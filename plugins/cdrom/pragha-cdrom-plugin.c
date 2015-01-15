@@ -70,6 +70,9 @@ struct _PraghaCdromPluginPrivate {
 	GtkWidget          *cddb_setting_widget;
 	GtkWidget          *use_cddb_w;
 
+	gchar              *audio_cd_device;
+	gboolean            use_cddb;
+
 	GtkActionGroup    *action_group_main_menu;
 	guint              merge_id_main_menu;
 	guint              merge_id_syst_menu;
@@ -79,6 +82,73 @@ typedef struct _PraghaCdromPluginPrivate PraghaCdromPluginPrivate;
 PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_CDROM_PLUGIN,
                         PraghaCdromPlugin,
                         pragha_cdrom_plugin)
+
+/*
+ * CDROM plugin.
+ */
+#define KEY_USE_CDDB        "use_cddb"
+#define KEY_AUDIO_CD_DEVICE "audio_cd_device"
+
+static gboolean
+pragha_preferences_get_use_cddb (PraghaPreferences *preferences)
+{
+	gchar *plugin_group = NULL;
+	gboolean use_cddb = FALSE;
+
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "cdrom");
+	use_cddb = pragha_preferences_get_boolean (preferences,
+	                                           plugin_group,
+	                                           KEY_USE_CDDB);
+	g_free (plugin_group);
+
+	return use_cddb;
+}
+
+static void
+pragha_preferences_set_use_cddb (PraghaPreferences *preferences,
+                                 gboolean           use_cddb)
+{
+	gchar *plugin_group = NULL;
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "cdrom");
+	pragha_preferences_set_boolean (preferences,
+	                                plugin_group,
+	                                KEY_USE_CDDB,
+	                                use_cddb);
+	g_free (plugin_group);
+}
+
+static gchar *
+pragha_preferences_get_audio_cd_device (PraghaPreferences *preferences)
+{
+	gchar *plugin_group = NULL, *audio_cd_device = NULL;
+
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "cdrom");
+	audio_cd_device = pragha_preferences_get_string (preferences,
+	                                                 plugin_group,
+	                                                 KEY_AUDIO_CD_DEVICE);
+	g_free (plugin_group);
+
+	return audio_cd_device;
+}
+
+static void
+pragha_preferences_set_audio_cd_device (PraghaPreferences *preferences,
+                                        const gchar       *device)
+{
+	gchar *plugin_group = NULL;
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "cdrom");
+
+	if (string_is_not_empty(device))
+		pragha_preferences_set_string (preferences,
+		                               plugin_group,
+		                               KEY_AUDIO_CD_DEVICE,
+		                               device);
+	else
+		pragha_preferences_remove_key (preferences,
+		                               plugin_group,
+		                               KEY_AUDIO_CD_DEVICE);
+	g_free (plugin_group);
+}
 
 static PraghaMusicobject *
 new_musicobject_from_cdda (PraghaApplication *pragha,
@@ -484,18 +554,22 @@ pragha_cdrom_preferences_dialog_response (GtkDialog         *dialog_w,
 	preferences = pragha_preferences_get();
 	switch(response_id) {
 	case GTK_RESPONSE_CANCEL:
-		pragha_gtk_entry_set_text (GTK_ENTRY(priv->audio_cd_device_w),
-			pragha_preferences_get_audio_cd_device (preferences));
+		pragha_gtk_entry_set_text(GTK_ENTRY(priv->audio_cd_device_w),
+			priv->audio_cd_device);
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->use_cddb_w),
-			pragha_preferences_get_use_cddb (preferences));
+			priv->use_cddb);
 		break;
 	case GTK_RESPONSE_OK:
 		audio_cd_device = gtk_entry_get_text (GTK_ENTRY(priv->audio_cd_device_w));
 		if (audio_cd_device) {
 			pragha_preferences_set_audio_cd_device (preferences, audio_cd_device);
+
+			g_free (priv->audio_cd_device);
+			priv->audio_cd_device = g_strdup(audio_cd_device);
 		}
-		pragha_preferences_set_use_cddb (preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->use_cddb_w)));
+		priv->use_cddb =
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->use_cddb_w));
+		pragha_preferences_set_use_cddb (preferences, priv->use_cddb);
 		break;
 	default:
 		break;
@@ -507,17 +581,28 @@ static void
 pragha_cdrom_init_settings (PraghaCdromPlugin *plugin)
 {
 	PraghaPreferences *preferences;
+	gchar *plugin_group = NULL;
+
 	PraghaCdromPluginPrivate *priv = plugin->priv;
 
 	preferences = pragha_preferences_get();
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "cdrom");
+	if (pragha_preferences_has_group (preferences, plugin_group)) {
+		priv->audio_cd_device =
+			pragha_preferences_get_audio_cd_device (preferences);
+		priv->use_cddb =
+			pragha_preferences_get_use_cddb(preferences);
+	}
+	else {
+		priv->audio_cd_device = NULL;
+		priv->use_cddb = TRUE;
+	}
 
-	pragha_gtk_entry_set_text(GTK_ENTRY(priv->audio_cd_device_w),
-		pragha_preferences_get_audio_cd_device (preferences));
-
-	if (pragha_preferences_get_use_cddb(preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->use_cddb_w), TRUE);
+	pragha_gtk_entry_set_text(GTK_ENTRY(priv->audio_cd_device_w), priv->audio_cd_device);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->use_cddb_w), priv->use_cddb);
 
 	g_object_unref (preferences);
+	g_free (plugin_group);
 }
 
 static void
@@ -675,6 +760,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	PraghaPreferences *preferences;
 	PraghaStatusIcon *status_icon = NULL;
 	PraghaMusicEnum *enum_map = NULL;
+	gchar *plugin_group = NULL;
 
 	PraghaCdromPlugin *plugin = PRAGHA_CDROM_PLUGIN (activatable);
 	PraghaCdromPluginPrivate *priv = plugin->priv;
@@ -706,11 +792,12 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	pragha_cdrom_plugin_remove_setting (plugin);
 
+	preferences = pragha_application_get_preferences (priv->pragha);
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "lastfm");
 	if (!pragha_plugins_is_shutdown(pragha_application_get_plugins_engine(priv->pragha))) {
-		preferences = pragha_preferences_get ();
-		pragha_preferences_set_audio_cd_device (preferences, NULL);
-		g_object_unref (preferences);
+		pragha_preferences_remove_group (preferences, plugin_group);
 	}
+	g_free (plugin_group);
 
 	enum_map = pragha_music_enum_get ();
 	pragha_music_enum_map_remove (enum_map, "FILE_CDDA");

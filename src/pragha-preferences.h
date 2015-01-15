@@ -85,7 +85,6 @@ struct _PraghaPreferencesClass
 #define KEY_AUDIO_DEVICE           "audio_device"
 #define KEY_SOFTWARE_MIXER         "software_mixer"
 #define KEY_SOFTWARE_VOLUME        "software_volume"
-#define KEY_AUDIO_CD_DEVICE        "audio_cd_device"
 #define KEY_EQ_10_BANDS            "equealizer_10_bands"
 #define KEY_EQ_PRESET              "equalizer_preset"
 
@@ -104,9 +103,6 @@ struct _PraghaPreferencesClass
 #define KEY_GNOME_STYLE            "gnome_style"
 #define KEY_CONTROLS_BELOW         "controls_below"
 #define KEY_SHOW_MENUBAR           "show_menubar"
-
-#define GROUP_SERVICES   "services"
-#define KEY_USE_CDDB               "use_cddb"
 
 /* Some default preferences. */
 
@@ -212,10 +208,11 @@ void
 pragha_preferences_remove_key (PraghaPreferences *preferences,
                                const gchar       *group_name,
                                const gchar       *key);
-/**
- * pragha_preferences_remove_group:
- *
- */
+
+gboolean
+pragha_preferences_has_group (PraghaPreferences *preferences,
+                              const gchar       *group_name);
+
 void
 pragha_preferences_remove_group (PraghaPreferences *preferences,
                                  const gchar       *group_name);
@@ -329,13 +326,6 @@ pragha_preferences_get_software_volume (PraghaPreferences *preferences);
 void
 pragha_preferences_set_software_volume (PraghaPreferences *preferences,
                                         gdouble software_volume);
-
-const gchar *
-pragha_preferences_get_audio_cd_device (PraghaPreferences *preferences);
-
-void
-pragha_preferences_set_audio_cd_device (PraghaPreferences *preferences,
-                                        const gchar *audio_cd_device);
 
 gboolean
 pragha_preferences_get_lateral_panel (PraghaPreferences *preferences);
@@ -462,13 +452,6 @@ pragha_preferences_get_hide_instead_close (PraghaPreferences *preferences);
 void
 pragha_preferences_set_hide_instead_close (PraghaPreferences *preferences,
                                            gboolean hide_instead_close);
-
-gboolean
-pragha_preferences_get_use_cddb (PraghaPreferences *preferences);
-
-void
-pragha_preferences_set_use_cddb (PraghaPreferences *preferences,
-                                 gboolean use_cddb);
 
 gboolean
 pragha_preferences_get_lock_library (PraghaPreferences *preferences);

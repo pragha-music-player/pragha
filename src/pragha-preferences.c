@@ -59,7 +59,6 @@ struct _PraghaPreferencesPrivate
 	gchar     *audio_device;
 	gboolean   software_mixer;
 	gdouble    software_volume;
-	gchar     *audio_cd_device;
 	/* Window preferences. */
 	gboolean   lateral_panel;
 	gint       sidebar_size;
@@ -80,8 +79,6 @@ struct _PraghaPreferencesPrivate
 	gboolean   add_recursively;
 	gboolean   timer_remaining_mode;
 	gboolean   hide_instead_close;
-	/* Services preferences */
-	gboolean   use_cddb;
 
 	/* Properties without backup. */
 	gboolean   lock_library;
@@ -103,7 +100,6 @@ enum
 	PROP_AUDIO_DEVICE,
 	PROP_SOFTWARE_MIXER,
 	PROP_SOFTWARE_VOLUME,
-	PROP_AUDIO_CD_DEVICE,
 	PROP_LATERAL_PANEL,
 	PROP_SIDEBAR_SIZE,
 	PROP_SECONDARY_LATERAL_PANEL,
@@ -122,7 +118,6 @@ enum
 	PROP_ADD_RECURSIVELY,
 	PROP_TIMER_REMAINING_MODE,
 	PROP_HIDE_INSTEAD_CLOSE,
-	PROP_USE_CDDB,
 	PROP_LOCK_LIBRARY,
 	LAST_PROP
 };
@@ -421,6 +416,20 @@ pragha_preferences_remove_key (PraghaPreferences *preferences,
 		                      key,
 		                      NULL);
 }
+
+/**
+ * pragha_preferences_has_group:
+ *
+ */
+gboolean
+pragha_preferences_has_group (PraghaPreferences *preferences,
+                              const gchar       *group_name)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), FALSE);
+
+	return g_key_file_has_group(preferences->priv->rc_keyfile, group_name);
+}
+
 
 /**
  * pragha_preferences_remove_group:
@@ -895,34 +904,6 @@ pragha_preferences_set_software_volume (PraghaPreferences *preferences,
 	preferences->priv->software_volume = software_volume;
 
 	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SOFTWARE_VOLUME]);
-}
-
-/**
- * pragha_preferences_get_audio_cd_device:
- *
- */
-const gchar *
-pragha_preferences_get_audio_cd_device (PraghaPreferences *preferences)
-{
-	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
-
-	return preferences->priv->audio_cd_device;
-}
-
-/**
- * pragha_preferences_set_audio_cd_device:
- *
- */
-void
-pragha_preferences_set_audio_cd_device (PraghaPreferences *preferences,
-                                        const gchar *audio_cd_device)
-{
-	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
-
-	g_free(preferences->priv->audio_cd_device);
-	preferences->priv->audio_cd_device = g_strdup(audio_cd_device);
-
-	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_AUDIO_CD_DEVICE]);
 }
 
 /**
@@ -1415,33 +1396,6 @@ pragha_preferences_set_hide_instead_close (PraghaPreferences *preferences,
 }
 
 /**
- * pragha_preferences_get_use_cddb:
- *
- */
-gboolean
-pragha_preferences_get_use_cddb (PraghaPreferences *preferences)
-{
-	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
-
-	return preferences->priv->use_cddb;
-}
-
-/**
- * pragha_preferences_set_use_cddb:
- *
- */
-void
-pragha_preferences_set_use_cddb (PraghaPreferences *preferences,
-                                 gboolean use_cddb)
-{
-	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
-
-	preferences->priv->use_cddb = use_cddb;
-
-	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_USE_CDDB]);
-}
-
-/**
  * pragha_preferences_get_lock_library:
  *
  */
@@ -1479,8 +1433,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gchar *album_art_pattern;
 	gchar *start_mode, *last_folder, *last_folder_converted = NULL;
 	gboolean add_recursively, timer_remaining_mode, hide_instead_close;
-	gboolean use_cddb;
-	gchar *audio_sink, *audio_device, *audio_cd_device;
+	gchar *audio_sink, *audio_device;
 	gdouble software_volume;
 	gint library_style, sidebar_size, secondary_sidebar_size, album_art_size;
 	gboolean fuse_folders, sort_by_year;
@@ -1698,18 +1651,6 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 	else {
 		pragha_preferences_set_software_volume(preferences, software_volume);
-	}
-
-	audio_cd_device = g_key_file_get_string(priv->rc_keyfile,
-	                                        GROUP_AUDIO,
-	                                        KEY_AUDIO_CD_DEVICE,
-	                                        &error);
-	if (error) {
-		g_error_free(error);
-		error = NULL;
-	}
-	else {
-		pragha_preferences_set_audio_cd_device(preferences, audio_cd_device);
 	}
 
 	lateral_panel = g_key_file_get_boolean(priv->rc_keyfile,
@@ -1937,22 +1878,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_hide_instead_close(preferences, hide_instead_close);
 	}
 
-	use_cddb = g_key_file_get_boolean(priv->rc_keyfile,
-	                                  GROUP_SERVICES,
-	                                  KEY_USE_CDDB,
-	                                  &error);
-	if (error) {
-		g_error_free(error);
-		error = NULL;
-	}
-	else {
-		pragha_preferences_set_use_cddb(preferences, use_cddb);
-	}
-
 	g_free(installed_version);
 	g_free(audio_sink);
 	g_free(audio_device);
-	g_free(audio_cd_device);
 	g_free(album_art_pattern);
 	g_free(start_mode);
 	g_free(last_folder);
@@ -2030,15 +1958,6 @@ pragha_preferences_finalize (GObject *object)
 	                      GROUP_AUDIO,
 	                      KEY_SOFTWARE_VOLUME,
 	                      priv->software_volume);
-	if (string_is_not_empty(priv->audio_cd_device))
-		g_key_file_set_string(priv->rc_keyfile,
-		                      GROUP_AUDIO,
-		                      KEY_AUDIO_CD_DEVICE,
-		                      priv->audio_cd_device);
-	else
-		pragha_preferences_remove_key(preferences,
-		                              GROUP_AUDIO,
-		                              KEY_AUDIO_CD_DEVICE);
 
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_WINDOW,
@@ -2133,11 +2052,6 @@ pragha_preferences_finalize (GObject *object)
 	                       KEY_CLOSE_TO_TRAY,
 	                       priv->hide_instead_close);
 
-	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_SERVICES,
-	                       KEY_USE_CDDB,
-	                       priv->use_cddb);
-
 	/* Save to key file */
 
 	data = g_key_file_to_data(priv->rc_keyfile, &length, NULL);
@@ -2150,7 +2064,6 @@ pragha_preferences_finalize (GObject *object)
 	g_free(priv->rc_filepath);
 	g_free(priv->audio_sink);
 	g_free(priv->audio_device);
-	g_free(priv->audio_cd_device);
 	g_free(priv->album_art_pattern);
 	g_free(priv->start_mode);
 	g_free(priv->last_folder);
@@ -2206,9 +2119,6 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_SOFTWARE_VOLUME:
 			g_value_set_double (value, pragha_preferences_get_software_volume(preferences));
 			break;
-		case PROP_AUDIO_CD_DEVICE:
-			g_value_set_string (value, pragha_preferences_get_audio_cd_device(preferences));
-			break;
 		case PROP_LATERAL_PANEL:
 			g_value_set_boolean (value, pragha_preferences_get_lateral_panel(preferences));
 			break;
@@ -2262,9 +2172,6 @@ pragha_preferences_get_property (GObject *object,
 			break;
 		case PROP_HIDE_INSTEAD_CLOSE:
 			g_value_set_boolean (value, pragha_preferences_get_hide_instead_close(preferences));
-			break;
-		case PROP_USE_CDDB:
-			g_value_set_boolean (value, pragha_preferences_get_use_cddb(preferences));
 			break;
 		case PROP_LOCK_LIBRARY:
 			g_value_set_boolean (value, pragha_preferences_get_lock_library(preferences));
@@ -2322,9 +2229,6 @@ pragha_preferences_set_property (GObject *object,
 		case PROP_SOFTWARE_VOLUME:
 			pragha_preferences_set_software_volume(preferences, g_value_get_double(value));
 			break;
-		case PROP_AUDIO_CD_DEVICE:
-			pragha_preferences_set_audio_cd_device(preferences, g_value_get_string(value));
-			break;
 		case PROP_LATERAL_PANEL:
 			pragha_preferences_set_lateral_panel(preferences, g_value_get_boolean(value));
 			break;
@@ -2378,9 +2282,6 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_HIDE_INSTEAD_CLOSE:
 			pragha_preferences_set_hide_instead_close(preferences, g_value_get_boolean(value));
-			break;
-		case PROP_USE_CDDB:
-			pragha_preferences_set_use_cddb(preferences, g_value_get_boolean(value));
 			break;
 		case PROP_LOCK_LIBRARY:
 			pragha_preferences_set_lock_library(preferences, g_value_get_boolean(value));
@@ -2561,17 +2462,6 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                      1.0,
 		                     -1.0,
 		                     PRAGHA_PREF_PARAMS);
-
-	/**
-	  * PraghaPreferences:audio_cd_device:
-	  *
-	  */
-	gParamSpecs[PROP_AUDIO_CD_DEVICE] =
-		g_param_spec_string("audio-cd-device",
-		                    "AudioCDDevice",
-		                    "Audio CD Device",
-		                    NULL,
-		                    PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:lateral_panel:
@@ -2778,18 +2668,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                      PRAGHA_PREF_PARAMS);
 
 	/**
-	  * PraghaPreferences:use_cddb:
-	  *
-	  */
-	gParamSpecs[PROP_USE_CDDB] =
-		g_param_spec_boolean("use-cddb",
-		                     "UseCddb",
-		                     "Use Cddb Preference",
-		                      TRUE,
-		                      PRAGHA_PREF_PARAMS);
-
-	/**
-	  * PraghaPreferences:use_cddb:
+	  * PraghaPreferences:lock_library:
 	  *
 	  */
 	gParamSpecs[PROP_LOCK_LIBRARY] =
