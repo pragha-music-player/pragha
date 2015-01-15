@@ -277,62 +277,100 @@ static const gchar *lastfm_menu_ui = \
 static void
 pragha_lastfm_plugin_set_password (PraghaPreferences *preferences, const gchar *pass)
 {
+	gchar *plugin_group = NULL;
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "lastfm");
+
 	if (string_is_not_empty(pass))
 		pragha_preferences_set_string (preferences,
-		                               GROUP_SERVICES,
+		                               plugin_group,
 		                               KEY_LASTFM_PASS,
 		                               pass);
 	else
  		pragha_preferences_remove_key (preferences,
-		                               GROUP_SERVICES,
+		                               plugin_group,
 		                               KEY_LASTFM_PASS);
+
+	g_free (plugin_group);
 }
 
 static gchar *
 pragha_lastfm_plugin_get_password (PraghaPreferences *preferences)
 {
-	return pragha_preferences_get_string (preferences,
-	                                      GROUP_SERVICES,
-	                                      KEY_LASTFM_PASS);
+	gchar *plugin_group = NULL, *string = NULL;
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "lastfm");
+
+	string = pragha_preferences_get_string (preferences,
+	                                        plugin_group,
+	                                        KEY_LASTFM_PASS);
+
+	g_free (plugin_group);
+
+	return string;
 }
 
 static void
 pragha_lastfm_plugin_set_user (PraghaPreferences *preferences, const gchar *user)
 {
+	gchar *plugin_group = NULL;
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "lastfm");
+
 	if (string_is_not_empty(user))
 		pragha_preferences_set_string (preferences,
-		                               GROUP_SERVICES,
+		                               plugin_group,
 		                               KEY_LASTFM_USER,
 		                               user);
 	else
  		pragha_preferences_remove_key (preferences,
-		                               GROUP_SERVICES,
+		                               plugin_group,
 		                               KEY_LASTFM_USER);
+
+	g_free (plugin_group);
 }
 
 static gchar *
 pragha_lastfm_plugin_get_user (PraghaPreferences *preferences)
 {
-	return pragha_preferences_get_string (preferences,
-	                                      GROUP_SERVICES,
-	                                      KEY_LASTFM_USER);
+	gchar *plugin_group = NULL, *string = NULL;
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "lastfm");
+
+	string = pragha_preferences_get_string (preferences,
+	                                        plugin_group,
+	                                        KEY_LASTFM_USER);
+
+	g_free (plugin_group);
+
+	return string;
 }
 
 static void
 pragha_lastfm_plugin_set_scrobble_support (PraghaPreferences *preferences, gboolean supported)
 {
+	gchar *plugin_group = NULL;
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "lastfm");
+
 	pragha_preferences_set_boolean (preferences,
-		                            GROUP_SERVICES,
+		                            plugin_group,
 		                            KEY_LASTFM,
 		                            supported);
+
+	g_free (plugin_group);
 }
 
 static gboolean
 pragha_lastfm_plugin_get_scrobble_support (PraghaPreferences *preferences)
 {
-	return pragha_preferences_get_boolean (preferences,
-	                                       GROUP_SERVICES,
-	                                       KEY_LASTFM);
+	gchar *plugin_group = NULL;
+	gboolean scrobble = FALSE;
+
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "lastfm");
+
+	scrobble = pragha_preferences_get_boolean (preferences,
+	                                           plugin_group,
+	                                           KEY_LASTFM);
+
+	g_free (plugin_group);
+
+	return scrobble;
 }
 
 
@@ -1874,6 +1912,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	PraghaPreferences *preferences;
 	PraghaLastfmPlugin *plugin = PRAGHA_LASTFM_PLUGIN (activatable);
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
+	gchar *plugin_group = NULL;
 
 	CDEBUG(DBG_PLUGIN, "Lastfm plugin %s", G_STRFUNC);
 
@@ -1884,12 +1923,14 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	pragha_lastfm_disconnect (plugin);
 
+	/* Settings */
+
+	preferences = pragha_application_get_preferences (priv->pragha);
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "lastfm");
 	if (!pragha_plugins_is_shutdown(pragha_application_get_plugins_engine(priv->pragha))) {
-		preferences = pragha_preferences_get ();
-		pragha_lastfm_plugin_set_user (preferences, NULL);
-		pragha_lastfm_plugin_set_password (preferences, NULL);
-		g_object_unref (preferences);
+		pragha_preferences_remove_group (preferences, plugin_group);
 	}
+	g_free (plugin_group);
 
 	/* Remove menu and settings */
 
