@@ -102,9 +102,15 @@ PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_LASTFM_PLUGIN,
                         PraghaLastfmPlugin,
                         pragha_lastfm_plugin)
 
-
+/*
+ * Some useful definitions
+ */
 #define LASTFM_API_KEY "ecdc2d21dbfe1139b1f0da35daca9309"
 #define LASTFM_SECRET  "f3498ce387f30eeae8ea1b1023afb32b"
+
+#define KEY_LASTFM_SCROBBLE "scrobble"
+#define KEY_LASTFM_USER     "lastfm_user"
+#define KEY_LASTFM_PASS     "lastfm_pass"
 
 #define WAIT_UPDATE 5
 
@@ -350,7 +356,7 @@ pragha_lastfm_plugin_set_scrobble_support (PraghaPreferences *preferences, gbool
 
 	pragha_preferences_set_boolean (preferences,
 		                            plugin_group,
-		                            KEY_LASTFM,
+		                            KEY_LASTFM_SCROBBLE,
 		                            supported);
 
 	g_free (plugin_group);
@@ -366,7 +372,7 @@ pragha_lastfm_plugin_get_scrobble_support (PraghaPreferences *preferences)
 
 	scrobble = pragha_preferences_get_boolean (preferences,
 	                                           plugin_group,
-	                                           KEY_LASTFM);
+	                                           KEY_LASTFM_SCROBBLE);
 
 	g_free (plugin_group);
 

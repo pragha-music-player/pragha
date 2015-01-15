@@ -106,9 +106,6 @@ struct _PraghaPreferencesClass
 #define KEY_SHOW_MENUBAR           "show_menubar"
 
 #define GROUP_SERVICES   "services"
-#define KEY_LASTFM                 "lastfm"
-#define KEY_LASTFM_USER            "lastfm_user"
-#define KEY_LASTFM_PASS            "lastfm_pass"
 #define KEY_USE_CDDB               "use_cddb"
 
 /* Some default preferences. */
