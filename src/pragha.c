@@ -520,7 +520,7 @@ pragha_application_about_dialog (PraghaApplication *pragha)
 	                      "authors", authors,
 	                      "translator-credits", _("translator-credits"),
 	                      "comments", "A lightweight GTK+ music player",
-	                      "copyright", "(C) 2007-2009 Sujith\n(C) 2009-2014 Matias",
+	                      "copyright", "(C) 2007-2009 Sujith\n(C) 2009-2015 Matias",
 	                      "license-type", GTK_LICENSE_GPL_3_0,
 	                      "name", PACKAGE_NAME,
 	                      "version", PACKAGE_VERSION,

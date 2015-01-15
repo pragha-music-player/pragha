@@ -654,7 +654,7 @@ static void statistics_action(GtkAction *action, PraghaApplication *pragha)
 
 static void home_action(GtkAction *action, PraghaApplication *pragha)
 {
-	const gchar *uri = "http://pragha.wikispaces.com/";
+	const gchar *uri = "http://pragha-music-player.github.io/";
 	open_url(uri, pragha_application_get_window(pragha));
 }
 
@@ -666,7 +666,7 @@ static void community_action(GtkAction *action, PraghaApplication *pragha)
 
 static void wiki_action(GtkAction *action, PraghaApplication *pragha)
 {
-	const gchar *uri = "http://pragha.wikispaces.com/";
+	const gchar *uri = "http://pragha-music-player.github.io/wiki";
 	open_url(uri, pragha_application_get_window(pragha));
 }
 

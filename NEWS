@@ -1,6 +1,48 @@
 ==============================================================
-Overview of changes between Pragha 1.3.1 and 1.3.0
+Overview of changes between Pragha 1.3.2 and 1.3.1
 ==============================================================
+
+Codename: "Que no cunda el panico. ;)"
+
+News:
+	Add optional client-side-decorators support trying to follow Gnome3 HIG.
+	Can hide menubar and then append a gear menu on toolbar.
+	Add a infobar when some change on prefrences need restart.
+
+Others Changes:
+	Except activation of plugins must accept the preferences dialog for the changes to take effect.
+	A lot of margins and sizes were stylized to improve the design.
+	Acrivate mpris2 and show lyrics sidebar by default.
+	Remove windows installer from source. Moves to its own repository.
+
+Bugs fixed:
+	Devices plugin: Fix remove library and drop database when eject any usb mass storage.
+	Devices plugin: Show a message when fails to mount a usb.
+	Devices plugin: Properly handles devices that are mounted by the desktop before than by Pragha.
+	Devices plugin: Fix format not a string literal and no format arguments [-Werror=format-security]
+	Check existence of the files before import any playlist. So.. never more import empty playlists.
+	Fix change library when old list is empty.
+	Insensitive some playback actions on toolbar, menubar and systray when startup.
+	Lastfm: Be a little more careful with PraghaMusicobject references.
+	Remove useless option to setting gstreamer version con configure.ac.
+	Remove preferences (including passwords) when plugins are deactivated.
+	Don't use deprecated GtkArrow.
+
+Updates Translations:
+	New Castillan translation thanks To Jordi Mas.
+	Update German translation thanks to Atalanttore.
+	Update Czech translation thanks to anespor.
+	Update Portuguese thanks to Smarquespt. Sorry. I lost another author.
+	Update Russian translation thanks to Lazy_Kent.
+	Update Korean (Korea) translation thanks to Smallsnail.
+	Update Spanish translation thanks to Fitoschido.
+	Fix typo thanks to Atalanttore.
+
+==============================================================
+OTHERS REALESES:
+==============================================================
+
+V1.3.1
 
 News:
  	New TuneIn plugin. Allow search on TuneIn and append first radio.
@@ -53,10 +95,6 @@ Updates Translations:
 	Update Czech translation thanks to anespor.
 	Update French translation thanks to Pingax.
 	Update Portuguese translation thanks to smarquespt.
-
-==============================================================
-OTHERS REALESES:
-==============================================================
 
 V1.3.0
 News:

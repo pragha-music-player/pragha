@@ -6,12 +6,12 @@ dnl
 dnl Version information
 m4_define([pragha_version_major], [1])
 m4_define([pragha_version_minor], [3])
-m4_define([pragha_version_micro], [1])
+m4_define([pragha_version_micro], [2])
 
 m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
 
 dnl Initialize autoconf
-AC_COPYRIGHT([Copyright (c) 2009-2014
+AC_COPYRIGHT([Copyright (c) 2009-2015
         Matias De lellis <mati86dl@gmail.com>])
 AC_INIT([pragha], [pragha_version()], [mati86dl@gmail.com])
 AC_CONFIG_HEADERS([config.h])
@@ -280,18 +280,19 @@ echo "  Prefix................: ${prefix}"
 echo "  Debug enabled.........: $debug"
 echo ""
 echo "  Plugins enabled.......: $LIBPEAS_FOUND"
-echo "   * Show notification when change songs....................................: $LIBNOTIFY_FOUND"
+echo "   * Show notification when change songs..........(Need libnotify >= 0.4.4).: $LIBNOTIFY_FOUND"
 echo "   * Controls Pragha using Mpris2 interface.................................: $LIBPEAS_FOUND"
 echo "   * Controls Pragha using gnome-media-keys interface.......................: $LIBPEAS_FOUND"
-echo "   * Play Audio cds.........................................................: $CDROM_SUPPORT"
-echo "   * Controls Pragha using multimedia keys.............(Need keybinder-3.0).: $LIBKEYBINDER_FOUND"
+echo "   * Play Audio cds...............(Need libcdio, libcdio_paranoia, libcddb).: $CDROM_SUPPORT"
+echo "   * Controls Pragha using multimedia keys....(Need keybinder-3.0 >= 0.2.0).: $LIBKEYBINDER_FOUND"
 echo "   * Search lyrics, artists info and albums art.....(Need libglyr >= 1.0.1).: $LIBGLYR_FOUND"
 echo "   * Search metadata on AcoustID.....................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
 echo "   * Search radios on TuneIn.........................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
-echo "   * Share music library on DLNA............(Need rygel-server-2.0 >= 0.20).: $RYGEL_FOUND"
+echo "   * Share music library on DLNA............(Need rygel-server-2.2 >= 0.20).: $RYGEL_FOUND"
 echo "   * Play songs on DLNA Servers..................(Need grilo-0.2 >= 0.2.10).: $GRILO_FOUND"
 echo "   * Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
-echo "   * EXPERIMENTAL management removable devices.:(Need gudev-1.0 and libmtp).: $LIBMTP_FOUND"
+echo "   * EXPERIMENTAL management of removable devices..........(Need gudev-1.0).: $GUDEV_FOUND"
+echo "   * EXPERIMENTAL management of mtp devices....:(Need gudev-1.0 and libmtp).: $LIBMTP_FOUND"
 echo ""
 echo "  Others build options..:"
 echo "   * Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_AUDIO_FOUND"

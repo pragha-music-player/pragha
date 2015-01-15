@@ -1,6 +1,6 @@
 Pragha is a Lightweight Music Player for GNU/Linux, based on Gtk, sqlite, and
-completely written in C, constructed to be fast, light, and simultaneously tries
-to be complete without obstructing the daily work. ;)
+completely written in C, constructed to be fast, light, and simultaneously
+tries to be complete without obstructing the daily work. ;)
 
 A tiny history of the project.?
 Consonance, An excellent player emerged in the archlinux forums, was
@@ -10,37 +10,46 @@ discontinued. The author, Sacamano said in his blog:
   all that I wanted to see in Consonance. It has been a fun project. :)"
 
 Well.. Dissonance is the project to continue developing Consonance, and its
-result is Pragha Music Manager. A New reproducer of music.. ;)
+result is Pragha Music Player. A New reproducer of music.. ;)
 
-Features:
- * Full integration with GTK+3, but always completely
-   independent of gnome or xfce.
+Main features:
+ * Full integration with GTK+3, but always completely independent of
+   gnome or xfce.
  * Two panel desing inspired on Amarok 1.4. Library and current playlist.
  * Library with multiple views, according tags or folder structure.
  * Search, filtering and queue songs on current playlist.
- * Playing and edit tag of mp3, m4a, ogg, flac, asf, wma, and ape files. Limited
-   only by codecs installed and taglib version used.
- * Playlist management. Exporting M3U and read M3U, PLS, XSPF and WAX playlists.
- * Play audio CDs and identifies this with CDDB.
- * Playback control with command line and MPRIS2.
- * Native desktop notifications with libnotify.
+ * Playing and edit tag of mp3, m4a, ogg, flac, asf, wma, and ape files.
+   Limited only by codecs installed and taglib version used.
+ * Playlist management: Exporting M3U and read M3U, PLS, XSPF and WAX
+   playlists.
+ * Playback control with command line.
+
+Extensible by plugins:
+ * AcoustID: Get metadata on AcoustID service.
+ * CD-ROM: Play audio CDs and identifies this with CDDB.
+ * DLNA Server: Share your playlist on a DLNA server.
+ * DLNA Renderer: Play music of a DLNA server.
+ * Gnome-Media-Keys: Control pragha with gnome-media-keys daemon.
+ * Global Hotkeys: Control pragha with multimedia keys.
+ * Last.fm: Scrobbling, love, unlove song, and append similar song to get
+   related playlists.
+ * MPRIS2: Control pragha with mpris2 interface.
+ * Mtp Devices: Basic Management of MTP devices.
+ * Notification: Show notification when change songs.
+ * Removable media: Detect removable media and scan it.
+ * Song-info: Get Artist info, Lyrics and Album arts of yours songs.
+ * Get radios: Search radios on TuneIn service.
 
 Requirements:
- * gtk+-3.0 >= 3.2, glib-2.0 >= 2.28.
- * gstreamer-1.0 >= 1.0, gstreamer-base-1.0 >= 1.0.
- * libcdio >= 0.80, libcdio_paranoia >= 0.80, libcddb >= 1.3.0.
- * taglib >= 1.4.
- * libnotify >= 0.4.4
+ * gtk+-3.0 >= 3.4, glib-2.0 >= 2.32
+ * gstreamer-1.0 >= 1.0, gstreamer-base-1.0 >= 1.0
+ * taglib >= 1.4
+ * sqlite3 >= 3.4
 
 Optional:
- * libclastfm >= 0.5: Scrobbling, love, unlove song, and append similar song to
-   get related playlists.
- * libglyr >= 1.0.1: Get lyrics and artist bio over many internet services, and
-   download missing album cover art from Last.fm.
- * libxfce4ui >= 4.8.0 (Or >= 4.11.0 with gtk+-3.0): Better session managament
-   support. Save the current playlist, last posicion when save session, etc.
- * libkeybinder >= 0.2.2 (Or keybinder-3.0 with gtk+-3.0) Use multimedia keys to
-   control pragha without gnome media keys.
+ * libpeas-1.0 >= 1.0.0 and libpeas-gtk-1.0 >= 1.0.0: Required for all plugins.
+ * libxfce4ui >= 4.11.0: Better session managament support. Save the current
+   playlist, last posicion when save session, etc.
  * totem-plparser >= 2.26: Support to open many more format and internet radios
    playlist.
  * gstreamer-plugins-base-devel >= 1.0: Use cubic volume to a better control of
