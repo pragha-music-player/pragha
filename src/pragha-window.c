@@ -554,6 +554,9 @@ pragha_window_new (PraghaApplication *pragha)
 	/* Add menu-button to toolbar */
 
 	menu_button =  gtk_menu_button_new ();
+#if GTK_CHECK_VERSION (3, 12, 0)
+	g_object_set(menu_button, "use-popover", FALSE, NULL);
+#endif
 	gtk_button_set_relief(GTK_BUTTON(menu_button), GTK_RELIEF_NONE);
 
 	icon = g_themed_icon_new_from_names ((gchar **)fallbacks_icon_menu, -1);
