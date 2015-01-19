@@ -26,25 +26,30 @@
 /* Create a new haeder widget to use in preferences.
  * Based in Midori Web Browser. Copyright (C) 2007 Christian Dywan. */
 
-gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon)
+gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon_name)
 {
 	GtkWidget* xfce_heading;
 	GtkWidget* hbox;
 	GtkWidget* vbox;
+	GdkPixbuf* icon;
 	GtkWidget* image;
 	GtkWidget* label;
 	GtkWidget* separator;
 	gchar* markup;
+	gint width = 1, height = 1;
 
 	xfce_heading = gtk_event_box_new();
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
 	gtk_container_set_border_width(GTK_CONTAINER(hbox), 6);
 
-	if (icon)
-		image = gtk_image_new_from_icon_name (icon, GTK_ICON_SIZE_DIALOG);
-	else
-		image = gtk_image_new_from_icon_name ("dialog-information", GTK_ICON_SIZE_DIALOG);
+	gtk_icon_size_lookup (GTK_ICON_SIZE_DIALOG, &width, &height);
+	icon = gtk_icon_theme_load_icon (gtk_icon_theme_get_default (),
+	                                 icon_name ? icon_name : "dialog-information",
+	                                 width,
+	                                 GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
+	image = gtk_image_new_from_pixbuf (GDK_PIXBUF(icon));
+	g_object_unref (icon);
 
 	label = gtk_label_new(NULL);
 	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
