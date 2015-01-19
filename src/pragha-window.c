@@ -561,7 +561,7 @@ pragha_window_new (PraghaApplication *pragha)
 
 	icon = g_themed_icon_new_from_names ((gchar **)fallbacks_icon_menu, -1);
 	gtk_button_set_image (GTK_BUTTON (menu_button),
-		gtk_image_new_from_gicon(icon, GTK_ICON_SIZE_MENU));
+		gtk_image_new_from_gicon(icon, GTK_ICON_SIZE_LARGE_TOOLBAR));
 	g_object_unref (icon);
 
 	menu_ui = pragha_application_get_menu_ui(pragha);
