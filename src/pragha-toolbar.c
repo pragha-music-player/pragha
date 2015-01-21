@@ -31,6 +31,7 @@
 #include <gdk/gdkkeysyms.h>
 
 #include "pragha-simple-widgets.h"
+#include "pragha-progressbar.h"
 #include "pragha-utils.h"
 
 static void pragha_toolbar_finalize (GObject *object);
@@ -46,7 +47,7 @@ struct _PraghaToolbar {
 	GtkToolbar      __parent__;
 #endif
 	PraghaAlbumArt *albumart;
-	PraghaTrackProgress *track_progress_bar;
+	GtkWidget      *track_progress_bar;
 
 	GtkToolItem    *prev_button;
 	GtkToolItem    *play_button;
@@ -120,7 +121,7 @@ pragha_toolbar_update_progress (PraghaToolbar *toolbar, gint length, gint progre
 
 	if(length) {
 		fraction = (gdouble) progress / (gdouble)length;
-		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), fraction);
+		pragha_progress_bar_set_fraction(PRAGHA_PROGRESS_BAR(toolbar->track_progress_bar), fraction);
 	}
 
 	g_free(cur_pos);
@@ -174,7 +175,7 @@ pragha_toolbar_unset_song_info(PraghaToolbar *toolbar)
 	gtk_label_set_markup(GTK_LABEL(toolbar->track_length_label),  "<small>--:--</small>");
 	gtk_label_set_markup(GTK_LABEL(toolbar->track_time_label),    "<small>00:00</small>");
 
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), 0);
+	pragha_progress_bar_set_fraction(PRAGHA_PROGRESS_BAR(toolbar->track_progress_bar), 0);
 
 	pragha_album_art_set_path(toolbar->albumart, NULL);
 }
@@ -308,7 +309,7 @@ pragha_toolbar_update_buffering_cb (PraghaBackend *backend, gint percent, gpoint
 {
 	PraghaToolbar *toolbar = user_data;
 
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), (gdouble)percent/100);
+	pragha_progress_bar_set_fraction (PRAGHA_PROGRESS_BAR(toolbar->track_progress_bar), (gdouble)percent/100);
 }
 
 void
@@ -460,12 +461,12 @@ GtkWidget *
 pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 {
 	PraghaPreferences *preferences;
-	PraghaTrackProgress *progress_bar;
 	PraghaAlbumArt *albumart;
 	PraghaContainer *box;
 	GtkWidget *hbox, *vbox_aling, *vbox, *top_hbox, *botton_hbox;
 	GtkWidget *album_art_frame,*title, *title_event_box, *extention_box;
-	GtkWidget *progress_bar_event_box, *time_label, *time_align, *length_label, *length_align, *length_event_box;
+	GtkWidget *progress_bar_event_box, *progress_bar, *time_label, *time_align, \
+	          *length_label, *length_align, *length_event_box;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
@@ -562,8 +563,7 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	g_signal_connect (G_OBJECT(progress_bar_event_box), "button-press-event",
 	                  G_CALLBACK(pragha_toolbar_progress_bar_event_seek), toolbar);
 
-	progress_bar = pragha_track_progress_new ();
-
+	progress_bar = pragha_progress_bar_new ();
 	gtk_container_add (GTK_CONTAINER(progress_bar_event_box),
 	                   GTK_WIDGET(progress_bar));
 
