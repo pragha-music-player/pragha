@@ -1129,7 +1129,13 @@ pragha_application_startup (GApplication *application)
 	pragha->setting_dialog = pragha_preferences_dialog_new (pragha->mainwindow);
 
 	#ifdef HAVE_LIBPEAS
+	gboolean sidebar2_visible = // FIXME: Hack to allow hide sidebar when init.
+		pragha_preferences_get_secondary_lateral_panel(pragha->preferences);
+
 	pragha_plugins_engine_startup (pragha->plugins_engine);
+
+	pragha_preferences_set_secondary_lateral_panel(pragha->preferences,
+	                                               sidebar2_visible);
 	#endif
 
 	/* If first run and the desktop is gnome adapts style. */
