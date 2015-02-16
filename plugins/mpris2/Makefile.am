@@ -5,15 +5,15 @@ AM_CPPFLAGS = \
 	$(LIBPEAS_CFLAGS)		\
 	$(LIBPEAS_GTK_CFLAGS)
 
-plugin_LTLIBRARIES = libmpris2.la
+plugin_LTLIBRARIES = libpmpris2.la
 
-libmpris2_la_SOURCES =      \
+libpmpris2_la_SOURCES =      \
 	pragha-mpris2-plugin.h \
 	pragha-mpris2-plugin.c
 
-libmpris2_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
+libpmpris2_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 
-libmpris2_la_CFLAGS =						\
+libpmpris2_la_CFLAGS =						\
 	$(GSTREAMER_CFLAGS)						\
 	$(GSTREAMER_BASE_CFLAGS)					\
 	$(GLIB_CFLAGS) 							\
@@ -26,7 +26,7 @@ libmpris2_la_CFLAGS =						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
-libmpris2_la_LIBADD =						\
+libpmpris2_la_LIBADD =						\
 	$(GSTREAMER_LIBS)					\
 	$(GLIB_LIBS) 							\
 	$(GIO_LIBS) 							\
@@ -37,13 +37,13 @@ libmpris2_la_LIBADD =						\
 	$(LIBPEAS_GTK_LIBS)
 
 if HAVE_GSTREAMER_AUDIO
-libmpris2_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
-libmpris2_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
+libpmpris2_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
+libpmpris2_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
 endif
 
 if HAVE_LIBXFCE4UI
-libmpris2_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
-libmpris2_la_LIBADD += $(LIBXFCE4UI_LIBS)
+libpmpris2_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
+libpmpris2_la_LIBADD += $(LIBXFCE4UI_LIBS)
 endif
 
 plugin_DATA = mpris2.plugin

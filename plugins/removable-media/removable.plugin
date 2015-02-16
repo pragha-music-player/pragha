@@ -1,9 +1,9 @@
 [Plugin]
-Module=removable
+Module=premovable
 Name=Removable media
 Description=Detect removable media and scan it
 Authors=Matias De lellis <mati86dl@gmail.com>
 Copyright=Copyright © 2014 Matias De lellis
 Website=https://github.com/matiasdelellis/pragha
 Help=https://github.com/matiasdelellis/pragha
-Depends=devices
+Depends=pdevices

@@ -1,5 +1,5 @@
 [Plugin]
-Module=gnome-media-keys
+Module=pgnome-media-keys
 Name=Global Hotkeys with gnome-media-keys daemon
 Description=Control pragha with gnome-media-keys daemon
 Authors=Pavel Vasin

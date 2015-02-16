@@ -5,15 +5,15 @@ AM_CPPFLAGS = \
 	$(LIBPEAS_CFLAGS)		\
 	$(LIBPEAS_GTK_CFLAGS)
 
-plugin_LTLIBRARIES = libcdrom.la
+plugin_LTLIBRARIES = libpcdrom.la
 
-libcdrom_la_SOURCES =      \
+libpcdrom_la_SOURCES =      \
 	pragha-cdrom-plugin.c  \
 	pragha-cdrom-plugin.h
 
-libcdrom_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
+libpcdrom_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 
-libcdrom_la_CFLAGS =						\
+libpcdrom_la_CFLAGS =						\
 	$(GSTREAMER_CFLAGS)						\
 	$(GSTREAMER_BASE_CFLAGS)					\
 	$(GLIB_CFLAGS) 							\
@@ -28,7 +28,7 @@ libcdrom_la_CFLAGS =						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
-libcdrom_la_LIBADD =						\
+libpcdrom_la_LIBADD =						\
 	$(GSTREAMER_LIBS)					\
 	$(GLIB_LIBS) 							\
 	$(GIO_LIBS) 							\
@@ -42,18 +42,18 @@ libcdrom_la_LIBADD =						\
 	$(LIBCDDB_LIBS)
 
 if HAVE_GSTREAMER_AUDIO
-libcdrom_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
-libcdrom_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
+libpcdrom_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
+libpcdrom_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
 endif
 
 if HAVE_LIBXFCE4UI
-libcdrom_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
-libcdrom_la_LIBADD += $(LIBXFCE4UI_LIBS)
+libpcdrom_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
+libpcdrom_la_LIBADD += $(LIBXFCE4UI_LIBS)
 endif
 
 if HAVE_GUDEV
-libcdrom_la_CFLAGS += $(GUDEV_CFLAGS)
-libcdrom_la_LIBADD += $(GUDEV_LIBS)
+libpcdrom_la_CFLAGS += $(GUDEV_CFLAGS)
+libpcdrom_la_LIBADD += $(GUDEV_LIBS)
 endif
 
 plugin_DATA = cdrom.plugin

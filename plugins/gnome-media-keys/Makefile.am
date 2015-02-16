@@ -5,15 +5,15 @@ AM_CPPFLAGS = \
 	$(LIBPEAS_CFLAGS)		\
 	$(LIBPEAS_GTK_CFLAGS)
 
-plugin_LTLIBRARIES = libgnome-media-keys.la
+plugin_LTLIBRARIES = libpgnome-media-keys.la
 
-libgnome_media_keys_la_SOURCES =       \
+libpgnome_media_keys_la_SOURCES =       \
 	pragha-gnome-media-keys-plugin.c \
 	pragha-gnome-media-keys-plugin.h
 
-libgnome_media_keys_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
+libpgnome_media_keys_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 
-libgnome_media_keys_la_CFLAGS =						\
+libpgnome_media_keys_la_CFLAGS =						\
 	$(GSTREAMER_CFLAGS)						\
 	$(GSTREAMER_BASE_CFLAGS)					\
 	$(GLIB_CFLAGS) 							\
@@ -26,7 +26,7 @@ libgnome_media_keys_la_CFLAGS =						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
-libgnome_media_keys_la_LIBADD =						\
+libpgnome_media_keys_la_LIBADD =						\
 	$(GSTREAMER_LIBS)					\
 	$(GLIB_LIBS) 							\
 	$(GIO_LIBS) 							\

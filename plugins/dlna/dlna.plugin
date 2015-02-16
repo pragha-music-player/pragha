@@ -1,5 +1,5 @@
 [Plugin]
-Module=dlna
+Module=pdlna
 Name=DLNA Server
 Description=Share your playlist on a DLNA server
 Authors=Matias De lellis <mati86dl@gmail.com>

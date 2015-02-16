@@ -5,14 +5,14 @@ AM_CPPFLAGS = \
 	$(LIBPEAS_CFLAGS)		\
 	$(LIBPEAS_GTK_CFLAGS)
 
-plugin_LTLIBRARIES = libtunein.la
+plugin_LTLIBRARIES = libptunein.la
 
-libtunein_la_SOURCES =      \
+libptunein_la_SOURCES =      \
 	pragha-tunein-plugin.c
 
-libtunein_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
+libptunein_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 
-libtunein_la_CFLAGS =						\
+libptunein_la_CFLAGS =						\
 	$(LIBSOUP_CFLAGS)						\
 	$(GSTREAMER_CFLAGS)						\
 	$(GSTREAMER_BASE_CFLAGS)					\
@@ -26,7 +26,7 @@ libtunein_la_CFLAGS =						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
-libtunein_la_LIBADD =						\
+libptunein_la_LIBADD =						\
 	$(LIBSOUP_LIBS) 						\
 	$(GSTREAMER_LIBS)					\
 	$(GLIB_LIBS) 							\
@@ -38,13 +38,13 @@ libtunein_la_LIBADD =						\
 	$(LIBPEAS_GTK_LIBS)
 
 if HAVE_GSTREAMER_AUDIO
-libtunein_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
-libtunein_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
+libptunein_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
+libptunein_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
 endif
 
 if HAVE_LIBXFCE4UI
-libtunein_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
-libtunein_la_LIBADD += $(LIBXFCE4UI_LIBS)
+libptunein_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
+libptunein_la_LIBADD += $(LIBXFCE4UI_LIBS)
 endif
 
 plugin_DATA = tunein.plugin

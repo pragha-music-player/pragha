@@ -5,17 +5,17 @@ AM_CPPFLAGS = \
 	$(LIBPEAS_CFLAGS)		\
 	$(LIBPEAS_GTK_CFLAGS)
 
-plugin_LTLIBRARIES = libdevices.la
+plugin_LTLIBRARIES = libpdevices.la
 
-libdevices_la_SOURCES = \
+libpdevices_la_SOURCES = \
 	pragha-devices-plugin.c \
 	pragha-devices-plugin.h \
 	pragha-device-client.c \
 	pragha-device-client.h
 
-libdevices_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
+libpdevices_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 
-libdevices_la_CFLAGS =						\
+libpdevices_la_CFLAGS =						\
 	$(GSTREAMER_CFLAGS)						\
 	$(GSTREAMER_BASE_CFLAGS)					\
 	$(GLIB_CFLAGS) 							\
@@ -29,7 +29,7 @@ libdevices_la_CFLAGS =						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
-libdevices_la_LIBADD =							\
+libpdevices_la_LIBADD =							\
 	$(GSTREAMER_LIBS)						\
 	$(GLIB_LIBS) 							\
 	$(GIO_LIBS) 							\
@@ -41,13 +41,13 @@ libdevices_la_LIBADD =							\
 	$(GUDEV_LIBS)
 
 if HAVE_GSTREAMER_AUDIO
-libdevices_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
-libdevices_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
+libpdevices_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
+libpdevices_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
 endif
 
 if HAVE_LIBXFCE4UI
-libdevices_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
-libdevices_la_LIBADD += $(LIBXFCE4UI_LIBS)
+libpdevices_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
+libpdevices_la_LIBADD += $(LIBXFCE4UI_LIBS)
 endif
 
 plugin_DATA = devices.plugin
