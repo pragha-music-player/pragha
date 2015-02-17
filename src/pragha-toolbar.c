@@ -46,7 +46,8 @@ struct _PraghaToolbar {
 	GtkToolbar      __parent__;
 #endif
 	PraghaAlbumArt *albumart;
-	PraghaTrackProgress *track_progress_bar;
+
+	GtkWidget      *track_progress_bar;
 
 	GtkToolItem    *prev_button;
 	GtkToolItem    *play_button;
@@ -460,12 +461,11 @@ GtkWidget *
 pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 {
 	PraghaPreferences *preferences;
-	PraghaTrackProgress *progress_bar;
 	PraghaAlbumArt *albumart;
 	PraghaContainer *box;
 	GtkWidget *hbox, *vbox_aling, *vbox, *top_hbox, *botton_hbox;
 	GtkWidget *album_art_frame,*title, *title_event_box, *extention_box;
-	GtkWidget *progress_bar_event_box, *time_label, *time_align, *length_label, *length_align, *length_event_box;
+	GtkWidget *progress_bar, *progress_bar_event_box, *time_label, *time_align, *length_label, *length_align, *length_event_box;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
@@ -562,7 +562,12 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	g_signal_connect (G_OBJECT(progress_bar_event_box), "button-press-event",
 	                  G_CALLBACK(pragha_toolbar_progress_bar_event_seek), toolbar);
 
-	progress_bar = pragha_track_progress_new ();
+#if GTK_CHECK_VERSION (3, 14, 0)
+	progress_bar = gtk_progress_bar_new ();
+	gtk_widget_set_valign (GTK_WIDGET(progress_bar), GTK_ALIGN_CENTER);
+#else
+	progress_bar = GTK_WIDGET(pragha_track_progress_new ());
+#endif
 
 	gtk_container_add (GTK_CONTAINER(progress_bar_event_box),
 	                   GTK_WIDGET(progress_bar));
