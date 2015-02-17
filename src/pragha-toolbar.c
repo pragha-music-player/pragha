@@ -46,11 +46,7 @@ struct _PraghaToolbar {
 	GtkToolbar      __parent__;
 #endif
 	PraghaAlbumArt *albumart;
-
-	GtkWidget      *track_progress_bar;
-#if GTK_CHECK_VERSION (3, 14, 0)
-	gulong          seek_id;
-#endif
+	PraghaTrackProgress *track_progress_bar;
 
 	GtkToolItem    *prev_button;
 	GtkToolItem    *play_button;
@@ -102,6 +98,7 @@ G_DEFINE_TYPE(PraghaToolbar, pragha_toolbar, GTK_TYPE_TOOLBAR)
 void
 pragha_toolbar_update_progress (PraghaToolbar *toolbar, gint length, gint progress)
 {
+	gdouble fraction = 0;
 	gchar *tot_length = NULL, *cur_pos = NULL, *str_length = NULL, *str_cur_pos = NULL;
 
 	cur_pos = convert_length_str(progress);
@@ -121,25 +118,10 @@ pragha_toolbar_update_progress (PraghaToolbar *toolbar, gint length, gint progre
 
 	gtk_tooltip_trigger_tooltip_query(gtk_widget_get_display (toolbar->track_length_label));
 
-#if GTK_CHECK_VERSION (3, 14, 0)
-	g_signal_handler_block(toolbar->track_progress_bar, toolbar->seek_id);
-	if (length) {
-		gtk_range_set_range (GTK_RANGE(toolbar->track_progress_bar), 0.0, length);
-		gtk_range_set_value (GTK_RANGE(toolbar->track_progress_bar), progress);
-	}
-	else {
-		gtk_range_set_value (GTK_RANGE(toolbar->track_progress_bar), 0.0);
-	}
-	g_signal_handler_unblock(toolbar->track_progress_bar, toolbar->seek_id);
-#else
-	if (length) {
-		gdouble fraction = (gdouble) progress / (gdouble)length;
+	if(length) {
+		fraction = (gdouble) progress / (gdouble)length;
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), fraction);
 	}
-	else {
-		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), 0.0);
-	}
-#endif
 
 	g_free(cur_pos);
 	g_free(str_cur_pos);
@@ -192,14 +174,7 @@ pragha_toolbar_unset_song_info(PraghaToolbar *toolbar)
 	gtk_label_set_markup(GTK_LABEL(toolbar->track_length_label),  "<small>--:--</small>");
 	gtk_label_set_markup(GTK_LABEL(toolbar->track_time_label),    "<small>00:00</small>");
 
-#if GTK_CHECK_VERSION (3, 14, 0)
-	g_signal_handler_block(toolbar->track_progress_bar, toolbar->seek_id);
-	gtk_range_set_range (GTK_RANGE(toolbar->track_progress_bar), 0.0, 0.0);
-	gtk_range_set_value (GTK_RANGE(toolbar->track_progress_bar), 0.0);
-	g_signal_handler_unblock(toolbar->track_progress_bar, toolbar->seek_id);
-#else
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), 0.0);
-#endif
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), 0);
 
 	pragha_album_art_set_path(toolbar->albumart, NULL);
 }
@@ -306,24 +281,6 @@ pragha_toolbar_song_label_event_edit (GtkWidget      *event_box,
 	return FALSE;
 }
 
-#if GTK_CHECK_VERSION (3, 14, 0)
-static void
-pragha_toolbar_progress_bar_event_seek (GtkWidget *widget, PraghaToolbar *toolbar)
-{
-	GtkAdjustment *adj;
-	gdouble value = 0.0, upper = 0.0, fraction = 0.0;
-	
-	adj = gtk_range_get_adjustment (GTK_RANGE(toolbar->track_progress_bar));
-
-	upper = gtk_adjustment_get_upper (adj);
-	if (upper > 0.0) {
-		value = gtk_adjustment_get_value (adj);
-		fraction = value / upper;
-
-		g_signal_emit (toolbar, signals[TRACK_PROGRESS_ACTIVATED], 0, fraction);
-	}
-}
-#else
 static void
 pragha_toolbar_progress_bar_event_seek (GtkWidget *widget,
                                         GdkEventButton *event,
@@ -341,7 +298,6 @@ pragha_toolbar_progress_bar_event_seek (GtkWidget *widget,
 
 	g_signal_emit (toolbar, signals[TRACK_PROGRESS_ACTIVATED], 0, fraction);
 }
-#endif
 
 /*
  * Callbacks that response to gstreamer signals.
@@ -352,14 +308,7 @@ pragha_toolbar_update_buffering_cb (PraghaBackend *backend, gint percent, gpoint
 {
 	PraghaToolbar *toolbar = user_data;
 
-#if GTK_CHECK_VERSION (3, 14, 0)
-	g_signal_handler_block(toolbar->track_progress_bar, toolbar->seek_id);
-	gtk_range_set_range (GTK_RANGE(toolbar->track_progress_bar), 0.0, 100.0);
-	gtk_range_set_value (GTK_RANGE(toolbar->track_progress_bar), percent);
-	g_signal_handler_unblock(toolbar->track_progress_bar, toolbar->seek_id);
-#else
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), (gdouble)percent/100);
-#endif
 }
 
 void
@@ -511,11 +460,12 @@ GtkWidget *
 pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 {
 	PraghaPreferences *preferences;
+	PraghaTrackProgress *progress_bar;
 	PraghaAlbumArt *albumart;
 	PraghaContainer *box;
 	GtkWidget *hbox, *vbox_aling, *vbox, *top_hbox, *botton_hbox;
 	GtkWidget *album_art_frame,*title, *title_event_box, *extention_box;
-	GtkWidget *progress_bar, *progress_bar_event_box, *time_label, *time_align, *length_label, *length_align, *length_event_box;
+	GtkWidget *progress_bar_event_box, *time_label, *time_align, *length_label, *length_align, *length_event_box;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
@@ -551,11 +501,8 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	 * Song info vbox
 	 */
 	vbox_aling = gtk_alignment_new(0.5, 0.5, 1, 0);
-#if GTK_CHECK_VERSION (3, 14, 0)
-	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-#else
-	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
-#endif
+
+ 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 	gtk_container_add(GTK_CONTAINER(vbox_aling), GTK_WIDGET(vbox));
 
  	/*
@@ -612,18 +559,10 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	progress_bar_event_box = gtk_event_box_new();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(progress_bar_event_box), FALSE);
 
-#if GTK_CHECK_VERSION (3, 14, 0)
-	progress_bar = gtk_scale_new (GTK_ORIENTATION_HORIZONTAL, NULL);
-	gtk_scale_set_draw_value (GTK_SCALE(progress_bar), FALSE);
-	gtk_widget_set_can_focus(progress_bar, FALSE);
-	toolbar->seek_id =
-		g_signal_connect (progress_bar, "value-changed",
-		                  G_CALLBACK(pragha_toolbar_progress_bar_event_seek), toolbar);
-#else
 	g_signal_connect (G_OBJECT(progress_bar_event_box), "button-press-event",
 	                  G_CALLBACK(pragha_toolbar_progress_bar_event_seek), toolbar);
-	progress_bar = GTK_WIDGET(pragha_track_progress_new ());
-#endif
+
+	progress_bar = pragha_track_progress_new ();
 
 	gtk_container_add (GTK_CONTAINER(progress_bar_event_box),
 	                   GTK_WIDGET(progress_bar));
