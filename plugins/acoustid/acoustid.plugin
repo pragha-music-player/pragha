@@ -1,5 +1,5 @@
 [Plugin]
-Module=pacoustid
+Module=acoustid
 Name=AcoustID
 Description=Get metadata on AcoustID service
 Authors=Matias De lellis <mati86dl@gmail.com>

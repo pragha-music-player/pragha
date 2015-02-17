@@ -5,15 +5,15 @@ AM_CPPFLAGS = \
 	$(LIBPEAS_CFLAGS)		\
 	$(LIBPEAS_GTK_CFLAGS)
 
-plugin_LTLIBRARIES = libpdlna.la
+plugin_LTLIBRARIES = libdlna.la
 
-libpdlna_la_SOURCES =      \
+libdlna_la_SOURCES =      \
 	pragha-dlna-plugin.h \
 	pragha-dlna-plugin.c
 
-libpdlna_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
+libdlna_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 
-libpdlna_la_CFLAGS =						\
+libdlna_la_CFLAGS =						\
 	$(RYGEL_CFLAGS)						\
 	$(GSTREAMER_CFLAGS)						\
 	$(GSTREAMER_BASE_CFLAGS)					\
@@ -27,7 +27,7 @@ libpdlna_la_CFLAGS =						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
-libpdlna_la_LIBADD =						\
+libdlna_la_LIBADD =						\
 	$(RYGEL_LIBS) 						\
 	$(GSTREAMER_LIBS)					\
 	$(GLIB_LIBS) 							\
@@ -39,13 +39,13 @@ libpdlna_la_LIBADD =						\
 	$(LIBPEAS_GTK_LIBS)
 
 if HAVE_GSTREAMER_AUDIO
-libpdlna_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
-libpdlna_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
+libdlna_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
+libdlna_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
 endif
 
 if HAVE_LIBXFCE4UI
-libpdlna_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
-libpdlna_la_LIBADD += $(LIBXFCE4UI_LIBS)
+libdlna_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
+libdlna_la_LIBADD += $(LIBXFCE4UI_LIBS)
 endif
 
 plugin_DATA = dlna.plugin

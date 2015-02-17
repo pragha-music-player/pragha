@@ -5,15 +5,15 @@ AM_CPPFLAGS = \
 	$(LIBPEAS_CFLAGS)		\
 	$(LIBPEAS_GTK_CFLAGS)
 
-plugin_LTLIBRARIES = libpkeybinder.la
+plugin_LTLIBRARIES = libkeybinder.la
 
-libpkeybinder_la_SOURCES =      \
+libkeybinder_la_SOURCES =      \
 	pragha-keybinder-plugin.h \
 	pragha-keybinder-plugin.c
 
-libpkeybinder_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
+libkeybinder_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 
-libpkeybinder_la_CFLAGS =						\
+libkeybinder_la_CFLAGS =						\
 	$(LIBKEYBINDER_CFLAGS)						\
 	$(GSTREAMER_CFLAGS)						\
 	$(GSTREAMER_BASE_CFLAGS)					\
@@ -27,7 +27,7 @@ libpkeybinder_la_CFLAGS =						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
-libpkeybinder_la_LIBADD =						\
+libkeybinder_la_LIBADD =						\
 	$(LIBKEYBINDER_LIBS) 						\
 	$(GSTREAMER_LIBS)					\
 	$(GLIB_LIBS) 							\
@@ -39,13 +39,13 @@ libpkeybinder_la_LIBADD =						\
 	$(LIBPEAS_GTK_LIBS)
 
 if HAVE_GSTREAMER_AUDIO
-libpkeybinder_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
-libpkeybinder_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
+libkeybinder_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
+libkeybinder_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
 endif
 
 if HAVE_LIBXFCE4UI
-libpkeybinder_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
-libpkeybinder_la_LIBADD += $(LIBXFCE4UI_LIBS)
+libkeybinder_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
+libkeybinder_la_LIBADD += $(LIBXFCE4UI_LIBS)
 endif
 
 plugin_DATA = keybinder.plugin

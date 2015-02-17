@@ -5,14 +5,14 @@ AM_CPPFLAGS = \
 	$(LIBPEAS_CFLAGS)		\
 	$(LIBPEAS_GTK_CFLAGS)
 
-plugin_LTLIBRARIES = libpremovable.la
+plugin_LTLIBRARIES = libremovable.la
 
-libpremovable_la_SOURCES = \
+libremovable_la_SOURCES = \
 	pragha-devices-removable.c
 
-libpremovable_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
+libremovable_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 
-libpremovable_la_CFLAGS =						\
+libremovable_la_CFLAGS =						\
 	$(GSTREAMER_CFLAGS)						\
 	$(GSTREAMER_BASE_CFLAGS)					\
 	$(GLIB_CFLAGS) 							\
@@ -26,7 +26,7 @@ libpremovable_la_CFLAGS =						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
-libpremovable_la_LIBADD =							\
+libremovable_la_LIBADD =							\
 	$(GSTREAMER_LIBS)						\
 	$(GLIB_LIBS) 							\
 	$(GIO_LIBS) 							\
@@ -38,13 +38,13 @@ libpremovable_la_LIBADD =							\
 	$(GUDEV_LIBS)
 
 if HAVE_GSTREAMER_AUDIO
-libpremovable_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
-libpremovable_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
+libremovable_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
+libremovable_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
 endif
 
 if HAVE_LIBXFCE4UI
-libpremovable_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
-libpremovable_la_LIBADD += $(LIBXFCE4UI_LIBS)
+libremovable_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
+libremovable_la_LIBADD += $(LIBXFCE4UI_LIBS)
 endif
 
 plugin_DATA = removable.plugin

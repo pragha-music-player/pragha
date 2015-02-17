@@ -1,5 +1,5 @@
 [Plugin]
-Module=psong-info
+Module=song-info
 Name=Get Artist info, Lyrics and Album arts
 Description=Get Artist info, Lyrics and Album arts of yours songs
 Authors=Matias De lellis <mati86dl@gmail.com>

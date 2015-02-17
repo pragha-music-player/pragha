@@ -5,9 +5,9 @@ AM_CPPFLAGS = \
 	$(LIBPEAS_CFLAGS)		\
 	$(LIBPEAS_GTK_CFLAGS)
 
-plugin_LTLIBRARIES = libpsong-info.la
+plugin_LTLIBRARIES = libsong-info.la
 
-libpsong_info_la_SOURCES =						\
+libsong_info_la_SOURCES =						\
 	pragha-song-info-plugin.c					\
 	pragha-song-info-plugin.h					\
 	pragha-song-info-dialog.c					\
@@ -21,9 +21,9 @@ libpsong_info_la_SOURCES =						\
 	pragha-song-info-thread-pane.c				\
 	pragha-song-info-thread-pane.h
 
-libpsong_info_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
+libsong_info_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 
-libpsong_info_la_CFLAGS =						\
+libsong_info_la_CFLAGS =						\
 	$(LIBGLYR_CFLAGS)							\
 	$(GSTREAMER_CFLAGS)						\
 	$(GSTREAMER_BASE_CFLAGS)					\
@@ -37,7 +37,7 @@ libpsong_info_la_CFLAGS =						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
-libpsong_info_la_LIBADD =						\
+libsong_info_la_LIBADD =						\
 	$(LIBGLYR_LIBS) 							\
 	$(GSTREAMER_LIBS)							\
 	$(GLIB_LIBS) 							\
@@ -49,13 +49,13 @@ libpsong_info_la_LIBADD =						\
 	$(LIBPEAS_GTK_LIBS)
 
 if HAVE_GSTREAMER_AUDIO
-libpsong_info_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
-libpsong_info_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
+libsong_info_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
+libsong_info_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
 endif
 
 if HAVE_LIBXFCE4UI
-libpsong_info_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
-libpsong_info_la_LIBADD += $(LIBXFCE4UI_LIBS)
+libsong_info_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
+libsong_info_la_LIBADD += $(LIBXFCE4UI_LIBS)
 endif
 
 plugin_DATA = song-info.plugin

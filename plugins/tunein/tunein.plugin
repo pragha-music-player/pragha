@@ -1,5 +1,5 @@
 [Plugin]
-Module=ptunein
+Module=tunein
 Name=Get radios
 Description=Get radios on TuneIn
 Authors=Matias De lellis <mati86dl@gmail.com>
