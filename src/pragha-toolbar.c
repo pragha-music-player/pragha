@@ -124,7 +124,6 @@ pragha_toolbar_update_progress (PraghaToolbar *toolbar, gint length, gint progre
 #if GTK_CHECK_VERSION (3, 14, 0)
 	g_signal_handler_block(toolbar->track_progress_bar, toolbar->seek_id);
 	if (length) {
-		gtk_widget_set_sensitive (GTK_WIDGET(toolbar->track_progress_bar), TRUE);
 		gtk_range_set_range (GTK_RANGE(toolbar->track_progress_bar), 0.0, length);
 		gtk_range_set_value (GTK_RANGE(toolbar->track_progress_bar), progress);
 	}
@@ -195,9 +194,8 @@ pragha_toolbar_unset_song_info(PraghaToolbar *toolbar)
 
 #if GTK_CHECK_VERSION (3, 14, 0)
 	g_signal_handler_block(toolbar->track_progress_bar, toolbar->seek_id);
-	gtk_widget_set_sensitive (GTK_WIDGET(toolbar->track_progress_bar), FALSE);
+	gtk_range_set_range (GTK_RANGE(toolbar->track_progress_bar), 0.0, 0.0);
 	gtk_range_set_value (GTK_RANGE(toolbar->track_progress_bar), 0.0);
-	gtk_range_set_range (GTK_RANGE(toolbar->track_progress_bar), 0.0, 1.0);
 	g_signal_handler_unblock(toolbar->track_progress_bar, toolbar->seek_id);
 #else
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), 0.0);
@@ -399,20 +397,13 @@ pragha_toolbar_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpo
 	gtk_widget_set_sensitive (GTK_WIDGET(toolbar->prev_button), playing);
 
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->play_button),
-	                               (state == ST_PLAYING) ?
-	                               "media-playback-pause" :
-	                               "media-playback-start");
+	                               (state == ST_PLAYING) ? "media-playback-pause" : "media-playback-start");
 
 	gtk_widget_set_sensitive (GTK_WIDGET(toolbar->stop_button), playing);
 	gtk_widget_set_sensitive (GTK_WIDGET(toolbar->next_button), playing);
 
 	if (playing == FALSE)
 		pragha_toolbar_unset_song_info(toolbar);
-
-	#if GTK_CHECK_VERSION (3, 14, 0)
-		gtk_widget_set_sensitive (GTK_WIDGET(toolbar->track_progress_bar),
-		                          (state == ST_PLAYING));
-	#endif
 }
 
 void
