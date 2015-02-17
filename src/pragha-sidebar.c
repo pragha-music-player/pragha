@@ -217,6 +217,8 @@ praga_sidebar_menu_button_new (PraghaSidebar *sidebar)
 	                    arrow,
 	                    FALSE, FALSE, 0);
 
+	gtk_widget_set_valign (GTK_WIDGET(sidebar->title_box), GTK_ALIGN_CENTER);
+
 	gtk_container_add (GTK_CONTAINER(button), hbox);
 
 	g_signal_connect(G_OBJECT(button),
