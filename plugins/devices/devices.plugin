@@ -1,5 +1,5 @@
 [Plugin]
-Module=pdevices
+Module=devices
 Name=Devices
 Description=Management removable devices
 Authors=Matias De lellis <mati86dl@gmail.com>

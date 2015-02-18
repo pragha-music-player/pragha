@@ -5,14 +5,14 @@ AM_CPPFLAGS = \
 	$(LIBPEAS_CFLAGS)		\
 	$(LIBPEAS_GTK_CFLAGS)
 
-plugin_LTLIBRARIES = libpnotify.la
+plugin_LTLIBRARIES = libnotify.la
 
-libpnotify_la_SOURCES =						\
+libnotify_la_SOURCES =						\
 	pragha-notify-plugin.c
 
-libpnotify_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
+libnotify_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 
-libpnotify_la_CFLAGS =						\
+libnotify_la_CFLAGS =						\
 	$(LIBGLYR_CFLAGS)							\
 	$(GSTREAMER_CFLAGS)						\
 	$(GSTREAMER_BASE_CFLAGS)					\
@@ -27,7 +27,7 @@ libpnotify_la_CFLAGS =						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
-libpnotify_la_LIBADD =						\
+libnotify_la_LIBADD =						\
 	$(LIBGLYR_LIBS) 							\
 	$(GSTREAMER_LIBS)							\
 	$(GLIB_LIBS) 							\
@@ -40,13 +40,13 @@ libpnotify_la_LIBADD =						\
 	$(LIBPEAS_GTK_LIBS)
 
 if HAVE_GSTREAMER_AUDIO
-libpnotify_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
-libpnotify_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
+libnotify_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
+libnotify_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
 endif
 
 if HAVE_LIBXFCE4UI
-libpnotify_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
-libpnotify_la_LIBADD += $(LIBXFCE4UI_LIBS)
+libnotify_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
+libnotify_la_LIBADD += $(LIBXFCE4UI_LIBS)
 endif
 
 plugin_DATA = notify.plugin

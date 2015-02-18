@@ -1,5 +1,5 @@
 [Plugin]
-Module=pmpris2
+Module=mpris2
 Name=Mpris2
 Description=Control pragha with mpris2 interface
 Authors=Matias De lellis <mati86dl@gmail.com>

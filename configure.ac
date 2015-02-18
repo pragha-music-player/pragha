@@ -52,6 +52,9 @@ fi
 
 AC_SUBST(CFLAGS)
 
+PLUGIN_LIBTOOL_FLAGS="-avoid-version -module -shared -export-dynamic -no-undefined"
+AC_SUBST(PLUGIN_LIBTOOL_FLAGS)
+
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 dnl Check for basic programs
