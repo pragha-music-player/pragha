@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: Pragha\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-12-21 14:02-0300\n"
-"PO-Revision-Date: 2015-01-06 14:43+0000\n"
+"PO-Revision-Date: 2015-02-12 19:02+0000\n"
 "Last-Translator: Kyrill Detinov <lazy.kent@opensuse.org>\n"
 "Language-Team: Russian (http://www.transifex.com/projects/p/Pragha/language/ru/)\n"
 "MIME-Version: 1.0\n"
@@ -148,13 +148,13 @@ msgstr "_Ok"
 #: ../src/pragha-filter-dialog.c:219 ../src/pragha-library-pane.c:507
 #: ../plugins/notify/pragha-notify-plugin.c:170
 msgid "Unknown Artist"
-msgstr "Неизвестный Исполнитель"
+msgstr "Неизвестный исполнитель"
 
 #: ../src/pragha-filter-dialog.c:220 ../src/pragha-library-pane.c:514
 #: ../src/pragha-library-pane.c:519
 #: ../plugins/notify/pragha-notify-plugin.c:171
 msgid "Unknown Album"
-msgstr "Неизвестный Альбом"
+msgstr "Неизвестный альбом"
 
 #. The search dialog
 #: ../src/pragha-filter-dialog.c:370
@@ -280,7 +280,7 @@ msgstr "Неизвестные"
 
 #: ../src/pragha-library-pane.c:524
 msgid "Unknown Genre"
-msgstr "Неизвестный Жанр"
+msgstr "Неизвестный жанр"
 
 #: ../src/pragha-library-pane.c:844
 msgid "File can't be moved to trash. Delete permanently?"

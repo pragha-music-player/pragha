@@ -1,7 +1,28 @@
 ==============================================================
-Overview of changes between Pragha 1.3.2 and 1.3.1
+Overview of changes between Pragha 1.3.2.1 and 1.3.1
 ==============================================================
 
+V1.3.2.1
+Codename: "Gtk 3.14: Que cunda el panico. haha. ;)"
+
+Bugs fixed:
+	Add Castillan translation to install list.
+	Disable libtool versioning for plugins. See issue #74
+	Not remember visibility of the second siderbar when init. Issue #73
+	Fix icon size on preferences dialog on Gtk 3.14 [1].
+	Try to fix the small progress bar on gtk 3.14, but finally just center it. [1]
+	Disable popover on gear menu!. It is just horrible!!, and pior on 3.14.
+	Fix size of Gear menu.
+
+Updates Translations:
+	Update Russian translation thanks to Lazy_Kent.
+	Update Korean (Korea) translation thanks to Smallsnail.
+	Update French translation thanks to Pingax.
+
+Note [1]: It worked correctly in at least 13 versions!. (Gtk 2.10 -> 2.24
+and 3.0 to 3.13), 7 years!!. Why sh*** did they get changed in gtk 3.14!?
+
+V1.3.2
 Codename: "Que no cunda el panico. ;)"
 
 News:

@@ -3,7 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Heimen Stoffels <motionshot@vivaldi.net>, 2012
+# Heimen Stoffels <vistausss@outlook.com>, 2012
 # Johan Bakker <ppine@gmx.com>, 2014
 # tuxmachine <info@rickdg.nl>, 2011
 msgid ""
