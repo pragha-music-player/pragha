@@ -537,23 +537,37 @@ pragha_playlist_stopped_playback (PraghaPlaylist *playlist)
 
 /* Update playback state pixbuf */
 
+static gint
+get_playlist_icon_size (void)
+{
+	gint width, height;
+	if (gtk_icon_size_lookup (GTK_ICON_SIZE_MENU, &width, &height))
+		return MAX (width, height);
+	else
+		return 16;
+}
+
 static void
 pragha_playlist_update_track_state (PraghaPlaylist *playlist, GtkTreePath *path, PraghaBackendState state)
 {
 	GtkIconTheme *icon_theme;
 	GdkPixbuf *pixbuf = NULL;
 	GtkTreeIter iter;
+	gint icon_size = 0;
 
 	if (pragha_playlist_is_changing (playlist))
 		return;
 
 	if (playlist->track_error) {
 		icon_theme = gtk_icon_theme_get_default ();
+		icon_size = get_playlist_icon_size ();
 
 		if(playlist->track_error->code == GST_RESOURCE_ERROR_NOT_FOUND)
-			pixbuf = gtk_icon_theme_load_icon (icon_theme, "list-remove", 16, 0, NULL);
+			pixbuf = gtk_icon_theme_load_icon (icon_theme, "list-remove",
+			                                   icon_size, GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
 		else
-			pixbuf = gtk_icon_theme_load_icon (icon_theme, "dialog-warning", 16, 0, NULL);
+			pixbuf = gtk_icon_theme_load_icon (icon_theme, "dialog-warning",
+			                                   icon_size, GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
 	}
 	else {
 		switch (state) {
@@ -4340,15 +4354,14 @@ static void
 pragha_playlist_init_pixbuf(PraghaPlaylist* cplaylist)
 {
 	GtkIconTheme *icontheme = gtk_icon_theme_get_default();
+	gint icon_size = get_playlist_icon_size();
 
 	cplaylist->playing_pixbuf =
-		gtk_icon_theme_load_icon (icontheme,
-					  "media-playback-start",
-					  16, 0, NULL);
+		gtk_icon_theme_load_icon (icontheme, "media-playback-start",
+		                          icon_size, GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
 	cplaylist->paused_pixbuf =
-		gtk_icon_theme_load_icon (icontheme,
-					  "media-playback-pause",
-					  16, 0, NULL);
+		gtk_icon_theme_load_icon (icontheme, "media-playback-pause",
+		                          icon_size, GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
 }
 
 static void

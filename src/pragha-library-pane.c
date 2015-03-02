@@ -2736,16 +2736,28 @@ pragha_library_pane_create_widget (PraghaLibraryPane *library)
 	                   library->library_tree);
 }
 
+static gint
+get_library_icon_size (void)
+{
+  gint width, height;
+
+  if (gtk_icon_size_lookup (GTK_ICON_SIZE_MENU, &width, &height))
+    return MAX (width, height);
+  else
+    return 16;
+}
+
 static void
 pragha_library_pane_init_pixbufs(PraghaLibraryPane *librarypane)
 {
 	gchar *pix_uri = NULL;
 	GtkIconTheme *icontheme = gtk_icon_theme_get_default();
+	gint icon_size = get_library_icon_size();
 
 	pix_uri = g_build_filename (PIXMAPDIR, "artist.png", NULL);
 	librarypane->pixbuf_artist =
 		gdk_pixbuf_new_from_file_at_scale(pix_uri,
-		                                  16, 16,
+		                                  icon_size, icon_size,
 		                                  TRUE,
 		                                  NULL);
 	if (!librarypane->pixbuf_artist)
@@ -2755,14 +2767,14 @@ pragha_library_pane_init_pixbufs(PraghaLibraryPane *librarypane)
 	librarypane->pixbuf_album =
 		gtk_icon_theme_load_icon(icontheme,
 		                         "media-optical",
-		                         16, 0,
+		                         icon_size, GTK_ICON_LOOKUP_FORCE_SIZE,
 		                         NULL);
 
 	if (!librarypane->pixbuf_album) {
 		pix_uri = g_build_filename (PIXMAPDIR, "album.png", NULL);
 		librarypane->pixbuf_album =
 			gdk_pixbuf_new_from_file_at_scale(pix_uri,
-			                                  16, 16,
+			                                  icon_size, icon_size,
 			                                  TRUE, NULL);
 		g_free (pix_uri);
 	}
@@ -2772,13 +2784,13 @@ pragha_library_pane_init_pixbufs(PraghaLibraryPane *librarypane)
 	librarypane->pixbuf_track =
 		gtk_icon_theme_load_icon(icontheme,
 		                         "audio-x-generic",
-		                         16, 0,
+		                         icon_size, GTK_ICON_LOOKUP_FORCE_SIZE,
 		                         NULL);
 	if (!librarypane->pixbuf_track) {
 		pix_uri = g_build_filename (PIXMAPDIR, "track.png", NULL);
 		librarypane->pixbuf_track =
 			gdk_pixbuf_new_from_file_at_scale(pix_uri,
-			                                  16, 16,
+			                                  icon_size, icon_size,
 			                                  TRUE, NULL);
 		g_free (pix_uri);
 	}
@@ -2788,7 +2800,7 @@ pragha_library_pane_init_pixbufs(PraghaLibraryPane *librarypane)
 	pix_uri = g_build_filename (PIXMAPDIR, "genre.png", NULL);
 	librarypane->pixbuf_genre =
 		gdk_pixbuf_new_from_file_at_scale(pix_uri,
-		                                  16, 16,
+		                                  icon_size, icon_size,
 		                                  TRUE, NULL);
 	if (!librarypane->pixbuf_genre)
 		g_warning("Unable to load genre png");
@@ -2797,13 +2809,13 @@ pragha_library_pane_init_pixbufs(PraghaLibraryPane *librarypane)
 	librarypane->pixbuf_dir =
 		gtk_icon_theme_load_icon(icontheme,
 		                         "folder-music",
-		                         16, 0,
+		                         icon_size, GTK_ICON_LOOKUP_FORCE_SIZE,
 		                         NULL);
 	if (!librarypane->pixbuf_dir)
 		librarypane->pixbuf_dir =
 			gtk_icon_theme_load_icon(icontheme,
 			                         "folder",
-			                         16, 0,
+			                         icon_size, GTK_ICON_LOOKUP_FORCE_SIZE,
 			                         NULL);
 	if (!librarypane->pixbuf_dir)
 		g_warning("Unable to load folder png");
