@@ -262,9 +262,7 @@ mpris_Root_get_SupportedMimeTypes (GError **error, PraghaMpris2Plugin *plugin)
 		#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
 		"'audio/x-m4a', "
 		#endif
-		#ifdef HAVE_TAGLIB_1_7
 		"'application/x-ape', 'audio/ape', 'audio/x-ape', "
-		#endif
 		"'application/x-flac', 'audio/flac', 'audio/x-wav']", NULL, NULL, NULL);
 }
 

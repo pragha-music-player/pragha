@@ -41,9 +41,9 @@ Extensible by plugins:
  * Get radios: Search radios on TuneIn service.
 
 Requirements:
- * gtk+-3.0 >= 3.4, glib-2.0 >= 2.32
+ * gtk+-3.0 >= 3.8, glib-2.0 >= 2.36
  * gstreamer-1.0 >= 1.0, gstreamer-base-1.0 >= 1.0
- * taglib >= 1.4
+ * taglib >= 1.8
  * sqlite3 >= 3.4
 
 Optional:
