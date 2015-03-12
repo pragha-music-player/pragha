@@ -195,7 +195,7 @@ pragha_notify_plugin_show_new_track (PraghaPlaylist     *playlist,
 	/* Add album art if set */
 	if (priv->album_art_in_osd) {
 		toolbar = pragha_application_get_toolbar (priv->pragha);
-		notify_notification_set_icon_from_pixbuf (priv->notify,
+		notify_notification_set_image_from_pixbuf (priv->notify,
 			pragha_album_art_get_pixbuf (pragha_toolbar_get_album_art(toolbar)));
 	}
 
