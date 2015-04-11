@@ -608,7 +608,11 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	toolbar->extention_box      = extention_box;
 
 	gtk_box_pack_start(GTK_BOX(hbox), vbox_aling, TRUE, TRUE, 2);
-	gtk_widget_show_all(GTK_WIDGET(box));
+
+	gtk_widget_show_all(GTK_WIDGET(vbox_aling));
+	gtk_widget_show(GTK_WIDGET(album_art_frame));
+	gtk_widget_show(GTK_WIDGET(hbox));
+	gtk_widget_show(GTK_WIDGET(box));
 
 	g_object_unref(preferences);
 
@@ -927,8 +931,17 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 		pragha_preferences_get_gnome_style (preferences));
 #endif
 
-	gtk_widget_show_all(GTK_WIDGET(toolbar));
+	gtk_widget_show(GTK_WIDGET(prev_button));
+	gtk_widget_show(GTK_WIDGET(play_button));
+	gtk_widget_show(GTK_WIDGET(stop_button));
+	gtk_widget_show(GTK_WIDGET(next_button));
+	gtk_widget_show(GTK_WIDGET(shuffle_button));
+	gtk_widget_show(GTK_WIDGET(repeat_button));
+	gtk_widget_show(GTK_WIDGET(vol_button));
+
 	gtk_widget_hide(GTK_WIDGET(toolbar->unfull_button));
+
+	gtk_widget_show(GTK_WIDGET(toolbar));
 
 	g_object_unref(preferences);
 }
