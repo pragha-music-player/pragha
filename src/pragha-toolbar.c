@@ -938,6 +938,7 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	gtk_widget_show(GTK_WIDGET(shuffle_button));
 	gtk_widget_show(GTK_WIDGET(repeat_button));
 	gtk_widget_show(GTK_WIDGET(vol_button));
+	gtk_widget_show(GTK_WIDGET(toolbar->extra_button_box));
 
 	gtk_widget_hide(GTK_WIDGET(toolbar->unfull_button));
 
