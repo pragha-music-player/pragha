@@ -1315,6 +1315,10 @@ gint main(gint argc, gchar *argv[])
 	g_set_application_name(_("Pragha Music Player"));
 	g_setenv("PULSE_PROP_media.role", "audio", TRUE);
 
+#if !GLIB_CHECK_VERSION(2,35,1)
+	g_type_init ();
+#endif
+
 	pragha = pragha_application_new ();
 	status = g_application_run (G_APPLICATION (pragha), argc, argv);
 	g_object_run_dispose (G_OBJECT (pragha));

@@ -6,7 +6,7 @@ dnl
 dnl Version information
 m4_define([pragha_version_major], [1])
 m4_define([pragha_version_minor], [3])
-m4_define([pragha_version_micro], [3.git])
+m4_define([pragha_version_micro], [2.1])
 
 m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
 
@@ -75,10 +75,10 @@ GSTREAMER_REQUIRED=0.11.90
 dnl Check for required packages
 XDT_CHECK_PACKAGE([GSTREAMER], [gstreamer-1.0], [$GSTREAMER_REQUIRED])
 XDT_CHECK_PACKAGE([GSTREAMER_BASE], [gstreamer-base-1.0], [$GSTREAMER_REQUIRED])
-XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.36])
-XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [3.8.0])
+XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.32])
+XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [3.4.0])
 XDT_CHECK_PACKAGE([SQLITE3], [sqlite3], [3.4])
-XDT_CHECK_PACKAGE([TAGLIB_C], [taglib_c], [1.8])
+XDT_CHECK_PACKAGE([TAGLIB_C], [taglib_c], [1.4])
 
 dnl Check peas library to plugins support
 LIBPEAS_FOUND="no"
@@ -95,7 +95,7 @@ dnl Check notify support
 LIBNOTIFY_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
 XDT_CHECK_OPTIONAL_PACKAGE([LIBNOTIFY],
-                           [libnotify], [0.7.5],
+                           [libnotify], [0.4.4],
                            [libnotify],
                            [libnotify library], [yes])
 else
@@ -222,6 +222,13 @@ fi
 fi
 fi
 
+dnl Check min taglib to add monkeyaudio support
+TAGLIB_1_7_FOUND="no"
+XDT_CHECK_OPTIONAL_PACKAGE([TAGLIB_1_7],
+                       [taglib], [1.7.0],
+                       [taglib],
+                       [taglib library to APE], [yes])
+
 dnl Check gstreamer-audio
 GSTREAMER_AUDIO_FOUND="no"
 XDT_CHECK_OPTIONAL_PACKAGE([GSTREAMER_AUDIO],
@@ -283,7 +290,7 @@ echo "  Prefix................: ${prefix}"
 echo "  Debug enabled.........: $debug"
 echo ""
 echo "  Plugins enabled.......: $LIBPEAS_FOUND"
-echo "   * Show notification when change songs..........(Need libnotify >= 0.7.5).: $LIBNOTIFY_FOUND"
+echo "   * Show notification when change songs..........(Need libnotify >= 0.4.4).: $LIBNOTIFY_FOUND"
 echo "   * Controls Pragha using Mpris2 interface.................................: $LIBPEAS_FOUND"
 echo "   * Controls Pragha using gnome-media-keys interface.......................: $LIBPEAS_FOUND"
 echo "   * Play Audio cds...............(Need libcdio, libcdio_paranoia, libcddb).: $CDROM_SUPPORT"

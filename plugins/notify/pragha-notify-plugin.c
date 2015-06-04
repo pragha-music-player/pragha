@@ -44,6 +44,10 @@
 #include "src/pragha-utils.h"
 #include "src/pragha-preferences-dialog.h"
 
+#ifndef NOTIFY_CHECK_VERSION
+#define NOTIFY_CHECK_VERSION(x,y,z) 0
+#endif
+
 #define PRAGHA_TYPE_NOTIFY_PLUGIN         (pragha_notify_plugin_get_type ())
 #define PRAGHA_NOTIFY_PLUGIN(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), PRAGHA_TYPE_NOTIFY_PLUGIN, PraghaNotifyPlugin))
 #define PRAGHA_NOTIFY_PLUGIN_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), PRAGHA_TYPE_NOTIFY_PLUGIN, PraghaNotifyPlugin))
@@ -170,7 +174,11 @@ pragha_notify_plugin_show_new_track (PraghaPlaylist     *playlist,
 	/* Create notification instance */
 
 	if (priv->notify == NULL) {
+		#if NOTIFY_CHECK_VERSION (0, 7, 1)
 		priv->notify = notify_notification_new(summary, body, NULL);
+		#else
+		priv->notify = notify_notification_new(summary, body, NULL, NULL);
+		#endif
 
 		if (can_support_actions() && priv->actions_in_osd) {
 			notify_notification_add_action(

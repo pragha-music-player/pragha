@@ -74,6 +74,7 @@ pragha_search_bar_icon_pressed_cb (GtkEntry       *entry,
 	}
 }
 
+#if GTK_CHECK_VERSION (3, 6, 0)
 static void
 show_clear_icon (GtkEntry *entry)
 {
@@ -92,6 +93,7 @@ hide_clear_icon (GtkEntry *entry)
 {
 	gtk_entry_set_icon_from_icon_name (entry, GTK_ENTRY_ICON_SECONDARY, NULL);
 }
+#endif
 
 static void
 changed_cb (GtkEditable *editable, gpointer user_data)
@@ -100,10 +102,14 @@ changed_cb (GtkEditable *editable, gpointer user_data)
 
 	gboolean has_text = gtk_entry_get_text_length (entry) > 0;
 
+#if GTK_CHECK_VERSION (3, 6, 0)
 	if (has_text)
 		show_clear_icon (entry);
 	else
 		hide_clear_icon (entry);
+#else
+	gtk_entry_set_icon_sensitive (entry, GTK_ENTRY_ICON_SECONDARY, has_text);
+#endif
 }
 
 GtkWidget *
@@ -113,7 +119,14 @@ pragha_search_entry_new (PraghaPreferences *preferences)
 
 	search_entry = gtk_entry_new ();
 
+#if GTK_CHECK_VERSION (3, 6, 0)
 	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_PRIMARY, "edit-find-symbolic");
+#else
+	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_PRIMARY, "edit-find");
+	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_SECONDARY, "edit-clear");
+
+	gtk_entry_set_icon_sensitive (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_SECONDARY, FALSE);
+#endif
 
 	g_signal_connect (search_entry, "icon-press", G_CALLBACK (pragha_search_bar_icon_pressed_cb), preferences);
 	g_signal_connect (search_entry, "changed", G_CALLBACK (changed_cb), NULL);
