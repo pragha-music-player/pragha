@@ -306,16 +306,13 @@ pragha_status_icon_set_application (PraghaStatusIcon *status_icon, PraghaApplica
 {
 	PraghaPreferences *preferences;
 	GtkActionGroup *actions;
-	GdkPixbuf *pixbuf_app;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	status_icon->pragha = pragha;
 
-	pixbuf_app = pragha_application_get_pixbuf_app(pragha);
-	if (pixbuf_app)
-		gtk_status_icon_set_from_pixbuf (GTK_STATUS_ICON(status_icon), pixbuf_app);
+	gtk_status_icon_set_from_icon_name (GTK_STATUS_ICON(status_icon), "pragha");
 
 	actions = gtk_action_group_new ("Systray Actions");
 	gtk_action_group_set_translation_domain (actions, GETTEXT_PACKAGE);

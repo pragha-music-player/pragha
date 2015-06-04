@@ -57,7 +57,6 @@ struct _PraghaApplication {
 	/* Main window and icon */
 
 	GtkWidget         *mainwindow;
-	GdkPixbuf         *pixbuf_app;
 
 	/* Main stuff */
 
@@ -505,10 +504,8 @@ void
 pragha_application_about_dialog (PraghaApplication *pragha)
 {
 	GtkWidget *mainwindow;
-	GdkPixbuf *pixbuf_app;
 
 	mainwindow = pragha_application_get_window (pragha);
-	pixbuf_app = pragha_application_get_pixbuf_app (pragha);
 
 	const gchar *authors[] = {
 		"sujith ( m.sujith@gmail.com )",
@@ -516,7 +513,7 @@ pragha_application_about_dialog (PraghaApplication *pragha)
 		NULL};
 
 	gtk_show_about_dialog(GTK_WINDOW(mainwindow),
-	                      "logo", pixbuf_app,
+	                      "logo-icon-name", "pragha",
 	                      "authors", authors,
 	                      "translator-credits", _("translator-credits"),
 	                      "comments", "A lightweight GTK+ music player",
@@ -775,12 +772,6 @@ pragha_application_get_window (PraghaApplication *pragha)
 	return pragha->mainwindow;
 }
 
-GdkPixbuf *
-pragha_application_get_pixbuf_app (PraghaApplication *pragha)
-{
-	return pragha->pixbuf_app;
-}
-
 PraghaPlaylist *
 pragha_application_get_playlist (PraghaApplication *pragha)
 {
@@ -892,22 +883,13 @@ pragha_application_is_first_run (PraghaApplication *pragha)
 static void
 pragha_application_construct_window (PraghaApplication *pragha)
 {
-	gchar *icon_uri = NULL;
-
 	/* Main window */
 
 	pragha->mainwindow = gtk_application_window_new (GTK_APPLICATION (pragha));
 
-	icon_uri = g_build_filename (PIXMAPDIR, "pragha.png", NULL);
-	pragha->pixbuf_app = gdk_pixbuf_new_from_file (icon_uri, NULL);
-	g_free (icon_uri);
+	gtk_window_set_icon_name (GTK_WINDOW(pragha->mainwindow), "pragha");
 
-	if (!pragha->pixbuf_app)
-		g_warning("Unable to load pragha png");
-	else
-		gtk_window_set_icon (GTK_WINDOW(pragha->mainwindow),
-		                     pragha->pixbuf_app);
-	
+
 	/* Get all widgets instances */
 
 	pragha->menu_ui_manager = pragha_menubar_new ();
@@ -967,10 +949,6 @@ pragha_application_dispose (GObject *object)
 	if (pragha->scanner) {
 		pragha_scanner_free (pragha->scanner);
 		pragha->scanner = NULL;
-	}
-	if (pragha->pixbuf_app) {
-		g_object_unref (pragha->pixbuf_app);
-		pragha->pixbuf_app = NULL;
 	}
 	if (pragha->menu_ui_manager) {
 		g_object_unref (pragha->menu_ui_manager);
