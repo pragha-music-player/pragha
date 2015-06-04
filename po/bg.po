@@ -3,139 +3,137 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Alois Nešpor <info@aloisnespor.info>, 2011-2015
-# Alois Nešpor <info@aloisnespor.info>, 2014
-# Petr Šimáček <petr.simacek@gmail.com>, 2012
+# Lyubomir Vasilev, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: Pragha\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-12-21 14:02-0300\n"
-"PO-Revision-Date: 2015-03-02 15:40+0000\n"
-"Last-Translator: Alois Nešpor <info@aloisnespor.info>\n"
-"Language-Team: Czech (http://www.transifex.com/projects/p/Pragha/language/cs/)\n"
+"PO-Revision-Date: 2015-05-28 10:43+0000\n"
+"Last-Translator: Lyubomir Vasilev\n"
+"Language-Team: Bulgarian (http://www.transifex.com/projects/p/Pragha/language/bg/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: cs\n"
-"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"Language: bg\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. GtkInfoBar has undocumented behavior for GTK_RESPONSE_CANCEL
 #: ../src/info-bar-import-music.c:80 ../src/info-bar-import-music.c:127
 #: ../src/info-bar-import-music.c:170
 msgid "_No"
-msgstr "_Ne"
+msgstr "_Не"
 
 #: ../src/info-bar-import-music.c:81 ../src/info-bar-import-music.c:128
 #: ../src/info-bar-import-music.c:171
 msgid "_Yes"
-msgstr "_Ano"
+msgstr "_Да"
 
 #: ../src/info-bar-import-music.c:83
 #, c-format
 msgid "Would you like to import %s to library?"
-msgstr "Chcete %s importovat do knihovny?"
+msgstr "Желаете ли да добавите %s в библиотеката?"
 
 #: ../src/info-bar-import-music.c:130
 msgid "Would you like to update your music library?"
-msgstr "Chcete aktualizovat vaši knihovnu?"
+msgstr "Желаете ли да обновите музикалната си библиотека?"
 
 #: ../src/info-bar-import-music.c:173
 msgid "Some changes need restart pragha."
-msgstr "Některé změny se projeví až po restartu přehrávače."
+msgstr "Някои промени изискват рестартиране на pragha."
 
 #: ../src/pragha-cmdline.c:199
 msgid "FILENAME"
-msgstr "JMÉNO SOUBORU"
+msgstr "ФАЙЛ"
 
 #: ../src/pragha-cmdline.c:258
 msgid "Use --help to see a full list of available command line options."
-msgstr "Použitím --help se zobrazit úplný seznam dostupných voleb příkazové řádky."
+msgstr "Използвайте --help , за да видите пълен списък с наличните опции."
 
 #: ../src/pragha-equalizer-dialog.c:44
 msgid "Disabled"
-msgstr "Vypnuto"
+msgstr "Изключен"
 
 #: ../src/pragha-equalizer-dialog.c:45
 msgid "Classical"
-msgstr "Klasika"
+msgstr "Класика"
 
 #: ../src/pragha-equalizer-dialog.c:46
 msgid "Club"
-msgstr "Klub"
+msgstr "Клубна"
 
 #: ../src/pragha-equalizer-dialog.c:47
 msgid "Dance"
-msgstr "Tanec"
+msgstr "Танцувална"
 
 #: ../src/pragha-equalizer-dialog.c:48
 msgid "Full Bass"
-msgstr "Plné basy"
+msgstr "Пълен бас"
 
 #: ../src/pragha-equalizer-dialog.c:49
 msgid "Full Bass and Treble"
-msgstr "Plné basy a výšky"
+msgstr "Пълен бас и високи"
 
 #: ../src/pragha-equalizer-dialog.c:50
 msgid "Full Treble"
-msgstr "Plné výšky"
+msgstr "Пълни високи"
 
 #: ../src/pragha-equalizer-dialog.c:51
 msgid "Laptop Speakers and Headphones"
-msgstr "Sluchátka a reproduktory laptopu"
+msgstr "Колонки на лаптоп и слушалки"
 
 #: ../src/pragha-equalizer-dialog.c:52
 msgid "Large Hall"
-msgstr "Velká místnost"
+msgstr "Голяма зала"
 
 #: ../src/pragha-equalizer-dialog.c:53
 msgid "Live"
-msgstr "Živě"
+msgstr "На живо"
 
 #: ../src/pragha-equalizer-dialog.c:54
 msgid "Party"
-msgstr "Párty"
+msgstr "Купон"
 
 #: ../src/pragha-equalizer-dialog.c:55
 msgid "Pop"
-msgstr "Pop"
+msgstr "Поп"
 
 #: ../src/pragha-equalizer-dialog.c:56
 msgid "Reggae"
-msgstr "Reggae"
+msgstr "Реге"
 
 #: ../src/pragha-equalizer-dialog.c:57
 msgid "Rock"
-msgstr "Rock"
+msgstr "Рок"
 
 #: ../src/pragha-equalizer-dialog.c:58
 msgid "Ska"
-msgstr "Ska"
+msgstr "Ска"
 
 #: ../src/pragha-equalizer-dialog.c:59
 msgid "Smiley Face Curve"
-msgstr "Smiley Face křivka"
+msgstr "Крива като усмихнато лице"
 
 #: ../src/pragha-equalizer-dialog.c:60
 msgid "Soft"
-msgstr "Soft"
+msgstr "Меко"
 
 #: ../src/pragha-equalizer-dialog.c:61
 msgid "Soft Rock"
-msgstr "Soft Rock"
+msgstr "Лек рок"
 
 #: ../src/pragha-equalizer-dialog.c:62
 msgid "Techno"
-msgstr "Techno"
+msgstr "Техно"
 
 #: ../src/pragha-equalizer-dialog.c:63
 msgid "Custom"
-msgstr "Vlastní"
+msgstr "Потребителски"
 
 #. Create the dialog
 #: ../src/pragha-equalizer-dialog.c:298
 msgid "Equalizer"
-msgstr "Ekvalizér"
+msgstr "Еквалайзер"
 
 #: ../src/pragha-equalizer-dialog.c:301 ../src/pragha-playlists-mgmt.c:86
 #: ../src/pragha-playlists-mgmt.c:541 ../src/pragha-playlists-mgmt.c:1239
@@ -144,153 +142,153 @@ msgstr "Ekvalizér"
 #: ../plugins/song-info/pragha-song-info-dialog.c:83
 #: ../plugins/tunein/pragha-tunein-plugin.c:224
 msgid "_Ok"
-msgstr "_Ok"
+msgstr "_Добре"
 
 #: ../src/pragha-filter-dialog.c:219 ../src/pragha-library-pane.c:507
 #: ../plugins/notify/pragha-notify-plugin.c:170
 msgid "Unknown Artist"
-msgstr "Neznámý umělec"
+msgstr "Непознат изпълнител"
 
 #: ../src/pragha-filter-dialog.c:220 ../src/pragha-library-pane.c:514
 #: ../src/pragha-library-pane.c:519
 #: ../plugins/notify/pragha-notify-plugin.c:171
 msgid "Unknown Album"
-msgstr "Neznámé album"
+msgstr "Непознат албум"
 
 #. The search dialog
 #: ../src/pragha-filter-dialog.c:370
 msgid "Search in playlist"
-msgstr "Hledat v playlistu"
+msgstr "Търсене в списъка за изпълнение"
 
 #: ../src/pragha-filter-dialog.c:373
 msgid "_Close"
-msgstr "_Zavřít"
+msgstr "_Затваряне"
 
 #: ../src/pragha-filter-dialog.c:376 ../src/pragha-playlist.c:210
 msgid "Add to playback queue"
-msgstr "Přidat do fronty"
+msgstr "Добавяне към списъка за изпълнение"
 
 #: ../src/pragha-filter-dialog.c:377
 msgid "_Jump to"
-msgstr "_Skočit na"
+msgstr "_Преминаване към"
 
 #: ../src/pragha-library-pane.c:133
 msgid "_Skip"
-msgstr "_Přeskočit"
+msgstr "П_ропускане"
 
 #: ../src/pragha-library-pane.c:134
 msgid "S_kip All"
-msgstr "P_řeskočit vše"
+msgstr "Пропускане на _всички"
 
 #: ../src/pragha-library-pane.c:135
 msgid "Delete _All"
-msgstr "Smazat _vše"
+msgstr "_Изтриване на всички"
 
 #: ../src/pragha-library-pane.c:189
 msgid "_Expand library"
-msgstr "_Rozbalit"
+msgstr "П_оказване на библиотеката"
 
 #: ../src/pragha-library-pane.c:191
 msgid "_Collapse library"
-msgstr "_Zabalit"
+msgstr "_Скриване на библиотеката"
 
 #: ../src/pragha-library-pane.c:193 ../src/pragha-library-pane.c:1586
 msgid "Folders structure"
-msgstr "Struktura adresářů"
+msgstr "Дърво на папките"
 
 #: ../src/pragha-library-pane.c:195 ../src/pragha-library-pane.c:1595
 #: ../src/pragha-playlist.c:116 ../src/pragha-playlist.c:3355
 #: ../src/pragha-playlist.c:3531 ../src/pragha-statusicon.c:180
 #: ../src/pragha-tags-dialog.c:117 ../src/pragha-tags-dialog.c:840
 msgid "Artist"
-msgstr "Umělec"
+msgstr "Изпълнител"
 
 #: ../src/pragha-library-pane.c:197 ../src/pragha-library-pane.c:1604
 #: ../src/pragha-playlist.c:117 ../src/pragha-playlist.c:3356
 #: ../src/pragha-playlist.c:3532 ../src/pragha-statusicon.c:181
 #: ../src/pragha-tags-dialog.c:118 ../src/pragha-tags-dialog.c:845
 msgid "Album"
-msgstr "Album"
+msgstr "Албум"
 
 #: ../src/pragha-library-pane.c:199 ../src/pragha-library-pane.c:1613
 #: ../src/pragha-playlist.c:118 ../src/pragha-playlist.c:3357
 #: ../src/pragha-playlist.c:3533 ../src/pragha-tags-dialog.c:119
 #: ../src/pragha-tags-dialog.c:850
 msgid "Genre"
-msgstr "Žánr"
+msgstr "Жанр"
 
 #: ../src/pragha-library-pane.c:201 ../src/pragha-library-pane.c:1625
 msgid "Artist / Album"
-msgstr "Umělec / Album"
+msgstr "Изпълнител / албум"
 
 #: ../src/pragha-library-pane.c:203 ../src/pragha-library-pane.c:1649
 msgid "Genre / Album"
-msgstr "Žánr / Album"
+msgstr "Жанр / албум"
 
 #: ../src/pragha-library-pane.c:205 ../src/pragha-library-pane.c:1637
 msgid "Genre / Artist"
-msgstr "Žánr / Umělec"
+msgstr "Жанр / изпълнител"
 
 #: ../src/pragha-library-pane.c:207 ../src/pragha-library-pane.c:1664
 msgid "Genre / Artist / Album"
-msgstr "Žánr / Umělec / Album"
+msgstr "Жанр / изпълнител / албум"
 
 #. Playlist and Radio tree
 #: ../src/pragha-library-pane.c:243
 msgid "_Add to current playlist"
-msgstr "_Přidat na současný playlist"
+msgstr "_Добавяне към текущия списък"
 
 #: ../src/pragha-library-pane.c:245
 msgid "_Replace current playlist"
-msgstr "_Nahradit současný playlist"
+msgstr "_Замяна на текущия списък"
 
 #: ../src/pragha-library-pane.c:247
 msgid "Replace and _play"
-msgstr "Nahradit a přehrát"
+msgstr "Замяна и _изъплнение"
 
 #: ../src/pragha-library-pane.c:249 ../src/pragha-playlists-mgmt.c:537
 msgid "Rename"
-msgstr "Přejmenovat"
+msgstr "Преименуване"
 
 #: ../src/pragha-library-pane.c:251
 msgid "Delete"
-msgstr "Smazat"
+msgstr "Изтриване"
 
 #: ../src/pragha-library-pane.c:253 ../src/pragha-menubar.c:222
 #: ../src/pragha-menubar.c:227 ../src/pragha-playlists-mgmt.c:1337
 #: ../src/pragha-playlists-mgmt.c:1375
 msgid "Export"
-msgstr "Exportovat"
+msgstr "Извличане"
 
 #. Set dialog properties
 #: ../src/pragha-library-pane.c:255 ../src/pragha-tags-dialog.c:99
 msgid "Edit tags"
-msgstr "Editovat tagy"
+msgstr "Редактиране на етикети"
 
 #: ../src/pragha-library-pane.c:257
 msgid "Move to _trash"
-msgstr "Přesunout do _koše"
+msgstr "Преместване в _кошчето"
 
 #: ../src/pragha-library-pane.c:259
 msgid "Delete from library"
-msgstr "Smazat z knihovny"
+msgstr "Изтриване от библиотеката"
 
 #: ../src/pragha-library-pane.c:512
 msgid "Unknown"
-msgstr "Neznámý"
+msgstr "Непознато"
 
 #: ../src/pragha-library-pane.c:524
 msgid "Unknown Genre"
-msgstr "Neznámý žánr"
+msgstr "Непознат жанр"
 
 #: ../src/pragha-library-pane.c:844
 msgid "File can't be moved to trash. Delete permanently?"
-msgstr "Soubor nelze přesunout do koše. Úplně mazat?"
+msgstr "Файлът не може да бъде преместен в кошчето. Изтриване завинаги?"
 
 #: ../src/pragha-library-pane.c:845
 #, c-format
 msgid "The file \"%s\" cannot be moved to the trash. Details: %s"
-msgstr "Soubor \"%s\" nelze přesunout do koše. Detaily: %s"
+msgstr "Файлът „%s“ не може да бъде преместен в кошчето. Подробности: %s"
 
 #: ../src/pragha-library-pane.c:853 ../src/pragha-playlists-mgmt.c:85
 #: ../src/pragha-playlists-mgmt.c:540 ../src/pragha-playlists-mgmt.c:612
@@ -300,690 +298,687 @@ msgstr "Soubor \"%s\" nelze přesunout do koše. Detaily: %s"
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:930
 #: ../plugins/tunein/pragha-tunein-plugin.c:223
 msgid "_Cancel"
-msgstr "_Zrušit"
+msgstr "_Отказ"
 
 #: ../src/pragha-library-pane.c:859
 msgid "_Delete"
-msgstr "_Smazat"
+msgstr "_Изтриване"
 
 #: ../src/pragha-library-pane.c:1896 ../src/pragha-library-pane.c:1978
 #: ../src/pragha-playlists-mgmt.c:641 ../src/pragha-playlists-mgmt.c:668
 #: ../src/pragha.c:307 ../plugins/mpris2/pragha-mpris2-plugin.c:855
 msgid "Playlists"
-msgstr "Playlisty"
+msgstr "Списъци за изпълнение"
 
 #: ../src/pragha-library-pane.c:1912 ../src/pragha-library-pane.c:1987
 msgid "Radios"
-msgstr "Rádia"
+msgstr "Радиа"
 
 #: ../src/pragha-library-pane.c:1928 ../src/pragha-preferences-dialog.c:957
 #: ../src/pragha-preferences-dialog.c:1281
 msgid "Library"
-msgstr "Knihovna"
+msgstr "Библиотека"
 
 #: ../src/pragha-library-pane.c:2483
 msgid "Really want to move the files to trash?"
-msgstr "Opravdu chcete přesunout do koše?"
+msgstr "Наистина ли искате да преместите файловете в кошчето?"
 
 #: ../src/pragha-library-pane.c:2485
 msgid "Delete permanently instead of moving to trash"
-msgstr "Namísto přesouvání do koše rovnou mazat"
+msgstr "Изтриване завинаги вместо местене в кошчето"
 
 #: ../src/pragha-library-pane.c:2535
 msgid ""
 "Are you sure you want to delete current file from library?\n"
 "\n"
 "Warning: To recover we must rescan the entire library."
-msgstr "Opravdu chcete smazat současný soubor z knihovny?\n\nVarování: K obnovení je nutné přeskenovat knihovnu."
+msgstr "Сигурни ли сте, че искате да изтриете текущия файл от библиотеката?\n\nВнимание: За да бъде възстановен, ще трябва цялата библиотека да бъде сканирана наново."
 
 #: ../src/pragha-menubar.c:190
 msgid "_Playback"
-msgstr "_Přehrát"
+msgstr "_Изпълнение"
 
 #: ../src/pragha-menubar.c:191
 msgid "Play_list"
-msgstr "Play_list"
+msgstr "_Списък за изпълнение"
 
 #: ../src/pragha-menubar.c:192
 msgid "_View"
-msgstr "_Zobrazení"
+msgstr "_Преглед"
 
 #: ../src/pragha-menubar.c:193 ../src/pragha-playlist.c:223
 msgid "_Tools"
-msgstr "_Nástroje"
+msgstr "И_нструменти"
 
 #: ../src/pragha-menubar.c:194
 msgid "_Help"
-msgstr "_Nápověda"
+msgstr "_Помощ"
 
 #: ../src/pragha-menubar.c:195 ../src/pragha-statusicon.c:83
 #: ../plugins/notify/pragha-notify-plugin.c:185
 msgid "Previous track"
-msgstr "Předchozí skladba"
+msgstr "Предишна"
 
 #: ../src/pragha-menubar.c:197 ../src/pragha-statusicon.c:85
 msgid "Play / Pause"
-msgstr "Hrát / Pauza"
+msgstr "Изпълнение / Пауза"
 
 #: ../src/pragha-menubar.c:199 ../src/pragha-statusicon.c:87
 msgid "Stop"
-msgstr "Zastavit"
+msgstr "Спиране"
 
 #: ../src/pragha-menubar.c:201 ../src/pragha-statusicon.c:89
 #: ../plugins/notify/pragha-notify-plugin.c:189
 msgid "Next track"
-msgstr "Další skladba"
+msgstr "Следваща"
 
 #: ../src/pragha-menubar.c:203 ../src/pragha-playlist.c:226
 #: ../src/pragha-statusicon.c:91
 msgid "Edit track information"
-msgstr "Editace informací o skladbě"
+msgstr "Редактиране на информацията за песента"
 
 #: ../src/pragha-menubar.c:205 ../src/pragha-statusicon.c:93
 msgid "_Quit"
-msgstr "_Konec"
+msgstr "И_зход"
 
 #: ../src/pragha-menubar.c:207 ../src/pragha-statusicon.c:79
 msgid "_Add files"
-msgstr "_Přidat soubory"
+msgstr "Добавяне на _файлове"
 
 #: ../src/pragha-menubar.c:208
 msgid "Open a media file"
-msgstr "Otevřít soubor"
+msgstr "Отваряна на файл за изпълнение"
 
 #: ../src/pragha-menubar.c:209 ../src/pragha-statusicon.c:81
 msgid "Add _location"
-msgstr "Přidat _umístění"
+msgstr "Добавяне на _местоположение"
 
 #: ../src/pragha-menubar.c:211
 msgid "_Add the library"
-msgstr "_Přidat knihovnu"
+msgstr "Добавяне на _библиотеката"
 
 #: ../src/pragha-menubar.c:213
 msgid "Remove selection from playlist"
-msgstr "Odebrat výběr z playlistu"
+msgstr "Премахване на избраното от списъка"
 
 #: ../src/pragha-menubar.c:215 ../src/pragha-playlist.c:216
 msgid "Crop playlist"
-msgstr "Oříznout playlist"
+msgstr "Отрязване на остатъка от списъка"
 
 #: ../src/pragha-menubar.c:217 ../src/pragha-playlist.c:218
 msgid "Clear playlist"
-msgstr "Vyčistit playlist"
+msgstr "Изчистване на списъка"
 
 #: ../src/pragha-menubar.c:219 ../src/pragha-playlist.c:220
 #: ../src/pragha-playlists-mgmt.c:69 ../src/pragha-playlists-mgmt.c:92
 #: ../src/pragha-playlists-mgmt.c:1243
 msgid "Save playlist"
-msgstr "Uložit playlist"
+msgstr "Запазване на списъка"
 
 #: ../src/pragha-menubar.c:220 ../src/pragha-menubar.c:225
 #: ../src/pragha-playlists-mgmt.c:1332 ../src/pragha-playlists-mgmt.c:1370
 msgid "New playlist"
-msgstr "Nový playlist"
+msgstr "Нова спъсък"
 
 #: ../src/pragha-menubar.c:224 ../src/pragha-playlist.c:221
 #: ../src/pragha-playlists-mgmt.c:71 ../src/pragha-playlists-mgmt.c:94
 #: ../src/pragha-playlists-mgmt.c:1245
 msgid "Save selection"
-msgstr "Uložit vybrané"
+msgstr "Запазване на избраното"
 
 #: ../src/pragha-menubar.c:229
 msgid "_Search in playlist"
-msgstr "_Hledat v playlistu"
+msgstr "_Търсене в списъка"
 
 #: ../src/pragha-menubar.c:231
 msgid "_Preferences"
-msgstr "_Možnosti"
+msgstr "_Предпочитания"
 
 #: ../src/pragha-menubar.c:233
 msgid "Jump to playing song"
-msgstr "Skočit na hrající píseň"
+msgstr "Към изпълняващата се песен"
 
 #: ../src/pragha-menubar.c:235
 msgid "E_qualizer"
-msgstr "E_qualizer"
+msgstr "_Еквалайзер"
 
 #: ../src/pragha-menubar.c:237
 msgid "_Rescan library"
-msgstr "_Znovu sestavit knihovnu"
+msgstr "Повторно _сканиране на библиотеката"
 
 #: ../src/pragha-menubar.c:239
 #: ../plugins/removable-media/pragha-devices-removable.c:302
 msgid "_Update library"
-msgstr "_Aktualizovat knihovnu"
+msgstr "_Обновяване на библиотеката"
 
 #: ../src/pragha-menubar.c:241
 msgid "_Statistics"
-msgstr "_Statistiky"
+msgstr "_Статистики"
 
 #: ../src/pragha-menubar.c:243
 msgid "Homepage"
-msgstr "Domů"
+msgstr "Начална страница"
 
 #: ../src/pragha-menubar.c:245
 msgid "Community"
-msgstr "Komunita"
+msgstr "Общност"
 
 #: ../src/pragha-menubar.c:247
 msgid "Wiki"
-msgstr "Wiki"
+msgstr "Уики"
 
 #: ../src/pragha-menubar.c:249
 msgid "Translate Pragha"
-msgstr "Přeložit"
+msgstr "Преведете Pragha"
 
 #: ../src/pragha-menubar.c:251 ../src/pragha-statusicon.c:77
 msgid "About"
-msgstr "O aplikaci"
+msgstr "Относно"
 
 #: ../src/pragha-menubar.c:256
 msgid "_Shuffle"
-msgstr "_Zamíchat"
+msgstr "_Разбъркване"
 
 #: ../src/pragha-menubar.c:259
 msgid "_Repeat"
-msgstr "_Opakovat"
+msgstr "_Повтаряне"
 
 #: ../src/pragha-menubar.c:262
 msgid "_Fullscreen"
-msgstr "_Na celou obrazovku"
+msgstr "На _цял екран"
 
 #: ../src/pragha-menubar.c:265
 msgid "Lateral _panel"
-msgstr "Postranní _panel"
+msgstr "Страничен _панел"
 
 #: ../src/pragha-menubar.c:268
 msgid "Secondary lateral panel"
-msgstr "Sekundární postranní panel"
+msgstr "Втори страничен панел"
 
 #: ../src/pragha-menubar.c:271
 msgid "Playback controls below"
-msgstr "Zobrazit ovládání v dolní části"
+msgstr "Бутоните за изпълнение да са отдолу"
 
 #: ../src/pragha-menubar.c:274
 msgid "Menubar"
-msgstr "Panel nabídky"
+msgstr "Лента с менюта"
 
 #: ../src/pragha-menubar.c:277
 msgid "Status bar"
-msgstr "Stavový řádek"
+msgstr "Лента за състояние"
 
 #: ../src/pragha-menubar.c:638
 msgid "Total Tracks:"
-msgstr "Celkem skladeb:"
+msgstr "Общо елементи за изпълнение:"
 
 #: ../src/pragha-menubar.c:640
 msgid "Total Artists:"
-msgstr "Celkem umělců:"
+msgstr "Общо изпълнители:"
 
 #: ../src/pragha-menubar.c:642
 msgid "Total Albums:"
-msgstr "Celkem Alb:"
+msgstr "Общо албуми:"
 
 #: ../src/pragha-menubar.c:645
 msgid "Statistics"
-msgstr "Statistika"
+msgstr "Статистики"
 
 #. Create labels
 #: ../src/pragha-playlist.c:115 ../src/pragha-playlist.c:3354
 #: ../src/pragha-playlist.c:3530 ../src/pragha-statusicon.c:179
 #: ../src/pragha-tags-dialog.c:116 ../src/pragha-tags-dialog.c:835
 msgid "Title"
-msgstr "Název"
+msgstr "Заглавие"
 
 #: ../src/pragha-playlist.c:119 ../src/pragha-playlist.c:3358
 #: ../src/pragha-playlist.c:3534 ../src/pragha-tags-dialog.c:576
 msgid "Bitrate"
-msgstr "Bitráž"
+msgstr "Побитова скорост"
 
 #: ../src/pragha-playlist.c:120 ../src/pragha-playlist.c:3359
 #: ../src/pragha-playlist.c:3535 ../src/pragha-tags-dialog.c:121
 msgid "Year"
-msgstr "Rok"
+msgstr "Година"
 
 #: ../src/pragha-playlist.c:121 ../src/pragha-playlist.c:3360
 #: ../src/pragha-playlist.c:3536 ../src/pragha-tags-dialog.c:122
 #: ../src/pragha-tags-dialog.c:855
 msgid "Comment"
-msgstr "Komentář"
+msgstr "Коментар"
 
 #. Create labels
 #: ../src/pragha-playlist.c:122 ../src/pragha-playlist.c:3361
 #: ../src/pragha-playlist.c:3537 ../src/pragha-statusicon.c:182
 #: ../src/pragha-tags-dialog.c:575
 msgid "Length"
-msgstr "Délka"
+msgstr "Дължина"
 
 #: ../src/pragha-playlist.c:123 ../src/pragha-playlist.c:3362
 #: ../src/pragha-playlist.c:3538 ../src/pragha-tags-dialog.c:580
 msgid "Filename"
-msgstr "Jméno souboru"
+msgstr "Име на файл"
 
 #: ../src/pragha-playlist.c:124 ../src/pragha-playlist.c:3363
 #: ../src/pragha-playlist.c:3539 ../src/pragha-tags-dialog.c:581
 msgid "Mimetype"
-msgstr "MIME typ"
+msgstr "Тип"
 
 #: ../src/pragha-playlist.c:212
 msgid "Remove from playback queue"
-msgstr "Odebrat z fronty přehrávání"
+msgstr "Премахване от опашката за изпълнение"
 
 #: ../src/pragha-playlist.c:214
 msgid "Remove from playlist"
-msgstr "Odebrat z playlistu"
+msgstr "Премахване от списъка за изпълнение"
 
 #: ../src/pragha-playlist.c:222
 msgid "_Send to"
-msgstr "_Odeslat"
+msgstr "Изп_ращане към"
 
 #: ../src/pragha-playlist.c:2485
 #, c-format
 msgid "Copy \"%i\" to selected track numbers"
-msgstr "Kopírovat \"%i\" na vybrané čísla skladeb"
+msgstr "Копиране на „%i“ в избраните номера на писти"
 
 #: ../src/pragha-playlist.c:2491
 #, c-format
 msgid "Copy \"%s\" to selected titles"
-msgstr "Kopírovat \"%s\" na vybrané názvy"
+msgstr "Копиране на „%s“ в избраните заглавия"
 
 #: ../src/pragha-playlist.c:2497
 #, c-format
 msgid "Copy \"%s\" to selected artists"
-msgstr "Kopírovat \"%s\" na vybrané umělce"
+msgstr "Копиране на „%s“ в избраните изпълнители"
 
 #: ../src/pragha-playlist.c:2503
 #, c-format
 msgid "Copy \"%s\" to selected albums"
-msgstr "Kopírovat \"%s\" na vybrané alba"
+msgstr "Копиране на „%s“ в избраните албуми"
 
 #: ../src/pragha-playlist.c:2509
 #, c-format
 msgid "Copy \"%s\" to selected genres"
-msgstr "Kopírovat \"%s\" na vybrané žánry"
+msgstr "Копиране на „%s“ в избраните жанрове"
 
 #: ../src/pragha-playlist.c:2515
 #, c-format
 msgid "Copy \"%i\" to selected years"
-msgstr "Kopírovat \"%i\" na vybrané roky"
+msgstr "Копиране на „%i“ в избраните години"
 
 #: ../src/pragha-playlist.c:2521
 #, c-format
 msgid "Copy \"%s\" to selected comments"
-msgstr "Kopírovat \"%s\" na vybrané komentáře"
+msgstr "Копиране на „%s“ в избраните коментари"
 
 #. Create the checkmenu items
 #: ../src/pragha-playlist.c:3353 ../src/pragha-playlist.c:3529
 #: ../src/pragha.c:614
 msgid "Track"
 msgid_plural "Tracks"
-msgstr[0] "Skladba"
-msgstr[1] "Skladby"
-msgstr[2] "Skladeb"
+msgstr[0] "Писта"
+msgstr[1] "Писти"
 
 #: ../src/pragha-playlist.c:3366
 msgid "Clear sort"
-msgstr "Zrušit výběr"
+msgstr "Изчистване на сортирането"
 
 #: ../src/pragha-playlists-mgmt.c:73 ../src/pragha-preferences-dialog.c:1062
 msgid "Playlist"
-msgstr "Playlist"
+msgstr "Списък за изпълнение"
 
 #: ../src/pragha-playlists-mgmt.c:129
 msgid "<b>con_playlist</b> is a reserved playlist name"
-msgstr "<b>con_playlist</b> je rezervované jméno playlistu"
+msgstr "<b>con_playlist</b> е запазено име на списък за изпълнение"
 
 #: ../src/pragha-playlists-mgmt.c:153
 #, c-format
 msgid "Do you want to overwrite the playlist: %s ?"
-msgstr "Chcete přepsat playlist: %s ?"
+msgstr "Искате ли да презапишете списъка за изпълнение: %s ?"
 
 #: ../src/pragha-playlists-mgmt.c:530
 msgid "Choose a new name"
-msgstr "Vyberte nový název"
+msgstr "Изберете ново име"
 
 #: ../src/pragha-playlists-mgmt.c:579
 #, c-format
 msgid "Do you want to delete the item: %s ?"
-msgstr "Chcete smazat položku: %s ?"
+msgstr "Искате ли да изтриете елемента: %s ?"
 
 #: ../src/pragha-playlists-mgmt.c:609
 msgid "Export playlist to file"
-msgstr "Exportovat playlist do souboru"
+msgstr "Извличане на списъка за изпълнение във файл"
 
 #: ../src/pragha-playlists-mgmt.c:613
 msgid "_Save"
-msgstr "_Uložit"
+msgstr "_Запазване"
 
 #: ../src/pragha-playlists-mgmt.c:1050
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:903
 #, c-format
 msgid "Added %d songs from %d of the imported playlist."
-msgstr "Z importovaného playlistu  přidáno %d z %d písní. "
+msgstr "%d от %d песни бяха добавени от внесения списък за изпълнение."
 
 #: ../src/pragha-playlists-mgmt.c:1223
 msgid "What do you want to do?"
-msgstr "Co chcete dělat?"
+msgstr "Какво искате да направите?"
 
 #: ../src/pragha-playlists-mgmt.c:1225
 #, c-format
 msgid "Replace the playlist \"%s\""
-msgstr "Nahradit playlist \"%s\""
+msgstr "Замяна на списъка за изпълнение „%s“"
 
 #: ../src/pragha-playlists-mgmt.c:1230
 #, c-format
 msgid "Add to playlist \"%s\""
-msgstr "Přidat na playlist \"%s\""
+msgstr "Добавяне към списъка за изпълнение „%s“"
 
 #: ../src/pragha-preferences-dialog.c:194
 msgid ""
 "Patterns should be of the form:<filename>;<filename>;....\n"
 "A maximum of six patterns are allowed.\n"
 "Wildcards are not accepted as of now ( patches welcome :-) )."
-msgstr "Názvy by měly vypadat jako:<jméno souboru>;<jméno souboru>;....\nMaximum vzorů je šest.\nZástupné znaky nejsou dovoleny (patch vítán :-) )."
+msgstr "Шаблоните трябва да бъдат във формата:<filename>;<filename>;....\nПозволени са най-много шест шаблона.\nЗа сега не се приемат заместващи символи ( приемаме разширения на функционалността :-) )."
 
 #: ../src/pragha-preferences-dialog.c:217
 msgid "Album art pattern"
-msgstr "Název obalu"
+msgstr "Шаблон за обложка на албум"
 
 #: ../src/pragha-preferences-dialog.c:521
 #: ../src/pragha-preferences-dialog.c:1130
 msgid "Start normal"
-msgstr "Sputit normálně"
+msgstr "Стартиране в нормален режим"
 
 #: ../src/pragha-preferences-dialog.c:525
 #: ../src/pragha-preferences-dialog.c:1131
 msgid "Start fullscreen"
-msgstr "Spustit na celou obrazovku (fullscreen)"
+msgstr "Стартиране на цял екран"
 
 #: ../src/pragha-preferences-dialog.c:529
 #: ../src/pragha-preferences-dialog.c:1132
 msgid "Start in system tray"
-msgstr "Spustit minimalizovaně v systémové liště"
+msgstr "Стартиране в системния панел"
 
 #. Create a folder chooser dialog
 #: ../src/pragha-preferences-dialog.c:664
 msgid "Select a folder to add to library"
-msgstr "Vybrat adresář k přidání do knihovny"
+msgstr "Изберете папка, която да добавите към библиотеката"
 
 #: ../src/pragha-preferences-dialog.c:668
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:931
 msgid "_Open"
-msgstr "_Otevřít"
+msgstr "_Отваряне"
 
 #: ../src/pragha-preferences-dialog.c:893
 #: ../src/pragha-preferences-dialog.c:1300
 msgid "Audio"
-msgstr "Audio"
+msgstr "Звук"
 
 #: ../src/pragha-preferences-dialog.c:895
 msgid "Audio sink"
-msgstr "Audio sink"
+msgstr "Звукова система"
 
 #: ../src/pragha-preferences-dialog.c:899
 #: ../src/pragha-preferences-dialog.c:918
 #: ../src/pragha-preferences-dialog.c:924
 msgid "Restart Required"
-msgstr "Potřebuje restart"
+msgstr "Изисква се рестартиране"
 
 #: ../src/pragha-preferences-dialog.c:914
 msgid "Audio Device"
-msgstr "Audio zařízení"
+msgstr "Звуково устройство"
 
 #: ../src/pragha-preferences-dialog.c:923
 msgid "Use software mixer"
-msgstr "Použít softwarový mixer"
+msgstr "Използване на софтуерен смесител"
 
 #: ../src/pragha-preferences-dialog.c:961
 msgid "Can not change directories while they are analyzing."
-msgstr "Nelze změnit adresáře, zatímco se analyzují."
+msgstr "Не можете да променяте папките, докато те биват обхождани"
 
 #: ../src/pragha-preferences-dialog.c:971
 msgid "Folders"
-msgstr "Adresáře"
+msgstr "Папки"
 
 #: ../src/pragha-preferences-dialog.c:990 ../src/pragha.c:211
 msgid "_Add"
-msgstr "_Přidat"
+msgstr "_Добавяне"
 
 #: ../src/pragha-preferences-dialog.c:991
 msgid "_Remove"
-msgstr "_Odstranit"
+msgstr "_Премахване"
 
 #: ../src/pragha-preferences-dialog.c:1007
 msgid "Merge folders in the folders estructure view"
-msgstr "Zobrazovat v knihovně všechny vybrané adresáře spolu"
+msgstr "Сливане на папките в изгледа с дървото на папките"
 
 #: ../src/pragha-preferences-dialog.c:1010
 msgid "Sort albums by release year"
-msgstr "Seřadit alba podle roku"
+msgstr "Подреждане на албумите по година на издаване"
 
 #. Labels
 #: ../src/pragha-preferences-dialog.c:1053
 #: ../src/pragha-preferences-dialog.c:1280
 msgid "Appearance"
-msgstr "Vzhled"
+msgstr "Облик"
 
 #: ../src/pragha-preferences-dialog.c:1055
 msgid "Use Gnome 3 HIG"
-msgstr "Použít Gnome 3 HIG"
+msgstr "Спазване на насоките на Gnome 3"
 
 #: ../src/pragha-preferences-dialog.c:1064
 msgid "Highlight rows on current playlist"
-msgstr "Zvýraznit řádky v současném playlistě"
+msgstr "Отбелязване на редовете в текущия списък за изпълнение"
 
 #: ../src/pragha-preferences-dialog.c:1067
 msgid "Controls"
-msgstr "Controla"
+msgstr "Елементи"
 
 #: ../src/pragha-preferences-dialog.c:1069
 msgid "Show Album art in Panel"
-msgstr "Ukazovat obal v panelu"
+msgstr "Показване на обложките на албумите в панела"
 
 #: ../src/pragha-preferences-dialog.c:1072
 msgid "Size of Album art"
-msgstr "Rozměry obalu"
+msgstr "Размер на обложките на албумите"
 
 #: ../src/pragha-preferences-dialog.c:1077
 msgid "Album art file pattern"
-msgstr "Vzor souboru obalu"
+msgstr "Шаблон за файлове с обложки на албуми"
 
 #: ../src/pragha-preferences-dialog.c:1118
 msgid "Search"
-msgstr "Hledat"
+msgstr "Търсене"
 
 #. Instant search.
 #: ../src/pragha-preferences-dialog.c:1120 ../src/pragha-search-entry.c:41
 msgid "Search while typing"
-msgstr "Hledat během psaní"
+msgstr "Търсене по време на писане"
 
 #. Aproximate search.
 #: ../src/pragha-preferences-dialog.c:1123 ../src/pragha-search-entry.c:48
 msgid "Search similar words"
-msgstr "Hledat podobná slova"
+msgstr "Търсене на подобни думи"
 
 #: ../src/pragha-preferences-dialog.c:1126
 msgid "When starting pragha"
-msgstr "Když Pragha startuje"
+msgstr "При стартиране на pragha"
 
 #: ../src/pragha-preferences-dialog.c:1129
 msgid "Remember last window state"
-msgstr "Pamatovat si poslední pozici okna"
+msgstr "Запомняне на последното състояние на прозореца"
 
 #: ../src/pragha-preferences-dialog.c:1135
 msgid "Restore last playlist"
-msgstr "Obnovit poslední playlist"
+msgstr "Възстановяване на последния списък за изпълнение"
 
 #: ../src/pragha-preferences-dialog.c:1138
 msgid "When adding folders"
-msgstr "Při přidávání adresářů"
+msgstr "При добавяне на папки"
 
 #: ../src/pragha-preferences-dialog.c:1139 ../src/pragha.c:202
 msgid "Add files recursively"
-msgstr "Přidat soubory rekurzivně"
+msgstr "Добавяне на файловете от всички подпапки"
 
 #: ../src/pragha-preferences-dialog.c:1163
 #: ../src/pragha-preferences-dialog.c:1315
 msgid "Desktop"
-msgstr "Desktop"
+msgstr "Работен плот"
 
 #: ../src/pragha-preferences-dialog.c:1165
 msgid "Show Pragha icon in the notification area"
-msgstr "Zobrazit Pragha v oznamovací oblasti"
+msgstr "Показване на иконката на Pragha в зоната за уведомления"
 
 #: ../src/pragha-preferences-dialog.c:1168
 msgid "Minimize Pragha when closing window"
-msgstr "Minimalizovat při zavření okna"
+msgstr "Минимизиране на Pragha при затваряне на прозореца"
 
 #: ../src/pragha-preferences-dialog.c:1189
 #: ../src/pragha-preferences-dialog.c:1284
 msgid "Plugins"
-msgstr "Pluginy"
+msgstr "Добавки"
 
 #. The main preferences dialog
 #: ../src/pragha-preferences-dialog.c:1271
 msgid "Preferences"
-msgstr "Možnosti"
+msgstr "Предпочитания"
 
 #: ../src/pragha-preferences-dialog.c:1282
 msgid "General"
-msgstr "Hlavní"
+msgstr "Общи"
 
 #: ../src/pragha-preferences-dialog.c:1319
 msgid "Services"
-msgstr "Služby"
+msgstr "Услуги"
 
 #. Add to dialog
 #: ../src/pragha-preferences-dialog.c:1332
 msgid "Preferences of Pragha"
-msgstr "Možnosti"
+msgstr "Предпочитания на Pragha"
 
 #: ../src/pragha-scanner.c:93
 #, c-format
 msgid "%i files analized of %i detected"
-msgstr "%i souborů analyzovaných z %i zjištěných"
+msgstr "Анализирани са %i от %i открити файла"
 
 #: ../src/pragha-scanner.c:99
 msgid "Searching files to analyze"
-msgstr "Hledám soubory k analyzování"
+msgstr "Търсене на файлове за анализиране"
 
 #: ../src/pragha-scanner.c:250
 msgid "Library scan complete"
-msgstr "Skenování knihovny dokončeno"
+msgstr "Сканирането на библиотеката е завършено"
 
 #: ../src/pragha-statusicon.c:174 ../src/pragha-toolbar.c:174
 #: ../src/pragha-toolbar.c:525
 msgid "<b>Not playing</b>"
-msgstr "<b>Nepřehrává</b>"
+msgstr "<b>Нищо не се изпълнява</b>"
 
 #: ../src/pragha-tags-dialog.c:120
 msgid "Track No"
-msgstr "Skladba č."
+msgstr "№ на писта"
 
 #: ../src/pragha-tags-dialog.c:123
 msgid "File"
-msgstr "Soubor"
+msgstr "Файл"
 
 #. The main edit dialog
 #: ../src/pragha-tags-dialog.c:456 ../src/pragha-tags-dialog.c:658
 msgid "Details"
-msgstr "Detaily "
+msgstr "Подробности"
 
 #: ../src/pragha-tags-dialog.c:558
 msgid "channel"
 msgid_plural "channels"
-msgstr[0] "kanál"
-msgstr[1] "kanály"
-msgstr[2] "kanálů"
+msgstr[0] "канал"
+msgstr[1] "канали"
 
 #: ../src/pragha-tags-dialog.c:577
 msgid "Channels"
-msgstr "Kanály"
+msgstr "Канали"
 
 #: ../src/pragha-tags-dialog.c:578
 msgid "Samplerate"
-msgstr "Vzorkovací frekvence"
+msgstr "Честота на дискретизация"
 
 #: ../src/pragha-tags-dialog.c:579
 msgid "Folder"
-msgstr "Adresář"
+msgstr "Папка"
 
 #: ../src/pragha-tags-dialog.c:828
 msgid "Selection to"
-msgstr "Výběr k"
+msgstr "Избраното към"
 
 #: ../src/pragha-tags-dialog.c:866
 msgid "Open folder"
-msgstr "Otevřít adresář"
+msgstr "Отваряне на папка"
 
 #: ../src/pragha-tags-mgmt.c:198
 #, c-format
 msgid ""
 "Do you want to set the track number of ALL of the selected tracks to: %d ?"
-msgstr "Chcete nastavit číslo stopy všech vybraných skladeb na %d ?"
+msgstr "Искате ли на ВСИЧКИ избрани писти да зададете номера: %d ?"
 
 #: ../src/pragha-tags-mgmt.c:216
 #, c-format
 msgid ""
 "Do you want to set the title tag of ALL of the selected tracks to: %s ?"
-msgstr "Chcete nastavit název tagu/značky u všech vybraných skladeb na %s ?"
+msgstr "Искате ли на ВСИЧКИ избрани писти да зададете етикетът на заглавие: %s ?"
 
 #: ../src/pragha-toolbar.c:150
 #, c-format
 msgid ""
 "%s <small><span weight=\"light\">by</span></small> %s <small><span "
 "weight=\"light\">in</span></small> %s"
-msgstr "%s <small><span weight=\"light\">od</span></small> %s <small><span weight=\"light\">v</span></small> %s"
+msgstr "%s <small><span weight=\"light\">от</span></small> %s <small><span weight=\"light\">в</span></small> %s"
 
 #: ../src/pragha-toolbar.c:155
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:52
 #, c-format
 msgid "%s <small><span weight=\"light\">by</span></small> %s"
-msgstr "%s <small><span weight=\"light\">od</span></small> %s"
+msgstr "%s <small><span weight=\"light\">от</span></small> %s"
 
 #: ../src/pragha-toolbar.c:159
 #, c-format
 msgid "%s <small><span weight=\"light\">in</span></small> %s"
-msgstr "%s <small><span weight=\"light\">v</span></small> %s"
+msgstr "%s <small><span weight=\"light\">в</span></small> %s"
 
 #: ../src/pragha-toolbar.c:801
 msgid "Previous Track"
-msgstr "Předchozí"
+msgstr "Предишна"
 
 #: ../src/pragha-toolbar.c:806
 msgid "Play / Pause Track"
-msgstr "Přehrát / Zastavit"
+msgstr "Изпълнение / пауза"
 
 #: ../src/pragha-toolbar.c:811
 msgid "Stop playback"
-msgstr "Zastavit přehrávání"
+msgstr "Спиране"
 
 #: ../src/pragha-toolbar.c:816
 msgid "Next Track"
-msgstr "Další skladba"
+msgstr "Следваща"
 
 #: ../src/pragha-toolbar.c:849
 msgid "Leave Fullscreen"
-msgstr "Opustit 'Celou obrazovku'"
+msgstr "Излизане от цял екран"
 
 #: ../src/pragha-toolbar.c:854
 msgid "Play songs in a random order"
-msgstr "Přehrávat písně náhodně"
+msgstr "Изпълнение на песните в произволен ред"
 
 #: ../src/pragha-toolbar.c:858
 msgid "Repeat playback list at the end"
-msgstr "Opakovat playlist po přehrání poslední skladby"
+msgstr "Повтаряне на списъка отначало след завършване"
 
 #: ../src/pragha-utils.c:239
 msgid "day"
 msgid_plural "days"
-msgstr[0] "den"
-msgstr[1] "dny"
-msgstr[2] "dnů"
+msgstr[0] "ден"
+msgstr[1] "дни"
 
 #: ../src/pragha-utils.c:486
 msgid "Unable to open the browser"
-msgstr "Nejde otevřít prohlížeč"
+msgstr "Неуспешно отваряне на браузъра"
 
 #: ../src/pragha-window.c:116
 #, c-format
@@ -991,111 +986,111 @@ msgid ""
 "<b>Error playing current track.</b>\n"
 "(%s)\n"
 "<b>Reason:</b> %s"
-msgstr "<b>Chyba při přehrávání současné skladby.</b>\n(%s)\n<b>Důvod:</b> %s"
+msgstr "<b>Грешка при изпълнение на текущата песен.</b>\n(%s)\n<b>Причина:</b> %s"
 
 #: ../src/pragha-window.c:119
 msgid "_Stop"
-msgstr "_Zastavit"
+msgstr "_Спиране"
 
 #: ../src/pragha-window.c:120
 msgid "_Next"
-msgstr "_Další"
+msgstr "С_ледваща"
 
 #: ../src/pragha.c:180
 msgid "Select a file to play"
-msgstr "Vybrat soubor k přehrání"
+msgstr "Изберете файл за изпълнение"
 
 #: ../src/pragha.c:224 ../plugins/lastfm/pragha-lastfm-plugin.c:935
 msgid "Supported media"
-msgstr "Podporované média"
+msgstr "Поддържани формати"
 
 #: ../src/pragha.c:310
 msgid "All files"
-msgstr "Všechny soubory"
+msgstr "Всички файлове"
 
 #: ../src/pragha.c:385
 msgid "Enter the URL of an internet radio stream"
-msgstr "Zadat URL internetového rádia"
+msgstr "Въведете адреса на радио поток от Интернет"
 
 #: ../src/pragha.c:390
 msgid "Give it a name to save"
-msgstr "Zadejte jméno k uložení"
+msgstr "Дайте му име"
 
 #: ../src/pragha.c:408
 msgid "Add a location"
-msgstr "Přidat místo"
+msgstr "Добавяне на местоположение"
 
 #: ../src/pragha.c:525
 msgid "translator-credits"
-msgstr "Alois Nešpor (info@aloisnespor.info)"
+msgstr "Любомир Василев <lyubomirv@abv.bg>, 2015"
 
 #. Setup application name and pulseaudio role
 #: ../src/pragha.c:713 ../src/pragha.c:931 ../src/pragha.c:1305
 #: ../plugins/dlna/pragha-dlna-plugin.c:220
 #: ../plugins/dlna/pragha-dlna-plugin.c:222
 msgid "Pragha Music Player"
-msgstr "Pragha hudební přehrávač"
+msgstr "Pragha музикален плеър"
 
 #: ../data/pragha.desktop.in.h:1
 msgid "Music Player"
-msgstr "Hudební přehrávač"
+msgstr "Музикален плеър"
 
 #: ../data/pragha.desktop.in.h:2
 msgid "Manage and listen to music"
-msgstr "Spravovat a poslouchat hudbu"
+msgstr "Слушайте и управлявайте музиката си"
 
 #: ../plugins/acoustid/pragha-acoustid-plugin.c:99
 #: ../plugins/acoustid/pragha-acoustid-plugin.c:426
 msgid "Search tags on AcoustID"
-msgstr "Hledat tagy na AcoustID"
+msgstr "Търсене на етикети в AcoustID"
 
 #: ../plugins/acoustid/pragha-acoustid-plugin.c:259
 msgid "AcoustID not found any similar song"
-msgstr "AcoustID nenašel žádnou podobnou píseň"
+msgstr "AcoustID не откри подобна песен"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:406
 msgid "Audio/Data CD"
-msgstr "Audio/Data CD"
+msgstr "Диск с аудио/данни"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:407
 msgid "An audio CD was inserted"
-msgstr "Bylo vloženo AudioCD"
+msgstr "Беше вкаран аудио диск"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:408
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:448
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:644
 msgid "Add Audio _CD"
-msgstr "Přidat Audio _CD"
+msgstr "Добавяне на _аудио диск"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:536
 msgid "Audio CD"
-msgstr "Audio CD"
+msgstr "Аудио диск"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:538
 msgid "Audio CD Device"
-msgstr "Audio CD zařízení"
+msgstr "Устройство за аудио дискове"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:558
 msgid "Connect to CDDB server"
-msgstr "Připojení k CDDB serveru"
+msgstr "Свързване със сървър за дискова информация"
 
 #: ../plugins/devices/pragha-devices-plugin.c:93
 msgid "Ignore"
-msgstr "Ignorovat"
+msgstr "Пренебрегване"
 
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:89
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:262
 msgid "Search music on DLNA server"
-msgstr "Hledat hudbu na DLNA serveru"
+msgstr "Свързване с DLNA сървър"
 
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:205
 #, c-format
 msgid "Music of the %s server was added."
-msgstr "Hudba ze serveru %s byla přidána."
+msgstr "Музиката от сървъра %s беше добавена."
 
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:210
 msgid "Could not find any DLNA server."
-msgstr "Nelze najít žádný DLNA server."
+msgstr "Неуспешно търсене на DLNA сървър"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:167
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1523
@@ -1105,171 +1100,171 @@ msgstr "_Lastfm"
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:168
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:208
 msgid "Love track"
-msgstr "Oblíbená píseň"
+msgstr "Обичам това"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:170
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:210
 msgid "Unlove track"
-msgstr "Neoblíbená píseň"
+msgstr "Не обичам това"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:172
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:927
 msgid "Import a XSPF playlist"
-msgstr "Importovat XSPF playlist"
+msgstr "Внасяне на списък за изпълнение от XSPF"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:174
 msgid "Add favorites"
-msgstr "Přidat mezi oblíbené"
+msgstr "Добавяне на любими"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:176
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:212
 msgid "Add similar"
-msgstr "Přidat podobné"
+msgstr "Добавяне на подобни"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:387
 msgid "Unable to establish conection with Last.fm"
-msgstr "Nelze navázat spojení s Last.fm"
+msgstr "Неуспешна връзка с Last.fm"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:591
 msgid "Last.fm suggested a tag correction"
-msgstr "Last.fm navrhne opravu tagu"
+msgstr "Last.fm предложи поправка в етикета"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:617
 msgid "Love song on Last.fm failed."
-msgstr "Není možné označit na Last.fm píseň za oblíbenou."
+msgstr "Неуспешно отбелязване на песента като обичана в Last.fm."
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:635
 msgid "Unlove song on Last.fm failed."
-msgstr "Neoblíbené písně na Last.fm selhalo."
+msgstr "Неуспешно отбелязване на песента като не обичана в Last.fm."
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:742
 #, c-format
 msgid "Added %d tracks of %d suggested from Last.fm"
-msgstr "Přidáno %d písní z %d navrhnutých Last.fm."
+msgstr "Добавени са %d от %d предложени от Last.fm"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:745
 #, c-format
 msgid "Last.fm doesn't suggest any similar track"
-msgstr "Last.fm nenavrhuje žádnou podobnou píseň"
+msgstr "Last.fm няма предложения за подобни"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:749
 #, c-format
 msgid "Added %d songs of the last %d loved on Last.fm."
-msgstr "Přidáno %d skladeb z posledních %d oblíbených na Last.fm."
+msgstr "Добавени са %d от последните %d обичани песни в Last.fm."
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:752
 #, c-format
 msgid "You don't have favorite tracks on Last.fm"
-msgstr "Nemáte žádné oblíbené písně na Last.fm"
+msgstr "Нямате любими песни в Last.fm"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1222
 msgid "Last.fm submission failed"
-msgstr "Podřízení se Last.fm selhalo"
+msgstr "Неуспешно подаване на информация към Last.fm"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1224
 msgid "Track scrobbled on Last.fm"
-msgstr "Skladba je \"scrobbled\" na Last.fm"
+msgstr "Песента е обявена в Last.fm"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1334
 msgid "Update current song on Last.fm failed."
-msgstr "Selhala aktualizace nynější písně na Last.fm."
+msgstr "Неуспешно обновяване на текущата песен в Last.fm."
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1761
 msgid "Scrobble on Last.fm"
-msgstr "Scrobble na Last.fm"
+msgstr "Обявяване в Last.fm"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1764
 msgid "Username"
-msgstr "Jméno uživatele"
+msgstr "Потребителско име"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1771
 msgid "Password"
-msgstr "Heslo"
+msgstr "Парола"
 
 #: ../plugins/notify/pragha-notify-plugin.c:169
 #, c-format
 msgid "by <b>%s</b> in <b>%s</b> <b>(%s)</b>"
-msgstr "od <b>%s</b> v <b>%s</b> <b>(%s)</b>"
+msgstr "от <b>%s</b> в <b>%s</b> <b>(%s)</b>"
 
 #: ../plugins/notify/pragha-notify-plugin.c:275
 msgid "Notifications"
-msgstr "Upozornění"
+msgstr "Известия"
 
 #: ../plugins/notify/pragha-notify-plugin.c:277
 msgid "Show Album art in notifications"
-msgstr "Zobrazovat obal při  oznamování"
+msgstr "Показване на обложките на албумите в известията"
 
 #: ../plugins/notify/pragha-notify-plugin.c:282
 msgid "Add actions to change track in notifications"
-msgstr "V oznámení přidat akce ke změně skladby "
+msgstr "Добавяне на средства за смяна на песента в известията"
 
 #: ../plugins/removable-media/pragha-devices-removable.c:211
 #, c-format
 msgid "Unable to access \"%s\""
-msgstr "Nelze získat přístup k \"%s\""
+msgstr "Неуспешен достъп до „%s“"
 
 #: ../plugins/removable-media/pragha-devices-removable.c:214
 #: ../plugins/removable-media/pragha-devices-removable.c:300
 msgid "Removable Device"
-msgstr "Odpojitelné zařízení"
+msgstr "Преносимо устройство"
 
 #: ../plugins/removable-media/pragha-devices-removable.c:297
 #, c-format
 msgid "Want to manage \"%s\" volume?"
-msgstr "Chcete spravovat svazek \"%s\"?"
+msgstr "Искате ли да управлявате файловете на „%s“?"
 
 #: ../plugins/song-info/pragha-song-info-plugin.c:88
 msgid "Search _lyric"
-msgstr "Najít _text písně"
+msgstr "Търсене на _текст"
 
 #: ../plugins/song-info/pragha-song-info-plugin.c:90
 msgid "Search _artist info"
-msgstr "Hledat informace o _umělci"
+msgstr "Търсене на информация за _изпълнителя"
 
 #: ../plugins/song-info/pragha-song-info-plugin.c:377
 msgid "Song Information"
-msgstr "Informace o hudbě"
+msgstr "Информация за песента"
 
 #: ../plugins/song-info/pragha-song-info-plugin.c:379
 msgid "Download the album art while playing their songs."
-msgstr "Stáhnout obal alba během přehrávání písní."
+msgstr "Изтегляне на обложката на албума по време на изпълнението на песните."
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:51
 #, c-format
 msgid "Lyrics thanks to %s"
-msgstr "Texty díky  %s"
+msgstr "Текстът е осигурен, благодарение на %s"
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:58
 #, c-format
 msgid "Artist info"
-msgstr "Informace o umělci"
+msgstr "Информация за изпълнителя"
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:59
 #, c-format
 msgid "%s <small><span weight=\"light\">thanks to</span></small> %s"
-msgstr "%s <small><span weight=\"light\">poděkování patří</span></small> %s"
+msgstr "%s <small><span weight=\"light\">благодарение на</span></small> %s"
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:81
 #: ../plugins/song-info/pragha-song-info-thread-pane.c:100
 msgid "Lyrics not found."
-msgstr "Text písní nenalezen."
+msgstr "Няма открит текст."
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:84
 #: ../plugins/song-info/pragha-song-info-thread-pane.c:104
 msgid "Artist information not found."
-msgstr "Informace o umělci nebyly nalezeny."
+msgstr "Няма открита информация за изпълнителя."
 
 #: ../plugins/song-info/pragha-song-info-thread-pane.c:185
 #: ../plugins/song-info/pragha-song-info-thread-pane.c:193
 msgid "Searching..."
-msgstr "Hledám...."
+msgstr "Търсене..."
 
 #: ../plugins/tunein/pragha-tunein-plugin.c:92
 #: ../plugins/tunein/pragha-tunein-plugin.c:291
 msgid "Search radio on TuneIn"
-msgstr "Hledat rádio na TuneIn"
+msgstr "Търсене на радио в TuneIn"
 
 #: ../plugins/tunein/pragha-tunein-plugin.c:220
 #: ../plugins/tunein/pragha-tunein-plugin.c:231
 msgid "Search in TuneIn"
-msgstr "Hledat v TuneIn"
+msgstr "Търсене в TuneIn"

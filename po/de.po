@@ -3,17 +3,19 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Aru21, 2015
 # Christoph Wickert <christoph.wickert@gmail.com>, 2012-2013
 # Christoph Wickert <cwickert@fedoraproject.org>, 2011
 # Ettore Atalan <atalanttore@googlemail.com>, 2014
 # Mario Blättermann <mario.blaettermann@gmail.com>, 2012
+# Zijj <Zijj123@gmail.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: Pragha\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-12-21 14:02-0300\n"
-"PO-Revision-Date: 2014-12-21 19:54+0000\n"
-"Last-Translator: Ettore Atalan <atalanttore@googlemail.com>\n"
+"PO-Revision-Date: 2015-06-04 15:09+0000\n"
+"Last-Translator: Zijj <Zijj123@gmail.com>\n"
 "Language-Team: German (http://www.transifex.com/projects/p/Pragha/language/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -43,7 +45,7 @@ msgstr "Möchten Sie Ihre Musikbibliothek aktualisieren?"
 
 #: ../src/info-bar-import-music.c:173
 msgid "Some changes need restart pragha."
-msgstr ""
+msgstr "Einige Änderungen erfordern einen Neustart."
 
 #: ../src/pragha-cmdline.c:199
 msgid "FILENAME"
@@ -286,7 +288,7 @@ msgstr "Unbekanntes Genre"
 
 #: ../src/pragha-library-pane.c:844
 msgid "File can't be moved to trash. Delete permanently?"
-msgstr ""
+msgstr "Datei kann nicht in den Papierkorb verschoben werden. Dauerhaft löschen?"
 
 #: ../src/pragha-library-pane.c:845
 #, c-format
@@ -736,7 +738,7 @@ msgstr "Software-Mixer verwenden"
 
 #: ../src/pragha-preferences-dialog.c:961
 msgid "Can not change directories while they are analyzing."
-msgstr ""
+msgstr "Das Verzeichnis kann nicht gewechselt werden, während diese analysiert werden."
 
 #: ../src/pragha-preferences-dialog.c:971
 msgid "Folders"
@@ -766,7 +768,7 @@ msgstr "Erscheinungsbild"
 
 #: ../src/pragha-preferences-dialog.c:1055
 msgid "Use Gnome 3 HIG"
-msgstr ""
+msgstr "Verwende Gnome 3 HIG"
 
 #: ../src/pragha-preferences-dialog.c:1064
 msgid "Highlight rows on current playlist"
@@ -1045,11 +1047,11 @@ msgstr "Musik verwalten und anhören"
 #: ../plugins/acoustid/pragha-acoustid-plugin.c:99
 #: ../plugins/acoustid/pragha-acoustid-plugin.c:426
 msgid "Search tags on AcoustID"
-msgstr ""
+msgstr "Suche Schlagwörter auf AcoustID"
 
 #: ../plugins/acoustid/pragha-acoustid-plugin.c:259
 msgid "AcoustID not found any similar song"
-msgstr ""
+msgstr "AcoustID fand kein ähnliches Lied"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:406
 msgid "Audio/Data CD"
@@ -1057,7 +1059,7 @@ msgstr "Audio/Daten-CD"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:407
 msgid "An audio CD was inserted"
-msgstr ""
+msgstr "Eine Audio-CD wurde eingelegt"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:408
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:448
@@ -1143,12 +1145,12 @@ msgstr "Abwerten des Titels bei Last.fm fehlgeschlagen."
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:742
 #, c-format
 msgid "Added %d tracks of %d suggested from Last.fm"
-msgstr ""
+msgstr "%d der %d von Last.fm vorgeschlagenen Titel wurden hinzugefügt"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:745
 #, c-format
 msgid "Last.fm doesn't suggest any similar track"
-msgstr ""
+msgstr "Es wurden keine ähnlichen Titel von Last.fm vorgeschlagen."
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:749
 #, c-format
@@ -1158,7 +1160,7 @@ msgstr "%d der letzten %d bei Last.fm beliebten Titel wurden hinzugefügt."
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:752
 #, c-format
 msgid "You don't have favorite tracks on Last.fm"
-msgstr ""
+msgstr "Keine Favoriten bei Last.fm vorhanden."
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1222
 msgid "Last.fm submission failed"
@@ -1166,7 +1168,7 @@ msgstr "Übertragung an Last.fm fehlgeschlagen"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1224
 msgid "Track scrobbled on Last.fm"
-msgstr ""
+msgstr "Titel, die auf Last.fm gescrobbelt wurden"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1334
 msgid "Update current song on Last.fm failed."
@@ -1174,7 +1176,7 @@ msgstr "Aktualisierung des aktuellen Titels bei Last.fm fehlgeschlagen."
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1761
 msgid "Scrobble on Last.fm"
-msgstr ""
+msgstr "Auf Last.fm scrobbeln"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1764
 msgid "Username"
@@ -1199,12 +1201,12 @@ msgstr "Album-Cover in Benachrichtigungen anzeigen"
 
 #: ../plugins/notify/pragha-notify-plugin.c:282
 msgid "Add actions to change track in notifications"
-msgstr ""
+msgstr "Aktionen zum Wechseln der Titel in den Benachrichtigungen anzeigen"
 
 #: ../plugins/removable-media/pragha-devices-removable.c:211
 #, c-format
 msgid "Unable to access \"%s\""
-msgstr ""
+msgstr "Kann nicht auf \"%s\" zugreifen"
 
 #: ../plugins/removable-media/pragha-devices-removable.c:214
 #: ../plugins/removable-media/pragha-devices-removable.c:300
@@ -1214,7 +1216,7 @@ msgstr "Entfernbares Gerät"
 #: ../plugins/removable-media/pragha-devices-removable.c:297
 #, c-format
 msgid "Want to manage \"%s\" volume?"
-msgstr ""
+msgstr "Wollen Sie den Datenträger \"%s\" verwalten?"
 
 #: ../plugins/song-info/pragha-song-info-plugin.c:88
 msgid "Search _lyric"
@@ -1235,7 +1237,7 @@ msgstr "Album-Hülle während der Wiedergabe der Titel herunterladen."
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:51
 #, c-format
 msgid "Lyrics thanks to %s"
-msgstr ""
+msgstr "Liedtext mit Dank an %s"
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:58
 #, c-format
@@ -1265,9 +1267,9 @@ msgstr "Suchvorgang..."
 #: ../plugins/tunein/pragha-tunein-plugin.c:92
 #: ../plugins/tunein/pragha-tunein-plugin.c:291
 msgid "Search radio on TuneIn"
-msgstr ""
+msgstr "Suche Radio auf TuneIn"
 
 #: ../plugins/tunein/pragha-tunein-plugin.c:220
 #: ../plugins/tunein/pragha-tunein-plugin.c:231
 msgid "Search in TuneIn"
-msgstr ""
+msgstr "Suche in TuneIn"

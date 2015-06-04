@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: ru\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 
 #. GtkInfoBar has undocumented behavior for GTK_RESPONSE_CANCEL
 #: ../src/info-bar-import-music.c:80 ../src/info-bar-import-music.c:127
@@ -619,6 +619,7 @@ msgid_plural "Tracks"
 msgstr[0] "Трек"
 msgstr[1] "Трека"
 msgstr[2] "Треков"
+msgstr[3] "Треков"
 
 #: ../src/pragha-playlist.c:3366
 msgid "Clear sort"
@@ -894,6 +895,7 @@ msgid_plural "channels"
 msgstr[0] "канал"
 msgstr[1] "каналов"
 msgstr[2] "каналы"
+msgstr[3] "каналы"
 
 #: ../src/pragha-tags-dialog.c:577
 msgid "Channels"
@@ -979,6 +981,7 @@ msgid_plural "days"
 msgstr[0] "день"
 msgstr[1] "дня"
 msgstr[2] "дней"
+msgstr[3] "дней"
 
 #: ../src/pragha-utils.c:486
 msgid "Unable to open the browser"

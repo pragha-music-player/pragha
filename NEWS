@@ -1,6 +1,22 @@
 ==============================================================
-Overview of changes between Pragha 1.3.2.1 and 1.3.1
+Overview of changes between Pragha 1.3.2.2 and 1.3.1
 ==============================================================
+
+V1.3.2.2
+Codename: "Gtk 3.14: Que cunda el panico. haha. ;)"
+
+Bugs fixed:
+	Not save state album_art_in_osd=false. See issue #77
+	Provide more app icons size. See issue #80
+	Set expand comment entry on tag dialog.
+	Ensure menu size and fallback to 16 on library and playlist icons.
+
+Updates Translations:
+	New Bulgarian translation thanks to lyubomirv.
+	Update German translation thanks to Zijj.
+	Update Ukrainian translation thanks to Koljan1970.
+	Update Czech translation thanks to anespor.
+	Update German translation thanks to Aru21.
 
 V1.3.2.1
 Codename: "Gtk 3.14: Que cunda el panico. haha. ;)"
