@@ -245,9 +245,16 @@ XDT_CHECK_OPTIONAL_PACKAGE([PLPARSER],
 
 dnl Output files
 AC_CONFIG_FILES([Makefile])
-AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_FILES([data/Makefile])
+AC_CONFIG_FILES([data/icons/Makefile])
+AC_CONFIG_FILES([data/icons/16x16/Makefile])
+AC_CONFIG_FILES([data/icons/24x24/Makefile])
+AC_CONFIG_FILES([data/icons/32x32/Makefile])
+AC_CONFIG_FILES([data/icons/48x48/Makefile])
+AC_CONFIG_FILES([data/icons/64x64/Makefile])
+AC_CONFIG_FILES([data/icons/128x128/Makefile])
 AC_CONFIG_FILES([po/Makefile.in])
+AC_CONFIG_FILES([src/Makefile])
 
 if test x"$LIBPEAS_FOUND" = x"yes"; then
 AC_CONFIG_FILES([plugins/Makefile])
