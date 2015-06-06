@@ -49,11 +49,11 @@ struct _PraghaToolbar {
 
 	GtkWidget      *track_progress_bar;
 
-	GtkToolItem    *prev_button;
-	GtkToolItem    *play_button;
-	GtkToolItem    *stop_button;
-	GtkToolItem    *next_button;
-	GtkToolItem    *unfull_button;
+	GtkWidget      *prev_button;
+	GtkWidget      *play_button;
+	GtkWidget      *stop_button;
+	GtkWidget      *next_button;
+	GtkWidget      *unfull_button;
 	GtkWidget      *vol_button;
 	GtkWidget      *extra_button_box;
 
@@ -346,9 +346,9 @@ pragha_toolbar_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpo
 
 	gtk_widget_set_sensitive (GTK_WIDGET(toolbar->prev_button), playing);
 
-	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->play_button),
-	                               (state == ST_PLAYING) ? "media-playback-pause" : "media-playback-start");
-
+	gtk_button_set_image (GTK_BUTTON(toolbar->play_button),
+		gtk_image_new_from_icon_name ((state == ST_PLAYING) ? "media-playback-pause" : "media-playback-start",
+		                              GTK_ICON_SIZE_LARGE_TOOLBAR));
 	gtk_widget_set_sensitive (GTK_WIDGET(toolbar->stop_button), playing);
 	gtk_widget_set_sensitive (GTK_WIDGET(toolbar->next_button), playing);
 
@@ -793,8 +793,8 @@ static void
 pragha_toolbar_init (PraghaToolbar *toolbar)
 {
 	PraghaPreferences *preferences;
-	GtkToolItem *prev_button, *play_button, *stop_button, *next_button;
-	GtkToolItem *unfull_button, *shuffle_button, *repeat_button;
+	GtkWidget *prev_button, *play_button, *stop_button, *next_button;
+	GtkWidget *unfull_button, *shuffle_button, *repeat_button;
 	GtkWidget *vol_button;
 
 	const GBindingFlags binding_flags =
@@ -804,23 +804,23 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 
 	/* Setup Left control buttons */
 
-	prev_button = gtk_tool_button_new (NULL, NULL);
-	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(prev_button), "media-skip-backward");
+  	prev_button = gtk_button_new_from_icon_name ("media-skip-backward", GTK_ICON_SIZE_LARGE_TOOLBAR);
+	gtk_button_set_relief(GTK_BUTTON(prev_button), GTK_RELIEF_NONE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(prev_button), _("Previous Track"));
 	toolbar->prev_button = prev_button;
 
-	play_button = gtk_tool_button_new (NULL, NULL);
-	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(play_button), "media-playback-start");
+	play_button = gtk_button_new_from_icon_name ("media-playback-start", GTK_ICON_SIZE_LARGE_TOOLBAR);
+	gtk_button_set_relief(GTK_BUTTON(play_button), GTK_RELIEF_NONE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(play_button), _("Play / Pause Track"));
 	toolbar->play_button = play_button;
 
-	stop_button = gtk_tool_button_new (NULL, NULL);
-	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(stop_button), "media-playback-stop");
+	stop_button = gtk_button_new_from_icon_name ("media-playback-stop", GTK_ICON_SIZE_LARGE_TOOLBAR);
+	gtk_button_set_relief(GTK_BUTTON(stop_button), GTK_RELIEF_NONE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(stop_button), _("Stop playback"));
 	toolbar->stop_button = stop_button;
 
-	next_button = gtk_tool_button_new (NULL, NULL);
-	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(next_button), "media-skip-forward");
+	next_button = gtk_button_new_from_icon_name ("media-skip-forward", GTK_ICON_SIZE_LARGE_TOOLBAR);
+	gtk_button_set_relief(GTK_BUTTON(next_button), GTK_RELIEF_NONE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(next_button), _("Next Track"));
 	toolbar->next_button = next_button;
 
@@ -852,17 +852,21 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 
 	/* Setup Right control buttons */
 
-	unfull_button = gtk_tool_button_new (NULL, NULL);
-	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(unfull_button), "view-restore");
+	unfull_button = gtk_button_new_from_icon_name ("view-restore", GTK_ICON_SIZE_LARGE_TOOLBAR);
+	gtk_button_set_relief(GTK_BUTTON(unfull_button), GTK_RELIEF_NONE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(unfull_button), _("Leave Fullscreen"));
 	toolbar->unfull_button = unfull_button;
 
-	shuffle_button = gtk_toggle_tool_button_new();
-	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(shuffle_button), "media-playlist-shuffle");
+	shuffle_button = gtk_toggle_button_new ();
+	gtk_button_set_image (GTK_BUTTON(shuffle_button),
+		gtk_image_new_from_icon_name ("media-playlist-shuffle", GTK_ICON_SIZE_LARGE_TOOLBAR));
+	gtk_button_set_relief(GTK_BUTTON(shuffle_button), GTK_RELIEF_NONE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(shuffle_button), _("Play songs in a random order"));
 
-	repeat_button = gtk_toggle_tool_button_new ();
-	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(repeat_button), "media-playlist-repeat");
+	repeat_button = gtk_toggle_button_new ();
+	gtk_button_set_image (GTK_BUTTON(repeat_button),
+		gtk_image_new_from_icon_name ("media-playlist-repeat", GTK_ICON_SIZE_LARGE_TOOLBAR));
+	gtk_button_set_relief(GTK_BUTTON(repeat_button), GTK_RELIEF_NONE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(repeat_button), _("Repeat playback list at the end"));
 
 	vol_button = gtk_volume_button_new();
