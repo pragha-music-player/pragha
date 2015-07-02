@@ -1330,12 +1330,10 @@ update_playlist_changes_save_selection_popup_playlist (PraghaPlaylist *cplaylist
 	gtk_menu_item_set_submenu (GTK_MENU_ITEM (gtk_ui_manager_get_widget (pragha_playlist_get_context_menu(cplaylist), "/SelectionPopup/Save selection")), submenu);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_icon_name("document-new", GTK_ICON_SIZE_MENU));
 	g_signal_connect(menuitem, "activate", G_CALLBACK(save_selected_playlist), cplaylist);
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("Export"));
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_icon_name("media-floppy", GTK_ICON_SIZE_MENU));
 	g_signal_connect(menuitem, "activate", G_CALLBACK(export_selected_playlist), cplaylist);
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
@@ -1368,12 +1366,10 @@ update_playlist_changes_save_playlist_popup_playlist (PraghaPlaylist *cplaylist)
 	gtk_menu_item_set_submenu (GTK_MENU_ITEM (gtk_ui_manager_get_widget (pragha_playlist_get_context_menu(cplaylist), "/SelectionPopup/Save playlist")), submenu);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_icon_name("document-new", GTK_ICON_SIZE_MENU));
 	g_signal_connect(menuitem, "activate", G_CALLBACK(save_current_playlist), cplaylist);
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("Export"));
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_icon_name("media-floppy", GTK_ICON_SIZE_MENU));
 	g_signal_connect(menuitem, "activate", G_CALLBACK(export_current_playlist), cplaylist);
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 

@@ -192,63 +192,63 @@ static GtkActionEntry main_aentries[] = {
 	{"ViewMenu", NULL, N_("_View")},
 	{"ToolsMenu", NULL, N_("_Tools")},
 	{"HelpMenu", NULL, N_("_Help")},
-	{"Prev", "media-skip-backward", N_("Previous track"),
+	{"Prev", NULL, N_("Previous track"),
 	 "<Alt>Left", "Prev track", G_CALLBACK(prev_action)},
-	{"Play_pause", "media-playback-start", N_("Play / Pause"),
+	{"Play_pause", NULL, N_("Play / Pause"),
 	 "<Control>space", "Play / Pause", G_CALLBACK(play_pause_action)},
-	{"Stop", "media-playback-stop", N_("Stop"),
+	{"Stop", NULL, N_("Stop"),
 	 "", "Stop", G_CALLBACK(stop_action)},
-	{"Next", "media-skip-forward", N_("Next track"),
+	{"Next", NULL, N_("Next track"),
 	 "<Alt>Right", "Next track", G_CALLBACK(next_action)},
 	{"Edit tags", NULL, N_("Edit track information"),
 	 "<Control>E", "Edit information of current track", G_CALLBACK(edit_tags_playing_action)},
-	{"Quit", "application-exit", N_("_Quit"),
+	{"Quit", NULL, N_("_Quit"),
 	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)},
-	{"Add files", "document-open", N_("_Add files"),
+	{"Add files", NULL, N_("_Add files"),
 	 "<Control>O", N_("Open a media file"), G_CALLBACK(open_file_action)},
-	{"Add location", "network-workgroup", N_("Add _location"),
+	{"Add location", NULL, N_("Add _location"),
 	 "", "Add a no local stream", G_CALLBACK(add_location_action)},
-	{"Add the library", "list-add", N_("_Add the library"),
+	{"Add the library", NULL, N_("_Add the library"),
 	"", "Add all the library", G_CALLBACK(add_libary_action)},
-	{"Remove from playlist", "list-remove", N_("Remove selection from playlist"),
+	{"Remove from playlist", NULL, N_("Remove selection from playlist"),
 	 "", "Remove selection from playlist", G_CALLBACK(pragha_menubar_remove_playlist_action)},
-	{"Crop playlist", "list-remove", N_("Crop playlist"),
+	{"Crop playlist", NULL, N_("Crop playlist"),
 	 "<Control>C", "Crop playlist", G_CALLBACK(pragha_menubar_crop_playlist_action)},
-	{"Clear playlist", "edit-clear", N_("Clear playlist"),
+	{"Clear playlist", NULL, N_("Clear playlist"),
 	 "<Control>L", "Clear the current playlist", G_CALLBACK(pragha_menubar_clear_playlist_action)},
-	{"SavePlaylist", "document-save-as", N_("Save playlist")},
-	{"New playlist1", "document-new", N_("New playlist"),
+	{"SavePlaylist", NULL, N_("Save playlist")},
+	{"New playlist1", NULL, N_("New playlist"),
 	 "<Control>S", "Save new playlist", G_CALLBACK(pragha_menubar_save_playlist_action)},
-	{"Export1", "media-floppy", N_("Export"),
+	{"Export1", NULL, N_("Export"),
 	 "", "Export playlist", G_CALLBACK(pragha_menubar_export_playlist_action)},
 	{"SaveSelection", NULL, N_("Save selection")},
-	{"New playlist2", "document-new", N_("New playlist"),
+	{"New playlist2", NULL, N_("New playlist"),
 	 "<Control><Shift>S", "Save new playlist", G_CALLBACK(pragha_menubar_save_selection_action)},
-	{"Export2", "media-floppy", N_("Export"),
+	{"Export2", NULL, N_("Export"),
 	 "", "Export playlist", G_CALLBACK(pragha_menubar_export_selection_action)},
-	{"Search in playlist", "edit-find", N_("_Search in playlist"),
+	{"Search in playlist", NULL, N_("_Search in playlist"),
 	 "<Control>F", "Search in playlist", G_CALLBACK(search_playlist_action)},
-	{"Preferences", "preferences-system", N_("_Preferences"),
+	{"Preferences", NULL, N_("_Preferences"),
 	 "<Control>P", "Set preferences", G_CALLBACK(pref_action)},
-	{"Jump to playing song", "go-jump", N_("Jump to playing song"),
+	{"Jump to playing song", NULL, N_("Jump to playing song"),
 	 "<Control>J", "Jump to playing song", G_CALLBACK(jump_to_playing_song_action)},
 	{"Equalizer", NULL, N_("E_qualizer"),
 	 "", "Equalizer", G_CALLBACK(show_equalizer_action)},
-	{"Rescan library", "system-run", N_("_Rescan library"),
+	{"Rescan library", NULL, N_("_Rescan library"),
 	 "", "Rescan library", G_CALLBACK(rescan_library_action)},
-	{"Update library", "system-run", N_("_Update library"),
+	{"Update library", NULL, N_("_Update library"),
 	 "", "Update library", G_CALLBACK(update_library_action)},
-	{"Statistics", "dialog-information", N_("_Statistics"),
+	{"Statistics", NULL, N_("_Statistics"),
 	 "", "Statistics", G_CALLBACK(statistics_action)},
-	{"Home", "go-home", N_("Homepage"),
+	{"Home", NULL, N_("Homepage"),
 	 "", "Homepage", G_CALLBACK(home_action)},
-	{"Community", "dialog-information", N_("Community"),
+	{"Community", NULL, N_("Community"),
 	 "", "Forum of pragha", G_CALLBACK(community_action)},
 	{"Wiki", NULL, N_("Wiki"),
 	 "", "Wiki of pragha", G_CALLBACK(wiki_action)},
-	{"Translate Pragha", "preferences-desktop-locale", N_("Translate Pragha"),
+	{"Translate Pragha", NULL, N_("Translate Pragha"),
 	 "", "Translate Pragha", G_CALLBACK(translate_action)},
-	{"About", "help-about", N_("About"),
+	{"About", NULL, N_("About"),
 	 "", "About pragha", G_CALLBACK(about_action)},
 };
 
@@ -1445,46 +1445,46 @@ static GActionEntry win_entries[] = {
 
 static const gchar *menu_ui = \
 	NEW_MENU("menubar") \
-		NEW_ICON_ACCEL_ITEM("_Add files",                     "document-open",        "&lt;Control&gt;O",     "win", "open") \
-		NEW_ICON_ITEM      ("Add _location",                  "network-workgroup",                            "win", "location") \
-		NEW_ICON_ITEM      ("_Add the library",               "list-add",                                     "win", "library") \
+		NEW_ACCEL_ITEM("_Add files",                           "&lt;Control&gt;O",     "win", "open") \
+		NEW_ITEM      ("Add _location",                                                "win", "location") \
+		NEW_ITEM      ("_Add the library",                                             "win", "library") \
 		NEW_PLACEHOLDER("pragha-plugins-append-music") \
 		SEPARATOR \
-		NEW_ACCEL_ITEM     ("Edit track information",                                 "&lt;Control&gt;E",     "win", "edit") \
-		NEW_ITEM           ("E_qualizer",                                                                     "win", "equalizer") \
+		NEW_ACCEL_ITEM     ("Edit track information",          "&lt;Control&gt;E",     "win", "edit") \
+		NEW_ITEM           ("E_qualizer",                                              "win", "equalizer") \
 		SEPARATOR \
-		NEW_ICON_ITEM      ("Remove selection from playlist", "list-remove",                                  "win", "remove") \
-		NEW_ICON_ACCEL_ITEM("Crop playlist",                  "list-remove",          "&lt;Control&gt;C",     "win", "crop") \
-		NEW_ICON_ACCEL_ITEM("Clear playlist",                 "edit-clear",           "&lt;Control&gt;L",     "win", "clear") \
+		NEW_ITEM      ("Remove selection from playlist",                               "win", "remove") \
+		NEW_ACCEL_ITEM("Crop playlist",                        "&lt;Control&gt;C",     "win", "crop") \
+		NEW_ACCEL_ITEM("Clear playlist",                       "&lt;Control&gt;L",     "win", "clear") \
 		NEW_SUBMENU("Save playlist") \
-			NEW_ICON_ACCEL_ITEM("New playlist",               "document-new",         "&lt;Control&gt;S",     "win", "new_playlist") \
-			NEW_ICON_ITEM      ("Export",                     "media-floppy",                                 "win", "export_playlist") \
+			NEW_ACCEL_ITEM("New playlist",                     "&lt;Control&gt;S",     "win", "new_playlist") \
+			NEW_ITEM      ("Export",                                                   "win", "export_playlist") \
 			SEPARATOR \
 			NEW_PLACEHOLDER("playlist-submenu") \
 		CLOSE_SUBMENU \
 		NEW_SUBMENU("Save selection") \
-			NEW_ICON_ACCEL_ITEM("New playlist",               "document-new", "&lt;Shift&gt;&lt;Control&gt;S","win", "new_selection") \
-			NEW_ICON_ITEM      ("Export",                     "media-floppy",                                 "win", "export_selection") \
+			NEW_ACCEL_ITEM("New playlist",             "&lt;Shift&gt;&lt;Control&gt;S","win", "new_selection") \
+			NEW_ITEM      ("Export",                                                   "win", "export_selection") \
 			SEPARATOR \
 			NEW_PLACEHOLDER("selection-submenu") \
 		CLOSE_SUBMENU \
 		SEPARATOR \
-		NEW_ICON_ACCEL_ITEM("_Search in playlist",            "edit-find",            "&lt;Control&gt;F",     "win", "search") \
-		NEW_ICON_ACCEL_ITEM("Jump to playing song",           "go-jump",              "&lt;Control&gt;J",     "win", "jump-song") \
+		NEW_ACCEL_ITEM("_Search in playlist",                  "&lt;Control&gt;F",     "win", "search") \
+		NEW_ACCEL_ITEM("Jump to playing song",                 "&lt;Control&gt;J",     "win", "jump-song") \
 		SEPARATOR \
-		NEW_ACCEL_ITEM     ("Show lateral _panel",                                    "F9",                   "win", "sidebar1") \
-		NEW_ACCEL_ITEM     ("Show secondary lateral panel",                           "&lt;Control&gt;F9",    "win", "sidebar2") \
-		NEW_ACCEL_ITEM     ("Show menubar",                                           "&lt;Control&gt;M",     "win", "menubar") \
-		NEW_ITEM           ("Show status bar",                                                                "win", "status-bar") \
+		NEW_ACCEL_ITEM     ("Show lateral _panel",             "F9",                   "win", "sidebar1") \
+		NEW_ACCEL_ITEM     ("Show secondary lateral panel",    "&lt;Control&gt;F9",    "win", "sidebar2") \
+		NEW_ACCEL_ITEM     ("Show menubar",                    "&lt;Control&gt;M",     "win", "menubar") \
+		NEW_ITEM           ("Show status bar",                                         "win", "status-bar") \
 		SEPARATOR \
 		NEW_PLACEHOLDER("pragha-plugins-placeholder") \
 		SEPARATOR \
-		NEW_ICON_ITEM      ("_Rescan library",                "system-run",                                   "win", "lib-rescan") \
-		NEW_ICON_ITEM      ("_Update library",                "system-run",                                   "win", "lib-update") \
+		NEW_ITEM      ("_Rescan library",                                              "win", "lib-rescan") \
+		NEW_ITEM      ("_Update library",                                              "win", "lib-update") \
 		SEPARATOR \
-		NEW_ICON_ACCEL_ITEM("_Preferences",                   "preferences-system",   "&lt;Control&gt;P",     "win", "preferences") \
-		NEW_ICON_ITEM      ("About",                          "help-about",                                   "win", "about") \
-		NEW_ICON_ACCEL_ITEM("_Quit",                          "application-exit",     "&lt;Control&gt;Q",     "win", "quit") \
+		NEW_ACCEL_ITEM("_Preferences",                         "&lt;Control&gt;P",     "win", "preferences") \
+		NEW_ITEM      ("About",                                                        "win", "about") \
+		NEW_ACCEL_ITEM("_Quit",                                "&lt;Control&gt;Q",     "win", "quit") \
 	CLOSE_MENU;
 
 

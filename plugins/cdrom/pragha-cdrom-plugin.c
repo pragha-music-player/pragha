@@ -516,7 +516,7 @@ pragha_gmenu_add_cdrom_action (GSimpleAction *action,
 }
 
 static const GtkActionEntry main_menu_actions [] = {
-	{"Add Audio CD", "media-optical", N_("Add Audio _CD"),
+	{"Add Audio CD", NULL, N_("Add Audio _CD"),
 	 "", "Append a Audio CD", G_CALLBACK(pragha_cdrom_plugin_append_action)}
 };
 

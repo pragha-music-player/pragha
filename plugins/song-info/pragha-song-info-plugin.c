@@ -87,7 +87,7 @@ static void get_artist_info_current_playlist_action (GtkAction *action, PraghaSo
 static const GtkActionEntry playlist_actions [] = {
 	{"Search lyric", NULL, N_("Search _lyric"),
 	 "", "Search lyric", G_CALLBACK(get_lyric_current_playlist_action)},
-	{"Search artist info", "dialog-information", N_("Search _artist info"),
+	{"Search artist info", NULL, N_("Search _artist info"),
 	 "", "Search artist info", G_CALLBACK(get_artist_info_current_playlist_action)},
 };
 

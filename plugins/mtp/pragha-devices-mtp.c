@@ -89,7 +89,7 @@ static void pragha_mtp_action_append_songs     (GtkAction *action, PraghaMtpPlug
 static void pragha_mtp_action_show_device_info (GtkAction *action, PraghaMtpPlugin *plugin);
 
 static const GtkActionEntry mtp_sendto_actions [] = {
-	{"Send to MTP", "multimedia-player", "Fake MTP device",
+	{"Send to MTP", NULL, "Fake MTP device",
 	 "", "Send to MTP", G_CALLBACK(pragha_mtp_action_send_to_device)},
 };
 

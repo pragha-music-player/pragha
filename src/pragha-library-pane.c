@@ -185,25 +185,25 @@ gchar *library_pane_context_menu_xml = "<ui>			\
 	</ui>";
 
 GtkActionEntry library_pane_context_aentries[] = {
-	{"Expand library", "list-add", N_("_Expand library"),
+	{"Expand library", NULL, N_("_Expand library"),
 	 "", "Expand the library", G_CALLBACK(pragha_library_pane_expand_all_action)},
-	{"Collapse library", "list-remove", N_("_Collapse library"),
+	{"Collapse library", NULL, N_("_Collapse library"),
 	 "", "Collapse the library", G_CALLBACK(pragha_library_pane_collapse_all_action)},
-	{"folders", "view-refresh", N_("Folders structure"),
+	{"folders", NULL, N_("Folders structure"),
 	 "", "Folders structure", G_CALLBACK(pragha_library_pane_set_folders_view_action)},
-	{"artist", "view-refresh", N_("Artist"),
+	{"artist", NULL, N_("Artist"),
 	 "", "Artist", G_CALLBACK(pragha_library_pane_set_artist_view_action)},
-	{"album", "view-refresh", N_("Album"),
+	{"album", NULL, N_("Album"),
 	 "", "Album", G_CALLBACK(pragha_library_pane_set_album_view_action)},
-	{"genre", "view-refresh", N_("Genre"),
+	{"genre", NULL, N_("Genre"),
 	 "", "Genre", G_CALLBACK(pragha_library_pane_set_genre_view_action)},
-	{"artist_album", "view-refresh", N_("Artist / Album"),
+	{"artist_album", NULL, N_("Artist / Album"),
 	 "", "Artist / Album", G_CALLBACK(pragha_library_pane_set_artist_album_view_action)},
-	{"genre_album", "view-refresh", N_("Genre / Album"),
+	{"genre_album", NULL, N_("Genre / Album"),
 	 "", "Genre / Album", G_CALLBACK(pragha_library_pane_set_genre_album_view_action)},
-	{"genre_artist", "view-refresh", N_("Genre / Artist"),
+	{"genre_artist", NULL, N_("Genre / Artist"),
 	 "", "Genre / Artist", G_CALLBACK(pragha_library_pane_set_genre_artist_action)},
-	{"genre_artist_album", "view-refresh", N_("Genre / Artist / Album"),
+	{"genre_artist_album", NULL, N_("Genre / Artist / Album"),
 	 "", "Genre / Artist / Album", G_CALLBACK(pragha_library_pane_set_genre_artist_album_view_action)}
 };
 

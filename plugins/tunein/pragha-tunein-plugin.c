@@ -89,7 +89,7 @@ pragha_gmenu_tunein_plugin_get_radio_action (GSimpleAction *action,
 }
 
 static const GtkActionEntry main_menu_actions [] = {
-	{"Search tunein", "audio-input-microphone", N_("Search radio on TuneIn"),
+	{"Search tunein", NULL, N_("Search radio on TuneIn"),
 	 "", "Search tunein", G_CALLBACK(pragha_tunein_plugin_get_radio_action)}
 };
 
