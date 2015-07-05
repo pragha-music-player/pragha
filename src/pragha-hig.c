@@ -56,6 +56,8 @@ pragha_hig_workarea_table_add_wide_control(GtkWidget *table, guint *row, GtkWidg
 	gtk_grid_attach (GTK_GRID(table), widget, 0, *row, 2, 1);
 	gtk_widget_set_margin_start (GTK_WIDGET(widget), 12);
 
+	gtk_widget_set_hexpand (GTK_WIDGET(widget), TRUE);
+
 	++ * row;
 }
 
