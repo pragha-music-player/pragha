@@ -658,7 +658,7 @@ pragha_need_restart_cb (PraghaPreferences *preferences, PraghaApplication *pragh
 
 #if GTK_CHECK_VERSION (3, 12, 0)
 static void
-pragha_gnome_style_changed_cb (PraghaPreferences *preferences, GParamSpec *pspec, PraghaApplication *pragha)
+pragha_system_titlebar_changed_cb (PraghaPreferences *preferences, GParamSpec *pspec, PraghaApplication *pragha)
 {
 	PraghaToolbar *toolbar;
 	GtkWidget *window, *parent, *menubar;
@@ -671,27 +671,7 @@ pragha_gnome_style_changed_cb (PraghaPreferences *preferences, GParamSpec *pspec
 
 	parent  = gtk_widget_get_parent (GTK_WIDGET(menubar));
 
-	if (pragha_preferences_get_gnome_style (preferences)) {
-		gtk_widget_hide(GTK_WIDGET(window));
-
-		pragha_preferences_set_controls_below(preferences, FALSE);
-
-		action = pragha_application_get_menu_action (pragha,
-			"/Menubar/ViewMenu/Fullscreen");
-		gtk_action_set_sensitive (GTK_ACTION (action), FALSE);
-
-		action = pragha_application_get_menu_action (pragha,
-			"/Menubar/ViewMenu/Playback controls below");
-		gtk_action_set_sensitive (GTK_ACTION (action), FALSE);
-
-		gtk_container_remove (GTK_CONTAINER(parent), GTK_WIDGET(toolbar));
-		gtk_window_set_titlebar (GTK_WINDOW (window), GTK_WIDGET(toolbar));
-
-		pragha_toolbar_set_style(toolbar, TRUE);
-
-		gtk_widget_show(GTK_WIDGET(window));
-	}
-	else {
+	if (pragha_preferences_get_system_titlebar (preferences)) {
 		gtk_widget_hide(GTK_WIDGET(window));
 
 		action = pragha_application_get_menu_action (pragha,
@@ -708,6 +688,27 @@ pragha_gnome_style_changed_cb (PraghaPreferences *preferences, GParamSpec *pspec
 		gtk_box_pack_start (GTK_BOX(parent), GTK_WIDGET(toolbar),
 		                    FALSE, FALSE, 0);
 		gtk_box_reorder_child(GTK_BOX(parent), GTK_WIDGET(toolbar), 1);
+
+		pragha_toolbar_set_style(toolbar, TRUE);
+
+		gtk_widget_show(GTK_WIDGET(window));
+
+	}
+	else {
+		gtk_widget_hide(GTK_WIDGET(window));
+
+		pragha_preferences_set_controls_below(preferences, FALSE);
+
+		action = pragha_application_get_menu_action (pragha,
+			"/Menubar/ViewMenu/Fullscreen");
+		gtk_action_set_sensitive (GTK_ACTION (action), FALSE);
+
+		action = pragha_application_get_menu_action (pragha,
+			"/Menubar/ViewMenu/Playback controls below");
+		gtk_action_set_sensitive (GTK_ACTION (action), FALSE);
+
+		gtk_container_remove (GTK_CONTAINER(parent), GTK_WIDGET(toolbar));
+		gtk_window_set_titlebar (GTK_WINDOW (window), GTK_WIDGET(toolbar));
 
 		pragha_toolbar_set_style(toolbar, FALSE);
 
@@ -1095,8 +1096,8 @@ pragha_application_startup (GApplication *application)
 	                  G_CALLBACK (pragha_need_restart_cb), pragha);
 
 #if GTK_CHECK_VERSION (3, 12, 0)
-	g_signal_connect (pragha->preferences, "notify::gnome-style",
-	                  G_CALLBACK (pragha_gnome_style_changed_cb), pragha);
+	g_signal_connect (pragha->preferences, "notify::system-titlebar",
+	                  G_CALLBACK (pragha_system_titlebar_changed_cb), pragha);
 #endif
 
 	pragha->sidebar2_binding =
@@ -1122,7 +1123,8 @@ pragha_application_startup (GApplication *application)
 		desktop = g_getenv ("XDG_CURRENT_DESKTOP");
 		if (desktop && (g_strcmp0(desktop, "GNOME") == 0) &&
 			gdk_screen_is_composited (gdk_screen_get_default())) {
-			pragha_preferences_set_gnome_style (pragha->preferences, TRUE);
+			pragha_preferences_set_system_titlebar (pragha->preferences, FALSE);
+			pragha_preferences_set_toolbar_size (pragha->preferences, GTK_ICON_SIZE_SMALL_TOOLBAR);
 			pragha_preferences_set_show_menubar (pragha->preferences, FALSE);
 		}
 	}

@@ -72,7 +72,7 @@ struct _PraghaPreferencesPrivate
 	gboolean   show_status_bar;
 	gboolean   show_status_icon;
 	gboolean   show_menubar;
-	gboolean   gnome_style;
+	gboolean   system_titlebar;
 	gboolean   controls_below;
 	gboolean   remember_state;
 	gchar     *start_mode;
@@ -113,7 +113,7 @@ enum
 	PROP_SHOW_STATUS_BAR,
 	PROP_SHOW_STATUS_ICON,
 	PROP_SHOW_MENUBAR,
-	PROP_GNOME_STYLE,
+	PROP_SYSTEM_TITLEBAR,
 	PROP_CONTROLS_BELOW,
 	PROP_REMEMBER_STATE,
 	PROP_START_MODE,
@@ -1208,30 +1208,30 @@ pragha_preferences_set_show_menubar (PraghaPreferences *preferences,
 }
 
 /**
- * pragha_preferences_get_gnome_style:
+ * pragha_preferences_get_system_titlebar:
  *
  */
 gboolean
-pragha_preferences_get_gnome_style (PraghaPreferences *preferences)
+pragha_preferences_get_system_titlebar (PraghaPreferences *preferences)
 {
 	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
 
-	return preferences->priv->gnome_style;
+	return preferences->priv->system_titlebar;
 }
 
 /**
- * pragha_preferences_set_gnome_style:
+ * pragha_preferences_set_system_titlebar:
  *
  */
 void
-pragha_preferences_set_gnome_style (PraghaPreferences *preferences,
-                                    gboolean           gnome_style)
+pragha_preferences_set_system_titlebar (PraghaPreferences *preferences,
+                                        gboolean           system_titlebar)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
-	preferences->priv->gnome_style = gnome_style;
+	preferences->priv->system_titlebar = system_titlebar;
 
-	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_GNOME_STYLE]);
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SYSTEM_TITLEBAR]);
 }
 
 /**
@@ -1459,7 +1459,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gboolean approximate_search, instant_search;
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
 	gboolean lateral_panel, secondary_lateral_panel, show_album_art, show_status_bar, \
-		show_status_icon, show_menubar, gnome_style, controls_below, remember_state;
+		show_status_icon, show_menubar, system_titlebar, controls_below, remember_state;
 	gchar *album_art_pattern;
 	gchar *start_mode, *last_folder, *last_folder_converted = NULL;
 	gboolean add_recursively, timer_remaining_mode, hide_instead_close;
@@ -1816,16 +1816,16 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_show_menubar(preferences, show_menubar);
 	}
 
-	gnome_style = g_key_file_get_boolean(priv->rc_keyfile,
-	                                     GROUP_WINDOW,
-	                                     KEY_GNOME_STYLE,
-	                                     &error);
+	system_titlebar = g_key_file_get_boolean(priv->rc_keyfile,
+	                                         GROUP_WINDOW,
+	                                         KEY_SYSTEM_TITLEBAR,
+	                                         &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
 	}
 	else {
-		pragha_preferences_set_gnome_style(preferences, gnome_style);
+		pragha_preferences_set_system_titlebar(preferences, system_titlebar);
 	}
 
 	controls_below = g_key_file_get_boolean(priv->rc_keyfile,
@@ -2053,8 +2053,8 @@ pragha_preferences_finalize (GObject *object)
 	                       priv->show_menubar);
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_WINDOW,
-	                       KEY_GNOME_STYLE,
-	                       priv->gnome_style);
+	                       KEY_SYSTEM_TITLEBAR,
+	                       priv->system_titlebar);
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_WINDOW,
 	                       KEY_CONTROLS_BELOW,
@@ -2199,8 +2199,8 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_SHOW_MENUBAR:
 			g_value_set_boolean (value, pragha_preferences_get_show_menubar(preferences));
 			break;
-		case PROP_GNOME_STYLE:
-			g_value_set_boolean (value, pragha_preferences_get_gnome_style(preferences));
+		case PROP_SYSTEM_TITLEBAR:
+			g_value_set_boolean (value, pragha_preferences_get_system_titlebar(preferences));
 			break;
 		case PROP_CONTROLS_BELOW:
 			g_value_set_boolean (value, pragha_preferences_get_controls_below(preferences));
@@ -2312,8 +2312,8 @@ pragha_preferences_set_property (GObject *object,
 		case PROP_SHOW_MENUBAR:
 			pragha_preferences_set_show_menubar(preferences, g_value_get_boolean(value));
 			break;
-		case PROP_GNOME_STYLE:
-			pragha_preferences_set_gnome_style(preferences, g_value_get_boolean(value));
+		case PROP_SYSTEM_TITLEBAR:
+			pragha_preferences_set_system_titlebar(preferences, g_value_get_boolean(value));
 			break;
 		case PROP_CONTROLS_BELOW:
 			pragha_preferences_set_controls_below(preferences, g_value_get_boolean(value));
@@ -2645,14 +2645,14 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                      PRAGHA_PREF_PARAMS);
 
 	/**
-	  * PraghaPreferences:gnome_style:
+	  * PraghaPreferences:system_titlebar:
 	  *
 	  */
-	gParamSpecs[PROP_GNOME_STYLE] =
-		g_param_spec_boolean("gnome-style",
-		                     "GnomeStyle",
-		                     "Gnome Style Preference",
-		                      FALSE,
+	gParamSpecs[PROP_SYSTEM_TITLEBAR] =
+		g_param_spec_boolean("system-titlebar",
+		                     "SystemTitlebar",
+		                     "System Titlebar Preference",
+		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
 
 	/**

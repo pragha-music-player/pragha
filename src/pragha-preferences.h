@@ -102,7 +102,7 @@ struct _PraghaPreferencesClass
 #define KEY_ALBUM_ART_SIZE         "album_art_size"
 #define KEY_TOOLBAR_SIZE           "toolbar_icon_size"
 #define KEY_STATUS_BAR             "status_bar"
-#define KEY_GNOME_STYLE            "gnome_style"
+#define KEY_SYSTEM_TITLEBAR        "system_titlebar"
 #define KEY_CONTROLS_BELOW         "controls_below"
 #define KEY_SHOW_MENUBAR           "show_menubar"
 
@@ -393,11 +393,11 @@ pragha_preferences_set_show_menubar (PraghaPreferences *preferences,
                                      gboolean           show_menubar);
 
 gboolean
-pragha_preferences_get_gnome_style (PraghaPreferences *preferences);
+pragha_preferences_get_system_titlebar (PraghaPreferences *preferences);
 
 void
-pragha_preferences_set_gnome_style (PraghaPreferences *preferences,
-                                    gboolean           gnome_style);
+pragha_preferences_set_system_titlebar (PraghaPreferences *preferences,
+                                        gboolean           system_titlebar);
 
 gboolean
 pragha_preferences_get_controls_below (PraghaPreferences *preferences);

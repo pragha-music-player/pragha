@@ -382,22 +382,23 @@ pragha_toolbar_window_state_event (GtkWidget *widget, GdkEventWindowState *event
 
 #if GTK_CHECK_VERSION (3, 12, 0)
 void
-pragha_toolbar_set_style (PraghaToolbar *toolbar, gboolean gnome_style)
+pragha_toolbar_set_style (PraghaToolbar *toolbar, gboolean system_titlebar)
 {
 	GtkStyleContext *context;
 	context = gtk_widget_get_style_context (GTK_WIDGET(toolbar));
 
-	if (gnome_style) {
-		gtk_style_context_remove_class (context, GTK_STYLE_CLASS_TOOLBAR);
-		gtk_style_context_remove_class (context, GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
-		gtk_style_context_add_class (context, "header-bar");
-	}
-	else {
+	if (system_titlebar) {
 		gtk_style_context_remove_class (context, "header-bar");
 		gtk_style_context_add_class (context, GTK_STYLE_CLASS_TOOLBAR);
 		gtk_style_context_add_class (context, GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
 	}
-	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(toolbar), gnome_style);
+	else {
+		gtk_style_context_remove_class (context, GTK_STYLE_CLASS_TOOLBAR);
+		gtk_style_context_remove_class (context, GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
+		gtk_style_context_add_class (context, "header-bar");
+	}
+
+	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(toolbar), !system_titlebar);
 }
 #endif
 
@@ -921,7 +922,7 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	/* Fix styling */
 #if GTK_CHECK_VERSION (3, 12, 0)
 	pragha_toolbar_set_style(toolbar,
-		pragha_preferences_get_gnome_style (preferences));
+		pragha_preferences_get_system_titlebar (preferences));
 #endif
 
 	g_object_bind_property(preferences, "toolbar-size", prev_button, "icon-size", binding_flags);

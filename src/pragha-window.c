@@ -559,7 +559,7 @@ pragha_window_new (PraghaApplication *pragha)
 	gtk_box_pack_start (GTK_BOX(vbox_main), menubar,
 	                    FALSE, FALSE, 0);
 #if GTK_CHECK_VERSION (3, 12, 0)
-	if (pragha_preferences_get_gnome_style (preferences) == FALSE)
+	if (pragha_preferences_get_system_titlebar (preferences))
 #endif
 		gtk_box_pack_start (GTK_BOX(vbox_main), GTK_WIDGET(toolbar),
 		                    FALSE, FALSE, 0);
@@ -632,7 +632,7 @@ pragha_window_new (PraghaApplication *pragha)
 	gtk_container_add(GTK_CONTAINER(window), vbox_main);
 
 #if GTK_CHECK_VERSION (3, 12, 0)
-	if (pragha_preferences_get_gnome_style (preferences))
+	if (!pragha_preferences_get_system_titlebar (preferences))
 		gtk_window_set_titlebar (GTK_WINDOW (window), GTK_WIDGET(toolbar));
 
 	GtkWidget *song = pragha_toolbar_get_song_box(toolbar);
