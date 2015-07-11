@@ -21,7 +21,7 @@ AM_INIT_AUTOMAKE([no-dist-gzip dist-bzip2])
 AM_MAINTAINER_MODE()
 
 dnl Set required and max glib/gdk versions
-AC_DEFINE(GDK_VERSION_MIN_REQUIRED, GDK_VERSION_3_4, [Ignore post 3.10 deprecations])
+AC_DEFINE(GDK_VERSION_MIN_REQUIRED, GDK_VERSION_3_8, [Ignore post 3.10 deprecations])
 AC_DEFINE(GDK_VERSION_MAX_ALLOWED, GDK_VERSION_3_10, [Ignore post 3.10 deprecations])
 
 dnl *********************
@@ -68,7 +68,7 @@ LT_PREREQ([2.2.6])
 LT_INIT([disable-static])
 
 dnl Check for i18n support
-XDT_I18N([ca_ES cs de es el fr hu it ja ko_KR nl no pl pt pt_BR ru sv tr uk vi zh_CN])
+XDT_I18N([bg ca_ES cs de es el fr hu it ja ko_KR lt nl no pl pt pt_BR ru sv tr uk vi zh_CN])
 
 GSTREAMER_REQUIRED=0.11.90
 

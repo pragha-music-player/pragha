@@ -3,139 +3,140 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Translators:
-# Chunyang xu <xuchunyang56@gmail.com>, 2014
-# 乐群 陈 <chenlequn22@gmail.com>, 2012
+# Moo, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: Pragha\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-07-11 20:17-0300\n"
-"PO-Revision-Date: 2014-12-21 17:03+0000\n"
-"Last-Translator: matias <mati86dl@gmail.com>\n"
-"Language-Team: Chinese (China) (http://www.transifex.com/p/Pragha/language/"
-"zh_CN/)\n"
-"Language: zh_CN\n"
+"PO-Revision-Date: 2015-07-11 19:32+0000\n"
+"Last-Translator: Moo\n"
+"Language-Team: Lithuanian (http://www.transifex.com/p/Pragha/language/lt/)\n"
+"Language: lt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && (n"
+"%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #. GtkInfoBar has undocumented behavior for GTK_RESPONSE_CANCEL
 #: ../src/info-bar-import-music.c:80 ../src/info-bar-import-music.c:127
 #: ../src/info-bar-import-music.c:170
 msgid "_No"
-msgstr "_No"
+msgstr "_Ne"
 
 #: ../src/info-bar-import-music.c:81 ../src/info-bar-import-music.c:128
 #: ../src/info-bar-import-music.c:171
 msgid "_Yes"
-msgstr "_Yes"
+msgstr "_Taip"
 
 #: ../src/info-bar-import-music.c:83
 #, c-format
 msgid "Would you like to import %s to library?"
-msgstr ""
+msgstr "Ar norėtumėte importuoti %s į fonoteką?"
 
 #: ../src/info-bar-import-music.c:130
 msgid "Would you like to update your music library?"
-msgstr ""
+msgstr "Ar norėtumėte atnaujinti savo muzikinę fonoteką?"
 
 #: ../src/info-bar-import-music.c:173
 msgid "Some changes need restart pragha."
-msgstr ""
+msgstr "Kai kuriems pakeitimams reikia iš naujo paleisti Pragha."
 
 #: ../src/pragha-cmdline.c:192
 msgid "FILENAME"
-msgstr ""
+msgstr "FAILO PAVADINIMAS"
 
 #: ../src/pragha-cmdline.c:251
 msgid "Use --help to see a full list of available command line options."
 msgstr ""
+"Naudokite --help, kad pamatytumėte pilną prieinamų komandų eilutės parinkčių "
+"sąrašą."
 
 #: ../src/pragha-equalizer-dialog.c:44
 msgid "Disabled"
-msgstr ""
+msgstr "Išjungtas"
 
 #: ../src/pragha-equalizer-dialog.c:45
 msgid "Classical"
-msgstr ""
+msgstr "Klasikinė"
 
 #: ../src/pragha-equalizer-dialog.c:46
 msgid "Club"
-msgstr ""
+msgstr "Klubas"
 
 #: ../src/pragha-equalizer-dialog.c:47
 msgid "Dance"
-msgstr ""
+msgstr "Šokiai"
 
 #: ../src/pragha-equalizer-dialog.c:48
 msgid "Full Bass"
-msgstr ""
+msgstr "Pilni Žemi Tonai"
 
 #: ../src/pragha-equalizer-dialog.c:49
 msgid "Full Bass and Treble"
-msgstr ""
+msgstr "Pilni Žemi ir Aukšti Tonai"
 
 #: ../src/pragha-equalizer-dialog.c:50
 msgid "Full Treble"
-msgstr ""
+msgstr "Pilni Aukšti Tonai"
 
 #: ../src/pragha-equalizer-dialog.c:51
 msgid "Laptop Speakers and Headphones"
-msgstr ""
+msgstr "Nešiojamojo Kompiuterio Garsiakalbiai ir Ausinės"
 
 #: ../src/pragha-equalizer-dialog.c:52
 msgid "Large Hall"
-msgstr ""
+msgstr "Didelė Salė"
 
 #: ../src/pragha-equalizer-dialog.c:53
 msgid "Live"
-msgstr ""
+msgstr "Gyvai"
 
 #: ../src/pragha-equalizer-dialog.c:54
 msgid "Party"
-msgstr ""
+msgstr "Vakarėlis"
 
 #: ../src/pragha-equalizer-dialog.c:55
 msgid "Pop"
-msgstr ""
+msgstr "Pop"
 
 #: ../src/pragha-equalizer-dialog.c:56
 msgid "Reggae"
-msgstr ""
+msgstr "Regis"
 
 #: ../src/pragha-equalizer-dialog.c:57
 msgid "Rock"
-msgstr ""
+msgstr "Rokas"
 
 #: ../src/pragha-equalizer-dialog.c:58
 msgid "Ska"
-msgstr ""
+msgstr "Ska"
 
 #: ../src/pragha-equalizer-dialog.c:59
 msgid "Smiley Face Curve"
-msgstr ""
+msgstr "Šypsenėlės Linija"
 
 #: ../src/pragha-equalizer-dialog.c:60
 msgid "Soft"
-msgstr ""
+msgstr "Švelni"
 
 #: ../src/pragha-equalizer-dialog.c:61
 msgid "Soft Rock"
-msgstr ""
+msgstr "Lengvasis Rokas"
 
 #: ../src/pragha-equalizer-dialog.c:62
 msgid "Techno"
-msgstr ""
+msgstr "Techno"
 
 #: ../src/pragha-equalizer-dialog.c:63
 msgid "Custom"
-msgstr ""
+msgstr "Pasirinktinis"
 
 #. Create the dialog
 #: ../src/pragha-equalizer-dialog.c:298
 msgid "Equalizer"
-msgstr ""
+msgstr "Glodintuvas"
 
 #: ../src/pragha-equalizer-dialog.c:301 ../src/pragha-playlists-mgmt.c:86
 #: ../src/pragha-playlists-mgmt.c:541 ../src/pragha-playlists-mgmt.c:1239
@@ -144,136 +145,136 @@ msgstr ""
 #: ../plugins/song-info/pragha-song-info-dialog.c:83
 #: ../plugins/tunein/pragha-tunein-plugin.c:224
 msgid "_Ok"
-msgstr ""
+msgstr "_Gerai"
 
 #: ../src/pragha-filter-dialog.c:218 ../src/pragha-library-pane.c:506
 #: ../plugins/notify/pragha-notify-plugin.c:166
 msgid "Unknown Artist"
-msgstr "未知歌手"
+msgstr "Nežinomas Atlikėjas"
 
 #: ../src/pragha-filter-dialog.c:219 ../src/pragha-library-pane.c:513
 #: ../src/pragha-library-pane.c:518
 #: ../plugins/notify/pragha-notify-plugin.c:167
 msgid "Unknown Album"
-msgstr "未知专辑"
+msgstr "Nežinomas Albumas"
 
 #. The search dialog
 #: ../src/pragha-filter-dialog.c:369
 msgid "Search in playlist"
-msgstr ""
+msgstr "Ieškoti grojaraštyje"
 
 #: ../src/pragha-filter-dialog.c:372
 msgid "_Close"
-msgstr ""
+msgstr "_Užverti"
 
 #: ../src/pragha-filter-dialog.c:375 ../src/pragha-playlist.c:209
 msgid "Add to playback queue"
-msgstr "添加到播放队列"
+msgstr "Pridėti į grojimo eilę"
 
 #: ../src/pragha-filter-dialog.c:376
 msgid "_Jump to"
-msgstr ""
+msgstr "_Peršokti į"
 
 #: ../src/pragha-library-pane.c:132
 msgid "_Skip"
-msgstr "跳过(_S)"
+msgstr "Pralei_sti"
 
 #: ../src/pragha-library-pane.c:133
 msgid "S_kip All"
-msgstr "跳过全部(_k)"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:134
 msgid "Delete _All"
-msgstr "删除全部(_A)"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:188
 msgid "_Expand library"
-msgstr "扩展“库”(_E)"
+msgstr "_Išskleisti fonoteką"
 
 #: ../src/pragha-library-pane.c:190
 msgid "_Collapse library"
-msgstr "折叠”库“(_C)"
+msgstr "_Suskleisti fonoteką"
 
 #: ../src/pragha-library-pane.c:192 ../src/pragha-library-pane.c:1585
 msgid "Folders structure"
-msgstr "目录结构"
+msgstr "Aplankų struktūra"
 
 #: ../src/pragha-library-pane.c:194 ../src/pragha-library-pane.c:1594
 #: ../src/pragha-playlist.c:115 ../src/pragha-playlist.c:3368
 #: ../src/pragha-playlist.c:3544 ../src/pragha-statusicon.c:180
 #: ../src/pragha-tags-dialog.c:116 ../src/pragha-tags-dialog.c:841
 msgid "Artist"
-msgstr "歌手"
+msgstr "Atlikėjas"
 
 #: ../src/pragha-library-pane.c:196 ../src/pragha-library-pane.c:1603
 #: ../src/pragha-playlist.c:116 ../src/pragha-playlist.c:3369
 #: ../src/pragha-playlist.c:3545 ../src/pragha-statusicon.c:181
 #: ../src/pragha-tags-dialog.c:117 ../src/pragha-tags-dialog.c:846
 msgid "Album"
-msgstr "专辑"
+msgstr "Albumas"
 
 #: ../src/pragha-library-pane.c:198 ../src/pragha-library-pane.c:1612
 #: ../src/pragha-playlist.c:117 ../src/pragha-playlist.c:3370
 #: ../src/pragha-playlist.c:3546 ../src/pragha-tags-dialog.c:118
 #: ../src/pragha-tags-dialog.c:851
 msgid "Genre"
-msgstr "类型"
+msgstr "Žanras"
 
 #: ../src/pragha-library-pane.c:200 ../src/pragha-library-pane.c:1624
 msgid "Artist / Album"
-msgstr "歌手/专辑"
+msgstr "Atlikėjas / Albumas"
 
 #: ../src/pragha-library-pane.c:202 ../src/pragha-library-pane.c:1648
 msgid "Genre / Album"
-msgstr "类别/专辑"
+msgstr "Žanras / Albumas"
 
 #: ../src/pragha-library-pane.c:204 ../src/pragha-library-pane.c:1636
 msgid "Genre / Artist"
-msgstr "类别/歌手"
+msgstr "Žanras / Atlikėjas"
 
 #: ../src/pragha-library-pane.c:206 ../src/pragha-library-pane.c:1663
 msgid "Genre / Artist / Album"
-msgstr "类别/歌手/专辑"
+msgstr "Žanras / Atlikėjas / Albumas"
 
 #. Playlist and Radio tree
 #: ../src/pragha-library-pane.c:242
 msgid "_Add to current playlist"
-msgstr "添加到播放列表(_A)"
+msgstr "_Pridėti prie esamo grojaraščio"
 
 #: ../src/pragha-library-pane.c:244
 msgid "_Replace current playlist"
-msgstr "替换当前播放列表(_R)"
+msgstr "P_akeisti esamą grojaraštį"
 
 #: ../src/pragha-library-pane.c:246
 msgid "Replace and _play"
-msgstr "替换并播放(_p)"
+msgstr "Pakeisti ir _groti"
 
 #: ../src/pragha-library-pane.c:248 ../src/pragha-playlists-mgmt.c:537
 msgid "Rename"
-msgstr "重命名"
+msgstr "Pervadinti"
 
 #: ../src/pragha-library-pane.c:250
 msgid "Delete"
-msgstr "删除"
+msgstr "Ištrinti"
 
 #: ../src/pragha-library-pane.c:252 ../src/pragha-menubar.c:222
 #: ../src/pragha-menubar.c:227 ../src/pragha-playlists-mgmt.c:1336
 #: ../src/pragha-playlists-mgmt.c:1372
 msgid "Export"
-msgstr "导出"
+msgstr "Eksportuoti"
 
 #. Set dialog properties
 #: ../src/pragha-library-pane.c:254 ../src/pragha-tags-dialog.c:98
 msgid "Edit tags"
-msgstr "编辑tags"
+msgstr "Keisti žymes"
 
 #: ../src/pragha-library-pane.c:256
 msgid "Move to _trash"
-msgstr "移到回收站(_t)"
+msgstr "Perkelti į š_iukšlinę"
 
 #: ../src/pragha-library-pane.c:258
 msgid "Delete from library"
-msgstr "从“库”中删除"
+msgstr "Ištrinti iš fonotekos"
 
 #: ../src/pragha-library-pane.c:511
 msgid "Unknown"
@@ -281,16 +282,16 @@ msgstr ""
 
 #: ../src/pragha-library-pane.c:523
 msgid "Unknown Genre"
-msgstr "未知类别"
+msgstr "Nežinomas Žanras"
 
 #: ../src/pragha-library-pane.c:843
 msgid "File can't be moved to trash. Delete permanently?"
-msgstr ""
+msgstr "Failas negali būti perkeltas į šiukšlinę. Ištrinti negrįžtamai?"
 
 #: ../src/pragha-library-pane.c:844
 #, c-format
 msgid "The file \"%s\" cannot be moved to the trash. Details: %s"
-msgstr "文件 \"%s\"无法移到回收站。详细：%s"
+msgstr "Failas \"%s\" negali būti perkeltas į šiukšlinę. Išsamiau: %s"
 
 #: ../src/pragha-library-pane.c:852 ../src/pragha-playlists-mgmt.c:85
 #: ../src/pragha-playlists-mgmt.c:540 ../src/pragha-playlists-mgmt.c:612
@@ -300,34 +301,34 @@ msgstr "文件 \"%s\"无法移到回收站。详细：%s"
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:975
 #: ../plugins/tunein/pragha-tunein-plugin.c:223
 msgid "_Cancel"
-msgstr "取消"
+msgstr "_Atsisakyti"
 
 #: ../src/pragha-library-pane.c:858
 msgid "_Delete"
-msgstr "删除"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:1895 ../src/pragha-library-pane.c:1977
 #: ../src/pragha-playlists-mgmt.c:641 ../src/pragha-playlists-mgmt.c:668
 #: ../src/pragha.c:302 ../plugins/mpris2/pragha-mpris2-plugin.c:853
 msgid "Playlists"
-msgstr "播放列表"
+msgstr "Grojaraščiai"
 
 #: ../src/pragha-library-pane.c:1911 ../src/pragha-library-pane.c:1986
 msgid "Radios"
-msgstr "电台"
+msgstr "Radijai"
 
 #: ../src/pragha-library-pane.c:1927 ../src/pragha-preferences-dialog.c:968
 #: ../src/pragha-preferences-dialog.c:1298
 msgid "Library"
-msgstr "“库”"
+msgstr "Fonoteka"
 
 #: ../src/pragha-library-pane.c:2482
 msgid "Really want to move the files to trash?"
-msgstr "确定移动这些文件到回收站么？"
+msgstr "Tikrai norite perkelti failus į šiukšlinę?"
 
 #: ../src/pragha-library-pane.c:2484
 msgid "Delete permanently instead of moving to trash"
-msgstr "不移到回收站，直接删除"
+msgstr "Vietoj perkelimo į šiukšlinę, ištrinti negrįžtamai"
 
 #: ../src/pragha-library-pane.c:2534
 msgid ""
@@ -335,138 +336,138 @@ msgid ""
 "\n"
 "Warning: To recover we must rescan the entire library."
 msgstr ""
-"确定从“库”中删除当前文件？\n"
+"Ar tikrai norite ištrinti esamą failą iš fonotekos?\n"
 "\n"
-"警告：必须重新扫描才能恢复"
+"Įspėjimas: Norint atkurti, reikės iš naujo skenuoti visą fonoteką."
 
 #: ../src/pragha-menubar.c:190
 msgid "_Playback"
-msgstr "播放"
+msgstr "_Grojimas"
 
 #: ../src/pragha-menubar.c:191
 msgid "Play_list"
-msgstr "播放列表"
+msgstr "Gr_ojaraštis"
 
 #: ../src/pragha-menubar.c:192
 msgid "_View"
-msgstr "视图(_V)"
+msgstr "_Rodinys"
 
 #: ../src/pragha-menubar.c:193 ../src/pragha-playlist.c:222
 msgid "_Tools"
-msgstr "工具(_T)"
+msgstr "Įr_ankiai"
 
 #: ../src/pragha-menubar.c:194
 msgid "_Help"
-msgstr "帮助(_H)"
+msgstr "_Pagalba"
 
 #: ../src/pragha-menubar.c:195 ../src/pragha-statusicon.c:83
 #: ../plugins/notify/pragha-notify-plugin.c:177
 msgid "Previous track"
-msgstr "上一首歌曲"
+msgstr "Ankstesnis takelis"
 
 #: ../src/pragha-menubar.c:197 ../src/pragha-statusicon.c:85
 msgid "Play / Pause"
-msgstr "播放/暂停"
+msgstr "Groti / Pristabdyti"
 
 #: ../src/pragha-menubar.c:199 ../src/pragha-statusicon.c:87
 msgid "Stop"
-msgstr "停止"
+msgstr "Stabdyti"
 
 #: ../src/pragha-menubar.c:201 ../src/pragha-statusicon.c:89
 #: ../plugins/notify/pragha-notify-plugin.c:181
 msgid "Next track"
-msgstr "下一首"
+msgstr "Kitas takelis"
 
 #: ../src/pragha-menubar.c:203 ../src/pragha-playlist.c:225
 #: ../src/pragha-statusicon.c:91
 msgid "Edit track information"
-msgstr "修改音轨信息"
+msgstr "Keisti takelio informaciją"
 
 #: ../src/pragha-menubar.c:205 ../src/pragha-statusicon.c:93
 msgid "_Quit"
-msgstr "退出(_Q)"
+msgstr "_Baigti"
 
 #: ../src/pragha-menubar.c:207 ../src/pragha-statusicon.c:79
 msgid "_Add files"
-msgstr "添加(_A)"
+msgstr "_Pridėti failus"
 
 #: ../src/pragha-menubar.c:208
 msgid "Open a media file"
-msgstr "打开媒体文件"
+msgstr "Atverti medija failą"
 
 #: ../src/pragha-menubar.c:209 ../src/pragha-statusicon.c:81
 msgid "Add _location"
-msgstr "添加网络地址(_l)"
+msgstr "Pridėti _vietą"
 
 #: ../src/pragha-menubar.c:211
 msgid "_Add the library"
-msgstr "添加“库”(_A)"
+msgstr "Pridėti _fonoteką"
 
 #: ../src/pragha-menubar.c:213
 msgid "Remove selection from playlist"
-msgstr "从播放列表中删除"
+msgstr "Šalinti pasirinktus iš grojaraščio"
 
 #: ../src/pragha-menubar.c:215 ../src/pragha-playlist.c:215
 msgid "Crop playlist"
-msgstr "清空播放列表"
+msgstr "Apkirpti grojaraštį"
 
 #: ../src/pragha-menubar.c:217 ../src/pragha-playlist.c:217
 msgid "Clear playlist"
-msgstr "清空播放列表"
+msgstr "Išvalyti grojaraštį"
 
 #: ../src/pragha-menubar.c:219 ../src/pragha-playlist.c:219
 #: ../src/pragha-playlists-mgmt.c:69 ../src/pragha-playlists-mgmt.c:92
 #: ../src/pragha-playlists-mgmt.c:1243
 msgid "Save playlist"
-msgstr "保存播放列表"
+msgstr "Įrašyti grojaraštį"
 
 #: ../src/pragha-menubar.c:220 ../src/pragha-menubar.c:225
 #: ../src/pragha-playlists-mgmt.c:1332 ../src/pragha-playlists-mgmt.c:1368
 msgid "New playlist"
-msgstr "新建播放列表"
+msgstr "Naujas grojaraštis"
 
 #: ../src/pragha-menubar.c:224 ../src/pragha-playlist.c:220
 #: ../src/pragha-playlists-mgmt.c:71 ../src/pragha-playlists-mgmt.c:94
 #: ../src/pragha-playlists-mgmt.c:1245
 msgid "Save selection"
-msgstr "保存所选"
+msgstr "Įrašyti pasirinktus"
 
 #: ../src/pragha-menubar.c:229
 msgid "_Search in playlist"
-msgstr "在列表中搜索(_S)"
+msgstr "_Ieškoti grojaraštyje"
 
 #: ../src/pragha-menubar.c:231
 msgid "_Preferences"
-msgstr "首选项(_P)"
+msgstr "_Nuostatos"
 
 #: ../src/pragha-menubar.c:233
 msgid "Jump to playing song"
-msgstr "跳到正播放歌曲"
+msgstr "Peršokti į šiuo metu grojamą dainą"
 
 #: ../src/pragha-menubar.c:235
 msgid "E_qualizer"
-msgstr "均衡器(_q)"
+msgstr "_Glodintuvas"
 
 #: ../src/pragha-menubar.c:237
 msgid "_Rescan library"
-msgstr "重新扫描“库”(_R)"
+msgstr "_Iš naujo skenuoti fonoteką"
 
 #: ../src/pragha-menubar.c:239
 #: ../plugins/removable-media/pragha-devices-removable.c:302
 msgid "_Update library"
-msgstr "更新“库”(_U)"
+msgstr "_Atnaujinti fonoteką"
 
 #: ../src/pragha-menubar.c:241
 msgid "_Statistics"
-msgstr "状态(_S)"
+msgstr "_Statistika"
 
 #: ../src/pragha-menubar.c:243
 msgid "Homepage"
-msgstr "主页"
+msgstr "Interneto svetainė"
 
 #: ../src/pragha-menubar.c:245
 msgid "Community"
-msgstr "社区"
+msgstr "Bendruomenė"
 
 #: ../src/pragha-menubar.c:247
 msgid "Wiki"
@@ -474,111 +475,111 @@ msgstr "Wiki"
 
 #: ../src/pragha-menubar.c:249
 msgid "Translate Pragha"
-msgstr "翻译Pragha"
+msgstr "Versti Pragha"
 
 #: ../src/pragha-menubar.c:251 ../src/pragha-statusicon.c:77
 msgid "About"
-msgstr "关于"
+msgstr "Apie"
 
 #: ../src/pragha-menubar.c:256
 msgid "_Shuffle"
-msgstr "随机(_S)"
+msgstr "_Maišyti"
 
 #: ../src/pragha-menubar.c:259
 msgid "_Repeat"
-msgstr "重复(_R)"
+msgstr "_Kartoti"
 
 #: ../src/pragha-menubar.c:262
 msgid "_Fullscreen"
-msgstr "全屏(_F)"
+msgstr "_Visas ekranas"
 
 #: ../src/pragha-menubar.c:265
 msgid "Lateral _panel"
-msgstr "表盘(_p)"
+msgstr "Šoninis _skydelis"
 
 #: ../src/pragha-menubar.c:268
 msgid "Secondary lateral panel"
-msgstr ""
+msgstr "Antrinis šoninis skydelis"
 
 #: ../src/pragha-menubar.c:271
 msgid "Playback controls below"
-msgstr "播放控制"
+msgstr "Grojimo valdikliai apačioje"
 
 #: ../src/pragha-menubar.c:274
 msgid "Menubar"
-msgstr ""
+msgstr "Meniu juosta"
 
 #: ../src/pragha-menubar.c:277
 msgid "Status bar"
-msgstr "状态栏"
+msgstr "Būsenos juosta"
 
 #: ../src/pragha-menubar.c:638
 msgid "Total Tracks:"
-msgstr "歌曲数量"
+msgstr "Viso Takelių:"
 
 #: ../src/pragha-menubar.c:640
 msgid "Total Artists:"
-msgstr "歌手数量"
+msgstr "Viso Atlikėjų:"
 
 #: ../src/pragha-menubar.c:642
 msgid "Total Albums:"
-msgstr "专辑数量"
+msgstr "Viso Albumų:"
 
 #: ../src/pragha-menubar.c:645
 msgid "Statistics"
-msgstr "状态"
+msgstr "Statistika"
 
 #. Create labels
 #: ../src/pragha-playlist.c:114 ../src/pragha-playlist.c:3367
 #: ../src/pragha-playlist.c:3543 ../src/pragha-statusicon.c:179
 #: ../src/pragha-tags-dialog.c:115 ../src/pragha-tags-dialog.c:836
 msgid "Title"
-msgstr "标题"
+msgstr "Pavadinimas"
 
 #: ../src/pragha-playlist.c:118 ../src/pragha-playlist.c:3371
 #: ../src/pragha-playlist.c:3547 ../src/pragha-tags-dialog.c:577
 msgid "Bitrate"
-msgstr "比特率"
+msgstr "Pralaidumas"
 
 #: ../src/pragha-playlist.c:119 ../src/pragha-playlist.c:3372
 #: ../src/pragha-playlist.c:3548 ../src/pragha-tags-dialog.c:120
 msgid "Year"
-msgstr "年份"
+msgstr "Metai"
 
 #: ../src/pragha-playlist.c:120 ../src/pragha-playlist.c:3373
 #: ../src/pragha-playlist.c:3549 ../src/pragha-tags-dialog.c:121
 #: ../src/pragha-tags-dialog.c:856
 msgid "Comment"
-msgstr "注释"
+msgstr "Komentaras"
 
 #. Create labels
 #: ../src/pragha-playlist.c:121 ../src/pragha-playlist.c:3374
 #: ../src/pragha-playlist.c:3550 ../src/pragha-statusicon.c:182
 #: ../src/pragha-tags-dialog.c:576
 msgid "Length"
-msgstr "长度"
+msgstr "Trukmė"
 
 #: ../src/pragha-playlist.c:122 ../src/pragha-playlist.c:3375
 #: ../src/pragha-playlist.c:3551 ../src/pragha-tags-dialog.c:581
 msgid "Filename"
-msgstr "文件名"
+msgstr "Failo pavadinimas"
 
 #: ../src/pragha-playlist.c:123 ../src/pragha-playlist.c:3376
 #: ../src/pragha-playlist.c:3552 ../src/pragha-tags-dialog.c:582
 msgid "Mimetype"
-msgstr ""
+msgstr "MIME tipas"
 
 #: ../src/pragha-playlist.c:211
 msgid "Remove from playback queue"
-msgstr "从播放队列中移除"
+msgstr "Šalinti iš grojimo eilės"
 
 #: ../src/pragha-playlist.c:213
 msgid "Remove from playlist"
-msgstr "从播放列表中删除"
+msgstr "Šalinti iš grojaraščio"
 
 #: ../src/pragha-playlist.c:221
 msgid "_Send to"
-msgstr "发送到"
+msgstr ""
 
 #: ../src/pragha-playlist.c:2498
 #, c-format
@@ -620,41 +621,43 @@ msgstr ""
 #: ../src/pragha.c:607
 msgid "Track"
 msgid_plural "Tracks"
-msgstr[0] "曲目标号"
+msgstr[0] "Takelis"
+msgstr[1] "Takeliai"
+msgstr[2] "Takelių"
 
 #: ../src/pragha-playlist.c:3379
 msgid "Clear sort"
-msgstr "清晰排序"
+msgstr "Išvalyti rikiavimą"
 
 #: ../src/pragha-playlists-mgmt.c:73 ../src/pragha-preferences-dialog.c:1076
 msgid "Playlist"
-msgstr "播放列表"
+msgstr "Grojaraštis"
 
 #: ../src/pragha-playlists-mgmt.c:129
 msgid "<b>con_playlist</b> is a reserved playlist name"
-msgstr "<b>con_playlist</b> 是一个反转后的播放列表名"
+msgstr ""
 
 #: ../src/pragha-playlists-mgmt.c:153
 #, c-format
 msgid "Do you want to overwrite the playlist: %s ?"
-msgstr "确认覆盖播放列表 %s ？"
+msgstr "Ar norite perrašyti grojaraštį: %s ?"
 
 #: ../src/pragha-playlists-mgmt.c:530
 msgid "Choose a new name"
-msgstr "选择一个新的名字"
+msgstr "Pasirinkite naują pavadinimą"
 
 #: ../src/pragha-playlists-mgmt.c:579
 #, c-format
 msgid "Do you want to delete the item: %s ?"
-msgstr "确认删除 %s ？"
+msgstr "Ar norite ištrinti elementą: %s ?"
 
 #: ../src/pragha-playlists-mgmt.c:609
 msgid "Export playlist to file"
-msgstr "导出播放列表到文件中"
+msgstr "Eksportuoti grojaraštį į failą"
 
 #: ../src/pragha-playlists-mgmt.c:613
 msgid "_Save"
-msgstr "保存"
+msgstr ""
 
 #: ../src/pragha-playlists-mgmt.c:1050
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:948
@@ -664,17 +667,17 @@ msgstr ""
 
 #: ../src/pragha-playlists-mgmt.c:1223
 msgid "What do you want to do?"
-msgstr "你想要做什么？"
+msgstr "Ką norite daryti?"
 
 #: ../src/pragha-playlists-mgmt.c:1225
 #, c-format
 msgid "Replace the playlist \"%s\""
-msgstr ""
+msgstr "Pakeisti grojaraštį \"%s\""
 
 #: ../src/pragha-playlists-mgmt.c:1230
 #, c-format
 msgid "Add to playlist \"%s\""
-msgstr ""
+msgstr "Pridėti į grojaraštį \"%s\""
 
 #: ../src/pragha-preferences-dialog.c:193
 msgid ""
@@ -682,61 +685,63 @@ msgid ""
 "A maximum of six patterns are allowed.\n"
 "Wildcards are not accepted as of now ( patches welcome :-) )."
 msgstr ""
-"匹配式必须是如下格式:<filename>;<filename>;....\n"
-"最多支持6个。\n"
-"通配符目前不支持（欢迎patchs ^_^）"
+"Šablonai turėtų būti tokios formos:<failo pavadinimas>;<failo "
+"pavadinimas>;....\n"
+"Daugiausiai leidžiami šeši šablonai.\n"
+"Pakaitos simboliai kol kas nėra priimami ( programos taisiniai yra "
+"sveikintini :-) )."
 
 #: ../src/pragha-preferences-dialog.c:216
 msgid "Album art pattern"
-msgstr "歌手匹配式"
+msgstr "Albumo viršelio šablonas"
 
 #: ../src/pragha-preferences-dialog.c:527
 #: ../src/pragha-preferences-dialog.c:1147
 msgid "Start normal"
-msgstr "正常启动"
+msgstr "Paleisti įprastai"
 
 #: ../src/pragha-preferences-dialog.c:531
 #: ../src/pragha-preferences-dialog.c:1148
 msgid "Start fullscreen"
-msgstr "全屏启动"
+msgstr "Paleisti visame ekrane"
 
 #: ../src/pragha-preferences-dialog.c:535
 #: ../src/pragha-preferences-dialog.c:1149
 msgid "Start in system tray"
-msgstr "最小化到托盘启动"
+msgstr "Paleisti sistemos dėkle"
 
 #. Create a folder chooser dialog
 #: ../src/pragha-preferences-dialog.c:675
 msgid "Select a folder to add to library"
-msgstr "选择一个目录加入到“库”中"
+msgstr "Pasirinkite aplanką, kurį pridėsite į fonoteką"
 
 #: ../src/pragha-preferences-dialog.c:679
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:976
 msgid "_Open"
-msgstr "打开"
+msgstr "_Atverti"
 
 #: ../src/pragha-preferences-dialog.c:904
 #: ../src/pragha-preferences-dialog.c:1317
 msgid "Audio"
-msgstr "音频"
+msgstr "Garsas"
 
 #: ../src/pragha-preferences-dialog.c:906
 msgid "Audio sink"
-msgstr "音频输出"
+msgstr "Garso posistemė"
 
 #: ../src/pragha-preferences-dialog.c:910
 #: ../src/pragha-preferences-dialog.c:929
 #: ../src/pragha-preferences-dialog.c:935
 msgid "Restart Required"
-msgstr "需要重启"
+msgstr "Reikalingas Paleidimas iš Naujo"
 
 #: ../src/pragha-preferences-dialog.c:925
 msgid "Audio Device"
-msgstr "音频设备"
+msgstr "Garso Įrenginys"
 
 #: ../src/pragha-preferences-dialog.c:934
 msgid "Use software mixer"
-msgstr "使用软件混合器"
+msgstr "Naudoti programinės įrangos maišiklį"
 
 #: ../src/pragha-preferences-dialog.c:972
 msgid "Can not change directories while they are analyzing."
@@ -744,29 +749,29 @@ msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:982
 msgid "Folders"
-msgstr "文件夹"
+msgstr "Aplankai"
 
 #: ../src/pragha-preferences-dialog.c:1001 ../src/pragha.c:206
 msgid "_Add"
-msgstr "添加"
+msgstr "_Pridėti"
 
 #: ../src/pragha-preferences-dialog.c:1002
 msgid "_Remove"
-msgstr "删除"
+msgstr "Ša_linti"
 
 #: ../src/pragha-preferences-dialog.c:1018
 msgid "Merge folders in the folders estructure view"
-msgstr "在目录结构视图中合并目录"
+msgstr "Sulieti aplankus į aplankų struktūros rodinį"
 
 #: ../src/pragha-preferences-dialog.c:1021
 msgid "Sort albums by release year"
-msgstr "按发行年份排序"
+msgstr "Rikiuoti albumus pagal laidos metus"
 
 #. Labels
 #: ../src/pragha-preferences-dialog.c:1064
 #: ../src/pragha-preferences-dialog.c:1297
 msgid "Appearance"
-msgstr "外观"
+msgstr "Išvaizda"
 
 #: ../src/pragha-preferences-dialog.c:1066
 msgid "Use system title bar and borders"
@@ -778,93 +783,93 @@ msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1078
 msgid "Highlight rows on current playlist"
-msgstr "为播放列表交替染色"
+msgstr "Paryškinti eilutes esamame grojaraštyje"
 
 #: ../src/pragha-preferences-dialog.c:1081
 msgid "Controls"
-msgstr "Controls"
+msgstr "Valdikliai"
 
 #: ../src/pragha-preferences-dialog.c:1083
 msgid "Show Album art in Panel"
-msgstr "在表盘中显示专辑"
+msgstr "Rodyti Skydelyje Albumo viršelį"
 
 #: ../src/pragha-preferences-dialog.c:1086
 msgid "Size of Album art"
-msgstr "专辑大小"
+msgstr "Albumo viršelio Dydis"
 
 #: ../src/pragha-preferences-dialog.c:1091
 msgid "Album art file pattern"
-msgstr "专辑匹配式"
+msgstr "Albumo viršelio failo šablonas"
 
 #: ../src/pragha-preferences-dialog.c:1135
 msgid "Search"
-msgstr "搜索"
+msgstr "Paieška"
 
 #. Instant search.
 #: ../src/pragha-preferences-dialog.c:1137 ../src/pragha-search-entry.c:41
 msgid "Search while typing"
-msgstr "搜索时即时显示结果"
+msgstr "Ieškoti, renkant tekstą"
 
 #. Aproximate search.
 #: ../src/pragha-preferences-dialog.c:1140 ../src/pragha-search-entry.c:48
 msgid "Search similar words"
-msgstr "搜索相似的词"
+msgstr "Ieškoti panašių žodžių"
 
 #: ../src/pragha-preferences-dialog.c:1143
 msgid "When starting pragha"
-msgstr "打开 pragha 时"
+msgstr "Paleidžiant Pragha"
 
 #: ../src/pragha-preferences-dialog.c:1146
 msgid "Remember last window state"
-msgstr "记住最后的窗口状态"
+msgstr "Prisiminti paskutinę lango būseną"
 
 #: ../src/pragha-preferences-dialog.c:1152
 msgid "Restore last playlist"
-msgstr "恢复最后的播放列表"
+msgstr "Atkurti paskutinį grojaraštį"
 
 #: ../src/pragha-preferences-dialog.c:1155
 msgid "When adding folders"
-msgstr "在添加文件夹时"
+msgstr "Pridedant aplankus"
 
 #: ../src/pragha-preferences-dialog.c:1156 ../src/pragha.c:197
 msgid "Add files recursively"
-msgstr "递归添加文件"
+msgstr "Pridėti failus su pakatalogiais"
 
 #: ../src/pragha-preferences-dialog.c:1180
 #: ../src/pragha-preferences-dialog.c:1332
 msgid "Desktop"
-msgstr "桌面"
+msgstr "Darbalaukis"
 
 #: ../src/pragha-preferences-dialog.c:1182
 msgid "Show Pragha icon in the notification area"
-msgstr "在通知栏中显示 Pragha"
+msgstr "Rodyti Pragha piktogramą pranešimų srityje"
 
 #: ../src/pragha-preferences-dialog.c:1185
 msgid "Minimize Pragha when closing window"
-msgstr "当点击关闭按钮时最小化Pragha"
+msgstr "Suskleisti Pragha, užveriant langą"
 
 #: ../src/pragha-preferences-dialog.c:1206
 #: ../src/pragha-preferences-dialog.c:1301
 msgid "Plugins"
-msgstr "插件"
+msgstr "Įskiepiai"
 
 #. The main preferences dialog
 #: ../src/pragha-preferences-dialog.c:1288
 msgid "Preferences"
-msgstr "Pragha首选项"
+msgstr "Nuostatos"
 
 #: ../src/pragha-preferences-dialog.c:1299
 msgid "General"
-msgstr "通用"
+msgstr "Bendra"
 
 #: ../src/pragha-preferences-dialog.c:1336
 msgid "Services"
-msgstr "网络服务"
+msgstr "Tarnybos"
 
 #. Add to dialog
 #: ../src/pragha-preferences-dialog.c:1349
 msgid "Preferences of Pragha"
-msgstr "Pragha首选项"
+msgstr "Pragha Nuostatos"
 
 #: ../src/pragha-scanner.c:93
 #, c-format
@@ -877,61 +882,63 @@ msgstr ""
 
 #: ../src/pragha-scanner.c:250
 msgid "Library scan complete"
-msgstr "“库”扫描完毕"
+msgstr "Fonotekos skenavimas užbaigtas"
 
 #: ../src/pragha-statusicon.c:174 ../src/pragha-toolbar.c:174
 #: ../src/pragha-toolbar.c:524
 msgid "<b>Not playing</b>"
-msgstr "<b>未播放</b>"
+msgstr "<b>Negrojama</b>"
 
 #: ../src/pragha-tags-dialog.c:119
 msgid "Track No"
-msgstr "曲目标号"
+msgstr "Takelio Nr"
 
 #: ../src/pragha-tags-dialog.c:122
 msgid "File"
-msgstr "文件"
+msgstr "Failas"
 
 #. The main edit dialog
 #: ../src/pragha-tags-dialog.c:457 ../src/pragha-tags-dialog.c:659
 msgid "Details"
-msgstr "详细"
+msgstr "Išsamiau"
 
 #: ../src/pragha-tags-dialog.c:559
 msgid "channel"
 msgid_plural "channels"
-msgstr[0] "声道"
+msgstr[0] "kanalas"
+msgstr[1] "kanalai"
+msgstr[2] "kanalų"
 
 #: ../src/pragha-tags-dialog.c:578
 msgid "Channels"
-msgstr "声道"
+msgstr "Kanalai"
 
 #: ../src/pragha-tags-dialog.c:579
 msgid "Samplerate"
-msgstr "采样率"
+msgstr "Skaitmeninimo dažnis"
 
 #: ../src/pragha-tags-dialog.c:580
 msgid "Folder"
-msgstr "文件夹"
+msgstr "Aplankas"
 
 #: ../src/pragha-tags-dialog.c:829
 msgid "Selection to"
-msgstr "保存所选"
+msgstr ""
 
 #: ../src/pragha-tags-dialog.c:867
 msgid "Open folder"
-msgstr "打开文件夹"
+msgstr "Atverti aplanką"
 
 #: ../src/pragha-tags-mgmt.c:197
 #, c-format
 msgid ""
 "Do you want to set the track number of ALL of the selected tracks to: %d ?"
-msgstr ""
+msgstr "Ar norite nustatyti VISŲ pasirinktų takelių takelio numerį į: %d ?"
 
 #: ../src/pragha-tags-mgmt.c:215
 #, c-format
 msgid "Do you want to set the title tag of ALL of the selected tracks to: %s ?"
-msgstr ""
+msgstr "Ar norite nustatyti VISŲ pasirinktų takelių pavadinimo žymę į: %s ?"
 
 #: ../src/pragha-toolbar.c:150
 #, c-format
@@ -939,56 +946,58 @@ msgid ""
 "%s <small><span weight=\"light\">by</span></small> %s <small><span weight="
 "\"light\">in</span></small> %s"
 msgstr ""
-"%s <small><span weight=\"light\">由</span></small> %s <small><span weight="
-"\"light\">位于</span></small> %s"
+"%s <small><span weight=\"light\">atlieka</span></small> %s <small><span "
+"weight=\"light\">albume</span></small> %s"
 
 #: ../src/pragha-toolbar.c:155
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:52
 #, c-format
 msgid "%s <small><span weight=\"light\">by</span></small> %s"
-msgstr "%s <small><span weight=\"light\">由</span></small> %s"
+msgstr "%s <small><span weight=\"light\">atlieka</span></small> %s"
 
 #: ../src/pragha-toolbar.c:159
 #, c-format
 msgid "%s <small><span weight=\"light\">in</span></small> %s"
-msgstr "%s <small><span weight=\"light\">于</span></small> %s"
+msgstr "%s <small><span weight=\"light\">albume</span></small> %s"
 
 #: ../src/pragha-toolbar.c:809
 msgid "Previous Track"
-msgstr "上一首歌曲"
+msgstr "Ankstesnis Takelis"
 
 #: ../src/pragha-toolbar.c:813
 msgid "Play / Pause Track"
-msgstr "播放/暂停歌曲"
+msgstr "Groti / Pristabdyti Takelį"
 
 #: ../src/pragha-toolbar.c:817
 msgid "Stop playback"
-msgstr "停止播放"
+msgstr "Stabdyti grojimą"
 
 #: ../src/pragha-toolbar.c:821
 msgid "Next Track"
-msgstr "下一首"
+msgstr "Kitas Takelis"
 
 #: ../src/pragha-toolbar.c:853
 msgid "Leave Fullscreen"
-msgstr "离开全屏"
+msgstr "Išeiti iš Viso Ekrano"
 
 #: ../src/pragha-toolbar.c:857
 msgid "Play songs in a random order"
-msgstr "乱序播放"
+msgstr "Groti dainas atsitiktine tvarka"
 
 #: ../src/pragha-toolbar.c:860
 msgid "Repeat playback list at the end"
-msgstr "重复播放"
+msgstr "Pabaigoje kartoti grojimo sąrašą"
 
 #: ../src/pragha-utils.c:239
 msgid "day"
 msgid_plural "days"
-msgstr[0] "天"
+msgstr[0] "diena"
+msgstr[1] "dienos"
+msgstr[2] "dienų"
 
 #: ../src/pragha-utils.c:486
 msgid "Unable to open the browser"
-msgstr "无法打开浏览器"
+msgstr "Nepavyko atverti naršyklę"
 
 #: ../src/pragha-window.c:115
 #, c-format
@@ -997,182 +1006,182 @@ msgid ""
 "(%s)\n"
 "<b>Reason:</b> %s"
 msgstr ""
-"<b>无法播放当前曲目</b>\n"
+"<b>Klaida, grojant esamą takelį.</b>\n"
 "(%s)\n"
-"<b>原因是：</b> %s"
+"<b>Priežastis:</b> %s"
 
 #: ../src/pragha-window.c:118
 msgid "_Stop"
-msgstr "停止"
+msgstr "_Stabdyti"
 
 #: ../src/pragha-window.c:119
 msgid "_Next"
-msgstr "下一首"
+msgstr "_Kitas"
 
 #: ../src/pragha.c:175
 msgid "Select a file to play"
-msgstr "选择一个文件来播放"
+msgstr "Pasirinkite norimą groti failą"
 
 #: ../src/pragha.c:219 ../plugins/lastfm/pragha-lastfm-plugin.c:980
 msgid "Supported media"
-msgstr "所有支持的媒体"
+msgstr "Palaikoma medija"
 
 #: ../src/pragha.c:305
 msgid "All files"
-msgstr "所有文件"
+msgstr "Visi failai"
 
 #: ../src/pragha.c:380
 msgid "Enter the URL of an internet radio stream"
-msgstr "输入感兴趣的电台地址"
+msgstr "Įveskite internetinio radijo srauto URL"
 
 #: ../src/pragha.c:385
 msgid "Give it a name to save"
-msgstr "保存为"
+msgstr "Suteikite jam vardą, siekiant įrašyti"
 
 #: ../src/pragha.c:403
 msgid "Add a location"
-msgstr "添加网络地址"
+msgstr "Pridėkite vietą"
 
 #: ../src/pragha.c:518
 msgid "translator-credits"
-msgstr "翻译者"
+msgstr "Moo"
 
 #. Setup application name and pulseaudio role
 #: ../src/pragha.c:686 ../src/pragha.c:918 ../src/pragha.c:1295
 #: ../plugins/dlna/pragha-dlna-plugin.c:220
 #: ../plugins/dlna/pragha-dlna-plugin.c:222
 msgid "Pragha Music Player"
-msgstr "Pragha音乐播放器"
+msgstr "Pragha Muzikos Grotuvas"
 
 #: ../data/pragha.desktop.in.h:1
 msgid "Music Player"
-msgstr "音乐播放器"
+msgstr "Muzikos Grotuvas"
 
 #: ../data/pragha.desktop.in.h:2
 msgid "Manage and listen to music"
-msgstr "管理和听音乐"
+msgstr "Tvarkyti ir klausytis muzikos"
 
 #: ../plugins/acoustid/pragha-acoustid-plugin.c:99
 #: ../plugins/acoustid/pragha-acoustid-plugin.c:426
 msgid "Search tags on AcoustID"
-msgstr ""
+msgstr "Ieškoti žymių per AcoustID"
 
 #: ../plugins/acoustid/pragha-acoustid-plugin.c:259
 msgid "AcoustID not found any similar song"
-msgstr ""
+msgstr "AcoustID nerado jokios panašios dainos"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:477
 msgid "Audio/Data CD"
-msgstr "Audio/Data CD"
+msgstr "Garso/Duomenų CD"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:478
 msgid "An audio CD was inserted"
-msgstr ""
+msgstr "Buvo įdėtas garso CD"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:479
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:519
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:730
 msgid "Add Audio _CD"
-msgstr "添加整张CD(_C)"
+msgstr "Pridėti Garso _CD"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:622
 msgid "Audio CD"
-msgstr "Audio CD"
+msgstr "Garso CD"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:624
 msgid "Audio CD Device"
-msgstr "音频CD设备"
+msgstr "Garso CD Įrenginys"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:644
 msgid "Connect to CDDB server"
-msgstr "连接到CDDB服务器"
+msgstr ""
 
 #: ../plugins/devices/pragha-devices-plugin.c:93
 msgid "Ignore"
-msgstr ""
+msgstr "Nepaisyti"
 
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:89
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:262
 msgid "Search music on DLNA server"
-msgstr ""
+msgstr "Ieškoti muzikos DLNA serveryje"
 
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:205
 #, c-format
 msgid "Music of the %s server was added."
-msgstr ""
+msgstr "Buvo pridėta %s serverio muzika."
 
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:210
 msgid "Could not find any DLNA server."
-msgstr ""
+msgstr "Nepavyko rasti jokio DLNA serverio."
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:174
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1568
 msgid "_Lastfm"
-msgstr "_Last.FM"
+msgstr "_Lastfm"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:175
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:215
 msgid "Love track"
-msgstr "设为喜爱曲目"
+msgstr "Patinka takelis"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:177
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:217
 msgid "Unlove track"
-msgstr "从喜爱曲目中删除"
+msgstr "Nepatinka takelis"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:179
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:972
 msgid "Import a XSPF playlist"
-msgstr "导入XSPF播放列表"
+msgstr "Importuoti XSPF grojaraštį"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:181
 msgid "Add favorites"
-msgstr "添加到我最喜爱的"
+msgstr "Pridėti mėgstamus"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:183
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:219
 msgid "Add similar"
-msgstr "添加相似歌曲"
+msgstr "Pridėti panašius"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:432
 msgid "Unable to establish conection with Last.fm"
-msgstr "无法连接 Last.fm"
+msgstr "Nepavyko užmegzti ryšio su Last.fm"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:636
 msgid "Last.fm suggested a tag correction"
-msgstr ""
+msgstr "Last.fm pasiūlė žymės pataisymą"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:662
 msgid "Love song on Last.fm failed."
-msgstr "在Last.FM上设置喜爱曲目失败"
+msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:680
 msgid "Unlove song on Last.fm failed."
-msgstr "在Last.FM上取消喜爱曲目失败"
+msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:787
 #, c-format
 msgid "Added %d tracks of %d suggested from Last.fm"
-msgstr "从Last.FM上添加了%d首推荐（共%d首）"
+msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:790
 #, c-format
 msgid "Last.fm doesn't suggest any similar track"
-msgstr ""
+msgstr "Last.fm nesiūlo jokių panašių takelių"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:794
 #, c-format
 msgid "Added %d songs of the last %d loved on Last.fm."
-msgstr "从Last.FM上添加了%d首喜爱曲目（共%d首）"
+msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:797
 #, c-format
 msgid "You don't have favorite tracks on Last.fm"
-msgstr ""
+msgstr "Jūs neturite mėgstamų takelių tarnyboje Last.fm"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1267
 msgid "Last.fm submission failed"
-msgstr ""
+msgstr "Last.fm pateikimas nepavyko"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1269
 msgid "Track scrobbled on Last.fm"
@@ -1180,7 +1189,7 @@ msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1379
 msgid "Update current song on Last.fm failed."
-msgstr "上传当前歌曲到Last.FM失败"
+msgstr "Esamos dainos atnaujinimas sistemoje Last.fm nepavyko."
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1806
 msgid "Scrobble on Last.fm"
@@ -1188,33 +1197,33 @@ msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1809
 msgid "Username"
-msgstr "用户名"
+msgstr "Naudotojo vardas"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1816
 msgid "Password"
-msgstr "密码"
+msgstr "Slaptažodis"
 
 #: ../plugins/notify/pragha-notify-plugin.c:165
 #, c-format
 msgid "by <b>%s</b> in <b>%s</b> <b>(%s)</b>"
-msgstr "由 <b>%s</b> 于 <b>%s</b> <b>(%s)</b>"
+msgstr "atlieka <b>%s</b> albume <b>%s</b> <b>(%s)</b>"
 
 #: ../plugins/notify/pragha-notify-plugin.c:267
 msgid "Notifications"
-msgstr "通知"
+msgstr "Pranešimai"
 
 #: ../plugins/notify/pragha-notify-plugin.c:269
 msgid "Show Album art in notifications"
-msgstr "在通知中显示专辑"
+msgstr "Rodyti pranešimuose Albumo viršelį"
 
 #: ../plugins/notify/pragha-notify-plugin.c:274
 msgid "Add actions to change track in notifications"
-msgstr "在通知中添加切换动作"
+msgstr "Pridėti į pranešimus veiksmus keisti takelį"
 
 #: ../plugins/removable-media/pragha-devices-removable.c:211
 #, c-format
 msgid "Unable to access \"%s\""
-msgstr ""
+msgstr "Nepavyksta pasiekti \"%s\""
 
 #: ../plugins/removable-media/pragha-devices-removable.c:214
 #: ../plugins/removable-media/pragha-devices-removable.c:300
@@ -1236,11 +1245,11 @@ msgstr ""
 
 #: ../plugins/song-info/pragha-song-info-plugin.c:377
 msgid "Song Information"
-msgstr ""
+msgstr "Dainos Informacija"
 
 #: ../plugins/song-info/pragha-song-info-plugin.c:379
 msgid "Download the album art while playing their songs."
-msgstr ""
+msgstr "Grojant dainą per tarnybas, atsisiųsti albumo viršelį."
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:51
 #, c-format
@@ -1250,7 +1259,7 @@ msgstr ""
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:58
 #, c-format
 msgid "Artist info"
-msgstr ""
+msgstr "Atlikėjo informacija"
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:59
 #, c-format
@@ -1260,24 +1269,27 @@ msgstr ""
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:81
 #: ../plugins/song-info/pragha-song-info-thread-pane.c:100
 msgid "Lyrics not found."
-msgstr ""
+msgstr "Dainos žodžių nerasta."
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:84
 #: ../plugins/song-info/pragha-song-info-thread-pane.c:104
 msgid "Artist information not found."
-msgstr ""
+msgstr "Atlikėjo informacijos nerasta."
 
 #: ../plugins/song-info/pragha-song-info-thread-pane.c:185
 #: ../plugins/song-info/pragha-song-info-thread-pane.c:193
 msgid "Searching..."
-msgstr ""
+msgstr "Ieškoma..."
 
 #: ../plugins/tunein/pragha-tunein-plugin.c:92
 #: ../plugins/tunein/pragha-tunein-plugin.c:291
 msgid "Search radio on TuneIn"
-msgstr ""
+msgstr "Ieškoti radijo per TuneIn"
 
 #: ../plugins/tunein/pragha-tunein-plugin.c:220
 #: ../plugins/tunein/pragha-tunein-plugin.c:231
 msgid "Search in TuneIn"
-msgstr ""
+msgstr "Ieškoti sistemoje TuneIn"
+
+#~ msgid "Use Gnome 3 HIG"
+#~ msgstr "Naudoti Gnome 3 HIG"
