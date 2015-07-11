@@ -408,6 +408,27 @@ pragha_window_init (PraghaApplication *pragha)
 	pragha_init_session_support(pragha);
 }
 
+static void
+prefrences_change_icon_size (PraghaPreferences *preferences,
+                             GParamSpec        *pspec,
+                             GtkWidget         *button)
+{
+	GIcon *icon = NULL;
+
+  	const gchar *fallbacks_icon_menu[] = {
+		"open-menu-symbolic",
+		"emblem-system-symbolic",
+		"open-menu",
+		"emblem-system",
+		NULL,
+	};
+
+  	icon = g_themed_icon_new_from_names ((gchar **)fallbacks_icon_menu, -1);
+	gtk_button_set_image (GTK_BUTTON (button),
+		gtk_image_new_from_gicon(icon, pragha_preferences_get_toolbar_size(preferences)));
+	g_object_unref (icon);
+}
+
 void
 pragha_window_new (PraghaApplication *pragha)
 {
@@ -561,7 +582,7 @@ pragha_window_new (PraghaApplication *pragha)
 
 	icon = g_themed_icon_new_from_names ((gchar **)fallbacks_icon_menu, -1);
 	gtk_button_set_image (GTK_BUTTON (menu_button),
-		gtk_image_new_from_gicon(icon, GTK_ICON_SIZE_LARGE_TOOLBAR));
+		gtk_image_new_from_gicon(icon, pragha_preferences_get_toolbar_size(preferences)));
 	g_object_unref (icon);
 
 	menu_ui = pragha_application_get_menu_ui(pragha);
@@ -571,6 +592,9 @@ pragha_window_new (PraghaApplication *pragha)
 	g_object_bind_property (preferences, "show-menubar",
 	                        menu_button, "visible",
 	                        binding_flags | G_BINDING_INVERT_BOOLEAN);
+
+	g_signal_connect (preferences, "notify::toolbar-size",
+	                  G_CALLBACK (prefrences_change_icon_size), menu_button);
 
 	pragha_toolbar_add_extra_button (toolbar, menu_button);
 

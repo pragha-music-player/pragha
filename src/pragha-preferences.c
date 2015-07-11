@@ -27,6 +27,7 @@
 
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <gtk/gtk.h>
 
 #include "pragha-musicobject.h"
 #include "pragha-utils.h"
@@ -67,6 +68,7 @@ struct _PraghaPreferencesPrivate
 	gboolean   show_album_art;
 	gint       album_art_size;
 	gchar     *album_art_pattern;
+	GtkIconSize toolbar_size;
 	gboolean   show_status_bar;
 	gboolean   show_status_icon;
 	gboolean   show_menubar;
@@ -107,6 +109,7 @@ enum
 	PROP_SHOW_ALBUM_ART,
 	PROP_ALBUM_ART_SIZE,
 	PROP_ALBUM_ART_PATTERN,
+	PROP_TOOLBAR_SIZE,
 	PROP_SHOW_STATUS_BAR,
 	PROP_SHOW_STATUS_ICON,
 	PROP_SHOW_MENUBAR,
@@ -1097,6 +1100,33 @@ pragha_preferences_set_album_art_pattern (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_toolbar_size:
+ *
+ */
+GtkIconSize
+pragha_preferences_get_toolbar_size (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), GTK_ICON_SIZE_LARGE_TOOLBAR);
+
+	return preferences->priv->toolbar_size;
+}
+
+/**
+ * pragha_preferences_set_toolbar_size:
+ *
+ */
+void
+pragha_preferences_set_toolbar_size (PraghaPreferences *preferences,
+                                     GtkIconSize        toolbar_size)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->toolbar_size = toolbar_size;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_TOOLBAR_SIZE]);
+}
+
+/**
  * pragha_preferences_get_show_status_bar:
  *
  */
@@ -1436,6 +1466,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gchar *audio_sink, *audio_device;
 	gdouble software_volume;
 	gint library_style, sidebar_size, secondary_sidebar_size, album_art_size;
+	GtkIconSize toolbar_size;
 	gboolean fuse_folders, sort_by_year;
 	const gchar *user_config_dir;
 	gchar *pragha_config_dir = NULL;
@@ -1737,6 +1768,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_album_art_pattern(preferences, album_art_pattern);
 	}
 
+	toolbar_size = g_key_file_get_integer(priv->rc_keyfile,
+	                                      GROUP_WINDOW,
+	                                      KEY_TOOLBAR_SIZE,
+	                                      &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_toolbar_size(preferences, toolbar_size);
+	}
+
 	show_status_bar = g_key_file_get_boolean(priv->rc_keyfile,
 	                                         GROUP_WINDOW,
 	                                         KEY_STATUS_BAR,
@@ -1992,6 +2035,10 @@ pragha_preferences_finalize (GObject *object)
 		pragha_preferences_remove_key(preferences,
 		                              GROUP_GENERAL,
 		                              KEY_ALBUM_ART_PATTERN);
+	g_key_file_set_integer(priv->rc_keyfile,
+	                       GROUP_WINDOW,
+	                       KEY_TOOLBAR_SIZE,
+	                       priv->toolbar_size);
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_WINDOW,
 	                       KEY_STATUS_BAR,
@@ -2140,6 +2187,9 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_ALBUM_ART_PATTERN:
 			g_value_set_string (value, pragha_preferences_get_album_art_pattern(preferences));
 			break;
+		case PROP_TOOLBAR_SIZE:
+			g_value_set_enum (value, pragha_preferences_get_toolbar_size(preferences));
+			break;
 		case PROP_SHOW_STATUS_BAR:
 			g_value_set_boolean (value, pragha_preferences_get_show_status_bar(preferences));
 			break;
@@ -2249,6 +2299,9 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_ALBUM_ART_PATTERN:
 			pragha_preferences_set_album_art_pattern(preferences, g_value_get_string(value));
+			break;
+		case PROP_TOOLBAR_SIZE:
+			pragha_preferences_set_toolbar_size(preferences, g_value_get_enum(value));
 			break;
 		case PROP_SHOW_STATUS_BAR:
 			pragha_preferences_set_show_status_bar(preferences, g_value_get_boolean(value));
@@ -2545,6 +2598,18 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                    "Album Art Pattern Preferences",
 		                    "",
 		                    PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:toolbar_size:
+	  *
+	  */
+	gParamSpecs[PROP_TOOLBAR_SIZE] =
+		g_param_spec_enum ("toolbar-size",
+		                   "ToolbarSize",
+		                   "Toolbar Size Preferences",
+		                   GTK_TYPE_ICON_SIZE,
+		                   GTK_ICON_SIZE_LARGE_TOOLBAR,
+		                   PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:show_status_bar:

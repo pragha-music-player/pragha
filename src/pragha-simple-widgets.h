@@ -22,13 +22,26 @@
 
 G_BEGIN_DECLS
 
+
 typedef struct _PraghaTrackProgress PraghaTrackProgress;
 typedef struct _PraghaContainer     PraghaContainer;
+typedef struct _PraghaToolbarButton PraghaToolbarButton;
+typedef struct _PraghaToggleButton  PraghaToggleButton;
 
 gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon);
 
 PraghaTrackProgress *pragha_track_progress_new (void);
+
 PraghaContainer     *pragha_container_new      (void);
+
+void pragha_toolbar_button_set_icon_name (PraghaToolbarButton *button, const gchar *icon_name);
+void pragha_toolbar_button_set_icon_size (PraghaToolbarButton *button, GtkIconSize  icon_size);
+PraghaToolbarButton *pragha_toolbar_button_new (const gchar *icon_name);
+
+void pragha_toggle_button_set_icon_name (PraghaToggleButton *button, const gchar *icon_name);
+void pragha_toggle_button_set_icon_size (PraghaToggleButton *button, GtkIconSize  icon_size);
+PraghaToggleButton *pragha_toggle_button_new (const gchar *icon_name);
+
 
 G_END_DECLS
 
