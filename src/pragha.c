@@ -33,6 +33,7 @@
 #include <libintl.h>
 #include <tag_c.h>
 
+#include "pragha-hig.h"
 #include "pragha-window.h"
 #include "pragha-playback.h"
 #include "pragha-musicobject-mgmt.h"
@@ -366,32 +367,30 @@ pragha_application_add_location (PraghaApplication *pragha)
 {
 	PraghaPlaylist *playlist;
 	PraghaDatabase *cdbase;
-	GtkWidget *dialog;
-	GtkWidget *vbox, *hbox;
-	GtkWidget *label_new, *uri_entry, *label_name, *name_entry;
-	const gchar *uri = NULL, *name = NULL;
-	gchar *clipboard_location = NULL, *parsed_uri = NULL;
 	PraghaMusicobject *mobj;
+	GtkWidget *dialog, *table, *uri_entry, *label_name, *name_entry;
+	const gchar *uri = NULL, *name = NULL;
+	gchar *clipboard_location = NULL, *real_name = NULL;
+	GSList *list = NULL, *i = NULL;
+	GList *mlist = NULL;
+	guint row = 0;
 	gint result;
 
 	/* Create dialog window */
-	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
 
-	label_new = gtk_label_new_with_mnemonic(_("Enter the URL of an internet radio stream"));
+	table = pragha_hig_workarea_table_new ();
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Enter the URL of an internet radio stream"));
+
 	uri_entry = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(uri_entry), 255);
 
-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
+	pragha_hig_workarea_table_add_wide_control (table, &row, uri_entry);
+
 	label_name = gtk_label_new_with_mnemonic(_("Give it a name to save"));
 	name_entry = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(name_entry), 255);
 
-	gtk_box_pack_start(GTK_BOX(hbox), label_name, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(hbox), name_entry, TRUE, TRUE, 2);
-
-	gtk_box_pack_start(GTK_BOX(vbox), label_new, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), uri_entry, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 2);
+	pragha_hig_workarea_table_add_row (table, &row, label_name, name_entry);
 
 	/* Get item from clipboard to fill GtkEntry */
 	clipboard_location = totem_open_location_set_from_clipboard (uri_entry);
@@ -409,7 +408,7 @@ pragha_application_add_location (PraghaApplication *pragha)
 
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
 
-	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), vbox);
+	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), table);
 
 	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, -1);
 
@@ -424,23 +423,40 @@ pragha_application_add_location (PraghaApplication *pragha)
 		if (gtk_entry_get_text_length (GTK_ENTRY(uri_entry)))
 			uri = gtk_entry_get_text(GTK_ENTRY(uri_entry));
 
+		playlist = pragha_application_get_playlist (pragha);
+
 		if (string_is_not_empty(uri)) {
 			if (gtk_entry_get_text_length (GTK_ENTRY(name_entry)))
 				name = gtk_entry_get_text(GTK_ENTRY(name_entry));
 
-			parsed_uri = pragha_pl_get_first_playlist_item (uri);
-			mobj = new_musicobject_from_location(parsed_uri, name);
+			#ifdef HAVE_PLPARSER
+			list = pragha_totem_pl_parser_parse_from_uri (uri);
+			#else
+			list = g_slist_append (list, g_strdup(uri));
+			#endif
 
-			playlist = pragha_application_get_playlist (pragha);
-			pragha_playlist_append_single_song (playlist, mobj);
+			for (i = list; i != NULL; i = i->next) {
+				if (string_is_not_empty(name))
+					real_name = new_radio (playlist, i->data, name);
 
-			if (string_is_not_empty(name)) {
-				new_radio (playlist, parsed_uri, name);
+				mobj = new_musicobject_from_location (i->data, real_name);
+				mlist = g_list_append(mlist, mobj);
 
-				cdbase = pragha_application_get_database (pragha);
-				pragha_database_change_playlists_done (cdbase);
+				if (real_name) {
+					g_free (real_name);
+					real_name = NULL;
+				}
+				g_free(i->data);
 			}
-			g_free (parsed_uri);
+			g_slist_free(list);
+
+			/* Append playlist and save on database */
+
+			pragha_playlist_append_mobj_list (playlist, mlist);
+			g_list_free(mlist);
+
+			cdbase = pragha_application_get_database (pragha);
+			pragha_database_change_playlists_done (cdbase);
 		}
 		break;
 	case GTK_RESPONSE_CANCEL:

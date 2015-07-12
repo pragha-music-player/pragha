@@ -711,8 +711,11 @@ exit:
 #endif
 
 #ifdef HAVE_PLPARSER
-static void _on_pl_entry_parsed(TotemPlParser *parser, gchar *uri,
-				gpointer metadata, GSList **plitems)
+static void
+_on_pl_entry_parsed (TotemPlParser *parser,
+                     gchar         *uri,
+                     gpointer       metadata,
+                     GSList       **plitems)
 {
 	gchar *filename = NULL;
 
@@ -730,7 +733,7 @@ static void _on_pl_entry_parsed(TotemPlParser *parser, gchar *uri,
 GSList *
 pragha_totem_pl_parser_parse_from_uri (const gchar *uri)
 {
-	static TotemPlParser *pl_parser = NULL;
+	TotemPlParser *pl_parser = NULL;
 	GSList *plitems = NULL;
 	gchar *base;
 
@@ -741,15 +744,21 @@ pragha_totem_pl_parser_parse_from_uri (const gchar *uri)
 
 	base = get_display_filename(uri, TRUE);
 
-	if (totem_pl_parser_parse_with_base(pl_parser, uri, base, FALSE)
-	    != TOTEM_PL_PARSER_RESULT_SUCCESS) {
-		/* An error happens while parsing */
-		goto bad;
+	switch (totem_pl_parser_parse_with_base(pl_parser, uri, base, FALSE)) {
+		case TOTEM_PL_PARSER_RESULT_UNHANDLED:
+		case TOTEM_PL_PARSER_RESULT_IGNORED:
+			/* maybe it's the actual stream URL, then */
+			plitems = g_slist_append(plitems, g_strdup(uri));
+			break;
+		case TOTEM_PL_PARSER_RESULT_ERROR:
+			g_warning ("An error happens while parsing %s", uri);
+			break;
+		case TOTEM_PL_PARSER_RESULT_SUCCESS:
+		default:
+			break;
 	}
-
 	g_object_unref (pl_parser);
 
-bad:
 	g_free(base);
 
 	return plitems;
@@ -1185,25 +1194,40 @@ void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, PraghaPla
 	save_playlist(cplaylist, playlist_id, type);
 }
 
-void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name)
+gchar *
+new_radio (PraghaPlaylist *playlist,
+           const gchar    *uri,
+           const gchar    *basename)
 {
-	gint radio_id = 0;
+	PraghaDatabase *cdbase;
+	gchar *name = NULL;
+	gint radio_id = 0, i = 0;
 
-	if (string_is_empty(name)) {
+	if (string_is_empty(basename)) {
 		g_warning("Radio name is NULL");
-		return;
+		return NULL;
 	}
 
-	if ((radio_id = pragha_database_find_radio (pragha_playlist_get_database(cplaylist), name))) {
-		if (overwrite_existing_playlist(name, gtk_widget_get_toplevel(GTK_WIDGET(cplaylist))))
-			pragha_database_delete_radio (pragha_playlist_get_database(cplaylist), name);
-		else
-			return;
+	cdbase = pragha_playlist_get_database(playlist);
+
+	if (!pragha_database_find_radio (cdbase, basename)) {
+		name = g_strdup (basename);
+	}
+	else {
+		/* Get a new name */
+		do {
+			if (name)
+				g_free (name);
+			name = g_strdup_printf ("%s %i", basename, ++i);
+		} while (pragha_database_find_radio (cdbase, name));
 	}
 
-	radio_id = pragha_database_add_new_radio (pragha_playlist_get_database(cplaylist), name);
+  	/* Save a new radio */
 
-	pragha_database_add_radio_track (pragha_playlist_get_database(cplaylist), radio_id, uri);
+  	radio_id = pragha_database_add_new_radio (cdbase, name);
+	pragha_database_add_radio_track (cdbase, radio_id, uri);
+
+	return name;
 }
 
 PraghaPlaylistAction
