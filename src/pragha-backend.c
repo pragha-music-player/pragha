@@ -1,18 +1,18 @@
 /*************************************************************************/
-/* Copyright (C) 2010-2012 matias <mati86dl@gmail.com>			 */
-/* Copyright (C) 2012-2013 Pavel Vasin					 */
-/* 									 */
-/* This program is free software: you can redistribute it and/or modify	 */
-/* it under the terms of the GNU General Public License as published by	 */
-/* the Free Software Foundation, either version 3 of the License, or	 */
-/* (at your option) any later version.					 */
-/* 									 */
-/* This program is distributed in the hope that it will be useful,	 */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	 */
-/* GNU General Public License for more details.				 */
-/* 									 */
-/* You should have received a copy of the GNU General Public License	 */
+/* Copyright (C) 2010-2015 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2012-2013 Pavel Vasin                                   */
+/*                                                                       */
+/* This program is free software: you can redistribute it and/or modify  */
+/* it under the terms of the GNU General Public License as published by  */
+/* the Free Software Foundation, either version 3 of the License, or     */
+/* (at your option) any later version.                                   */
+/*                                                                       */
+/* This program is distributed in the hope that it will be useful,       */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
+/* GNU General Public License for more details.                          */
+/*                                                                       */
+/* You should have received a copy of the GNU General Public License     */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
@@ -65,6 +65,7 @@ struct PraghaBackendPrivate {
 	PraghaArtCache *art_cache;
 	GstElement *pipeline;
 	GstElement *audio_sink;
+	GstElement *preamp;
 	GstElement *equalizer;
 	guint timer;
 	gboolean is_live;
@@ -805,6 +806,12 @@ pragha_backend_get_equalizer (PraghaBackend *backend)
 	return backend->priv->equalizer;
 }
 
+GstElement *
+pragha_backend_get_preamp (PraghaBackend *backend)
+{
+	return backend->priv->preamp;
+}
+
 void
 pragha_backend_update_equalizer (PraghaBackend *backend, const gdouble *bands)
 {
@@ -1068,15 +1075,17 @@ pragha_backend_init (PraghaBackend *backend)
 
 		/* Test 10bands equalizer and test it. */
 		priv->equalizer = gst_element_factory_make ("equalizer-10bands", "equalizer");
-		if (priv->equalizer != NULL) {
+		priv->preamp = gst_element_factory_make ("volume", "preamp");
+
+		if (priv->equalizer != NULL && priv->preamp != NULL) {
 			GstElement *bin;
 			GstPad *pad, *ghost_pad;
 
 			bin = gst_bin_new ("audiobin");
-			gst_bin_add_many (GST_BIN(bin), priv->equalizer, priv->audio_sink, NULL);
-			gst_element_link_many (priv->equalizer, priv->audio_sink, NULL);
+			gst_bin_add_many (GST_BIN(bin), priv->preamp, priv->equalizer, priv->audio_sink, NULL);
+			gst_element_link_many (priv->preamp, priv->equalizer, priv->audio_sink, NULL);
 
-			pad = gst_element_get_static_pad (priv->equalizer, "sink");
+			pad = gst_element_get_static_pad (priv->preamp, "sink");
 			ghost_pad = gst_ghost_pad_new ("sink", pad);
 			gst_pad_set_active (ghost_pad, TRUE);
 			gst_element_add_pad (bin, ghost_pad);
@@ -1089,9 +1098,16 @@ pragha_backend_init (PraghaBackend *backend)
 			g_object_set (priv->pipeline, "audio-sink", priv->audio_sink, NULL);
 		}
 	} else {
+		if (priv->equalizer) {
+			g_object_unref(priv->equalizer);
+			priv->equalizer = NULL;
+		}
+		if (priv->preamp) {
+			g_object_unref(priv->preamp);
+			priv->preamp = NULL;
+		}
 		g_warning ("Failed to create audio-sink element. Use default sink, without equalizer.");
 
-		priv->equalizer = NULL;
 		g_object_set (priv->pipeline, "audio-sink", priv->audio_sink, NULL);
 	}
 
