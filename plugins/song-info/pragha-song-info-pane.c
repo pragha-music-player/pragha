@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2015 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -29,16 +29,14 @@
 
 #include "pragha-song-info-pane.h"
 
+#include "src/pragha-album-art.h"
 #include "src/pragha-utils.h"
 
 struct _PraghaSonginfoPane {
 	GtkScrolledWindow  parent;
 
-	/* Text widget */
-	GtkWidget         *text_view;
-
-	/* Info that show thde pane */
-	GLYR_GET_TYPE      info_type;
+	PraghaAlbumArt    *albumart_view;
+	GtkWidget         *lyrics_view;
 
 	/* Sidebar widgets */
 	GtkWidget         *pane_title;
@@ -47,36 +45,31 @@ struct _PraghaSonginfoPane {
 
 G_DEFINE_TYPE(PraghaSonginfoPane, pragha_songinfo_pane, GTK_TYPE_SCROLLED_WINDOW)
 
-enum {
-	SIGNAL_TYPE_CHANGED,
-	LAST_SIGNAL
-};
-static int signals[LAST_SIGNAL] = { 0 };
-
 /*
  * Menus definitions
  *
  **/
-static void pragha_songinfo_pane_show_artist_info_action (GtkAction *action, PraghaSonginfoPane *pane);
-static void pragha_songinfo_pane_show_lyrics_action      (GtkAction *action, PraghaSonginfoPane *pane);
 
 gchar *songinfo_pane_context_menu_xml = "<ui> \
 	<popup>                                   \
-	<menuitem action=\"Artist info\"/>        \
-	<menuitem action=\"Lyrics\"/>             \
+	<menuitem action=\"Show album art\"/>             \
 	</popup>                                  \
 	</ui>";
 
-GtkActionEntry songinfo_pane_context_aentries[] = {
-	{"Artist info", NULL, N_("Artist info"),
-	 "", "Artist info", G_CALLBACK(pragha_songinfo_pane_show_artist_info_action)},
-	{"Lyrics", NULL, N_("Lyrics"),
-	 "", "Lyrics", G_CALLBACK(pragha_songinfo_pane_show_lyrics_action)}
+static GtkToggleActionEntry songinfo_pane_toggles_entries[] = {
+	{"Show album art", NULL, N_("Show album art"),
+	 "", "Show album art", NULL, TRUE}
 };
 
 /*
  * Public Api
  */
+void
+pragha_songinfo_pane_set_album_art (PraghaSonginfoPane *pane,
+                                    const gchar        *uri)
+{
+	pragha_album_art_set_path (PRAGHA_ALBUM_ART(pane->albumart_view), uri);
+}
 
 void
 pragha_songinfo_pane_set_text (PraghaSonginfoPane *pane,
@@ -87,7 +80,7 @@ pragha_songinfo_pane_set_text (PraghaSonginfoPane *pane,
 	GtkTextIter iter;
 	GtkTextBuffer *buffer;
 
-	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (pane->text_view));
+	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (pane->lyrics_view));
 
 	gtk_text_buffer_set_text (buffer, "", -1);
 
@@ -108,9 +101,12 @@ pragha_songinfo_pane_set_text (PraghaSonginfoPane *pane,
 void
 pragha_songinfo_pane_clear_text (PraghaSonginfoPane *pane)
 {
-	GtkTextBuffer *buffer;
-	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (pane->text_view));
-	gtk_text_buffer_set_text (buffer, "", -1);
+	pragha_songinfo_pane_set_text (pane,
+	                               _("Why not enjoy a song?"),
+	                               _("Here you can view the information of your songs"),
+	                               NULL);
+
+	pragha_album_art_set_path (PRAGHA_ALBUM_ART(pane->albumart_view), NULL);
 }
 
 GtkWidget *
@@ -131,35 +127,12 @@ pragha_songinfo_pane_get_pane_context_menu (PraghaSonginfoPane *pane)
 	return pane->context_menu;
 }
 
-GLYR_GET_TYPE
-pragha_songinfo_pane_get_default_view (PraghaSonginfoPane *pane)
-{
-	return pane->info_type;
-}
-
 /*
  * Private
  */
 
 /* Menus */
 
-static void
-pragha_songinfo_pane_show_artist_info_action (GtkAction *action, PraghaSonginfoPane *pane)
-{
-	gtk_label_set_text (GTK_LABEL(pane->pane_title), _("Artist info"));
-	pane->info_type = GLYR_GET_ARTIST_BIO;
-
-	g_signal_emit (pane, signals[SIGNAL_TYPE_CHANGED], 0);
-}
-
-static void
-pragha_songinfo_pane_show_lyrics_action (GtkAction *action, PraghaSonginfoPane *pane)
-{
-	gtk_label_set_text (GTK_LABEL(pane->pane_title), _("Lyrics"));
-	pane->info_type = GLYR_GET_LYRICS;
-
-	g_signal_emit (pane, signals[SIGNAL_TYPE_CHANGED], 0);
-}
 
 /* Construction */
 
@@ -182,11 +155,15 @@ pragha_songinfo_pane_context_menu_new (PraghaSonginfoPane *pane)
 		            __func__, error->message);
 	}
 
-	gtk_action_group_add_actions (context_actions,
-	                              songinfo_pane_context_aentries,
-	                              G_N_ELEMENTS(songinfo_pane_context_aentries),
-	                              (gpointer) pane);
+	gtk_action_group_add_toggle_actions (context_actions,
+	                                     songinfo_pane_toggles_entries,
+	                                     G_N_ELEMENTS(songinfo_pane_toggles_entries),
+	                                     pane);
 	gtk_ui_manager_insert_action_group (context_menu, context_actions, 0);
+
+	GtkAction *action = gtk_ui_manager_get_action(context_menu, "/popup/Show album art");
+	g_object_bind_property (pane->albumart_view, "visible", action, "active",
+	                        G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL);
 
 	g_object_unref (context_actions);
 
@@ -203,14 +180,15 @@ pragha_songinfo_pane_finalize (GObject *object)
 	(*G_OBJECT_CLASS (pragha_songinfo_pane_parent_class)->finalize) (object);
 }
 
-static void
-pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
+static GtkWidget *
+pragha_songinfo_text_view_new (void)
 {
 	GtkWidget *view;
 	GtkTextBuffer *buffer;
 
-	view = gtk_text_view_new ();
-	gtk_text_view_set_editable (GTK_TEXT_VIEW (view), FALSE);
+  	view = gtk_text_view_new ();
+
+  	gtk_text_view_set_editable (GTK_TEXT_VIEW (view), FALSE);
 	gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW (view), FALSE);
 	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (view), GTK_WRAP_WORD);
 	gtk_text_view_set_accepts_tab (GTK_TEXT_VIEW (view), FALSE);
@@ -223,6 +201,33 @@ pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
 	gtk_text_buffer_create_tag(GTK_TEXT_BUFFER(buffer), "style_italic", "style", PANGO_STYLE_ITALIC, NULL);
 	gtk_text_buffer_create_tag(GTK_TEXT_BUFFER(buffer), "margin_top", "pixels-above-lines", 2, NULL);
 
+	return view;
+}
+
+static void
+pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
+{
+	GtkWidget *grid;
+
+	grid = gtk_grid_new ();
+	gtk_style_context_add_class (gtk_widget_get_style_context (GTK_WIDGET(grid)),
+	                             "view");
+
+	pane->albumart_view = pragha_album_art_new ();
+	pragha_album_art_set_size(pane->albumart_view, 128);
+	pragha_album_art_set_path(pane->albumart_view, NULL);
+
+	gtk_widget_set_hexpand (GTK_WIDGET(pane->albumart_view), TRUE);
+	gtk_grid_attach (GTK_GRID(grid),
+	                 GTK_WIDGET(pane->albumart_view),
+	                 0, 0, 1, 1);
+
+	pane->lyrics_view  = pragha_songinfo_text_view_new ();
+	gtk_widget_set_hexpand (GTK_WIDGET(pane->lyrics_view), TRUE);
+	gtk_grid_attach (GTK_GRID(grid),
+	                 GTK_WIDGET(pane->lyrics_view),
+	                 0, 1, 1, 1);
+
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (pane),
 	                                GTK_POLICY_AUTOMATIC,
 	                                GTK_POLICY_AUTOMATIC);
@@ -233,18 +238,14 @@ pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
 	gtk_scrolled_window_set_hadjustment (GTK_SCROLLED_WINDOW(pane), NULL);
 	gtk_scrolled_window_set_vadjustment (GTK_SCROLLED_WINDOW(pane), NULL);
 
-	gtk_container_set_border_width (GTK_CONTAINER (pane), 2);
-
-	gtk_container_add (GTK_CONTAINER (pane), view);
+	gtk_container_add (GTK_CONTAINER (pane), grid);
 
 	gtk_widget_show_all (GTK_WIDGET(pane));
 
-	pane->pane_title = gtk_label_new (_("Lyrics"));
+	pane->pane_title = gtk_label_new (_("Information about the song"));
 	gtk_misc_set_alignment (GTK_MISC(pane->pane_title), 0.0, 0.5);
 
 	pane->context_menu = pragha_songinfo_pane_context_menu_new(pane);
-	pane->text_view = view;
-	pane->info_type = GLYR_GET_LYRICS;
 }
 
 static void
@@ -254,15 +255,6 @@ pragha_songinfo_pane_class_init (PraghaSonginfoPaneClass *klass)
 
 	gobject_class = G_OBJECT_CLASS (klass);
 	gobject_class->finalize = pragha_songinfo_pane_finalize;
-
-	signals[SIGNAL_TYPE_CHANGED] =
-		g_signal_new ("type-changed",
-		              G_TYPE_FROM_CLASS (gobject_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (PraghaSonginfoPaneClass, type_changed),
-		              NULL, NULL,
-		              g_cclosure_marshal_VOID__VOID,
-		              G_TYPE_NONE, 0);
 }
 
 PraghaSonginfoPane *

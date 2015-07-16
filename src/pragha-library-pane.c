@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2015 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -2723,7 +2723,8 @@ pragha_library_pane_create_widget (PraghaLibraryPane *library)
 	                                GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(library_tree_scroll),
 	                                     GTK_SHADOW_IN);
-	gtk_container_set_border_width (GTK_CONTAINER(library_tree_scroll), 2);
+
+	gtk_box_set_spacing (GTK_BOX(library), 2);
 
 	/* Package all */
 
@@ -2878,8 +2879,8 @@ pragha_library_pane_init (PraghaLibraryPane *library)
 
 	pragha_library_pane_create_widget (library);
 
-	gtk_style_context_add_class (gtk_widget_get_style_context (GTK_WIDGET(library)),
-	                             GTK_STYLE_CLASS_SIDEBAR);
+	//gtk_style_context_add_class (gtk_widget_get_style_context (GTK_WIDGET(library)),
+	//                             GTK_STYLE_CLASS_SIDEBAR);
 
 	/* Create context menus */
 

@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2015 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -71,6 +71,7 @@ struct _PraghaSongInfoPluginPrivate {
 	guint               merge_id_playlist;
 
 	GCancellable       *pane_search;
+	GCancellable       *albumart_search;
 };
 
 PRAGHA_PLUGIN_REGISTER_PRIVATE_CODE (PRAGHA_TYPE_SONG_INFO_PLUGIN,
@@ -82,13 +83,10 @@ PRAGHA_PLUGIN_REGISTER_PRIVATE_CODE (PRAGHA_TYPE_SONG_INFO_PLUGIN,
  */
 
 static void get_lyric_current_playlist_action       (GtkAction *action, PraghaSongInfoPlugin *plugin);
-static void get_artist_info_current_playlist_action (GtkAction *action, PraghaSongInfoPlugin *plugin);
 
 static const GtkActionEntry playlist_actions [] = {
 	{"Search lyric", NULL, N_("Search _lyric"),
-	 "", "Search lyric", G_CALLBACK(get_lyric_current_playlist_action)},
-	{"Search artist info", NULL, N_("Search _artist info"),
-	 "", "Search artist info", G_CALLBACK(get_artist_info_current_playlist_action)},
+	 "", "Search lyric", G_CALLBACK(get_lyric_current_playlist_action)}
 };
 
 static const gchar *playlist_xml = "<ui>						\
@@ -96,7 +94,6 @@ static const gchar *playlist_xml = "<ui>						\
 	<menu action=\"ToolsMenu\">							\
 		<placeholder name=\"pragha-glyr-placeholder\">			\
 			<menuitem action=\"Search lyric\"/>				\
-			<menuitem action=\"Search artist info\"/>			\
 			<separator/>							\
 		</placeholder>								\
 	</menu>										\
@@ -106,30 +103,6 @@ static const gchar *playlist_xml = "<ui>						\
 /*
  * Action on playlist that show a dialog
  */
-
-static void
-get_artist_info_current_playlist_action (GtkAction *action, PraghaSongInfoPlugin *plugin)
-{
-	PraghaPlaylist *playlist;
-	PraghaMusicobject *mobj;
-	const gchar *artist = NULL;
-
-	PraghaApplication *pragha = NULL;
-
-	pragha = plugin->priv->pragha;
-	playlist = pragha_application_get_playlist (pragha);
-
-	mobj = pragha_playlist_get_selected_musicobject (playlist);
-
-	artist = pragha_musicobject_get_artist (mobj);
-
-	CDEBUG(DBG_INFO, "Get Artist info Action of current playlist selection");
-
-	if (string_is_empty(artist))
-		return;
-
-	pragha_songinfo_plugin_get_info_to_dialog (plugin, GLYR_GET_ARTISTBIO, artist, NULL);
-}
 
 static void
 get_lyric_current_playlist_action (GtkAction *action, PraghaSongInfoPlugin *plugin)
@@ -161,6 +134,24 @@ get_lyric_current_playlist_action (GtkAction *action, PraghaSongInfoPlugin *plug
  */
 
 static void
+related_cancel_song_info_search (PraghaSongInfoPlugin *plugin)
+{
+	PraghaSongInfoPluginPrivate *priv = plugin->priv;
+
+	if (priv->pane_search) {
+		g_cancellable_cancel (priv->pane_search);
+		g_object_unref (priv->pane_search);
+		priv->pane_search = NULL;
+	}
+
+	if (priv->albumart_search) {
+		g_cancellable_cancel (priv->albumart_search);
+		g_object_unref (priv->albumart_search);
+		priv->albumart_search = NULL;
+	}
+}
+
+static void
 related_get_album_art_handler (PraghaSongInfoPlugin *plugin)
 {
 	PraghaBackend *backend;
@@ -168,7 +159,7 @@ related_get_album_art_handler (PraghaSongInfoPlugin *plugin)
 	PraghaMusicobject *mobj;
 	const gchar *artist = NULL;
 	const gchar *album = NULL;
-	gchar *album_art_path;
+	gchar *album_art_path = NULL;
 
 	CDEBUG(DBG_INFO, "Get album art handler");
 
@@ -186,24 +177,13 @@ related_get_album_art_handler (PraghaSongInfoPlugin *plugin)
 	art_cache = pragha_application_get_art_cache (plugin->priv->pragha);
 	album_art_path = pragha_art_cache_get_uri (art_cache, artist, album);
 
-	if (album_art_path)
-		goto exists;
-
-	pragha_songinfo_plugin_get_album_art (plugin, artist, album);
-
-exists:
-	g_free(album_art_path);
-}
-
-static void
-cancel_pane_search (PraghaSongInfoPlugin *plugin)
-{
-	PraghaSongInfoPluginPrivate *priv = plugin->priv;
-
-	if (priv->pane_search) {
-		g_cancellable_cancel (priv->pane_search);
-		g_object_unref (priv->pane_search);
-		priv->pane_search = NULL;
+	if (album_art_path) {
+		pragha_songinfo_pane_set_album_art (plugin->priv->pane, album_art_path);
+		g_free (album_art_path);
+	}
+	else {
+		plugin->priv->albumart_search =
+			pragha_songinfo_plugin_get_album_art (plugin, artist, album);
 	}
 }
 
@@ -230,11 +210,18 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 	title = pragha_musicobject_get_title (mobj);
 	filename = pragha_musicobject_get_file (mobj);
 
-	if (string_is_empty(artist) || string_is_empty(title))
+	if (string_is_empty(artist) || string_is_empty(title)) {
+		pragha_songinfo_pane_set_text (plugin->priv->pane,
+		                               string_is_empty(title) ? filename : title,
+		                               _("Missing some tags to search for the information"),
+		                               NULL);
 		return;
+	}
 
-	cancel_pane_search (plugin);
-	priv->pane_search = pragha_songinfo_plugin_get_info_to_pane (plugin, pragha_songinfo_pane_get_default_view(plugin->priv->pane), artist, title, filename);
+	priv->pane_search =
+		pragha_songinfo_plugin_get_info_to_pane (plugin, GLYR_GET_LYRICS,
+		                                         artist, title,
+		                                         filename);
 }
 
 static void
@@ -258,7 +245,7 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 
 	PraghaSongInfoPlugin *plugin = user_data;
 
-	cancel_pane_search (plugin);
+	related_cancel_song_info_search (plugin);
 
 	state = pragha_backend_get_state (backend);
 
@@ -283,12 +270,6 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 /*
  * Update handlers
  */
-
-static void
-pragha_songinfo_pane_type_changed (PraghaSonginfoPane *pane, PraghaSongInfoPlugin *plugin)
-{
-	related_get_song_info_pane_handler (plugin);
-}
 
 static void
 pragha_songinfo_pane_visibility_changed (PraghaPreferences *preferences, GParamSpec *pspec, PraghaSongInfoPlugin *plugin)
@@ -474,9 +455,6 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	g_signal_connect (G_OBJECT(preferences), "notify::secondary-lateral-panel",
 	                  G_CALLBACK(pragha_songinfo_pane_visibility_changed), plugin);
 
-	g_signal_connect (G_OBJECT(priv->pane), "type-changed",
-	                  G_CALLBACK(pragha_songinfo_pane_type_changed), plugin);
-
 	/* Default values */
 
 	pragha_songinfo_plugin_append_setting (plugin);
@@ -512,10 +490,6 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	g_signal_handlers_disconnect_by_func (G_OBJECT(preferences),
 	                                      pragha_songinfo_pane_visibility_changed,
-	                                      plugin);
-
-	g_signal_handlers_disconnect_by_func (G_OBJECT(preferences),
-	                                      pragha_songinfo_pane_type_changed,
 	                                      plugin);
 
 	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "song-info");

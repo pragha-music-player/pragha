@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2013 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2013-2015 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -261,9 +261,10 @@ pragha_sidebar_close_button_new(PraghaSidebar *sidebar)
 		"window-close",
 		NULL,
 	};
-   
+
 	button = gtk_button_new ();
 	gtk_button_set_relief (GTK_BUTTON (button), GTK_RELIEF_NONE);
+	gtk_widget_set_valign (GTK_WIDGET(button), GTK_ALIGN_CENTER);
 	gtk_button_set_focus_on_click (GTK_BUTTON (button), FALSE);
 	pragha_sidebar_set_tiny_button (button);
 

@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2015 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -25,7 +25,7 @@
 
 G_BEGIN_DECLS
 
-void
+GCancellable *
 pragha_songinfo_plugin_get_album_art (PraghaSongInfoPlugin *plugin,
                                       const gchar          *artist,
                                       const gchar          *album_art);

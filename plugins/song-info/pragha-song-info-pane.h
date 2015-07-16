@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2015 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -37,6 +37,9 @@ typedef struct {
 	void (*type_changed)   (PraghaSonginfoPane *pane);
 } PraghaSonginfoPaneClass;
 
+void                pragha_songinfo_pane_set_album_art         (PraghaSonginfoPane *pane,
+                                                                const gchar        *uri);
+
 void                pragha_songinfo_pane_set_text              (PraghaSonginfoPane *pane,
                                                                 const gchar        *title,
                                                                 const gchar        *text,
@@ -46,7 +49,6 @@ void                pragha_songinfo_pane_clear_text            (PraghaSonginfoPa
 GtkWidget          *pragha_songinfo_pane_get_pane_title        (PraghaSonginfoPane *pane);
 GtkMenu            *pragha_songinfo_pane_get_popup_menu        (PraghaSonginfoPane *pane);
 GtkUIManager       *pragha_songinfo_pane_get_pane_context_menu (PraghaSonginfoPane *pane);
-GLYR_GET_TYPE       pragha_songinfo_pane_get_default_view      (PraghaSonginfoPane *pane);
 
 PraghaSonginfoPane *pragha_songinfo_pane_new                   (void);
 

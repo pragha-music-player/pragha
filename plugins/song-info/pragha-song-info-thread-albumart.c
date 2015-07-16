@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2015 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -30,8 +30,12 @@
 
 typedef struct {
 	PraghaSongInfoPlugin *plugin;
+
 	GlyrQuery             query;
 	GlyrMemCache         *head;
+
+	GCancellable         *cancellable;
+	gulong                cancel_id;
 } glyr_struct;
 
 /* Save the downloaded album art in cache, and updates the gui.*/
@@ -53,7 +57,8 @@ glyr_finished_successfully (glyr_struct *glyr_info)
 	if (glyr_info->head->data)
 		pragha_art_cache_put (art_cache, artist, album, glyr_info->head->data, glyr_info->head->size);
 
-	glyr_free_list(glyr_info->head);
+	pragha_songinfo_pane_set_album_art (pragha_songinfo_plugin_get_pane(glyr_info->plugin),
+	                                    pragha_art_cache_get_uri(art_cache, artist, album));
 }
 
 /*
@@ -65,8 +70,18 @@ glyr_finished_thread_update (gpointer data)
 {
 	glyr_struct *glyr_info = data;
 
+	if (g_cancellable_is_cancelled (glyr_info->cancellable))
+		goto old_thread;
+
 	if (glyr_info->head != NULL)
 		glyr_finished_successfully (glyr_info);
+
+old_thread:
+	g_cancellable_disconnect (glyr_info->cancellable, glyr_info->cancel_id);
+	g_object_unref (glyr_info->cancellable);
+
+	if (glyr_info->head != NULL)
+		glyr_free_list(glyr_info->head);
 
 	glyr_query_destroy (&glyr_info->query);
 	g_slice_free (glyr_struct, glyr_info);
@@ -91,11 +106,20 @@ get_related_info_idle_func (gpointer data)
 	return glyr_info;
 }
 
-void
+static void
+pragha_songinfo_search_album_art_cancelled (GCancellable *cancellable,
+                                            gpointer      user_data)
+{
+	GlyrQuery *query = user_data;
+	glyr_signal_exit (query);
+}
+
+GCancellable *
 pragha_songinfo_plugin_get_album_art (PraghaSongInfoPlugin *plugin,
                                       const gchar          *artist,
                                       const gchar          *album)
 {
+	GCancellable *cancellable;
 	glyr_struct *glyr_info;
 
 	CDEBUG(DBG_INFO, "Get album art handler");
@@ -110,10 +134,19 @@ pragha_songinfo_plugin_get_album_art (PraghaSongInfoPlugin *plugin,
 	glyr_opt_artist (&glyr_info->query, artist);
 	glyr_opt_album (&glyr_info->query, album);
 
+	cancellable = g_cancellable_new ();
+	glyr_info->cancellable = g_object_ref (cancellable);
+	glyr_info->cancel_id = g_cancellable_connect (glyr_info->cancellable,
+	                                              G_CALLBACK (pragha_songinfo_search_album_art_cancelled),
+	                                              &glyr_info->query,
+	                                              NULL);
+
 	glyr_info->plugin = plugin;
 
 	pragha_async_launch (get_related_info_idle_func,
 	                     glyr_finished_thread_update,
 	                     glyr_info);
+
+	return cancellable;
 }
 

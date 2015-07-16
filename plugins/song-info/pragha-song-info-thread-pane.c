@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2015 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -80,9 +80,6 @@ glyr_finished_successfully_pane (glyr_struct *glyr_info)
 			pragha_songinfo_pane_set_text (pane, glyr_info->query.title, glyr_info->head->data, glyr_info->head->prov);
 			break;
 		case GLYR_TYPE_ARTIST_BIO:
-			pane = pragha_songinfo_plugin_get_pane (glyr_info->plugin);
-			pragha_songinfo_pane_set_text (pane,glyr_info->query.artist, glyr_info->head->data, glyr_info->head->prov);
-			break;
 		case GLYR_TYPE_COVERART:
 		default:
 			break;
@@ -100,9 +97,6 @@ glyr_finished_incorrectly_pane (glyr_struct *glyr_info)
 			pragha_songinfo_pane_set_text (pane, glyr_info->query.title, _("Lyrics not found."), "");
 			break;
 		case GLYR_GET_ARTIST_BIO:
-			pane = pragha_songinfo_plugin_get_pane (glyr_info->plugin);
-			pragha_songinfo_pane_set_text (pane, glyr_info->query.artist, _("Artist information not found."), "");
-			break;
 		case GLYR_GET_COVERART:
 		default:
 			break;
@@ -181,14 +175,6 @@ pragha_songinfo_plugin_get_info_to_pane (PraghaSongInfoPlugin *plugin,
 	pane = pragha_songinfo_plugin_get_pane (plugin);
 
 	switch (type) {
-		case GLYR_GET_ARTIST_BIO:
-			pragha_songinfo_pane_set_text (pane, artist, _("Searching..."), "");
-
-			glyr_opt_artist(&glyr_info->query, artist);
-
-			glyr_opt_lang (&glyr_info->query, "auto");
-			glyr_opt_lang_aware_only (&glyr_info->query, TRUE);
-			break;
 		case GLYR_GET_LYRICS:
 			pragha_songinfo_pane_set_text (pane, title, _("Searching..."), "");
 
