@@ -27,6 +27,7 @@ libremovable_la_CFLAGS =						\
 	-Wall
 
 libremovable_la_LIBADD =							\
+	../devices/libdeviceclient.la					\
 	$(GSTREAMER_LIBS)						\
 	$(GLIB_LIBS) 							\
 	$(GIO_LIBS) 							\

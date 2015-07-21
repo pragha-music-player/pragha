@@ -664,6 +664,7 @@ pragha_mtp_plugin_device_removed (PraghaDeviceClient *device_client,
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
 {
+	PraghaDeviceClient *device_client;
 	PraghaBackend *backend;
 
 	PraghaMtpPlugin *plugin = PRAGHA_MTP_PLUGIN (activatable);
@@ -684,9 +685,12 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	g_signal_connect (backend, "clean-source",
 	                  G_CALLBACK(pragha_mtp_plugin_clean_source), plugin);
 
-	pragha_devices_plugin_connect_signals (G_CALLBACK(pragha_mtp_plugin_device_added),
-	                                       G_CALLBACK(pragha_mtp_plugin_device_removed),
-	                                       plugin);
+	device_client = pragha_device_client_get();
+	g_signal_connect (G_OBJECT(device_client), "device-added",
+	                  G_CALLBACK(pragha_mtp_plugin_device_added), plugin);
+	g_signal_connect (G_OBJECT(device_client), "device-removed",
+	                  G_CALLBACK(pragha_mtp_plugin_device_removed), plugin);
+	g_object_unref (device_client);
 
 	LIBMTP_Init ();
 }
@@ -694,6 +698,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
+	PraghaDeviceClient *device_client;
 	PraghaBackend *backend;
 
 	PraghaMtpPlugin *plugin = PRAGHA_MTP_PLUGIN (activatable);
@@ -711,9 +716,14 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	g_signal_handlers_disconnect_by_func (backend, pragha_mtp_plugin_prepare_source, plugin);
 	g_signal_handlers_disconnect_by_func (backend, pragha_mtp_plugin_clean_source, plugin);
 
-	pragha_devices_plugin_disconnect_signals (G_CALLBACK(pragha_mtp_plugin_device_added),
-	                                          G_CALLBACK(pragha_mtp_plugin_device_removed),
-	                                          plugin);
+	device_client = pragha_device_client_get();
+	g_signal_handlers_disconnect_by_func (device_client,
+	                                      pragha_mtp_plugin_device_added,
+	                                      plugin);
+	g_signal_handlers_disconnect_by_func (device_client,
+	                                      pragha_mtp_plugin_device_removed,
+	                                      plugin);
+	g_object_unref (device_client);
 
 	priv->pragha = NULL;
 }

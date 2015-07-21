@@ -364,6 +364,7 @@ pragha_removable_plugin_device_removed (PraghaDeviceClient *device_client,
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
 {
+	PraghaDeviceClient *device_client;
 	PraghaRemovablePlugin *plugin = PRAGHA_REMOVABLE_PLUGIN (activatable);
 	PraghaRemovablePluginPrivate *priv = plugin->priv;
 
@@ -371,22 +372,31 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
-	pragha_devices_plugin_connect_signals (G_CALLBACK(pragha_removable_plugin_device_added),
-	                                       G_CALLBACK(pragha_removable_plugin_device_removed),
-	                                       plugin);
+	device_client = pragha_device_client_get();
+	g_signal_connect (G_OBJECT(device_client), "device-added",
+	                  G_CALLBACK(pragha_removable_plugin_device_added), plugin);
+	g_signal_connect (G_OBJECT(device_client), "device-removed",
+	                  G_CALLBACK(pragha_removable_plugin_device_removed), plugin);
+	g_object_unref (device_client);
 }
 
 static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
+	PraghaDeviceClient *device_client;
 	PraghaRemovablePlugin *plugin = PRAGHA_REMOVABLE_PLUGIN (activatable);
 	PraghaRemovablePluginPrivate *priv = plugin->priv;
 
 	CDEBUG(DBG_PLUGIN, "Removable plugin %s", G_STRFUNC);
 
-	pragha_devices_plugin_disconnect_signals (G_CALLBACK(pragha_removable_plugin_device_added),
-	                                          G_CALLBACK(pragha_removable_plugin_device_removed),
-	                                          plugin);
+	device_client = pragha_device_client_get();
+	g_signal_handlers_disconnect_by_func (device_client,
+	                                      pragha_removable_plugin_device_added,
+	                                      plugin);
+	g_signal_handlers_disconnect_by_func (device_client,
+	                                      pragha_removable_plugin_device_removed,
+	                                      plugin);
+	g_object_unref (device_client);
 
 	priv->pragha = NULL;
 }

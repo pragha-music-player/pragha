@@ -1,3 +1,27 @@
+# Device library.
+
+deviceclientdir = $(libdir)/pragha/plugins/devices
+
+deviceclient_LTLIBRARIES = libdeviceclient.la
+
+libdeviceclient_la_SOURCES = \
+	pragha-device-client.c \
+	pragha-device-client.h
+
+#libdeviceclient_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
+
+libdeviceclient_la_CFLAGS =						\
+	$(GTK_CFLAGS) 							\
+	$(GUDEV_CFLAGS) 						\
+	-I$(top_srcdir)/src/include 					\
+	-Wall
+
+libdeviceclient_la_LIBADD =						\
+	$(GTK_LIBS) 							\
+	$(GUDEV_LIBS)
+
+# Fake plugin
+
 plugindir = $(libdir)/pragha/plugins/devices
 
 AM_CPPFLAGS = \
@@ -9,9 +33,7 @@ plugin_LTLIBRARIES = libdevices.la
 
 libdevices_la_SOURCES = \
 	pragha-devices-plugin.c \
-	pragha-devices-plugin.h \
-	pragha-device-client.c \
-	pragha-device-client.h
+	pragha-devices-plugin.h
 
 libdevices_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 
@@ -30,6 +52,7 @@ libdevices_la_CFLAGS =						\
 	-Wall
 
 libdevices_la_LIBADD =							\
+	libdeviceclient.la						\
 	$(GSTREAMER_LIBS)						\
 	$(GLIB_LIBS) 							\
 	$(GIO_LIBS) 							\

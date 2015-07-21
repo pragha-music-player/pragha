@@ -26,37 +26,6 @@
 
 G_BEGIN_DECLS
 
-enum
-{
-	PRAGHA_DEVICE_RESPONSE_NONE,
-	PRAGHA_DEVICE_RESPONSE_PLAY,
-	PRAGHA_DEVICE_RESPONSE_BROWSE,
-};
-
-GtkWidget *
-pragha_gudev_dialog_new (GtkWidget *parent, const gchar *title, const gchar *icon,
-                         const gchar *primary_text, const gchar *secondary_text,
-                         const gchar *first_button_text, gint first_button_response);
-
-
-typedef enum {
-	PRAGHA_DEVICE_NONE = 0,
-	PRAGHA_DEVICE_MOUNTABLE,
-	PRAGHA_DEVICE_AUDIO_CD,
-	PRAGHA_DEVICE_MTP,
-	PRAGHA_DEVICE_UNKNOWN
-} PraghaDeviceType;
-
-void
-pragha_devices_plugin_connect_signals    (GCallback added_callback,
-                                          GCallback removed_callback,
-                                          gpointer  user_data);
-
-void
-pragha_devices_plugin_disconnect_signals (GCallback added_callback,
-                                          GCallback removed_callback,
-                                          gpointer  user_data);
-
 G_END_DECLS
 
 #endif /* __PRAGHA_DEVICES_PLUGIN_H__ */

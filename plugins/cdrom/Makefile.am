@@ -53,7 +53,8 @@ endif
 
 if HAVE_GUDEV
 libcdrom_la_CFLAGS += $(GUDEV_CFLAGS)
-libcdrom_la_LIBADD += $(GUDEV_LIBS)
+libcdrom_la_LIBADD += $(GUDEV_LIBS) \
+	../devices/libdeviceclient.la
 endif
 
 plugin_DATA = cdrom.plugin

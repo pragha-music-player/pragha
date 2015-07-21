@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2015 matias <mati86dl@gmail.com>                   */
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
@@ -740,9 +740,14 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                  G_CALLBACK(pragha_cdrom_plugin_prepare_source), plugin);
 
 	#ifdef HAVE_GUDEV
-	pragha_devices_plugin_connect_signals (G_CALLBACK(pragha_cdrom_plugin_device_added),
-	                                       G_CALLBACK(pragha_cdrom_plugin_device_removed),
-	                                       plugin);
+	PraghaDeviceClient *device_client;
+	device_client = pragha_device_client_get();
+
+	g_signal_connect (G_OBJECT(device_client), "device-added",
+	                  G_CALLBACK(pragha_cdrom_plugin_device_added), plugin);
+	g_signal_connect (G_OBJECT(device_client), "device-removed",
+	                  G_CALLBACK(pragha_cdrom_plugin_device_removed), plugin);
+	g_object_unref (device_client);
 	#endif
 
 	enum_map = pragha_music_enum_get ();
@@ -785,9 +790,15 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	g_signal_handlers_disconnect_by_func (backend, pragha_cdrom_plugin_prepare_source, plugin);
 
 	#ifdef HAVE_GUDEV
-	pragha_devices_plugin_disconnect_signals (G_CALLBACK(pragha_cdrom_plugin_device_added),
-	                                          G_CALLBACK(pragha_cdrom_plugin_device_removed),
-	                                          plugin);
+	PraghaDeviceClient *device_client;
+	device_client = pragha_device_client_get();
+	g_signal_handlers_disconnect_by_func (device_client,
+	                                      pragha_cdrom_plugin_device_added,
+	                                      plugin);
+	g_signal_handlers_disconnect_by_func (device_client,
+	                                      pragha_cdrom_plugin_device_removed,
+	                                      plugin);
+	g_object_unref (device_client);
 	#endif
 
 	pragha_cdrom_plugin_remove_setting (plugin);

@@ -20,10 +20,21 @@
 
 #include <glib.h>
 #include <glib-object.h>
+#include <gtk/gtk.h>
 
-#include "pragha-devices-plugin.h"
+#include <gudev/gudev.h>
 
 G_BEGIN_DECLS
+
+/* Device types */
+
+typedef enum {
+	PRAGHA_DEVICE_NONE = 0,
+	PRAGHA_DEVICE_MOUNTABLE,
+	PRAGHA_DEVICE_AUDIO_CD,
+	PRAGHA_DEVICE_MTP,
+	PRAGHA_DEVICE_UNKNOWN
+} PraghaDeviceType;
 
 #define PRAGHA_TYPE_DEVICE_CLIENT (pragha_device_client_get_type())
 #define PRAGHA_DEVICE_CLIENT(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_DEVICE_CLIENT, PraghaDeviceClient))
@@ -40,21 +51,28 @@ struct _PraghaDeviceClientClass
 {
 	GObjectClass parent_class;
 	void (*device_added)   (PraghaDeviceClient *device_client,
-                            PraghaDeviceType    device_type,
-                            GUdevDevice        *u_device);
+	                        PraghaDeviceType    device_type,
+	                        GUdevDevice        *u_device);
 	void (*device_removed) (PraghaDeviceClient *device_client,
-                            PraghaDeviceType    device_type,
-                            GUdevDevice        *u_device);
+	                        PraghaDeviceType    device_type,
+	                        GUdevDevice        *u_device);
 };
 
-void
-pragha_device_client_device_added (PraghaDeviceClient *device_client,
-                                   PraghaDeviceType    device_type,
-                                   GUdevDevice        *u_device);
-void
-pragha_device_client_device_removed (PraghaDeviceClient *device_client,
-                                     PraghaDeviceType    device_type,
-                                     GUdevDevice        *u_device);
+/* Dialog when add device */
+
+enum
+{
+	PRAGHA_DEVICE_RESPONSE_NONE,
+	PRAGHA_DEVICE_RESPONSE_PLAY,
+	PRAGHA_DEVICE_RESPONSE_BROWSE,
+};
+
+GtkWidget *
+pragha_gudev_dialog_new (GtkWidget *parent, const gchar *title, const gchar *icon,
+                         const gchar *primary_text, const gchar *secondary_text,
+                         const gchar *first_button_text, gint first_button_response);
+
+/* Create a new instance of PraghaDeviceClient* */
 
 PraghaDeviceClient *pragha_device_client_get          (void);
 
