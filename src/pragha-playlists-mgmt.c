@@ -248,11 +248,6 @@ exit_list:
 }
 
 #ifdef HAVE_PLPARSER
-typedef struct {
-	TotemPlPlaylist *playlist;
-	gchar           *folder_saved;
-} PraghaPlParser;
-
 static void
 pragha_parser_append_foreach_playlist (GtkTreeModel *model,
                                        GtkTreePath  *path,
@@ -262,29 +257,24 @@ pragha_parser_append_foreach_playlist (GtkTreeModel *model,
 	TotemPlPlaylistIter pl_iter;
 	PraghaMusicobject *mobj;
 	const gchar *filename;
-	gchar *base_uri = NULL, *uri = NULL;
+	gchar *uri = NULL;
 
-	PraghaPlParser *parser = data;
+	TotemPlPlaylist *playlist = data;
 
 	gtk_tree_model_get (model, iter, P_MOBJ_PTR, &mobj, -1);
 
 	filename = pragha_musicobject_get_file(mobj);
-	base_uri = get_display_filename(filename, TRUE);
 
-	if (g_ascii_strcasecmp(base_uri, parser->folder_saved) == 0)
-		uri = get_display_filename(filename, FALSE);
-	else
-		uri = g_strdup(filename);
+	uri = g_filename_to_uri (filename, NULL, NULL);
 
-	totem_pl_playlist_append (parser->playlist, &pl_iter);
-	totem_pl_playlist_set (parser->playlist, &pl_iter,
+	totem_pl_playlist_append (playlist, &pl_iter);
+	totem_pl_playlist_set (playlist, &pl_iter,
 	                       TOTEM_PL_PARSER_FIELD_URI, uri,
 	                       NULL);
 
 	g_free(uri);
-	g_free(base_uri);
 }
- 
+
 static gboolean
 pragha_parser_append_foreach_track_list (GtkTreeModel *model,
                                          GtkTreePath  *path,
@@ -299,9 +289,9 @@ pragha_parser_append_foreach_track_list (GtkTreeModel *model,
 }
 
 static gboolean
-pragha_parser_save_full_track_list(PraghaPlaylist *cplaylist, gchar *filename)
+pragha_parser_save_full_track_list (PraghaPlaylist *cplaylist,
+                                    const gchar    *filename)
 {
-	PraghaPlParser *parser;
 	TotemPlPlaylist *playlist;
 	TotemPlParser *pl;
 	GFile *file;
@@ -311,21 +301,15 @@ pragha_parser_save_full_track_list(PraghaPlaylist *cplaylist, gchar *filename)
 	playlist = totem_pl_playlist_new ();
 	file = g_file_new_for_path (filename);
 
-	parser = g_slice_new (PraghaPlParser);
-	parser->playlist = playlist;
-	parser->folder_saved = get_display_filename(filename, TRUE);
-
 	gtk_tree_model_foreach(pragha_playlist_get_model(cplaylist),
 	                       pragha_parser_append_foreach_track_list,
-	                       parser);
+	                       playlist);
+
 
 	if (totem_pl_parser_save (pl, playlist, file, "Title", TOTEM_PL_PARSER_M3U, NULL) != TRUE) {
-        g_error ("Playlist writing failed.");
-        ret = FALSE;
+		g_error ("Playlist writing failed.");
+		ret = FALSE;
     }
-
-	g_free(parser->folder_saved);
-	g_slice_free (PraghaPlParser, parser);
 
 	g_object_unref (playlist);
 	g_object_unref (pl);
@@ -335,9 +319,9 @@ pragha_parser_save_full_track_list(PraghaPlaylist *cplaylist, gchar *filename)
 }
 
 static gboolean
-pragha_parser_save_selection_track_list(PraghaPlaylist *cplaylist, gchar *filename)
+pragha_parser_save_selection_track_list (PraghaPlaylist *cplaylist,
+                                         const gchar    *filename)
 {
-	PraghaPlParser *parser;
 	TotemPlPlaylist *playlist;
 	TotemPlParser *pl;
 	GtkTreeSelection *selection;
@@ -348,22 +332,15 @@ pragha_parser_save_selection_track_list(PraghaPlaylist *cplaylist, gchar *filena
 	playlist = totem_pl_playlist_new ();
 	file = g_file_new_for_path (filename);
 
-	parser = g_slice_new (PraghaPlParser);
-	parser->playlist = playlist;
-	parser->folder_saved = get_display_filename(filename, TRUE);
-
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(pragha_playlist_get_view(cplaylist)));
 	gtk_tree_selection_selected_foreach(selection,
 	                                    pragha_parser_append_foreach_playlist,
-	                                    parser);
+	                                    playlist);
 
 	if (totem_pl_parser_save (pl, playlist, file, "Title", TOTEM_PL_PARSER_M3U, NULL) != TRUE) {
         g_error ("Playlist writing failed.");
         ret = FALSE;
     }
-
-	g_free(parser->folder_saved);
-	g_slice_free (PraghaPlParser, parser);
 
 	g_object_unref (playlist);
 	g_object_unref (pl);
