@@ -871,7 +871,7 @@ msgstr "Pragha voorkeuren"
 
 #: ../src/pragha-scanner.c:93
 #, c-format
-msgid "%i files analized of %i detected"
+msgid "%i files analyzed of %i detected"
 msgstr "%i bestanden geanalyseerd van de %i gedetecteerd"
 
 #: ../src/pragha-scanner.c:99

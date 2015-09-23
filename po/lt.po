@@ -873,7 +873,7 @@ msgstr "Pragha Nuostatos"
 
 #: ../src/pragha-scanner.c:93
 #, c-format
-msgid "%i files analized of %i detected"
+msgid "%i files analyzed of %i detected"
 msgstr ""
 
 #: ../src/pragha-scanner.c:99
