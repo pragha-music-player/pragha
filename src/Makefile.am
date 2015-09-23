@@ -98,7 +98,7 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(SQLITE3_CFLAGS) 						\
 	$(TAGLIB_C_CFLAGS) 						\
 	-I$(top_srcdir)/src/include 					\
-	-Wall
+	-Wall -lm
 
 pragha_LDADD = $(GSTREAMER_LIBS)					\
 	$(GLIB_LIBS) 							\

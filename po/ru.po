@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Pragha\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-11 20:17-0300\n"
+"POT-Creation-Date: 2015-09-23 20:11-0300\n"
 "PO-Revision-Date: 2015-02-12 19:02+0000\n"
 "Last-Translator: Kyrill Detinov <lazy.kent@opensuse.org>\n"
 "Language-Team: Russian (http://www.transifex.com/p/Pragha/language/ru/)\n"
@@ -53,99 +53,89 @@ msgstr "ИМЯ_ФАЙЛА"
 msgid "Use --help to see a full list of available command line options."
 msgstr "Используйте --help для полного списка опций командной строки."
 
-#: ../src/pragha-equalizer-dialog.c:44
+#: ../src/pragha-equalizer-dialog.c:50
 msgid "Disabled"
 msgstr "Отключен"
 
-#: ../src/pragha-equalizer-dialog.c:45
+#: ../src/pragha-equalizer-dialog.c:51
 msgid "Classical"
 msgstr "Классическая музыка"
 
-#: ../src/pragha-equalizer-dialog.c:46
+#: ../src/pragha-equalizer-dialog.c:52
 msgid "Club"
 msgstr "Клубная музыка"
 
-#: ../src/pragha-equalizer-dialog.c:47
+#: ../src/pragha-equalizer-dialog.c:53
 msgid "Dance"
 msgstr "Танцевальная музыка"
 
-#: ../src/pragha-equalizer-dialog.c:48
+#: ../src/pragha-equalizer-dialog.c:54
 msgid "Full Bass"
 msgstr "Усиление басов"
 
-#: ../src/pragha-equalizer-dialog.c:49
+#: ../src/pragha-equalizer-dialog.c:55
 msgid "Full Bass and Treble"
 msgstr "Усиление басов и высоких частот"
 
-#: ../src/pragha-equalizer-dialog.c:50
+#: ../src/pragha-equalizer-dialog.c:56
 msgid "Full Treble"
 msgstr "Усиление высоких частот"
 
-#: ../src/pragha-equalizer-dialog.c:51
+#: ../src/pragha-equalizer-dialog.c:57
 msgid "Laptop Speakers and Headphones"
 msgstr "Ноутбук или наушники"
 
-#: ../src/pragha-equalizer-dialog.c:52
+#: ../src/pragha-equalizer-dialog.c:58
 msgid "Large Hall"
 msgstr "Большой зал"
 
-#: ../src/pragha-equalizer-dialog.c:53
+#: ../src/pragha-equalizer-dialog.c:59
 msgid "Live"
 msgstr "Живое исполнение"
 
-#: ../src/pragha-equalizer-dialog.c:54
+#: ../src/pragha-equalizer-dialog.c:60
 msgid "Party"
 msgstr "Вечеринка"
 
-#: ../src/pragha-equalizer-dialog.c:55
+#: ../src/pragha-equalizer-dialog.c:61
 msgid "Pop"
 msgstr "Поп-музыка"
 
-#: ../src/pragha-equalizer-dialog.c:56
+#: ../src/pragha-equalizer-dialog.c:62
 msgid "Reggae"
 msgstr "Регги"
 
-#: ../src/pragha-equalizer-dialog.c:57
+#: ../src/pragha-equalizer-dialog.c:63
 msgid "Rock"
 msgstr "Рок"
 
-#: ../src/pragha-equalizer-dialog.c:58
+#: ../src/pragha-equalizer-dialog.c:64
 msgid "Ska"
 msgstr "Ска"
 
-#: ../src/pragha-equalizer-dialog.c:59
+#: ../src/pragha-equalizer-dialog.c:65
 msgid "Smiley Face Curve"
 msgstr "Smiley Face Curve"
 
-#: ../src/pragha-equalizer-dialog.c:60
+#: ../src/pragha-equalizer-dialog.c:66
 msgid "Soft"
 msgstr "Мягкая музыка"
 
-#: ../src/pragha-equalizer-dialog.c:61
+#: ../src/pragha-equalizer-dialog.c:67
 msgid "Soft Rock"
 msgstr "Софт-рок"
 
-#: ../src/pragha-equalizer-dialog.c:62
+#: ../src/pragha-equalizer-dialog.c:68
 msgid "Techno"
 msgstr "Техно"
 
-#: ../src/pragha-equalizer-dialog.c:63
+#: ../src/pragha-equalizer-dialog.c:69
 msgid "Custom"
 msgstr "Пользовательский"
 
-#. Create the dialog
-#: ../src/pragha-equalizer-dialog.c:298
+#: ../src/pragha-equalizer-dialog.c:418
 msgid "Equalizer"
 msgstr "Эквалайзер"
-
-#: ../src/pragha-equalizer-dialog.c:301 ../src/pragha-playlists-mgmt.c:86
-#: ../src/pragha-playlists-mgmt.c:541 ../src/pragha-playlists-mgmt.c:1239
-#: ../src/pragha-preferences-dialog.c:1292 ../src/pragha-tags-dialog.c:101
-#: ../src/pragha-tags-dialog.c:662 ../src/pragha.c:407
-#: ../plugins/song-info/pragha-song-info-dialog.c:83
-#: ../plugins/tunein/pragha-tunein-plugin.c:224
-msgid "_Ok"
-msgstr "_Ok"
 
 #: ../src/pragha-filter-dialog.c:218 ../src/pragha-library-pane.c:506
 #: ../plugins/notify/pragha-notify-plugin.c:166
@@ -249,7 +239,7 @@ msgstr "_Заменить текущий плейлист"
 msgid "Replace and _play"
 msgstr "Заменить и _воспроизвести"
 
-#: ../src/pragha-library-pane.c:248 ../src/pragha-playlists-mgmt.c:537
+#: ../src/pragha-library-pane.c:248 ../src/pragha-playlists-mgmt.c:514
 msgid "Rename"
 msgstr "Переименовать"
 
@@ -258,8 +248,8 @@ msgid "Delete"
 msgstr "Удалить"
 
 #: ../src/pragha-library-pane.c:252 ../src/pragha-menubar.c:222
-#: ../src/pragha-menubar.c:227 ../src/pragha-playlists-mgmt.c:1336
-#: ../src/pragha-playlists-mgmt.c:1372
+#: ../src/pragha-menubar.c:227 ../src/pragha-playlists-mgmt.c:1337
+#: ../src/pragha-playlists-mgmt.c:1373
 msgid "Export"
 msgstr "Экспорт"
 
@@ -294,10 +284,10 @@ msgid "The file \"%s\" cannot be moved to the trash. Details: %s"
 msgstr "Файл «%s» не удалось поместить в корзину. Подробности: %s"
 
 #: ../src/pragha-library-pane.c:852 ../src/pragha-playlists-mgmt.c:85
-#: ../src/pragha-playlists-mgmt.c:540 ../src/pragha-playlists-mgmt.c:612
-#: ../src/pragha-playlists-mgmt.c:1238 ../src/pragha-preferences-dialog.c:678
+#: ../src/pragha-playlists-mgmt.c:517 ../src/pragha-playlists-mgmt.c:589
+#: ../src/pragha-playlists-mgmt.c:1239 ../src/pragha-preferences-dialog.c:678
 #: ../src/pragha-preferences-dialog.c:1291 ../src/pragha-tags-dialog.c:100
-#: ../src/pragha.c:205 ../src/pragha.c:406
+#: ../src/pragha.c:206 ../src/pragha.c:405
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:975
 #: ../plugins/tunein/pragha-tunein-plugin.c:223
 msgid "_Cancel"
@@ -308,8 +298,8 @@ msgid "_Delete"
 msgstr "_Удалить"
 
 #: ../src/pragha-library-pane.c:1895 ../src/pragha-library-pane.c:1977
-#: ../src/pragha-playlists-mgmt.c:641 ../src/pragha-playlists-mgmt.c:668
-#: ../src/pragha.c:302 ../plugins/mpris2/pragha-mpris2-plugin.c:853
+#: ../src/pragha-playlists-mgmt.c:618 ../src/pragha-playlists-mgmt.c:645
+#: ../src/pragha.c:303 ../plugins/mpris2/pragha-mpris2-plugin.c:853
 msgid "Playlists"
 msgstr "Плейлисты"
 
@@ -417,18 +407,18 @@ msgstr "Очистить плейлист"
 
 #: ../src/pragha-menubar.c:219 ../src/pragha-playlist.c:219
 #: ../src/pragha-playlists-mgmt.c:69 ../src/pragha-playlists-mgmt.c:92
-#: ../src/pragha-playlists-mgmt.c:1243
+#: ../src/pragha-playlists-mgmt.c:1244
 msgid "Save playlist"
 msgstr "Сохранить плейлист"
 
 #: ../src/pragha-menubar.c:220 ../src/pragha-menubar.c:225
-#: ../src/pragha-playlists-mgmt.c:1332 ../src/pragha-playlists-mgmt.c:1368
+#: ../src/pragha-playlists-mgmt.c:1333 ../src/pragha-playlists-mgmt.c:1369
 msgid "New playlist"
 msgstr "Создать плейлист"
 
 #: ../src/pragha-menubar.c:224 ../src/pragha-playlist.c:220
 #: ../src/pragha-playlists-mgmt.c:71 ../src/pragha-playlists-mgmt.c:94
-#: ../src/pragha-playlists-mgmt.c:1245
+#: ../src/pragha-playlists-mgmt.c:1246
 msgid "Save selection"
 msgstr "Сохранить выделенное"
 
@@ -618,7 +608,7 @@ msgstr "Копировать \"%s\" в выбранные комментарии
 
 #. Create the checkmenu items
 #: ../src/pragha-playlist.c:3366 ../src/pragha-playlist.c:3542
-#: ../src/pragha.c:607
+#: ../src/pragha.c:623
 msgid "Track"
 msgid_plural "Tracks"
 msgstr[0] "Трек"
@@ -634,6 +624,14 @@ msgstr "Без сортировки"
 msgid "Playlist"
 msgstr "Плейлист"
 
+#: ../src/pragha-playlists-mgmt.c:86 ../src/pragha-playlists-mgmt.c:518
+#: ../src/pragha-playlists-mgmt.c:1240 ../src/pragha-preferences-dialog.c:1292
+#: ../src/pragha-tags-dialog.c:101 ../src/pragha-tags-dialog.c:662
+#: ../src/pragha.c:406 ../plugins/song-info/pragha-song-info-dialog.c:83
+#: ../plugins/tunein/pragha-tunein-plugin.c:224
+msgid "_Ok"
+msgstr "_Ok"
+
 #: ../src/pragha-playlists-mgmt.c:129
 msgid "<b>con_playlist</b> is a reserved playlist name"
 msgstr "<b>con_playlist</b> это зарезервированное название плейлиста"
@@ -643,39 +641,39 @@ msgstr "<b>con_playlist</b> это зарезервированное назва
 msgid "Do you want to overwrite the playlist: %s ?"
 msgstr "Вы хотите перезаписать плейлист: %s?"
 
-#: ../src/pragha-playlists-mgmt.c:530
+#: ../src/pragha-playlists-mgmt.c:507
 msgid "Choose a new name"
 msgstr "Выберите имя"
 
-#: ../src/pragha-playlists-mgmt.c:579
+#: ../src/pragha-playlists-mgmt.c:556
 #, c-format
 msgid "Do you want to delete the item: %s ?"
 msgstr "Вы хотите удалить этот элемент: %s?"
 
-#: ../src/pragha-playlists-mgmt.c:609
+#: ../src/pragha-playlists-mgmt.c:586
 msgid "Export playlist to file"
 msgstr "Экспортировать плейлист в файл"
 
-#: ../src/pragha-playlists-mgmt.c:613
+#: ../src/pragha-playlists-mgmt.c:590
 msgid "_Save"
 msgstr "_Сохранить"
 
-#: ../src/pragha-playlists-mgmt.c:1050
+#: ../src/pragha-playlists-mgmt.c:1036
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:948
 #, c-format
 msgid "Added %d songs from %d of the imported playlist."
 msgstr "Добавлено %d композиций из %d импортированных плейлистов."
 
-#: ../src/pragha-playlists-mgmt.c:1223
+#: ../src/pragha-playlists-mgmt.c:1224
 msgid "What do you want to do?"
 msgstr "Что вы хотите сделать?"
 
-#: ../src/pragha-playlists-mgmt.c:1225
+#: ../src/pragha-playlists-mgmt.c:1226
 #, c-format
 msgid "Replace the playlist \"%s\""
 msgstr "Заменить плейлист \"%s\""
 
-#: ../src/pragha-playlists-mgmt.c:1230
+#: ../src/pragha-playlists-mgmt.c:1231
 #, c-format
 msgid "Add to playlist \"%s\""
 msgstr "Добавить в плейлист \"%s\""
@@ -750,7 +748,7 @@ msgstr "Невозможно менять директории во время �
 msgid "Folders"
 msgstr "Каталоги"
 
-#: ../src/pragha-preferences-dialog.c:1001 ../src/pragha.c:206
+#: ../src/pragha-preferences-dialog.c:1001 ../src/pragha.c:207
 msgid "_Add"
 msgstr "_Добавить"
 
@@ -830,7 +828,7 @@ msgstr "Восстанавливать последний плейлист"
 msgid "When adding folders"
 msgstr "При добавлении каталога"
 
-#: ../src/pragha-preferences-dialog.c:1156 ../src/pragha.c:197
+#: ../src/pragha-preferences-dialog.c:1156 ../src/pragha.c:198
 msgid "Add files recursively"
 msgstr "Добавлять содержимое вложенных папок"
 
@@ -1019,36 +1017,36 @@ msgstr "_Остановить"
 msgid "_Next"
 msgstr "_Следующий"
 
-#: ../src/pragha.c:175
+#: ../src/pragha.c:176
 msgid "Select a file to play"
 msgstr "Воспроизвести выделенный файл"
 
-#: ../src/pragha.c:219 ../plugins/lastfm/pragha-lastfm-plugin.c:980
+#: ../src/pragha.c:220 ../plugins/lastfm/pragha-lastfm-plugin.c:980
 msgid "Supported media"
 msgstr "Поддерживаемые типы"
 
-#: ../src/pragha.c:305
+#: ../src/pragha.c:306
 msgid "All files"
 msgstr "Все файлы"
 
-#: ../src/pragha.c:380
+#: ../src/pragha.c:382
 msgid "Enter the URL of an internet radio stream"
 msgstr "Введите URL интернет радио-потока"
 
-#: ../src/pragha.c:385
+#: ../src/pragha.c:389
 msgid "Give it a name to save"
 msgstr "Введите имя для сохранения"
 
-#: ../src/pragha.c:403
+#: ../src/pragha.c:402
 msgid "Add a location"
 msgstr "Добавить расположение"
 
-#: ../src/pragha.c:518
+#: ../src/pragha.c:534
 msgid "translator-credits"
 msgstr "Kyrill Detinov <lazy.kent@opensuse.org>"
 
 #. Setup application name and pulseaudio role
-#: ../src/pragha.c:686 ../src/pragha.c:918 ../src/pragha.c:1295
+#: ../src/pragha.c:702 ../src/pragha.c:934 ../src/pragha.c:1311
 #: ../plugins/dlna/pragha-dlna-plugin.c:220
 #: ../plugins/dlna/pragha-dlna-plugin.c:222
 msgid "Pragha Music Player"
@@ -1096,10 +1094,6 @@ msgstr "Устройство Audio CD"
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:644
 msgid "Connect to CDDB server"
 msgstr "Соединиться с CDDB сервером"
-
-#: ../plugins/devices/pragha-devices-plugin.c:93
-msgid "Ignore"
-msgstr "Игнорировать"
 
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:89
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:262
@@ -1291,6 +1285,9 @@ msgstr "Искать радио на TuneIn"
 #: ../plugins/tunein/pragha-tunein-plugin.c:231
 msgid "Search in TuneIn"
 msgstr "Искать на TuneIn"
+
+#~ msgid "Ignore"
+#~ msgstr "Игнорировать"
 
 #~ msgid "Use Gnome 3 HIG"
 #~ msgstr "Использовать GNOME 3 HIG"
