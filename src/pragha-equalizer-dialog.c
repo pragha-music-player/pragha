@@ -27,16 +27,17 @@
 #include <glib/gi18n.h>
 #endif
 
+#include <math.h>
+
 #include "pragha-preferences.h"
 
-#define NUM_BANDS 10
+#define NUM_BANDS 11
 
 typedef struct _PraghaEqualizerDialog PraghaEqualizerDialog;
 
 struct _PraghaEqualizerDialog {
 	GtkWidget         *enable;
 	GtkWidget         *vscales[NUM_BANDS];
-	GtkWidget         *preamp_scale;
 	GtkWidget         *preset_combobox;
 
 	PraghaPreferences *preferences;
@@ -91,25 +92,25 @@ eq_combobox_activated_cb (GtkComboBox *widget, gpointer user_data)
 
 	gdouble value[][NUM_BANDS] =
 	{
-		{  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0}, // "Disabled"
-		{  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -7.2, -7.2, -7.2, -9.6}, // "Classical"
-		{  0.0,  0.0,  8.0,  5.6,  5.6,  5.6,  3.2,  0.0,  0.0,  0.0}, // "Club"
-		{  9.6,  7.2,  2.4, -1.1, -1.1, -5.6, -7.2, -7.2, -1.1, -1.1}, // "Dance"
-		{ -8.0,  9.6,  9.6,  5.6,  1.6, -4.0, -8.0,-10.4,-11.2,-11.2}, //"Full Bass"
-		{  7.2,  5.6, -1.1, -7.2, -4.8,  1.6,  8.0, 11.2, 12.0, 12.0}, // "Full Bass and Treble"
-		{ -9.6, -9.6, -9.6, -4.0,  2.4, 11.2, 11.5, 11.8, 11.8, 12.0}, // "Full Treble"
-		{  4.8, 11.2,  5.6, -3.2, -2.4,  1.6,  4.8,  9.6, 11.9, 11.9}, // "Laptop Speakers and Headphones"
-		{ 10.4, 10.4,  5.6,  5.6, -1.1, -4.8, -4.8, -4.8, -1.1, -1.1}, // "Large Hall"
-		{ -4.8, -1.1,  4.0,  5.6,  5.6,  5.6,  4.0,  2.4,  2.4,  2.4}, // "Live"
-		{  7.2,  7.2, -1.1, -1.1, -1.1, -1.1, -1.1, -1.1,  7.2,  7.2}, // "Party"
-		{ -1.6,  4.8,  7.2,  8.0,  5.6, -1.1, -2.4, -2.4, -1.6, -1.6}, // "Pop"
-		{ -1.1, -1.1, -1.1, -5.6, -1.1,  6.4,  6.4, -1.1, -1.1, -1.1}, // "Reggae"
-		{  8.0,  4.8, -5.6, -8.0, -3.2,  4.0,  8.8, 11.2, 11.2, 11.2}, // "Rock"
-		{ -2.4, -4.8, -4.0, -1.1,  4.0,  5.6,  8.8,  9.6, 11.2,  9.6}, // "Ska"
-		{ 12.0,  8.0,  6.0,  3.0,  0.0,  0.0,  3.0,  6.0,  8.0, 12.0}, // "Smiley Face Curve"
-		{  4.8,  1.6, -1.1, -2.4, -1.1,  4.0,  8.0,  9.6, 11.2, 12.0}, // "Soft"
-		{  4.0,  4.0,  2.4, -1.1, -4.0, -5.6, -3.2, -1.1,  2.4,  8.8}, // "Soft Rock"
-		{  8.0,  5.6, -1.1, -5.6, -4.8, -1.1,  8.0,  9.6,  9.6,  8.8}, // "Techno"
+		{  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0}, // "Disabled"
+		{  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -7.2, -7.2, -7.2, -9.6}, // "Classical"
+		{  0.0,  0.0,  0.0,  8.0,  5.6,  5.6,  5.6,  3.2,  0.0,  0.0,  0.0}, // "Club"
+		{ -1.1,  9.6,  7.2,  2.4, -1.1, -1.1, -5.6, -7.2, -7.2, -1.1, -1.1}, // "Dance"
+		{ -1.1, -8.0,  9.6,  9.6,  5.6,  1.6, -4.0, -8.0,-10.4,-11.2,-11.2}, //"Full Bass"
+		{ -1.1,  7.2,  5.6, -1.1, -7.2, -4.8,  1.6,  8.0, 11.2, 12.0, 12.0}, // "Full Bass and Treble"
+		{ -1.1, -9.6, -9.6, -9.6, -4.0,  2.4, 11.2, 11.5, 11.8, 11.8, 12.0}, // "Full Treble"
+		{ -1.1,  4.8, 11.2,  5.6, -3.2, -2.4,  1.6,  4.8,  9.6, 11.9, 11.9}, // "Laptop Speakers and Headphones"
+		{ -1.1, 10.4, 10.4,  5.6,  5.6, -1.1, -4.8, -4.8, -4.8, -1.1, -1.1}, // "Large Hall"
+		{ -1.1, -4.8, -1.1,  4.0,  5.6,  5.6,  5.6,  4.0,  2.4,  2.4,  2.4}, // "Live"
+		{ -1.1,  7.2,  7.2, -1.1, -1.1, -1.1, -1.1, -1.1, -1.1,  7.2,  7.2}, // "Party"
+		{ -1.1, -1.6,  4.8,  7.2,  8.0,  5.6, -1.1, -2.4, -2.4, -1.6, -1.6}, // "Pop"
+		{ -1.1, -1.1, -1.1, -1.1, -5.6, -1.1,  6.4,  6.4, -1.1, -1.1, -1.1}, // "Reggae"
+		{ -1.1,  8.0,  4.8, -5.6, -8.0, -3.2,  4.0,  8.8, 11.2, 11.2, 11.2}, // "Rock"
+		{ -1.1, -2.4, -4.8, -4.0, -1.1,  4.0,  5.6,  8.8,  9.6, 11.2,  9.6}, // "Ska"
+		{ -7.0, 12.0,  8.0,  6.0,  3.0,  0.0,  0.0,  3.0,  6.0,  8.0, 12.0}, // "Smiley Face Curve"
+		{ -1.1,  4.8,  1.6, -1.1, -2.4, -1.1,  4.0,  8.0,  9.6, 11.2, 12.0}, // "Soft"
+		{ -1.1,  4.0,  4.0,  2.4, -1.1, -4.0, -5.6, -3.2, -1.1,  2.4,  8.8}, // "Soft Rock"
+		{ -1.1,  8.0,  5.6, -1.1, -5.6, -4.8, -1.1,  8.0,  9.6,  9.6,  8.8}, // "Techno"
 	};
 
 	gtk_switch_set_state (GTK_SWITCH(dialog->enable), TRUE);
@@ -211,8 +212,8 @@ pragha_equalizer_dialog_bind_bands_to_backend (PraghaEqualizerDialog *dialog)
 
 	GBindingFlags flags = G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
-	for (i = 0; i < NUM_BANDS; i++) {
-		eq_property = g_strdup_printf ("band%i", i);
+	for (i = 1; i < NUM_BANDS; i++) {
+		eq_property = g_strdup_printf ("band%i", i-1);
 		adjustment = gtk_range_get_adjustment (GTK_RANGE(dialog->vscales[i]));
 
 		g_object_bind_property (dialog->equalizer, eq_property,
@@ -221,6 +222,36 @@ pragha_equalizer_dialog_bind_bands_to_backend (PraghaEqualizerDialog *dialog)
 
 		g_free (eq_property);
 	}
+}
+
+static gboolean
+db_to_volume_transform_func (GBinding     *binding,
+                             const GValue *from_value,
+                             GValue       *to_value,
+                             gpointer      user_data)
+{
+	gdouble db = 0, volume = 0;
+
+	db = g_value_get_double (from_value);
+	volume = pow(10.0, db / 20.0);
+	g_value_set_double (to_value, volume);
+
+	return TRUE;
+}
+
+static gboolean
+volume_to_db_transform_func (GBinding     *binding,
+                             const GValue *from_value,
+                             GValue       *to_value,
+                             gpointer      user_data)
+{
+	gdouble db = 0, volume = 0;
+
+	volume = g_value_get_double (from_value);
+	db = 20 * log (volume/100);
+	g_value_set_double (to_value, db);
+
+	return TRUE;
 }
 
 static void
@@ -232,7 +263,6 @@ pragha_equalizer_dialog_enabled_cb (GtkSwitch *enable,
 
 	if (!gtk_switch_get_active (enable)) {
 		gtk_combo_box_set_active (GTK_COMBO_BOX(dialog->preset_combobox), 0);
-		gtk_range_set_value(GTK_RANGE(dialog->preamp_scale), 1.0);
 	}
 }
 
@@ -257,6 +287,7 @@ pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent)
 {
 	PraghaEqualizerDialog *dialog;
 	GtkWidget *w_dialog, *grid, *label;
+	GtkWidget *preamp_scale;
 	gint i;
 
 	dialog = g_slice_new0 (PraghaEqualizerDialog);
@@ -282,17 +313,29 @@ pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent)
 
 	/* Preamp scale */
 
-	dialog->preamp_scale = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL,
-	                                                 0.0, 2.0, 0.1);
-	gtk_scale_add_mark (GTK_SCALE(dialog->preamp_scale), 1.0, GTK_POS_LEFT, NULL);
-	gtk_range_set_inverted(GTK_RANGE(dialog->preamp_scale), TRUE);
-	gtk_scale_set_draw_value (GTK_SCALE(dialog->preamp_scale), FALSE);
-	gtk_grid_attach (GTK_GRID(grid), GTK_WIDGET(dialog->preamp_scale),
+	preamp_scale = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL,
+	                                         -12.0, 12.0, 0.1);
+	gtk_scale_add_mark (GTK_SCALE(preamp_scale), 0.0, GTK_POS_LEFT, NULL);
+	gtk_range_set_inverted(GTK_RANGE(preamp_scale), TRUE);
+	gtk_scale_set_draw_value (GTK_SCALE(preamp_scale), FALSE);
+	gtk_grid_attach (GTK_GRID(grid), GTK_WIDGET(preamp_scale),
 	                 0, 1, 1, 3);
 
-	g_object_bind_property (dialog->preamp, "volume",
-	                        gtk_range_get_adjustment(GTK_RANGE(dialog->preamp_scale)), "value",
-		                    G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL);
+	g_object_bind_property_full (dialog->preamp, "volume",
+	                             gtk_range_get_adjustment(GTK_RANGE(preamp_scale)), "value",
+	                             G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL,
+	                             volume_to_db_transform_func,
+	                             db_to_volume_transform_func,
+		                         NULL, NULL);
+
+	g_object_set (G_OBJECT(preamp_scale), "has-tooltip", TRUE, NULL);
+	g_signal_connect (G_OBJECT(preamp_scale), "query-tooltip",
+	                  G_CALLBACK(pragha_equalizer_band_get_tooltip),
+	                  NULL);
+
+	dialog->vscales[0] = preamp_scale;
+
+	/* Preamp label */
 
 	label = gtk_label_new("Preamp");
 
@@ -323,7 +366,7 @@ pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent)
 
 	/* Create vertical scales band to equalizer */
 
-	for (i = 0; i < NUM_BANDS; i++) {
+	for (i = 1; i < NUM_BANDS; i++) {
 		dialog->vscales[i] = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL,
 		                                               -12.0, 12.0, 0.1);
 		gtk_range_set_inverted(GTK_RANGE(dialog->vscales[i]), TRUE);
@@ -342,7 +385,7 @@ pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent)
 		gtk_widget_set_hexpand (dialog->vscales[i], TRUE);
 
 		gtk_grid_attach (GTK_GRID(grid), dialog->vscales[i],
-		                 i+2, 1, 1, 3);
+		                 i+1, 1, 1, 3);
 	}
 
 	for (i = 0; i < G_N_ELEMENTS(label_band_frec); i++) {
