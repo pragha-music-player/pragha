@@ -90,7 +90,7 @@ pragha_scanner_update_progress(gpointer user_data)
 		fraction = (gdouble)files_scanned / (gdouble)no_files;
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(scanner->progress_bar), fraction);
 
-		data = g_strdup_printf(_("%i files analized of %i detected"), files_scanned, no_files);
+		data = g_strdup_printf(_("%i files analyzed of %i detected"), files_scanned, no_files);
 		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(scanner->progress_bar), data);
 		g_free(data);
 	}
