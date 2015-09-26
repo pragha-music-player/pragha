@@ -415,11 +415,11 @@ prefrences_change_icon_size (PraghaPreferences *preferences,
 {
 	GIcon *icon = NULL;
 
-  	const gchar *fallbacks_icon_menu[] = {
-		"open-menu-symbolic",
-		"emblem-system-symbolic",
+	const gchar *fallbacks_icon_menu[] = {
 		"open-menu",
 		"emblem-system",
+		"open-menu-symbolic",
+		"emblem-system-symbolic",
 		NULL,
 	};
 
@@ -451,10 +451,10 @@ pragha_window_new (PraghaApplication *pragha)
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	const gchar *fallbacks_icon_menu[] = {
-		"open-menu-symbolic",
-		"emblem-system-symbolic",
 		"open-menu",
 		"emblem-system",
+		"open-menu-symbolic",
+		"emblem-system-symbolic",
 		NULL,
 	};
 
