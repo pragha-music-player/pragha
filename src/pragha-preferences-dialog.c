@@ -960,6 +960,7 @@ pref_create_library_page (PreferencesDialog *dialog)
 	GtkListStore *library_store;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
+	GtkStyleContext *context;
 
 	guint row = 0;
 
@@ -998,7 +999,12 @@ pref_create_library_page (PreferencesDialog *dialog)
 
 	library_bbox_align = gtk_alignment_new(0, 0, 0, 0);
 	library_bbox = gtk_button_box_new (GTK_ORIENTATION_VERTICAL);
+	gtk_box_set_spacing (library_bbox, 5);
 	library_add = gtk_button_new_with_mnemonic (_("_Add"));
+	context = gtk_widget_get_style_context (library_add);
+	gtk_style_context_add_class (context, "suggested-action");
+	// gtk_widget_set_margin_bottom (GTK_WIDGET (library_add), 5);
+	
 	library_remove = gtk_button_new_with_mnemonic (_("_Remove"));
 
 	gtk_box_pack_start (GTK_BOX(library_bbox), library_add,
@@ -1287,7 +1293,9 @@ pragha_preferences_dialog_new (GtkWidget *parent)
 
 	dialog->widget = gtk_dialog_new_with_buttons (_("Preferences"),
 	                                              GTK_WINDOW(parent),
-	                                              GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                              GTK_DIALOG_MODAL |
+						      GTK_DIALOG_DESTROY_WITH_PARENT |
+						      GTK_DIALOG_USE_HEADER_BAR,
 	                                              _("_Cancel"), GTK_RESPONSE_CANCEL,
 	                                              _("_Ok"), GTK_RESPONSE_OK,
 	                                              NULL);
