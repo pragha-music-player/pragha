@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Pragha\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-23 20:11-0300\n"
+"POT-Creation-Date: 2015-10-10 12:18-0500\n"
 "PO-Revision-Date: 2015-07-11 19:32+0000\n"
 "Last-Translator: Moo\n"
 "Language-Team: Lithuanian (http://www.transifex.com/p/Pragha/language/lt/)\n"
@@ -53,87 +53,88 @@ msgstr ""
 "Naudokite --help, kad pamatytumėte pilną prieinamų komandų eilutės parinkčių "
 "sąrašą."
 
-#: ../src/pragha-equalizer-dialog.c:50
-msgid "Disabled"
-msgstr "Išjungtas"
-
 #: ../src/pragha-equalizer-dialog.c:51
+msgid "Normal"
+msgstr ""
+
+#: ../src/pragha-equalizer-dialog.c:52
 msgid "Classical"
 msgstr "Klasikinė"
 
-#: ../src/pragha-equalizer-dialog.c:52
+#: ../src/pragha-equalizer-dialog.c:53
 msgid "Club"
 msgstr "Klubas"
 
-#: ../src/pragha-equalizer-dialog.c:53
+#: ../src/pragha-equalizer-dialog.c:54
 msgid "Dance"
 msgstr "Šokiai"
 
-#: ../src/pragha-equalizer-dialog.c:54
+#: ../src/pragha-equalizer-dialog.c:55
 msgid "Full Bass"
 msgstr "Pilni Žemi Tonai"
 
-#: ../src/pragha-equalizer-dialog.c:55
+#: ../src/pragha-equalizer-dialog.c:56
 msgid "Full Bass and Treble"
 msgstr "Pilni Žemi ir Aukšti Tonai"
 
-#: ../src/pragha-equalizer-dialog.c:56
+#: ../src/pragha-equalizer-dialog.c:57
 msgid "Full Treble"
 msgstr "Pilni Aukšti Tonai"
 
-#: ../src/pragha-equalizer-dialog.c:57
+#: ../src/pragha-equalizer-dialog.c:58
 msgid "Laptop Speakers and Headphones"
 msgstr "Nešiojamojo Kompiuterio Garsiakalbiai ir Ausinės"
 
-#: ../src/pragha-equalizer-dialog.c:58
+#: ../src/pragha-equalizer-dialog.c:59
 msgid "Large Hall"
 msgstr "Didelė Salė"
 
-#: ../src/pragha-equalizer-dialog.c:59
+#: ../src/pragha-equalizer-dialog.c:60
 msgid "Live"
 msgstr "Gyvai"
 
-#: ../src/pragha-equalizer-dialog.c:60
+#: ../src/pragha-equalizer-dialog.c:61
 msgid "Party"
 msgstr "Vakarėlis"
 
-#: ../src/pragha-equalizer-dialog.c:61
+#: ../src/pragha-equalizer-dialog.c:62
 msgid "Pop"
 msgstr "Pop"
 
-#: ../src/pragha-equalizer-dialog.c:62
+#: ../src/pragha-equalizer-dialog.c:63
 msgid "Reggae"
 msgstr "Regis"
 
-#: ../src/pragha-equalizer-dialog.c:63
+#: ../src/pragha-equalizer-dialog.c:64
 msgid "Rock"
 msgstr "Rokas"
 
-#: ../src/pragha-equalizer-dialog.c:64
+#: ../src/pragha-equalizer-dialog.c:65
 msgid "Ska"
 msgstr "Ska"
 
-#: ../src/pragha-equalizer-dialog.c:65
+#: ../src/pragha-equalizer-dialog.c:66
 msgid "Smiley Face Curve"
 msgstr "Šypsenėlės Linija"
 
-#: ../src/pragha-equalizer-dialog.c:66
+#: ../src/pragha-equalizer-dialog.c:67
 msgid "Soft"
 msgstr "Švelni"
 
-#: ../src/pragha-equalizer-dialog.c:67
+#: ../src/pragha-equalizer-dialog.c:68
 msgid "Soft Rock"
 msgstr "Lengvasis Rokas"
 
-#: ../src/pragha-equalizer-dialog.c:68
+#: ../src/pragha-equalizer-dialog.c:69
 msgid "Techno"
 msgstr "Techno"
 
-#: ../src/pragha-equalizer-dialog.c:69
+#: ../src/pragha-equalizer-dialog.c:70
 msgid "Custom"
 msgstr "Pasirinktinis"
 
-#: ../src/pragha-equalizer-dialog.c:418
+#. Create the dialog
+#: ../src/pragha-equalizer-dialog.c:424
 msgid "Equalizer"
 msgstr "Glodintuvas"
 
@@ -1094,6 +1095,10 @@ msgstr "Garso CD Įrenginys"
 msgid "Connect to CDDB server"
 msgstr ""
 
+#: ../plugins/devices/pragha-device-client.c:76
+msgid "Ignore"
+msgstr "Nepaisyti"
+
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:89
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:262
 msgid "Search music on DLNA server"
@@ -1285,8 +1290,8 @@ msgstr "Ieškoti radijo per TuneIn"
 msgid "Search in TuneIn"
 msgstr "Ieškoti sistemoje TuneIn"
 
-#~ msgid "Ignore"
-#~ msgstr "Nepaisyti"
+#~ msgid "Disabled"
+#~ msgstr "Išjungtas"
 
 #~ msgid "Use Gnome 3 HIG"
 #~ msgstr "Naudoti Gnome 3 HIG"

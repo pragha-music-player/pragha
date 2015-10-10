@@ -39,6 +39,7 @@ struct _PraghaEqualizerDialog {
 	GtkWidget         *enable;
 	GtkWidget         *vscales[NUM_BANDS];
 	GtkWidget         *preset_combobox;
+        GtkWidget         *grid;
 
 	PraghaPreferences *preferences;
 
@@ -47,7 +48,7 @@ struct _PraghaEqualizerDialog {
 };
 
 static const gchar *presets_names[] = {
-	N_("Disabled"),
+	N_("Normal"),
 	N_("Classical"),
 	N_("Club"),
 	N_("Dance"),
@@ -92,7 +93,7 @@ eq_combobox_activated_cb (GtkComboBox *widget, gpointer user_data)
 
 	gdouble value[][NUM_BANDS] =
 	{
-		{  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0}, // "Disabled"
+		{  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0}, // "Normal"
 		{  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -7.2, -7.2, -7.2, -9.6}, // "Classical"
 		{  0.0,  0.0,  0.0,  8.0,  5.6,  5.6,  5.6,  3.2,  0.0,  0.0,  0.0}, // "Club"
 		{ -1.1,  9.6,  7.2,  2.4, -1.1, -1.1, -5.6, -7.2, -7.2, -1.1, -1.1}, // "Dance"
@@ -112,8 +113,6 @@ eq_combobox_activated_cb (GtkComboBox *widget, gpointer user_data)
 		{ -1.1,  4.0,  4.0,  2.4, -1.1, -4.0, -5.6, -3.2, -1.1,  2.4,  8.8}, // "Soft Rock"
 		{ -1.1,  8.0,  5.6, -1.1, -5.6, -4.8, -1.1,  8.0,  9.6,  9.6,  8.8}, // "Techno"
 	};
-
-	gtk_switch_set_state (GTK_SWITCH(dialog->enable), TRUE);
 
 	option = gtk_combo_box_get_active (widget);
 
@@ -256,14 +255,20 @@ volume_to_db_transform_func (GBinding     *binding,
 
 static void
 pragha_equalizer_dialog_enabled_cb (GtkSwitch *enable,
-									gpointer   data1,
+                                    gpointer   data1,
                                     gpointer   data)
 {
 	PraghaEqualizerDialog *dialog = data;
+        gboolean sensitive = gtk_switch_get_active (enable);
 
-	if (!gtk_switch_get_active (enable)) {
+        pragha_preferences_set_boolean (dialog->preferences,
+                                        GROUP_AUDIO,
+                                        KEY_EQ_ENABLED,
+                                        sensitive);
+        gtk_widget_set_sensitive (GTK_WIDGET (dialog->grid), sensitive);
+        if (sensitive == FALSE) {
 		gtk_combo_box_set_active (GTK_COMBO_BOX(dialog->preset_combobox), 0);
-	}
+        }
 }
 
 static void
@@ -286,9 +291,11 @@ void
 pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent)
 {
 	PraghaEqualizerDialog *dialog;
-	GtkWidget *w_dialog, *grid, *label;
+	GtkWidget *w_dialog, *label;
 	GtkWidget *preamp_scale;
+        GtkWidget *header_bar;
 	gint i;
+        gboolean equalizer_enabled;
 
 	dialog = g_slice_new0 (PraghaEqualizerDialog);
 
@@ -298,16 +305,19 @@ pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent)
 
 	/* The main grid of dialog */
 
-	grid = gtk_grid_new ();
+	dialog->grid = gtk_grid_new ();
+        g_object_set (G_OBJECT(dialog->grid), "margin", 4, NULL);
 
 	/* Enable switch button */
 
+        equalizer_enabled = pragha_preferences_get_boolean (dialog->preferences,
+                                                            GROUP_AUDIO,
+                                                            KEY_EQ_ENABLED);
 	dialog->enable = gtk_switch_new ();
-	gtk_switch_set_state (GTK_SWITCH(dialog->enable), TRUE);
 	gtk_widget_set_halign (GTK_WIDGET(dialog->enable), GTK_ALIGN_CENTER);
+        gtk_switch_set_active (GTK_SWITCH(dialog->enable), equalizer_enabled);
+        gtk_widget_set_sensitive (GTK_WIDGET (dialog->grid), equalizer_enabled);
 	g_object_set (G_OBJECT(dialog->enable), "margin", 4, NULL);
-	gtk_grid_attach (GTK_GRID(grid), GTK_WIDGET(dialog->enable),
-	                 0, 0, 1, 1);
 	g_signal_connect (dialog->enable, "notify::active",
 	                  G_CALLBACK (pragha_equalizer_dialog_enabled_cb), dialog);
 
@@ -318,7 +328,7 @@ pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent)
 	gtk_scale_add_mark (GTK_SCALE(preamp_scale), 0.0, GTK_POS_LEFT, NULL);
 	gtk_range_set_inverted(GTK_RANGE(preamp_scale), TRUE);
 	gtk_scale_set_draw_value (GTK_SCALE(preamp_scale), FALSE);
-	gtk_grid_attach (GTK_GRID(grid), GTK_WIDGET(preamp_scale),
+	gtk_grid_attach (GTK_GRID(dialog->grid), GTK_WIDGET(preamp_scale),
 	                 0, 1, 1, 3);
 
 	g_object_bind_property_full (dialog->preamp, "volume",
@@ -342,7 +352,7 @@ pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent)
 	gtk_label_set_justify (GTK_LABEL(label), GTK_JUSTIFY_CENTER);
 	gtk_misc_set_alignment (GTK_MISC(label), 0.5, 0.5);
 
-	gtk_grid_attach (GTK_GRID(grid), label,
+	gtk_grid_attach (GTK_GRID(dialog->grid), label,
 	                 0, 4, 1, 1);
 
 	/* Equalizer scales marks */
@@ -350,18 +360,18 @@ pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent)
 	label = gtk_label_new("+12 dB");
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_misc_set_alignment (GTK_MISC(label), 1.0, 0.0);
-	gtk_grid_attach (GTK_GRID(grid), label,
+	gtk_grid_attach (GTK_GRID(dialog->grid), label,
 	                 1, 1, 1, 1);
 
 	label = gtk_label_new("0 dB");
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_misc_set_alignment (GTK_MISC(label), 1.0, 0.5);
-	gtk_grid_attach (GTK_GRID(grid), label,
+	gtk_grid_attach (GTK_GRID(dialog->grid), label,
 	                 1, 2, 1, 1);
 	label = gtk_label_new("-12 dB");
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_misc_set_alignment (GTK_MISC(label), 1.0, 1.0);
-	gtk_grid_attach (GTK_GRID(grid), label,
+	gtk_grid_attach (GTK_GRID(dialog->grid), label,
 	                 1, 3, 1, 1);
 
 	/* Create vertical scales band to equalizer */
@@ -384,7 +394,7 @@ pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent)
 		gtk_widget_set_vexpand (dialog->vscales[i], TRUE);
 		gtk_widget_set_hexpand (dialog->vscales[i], TRUE);
 
-		gtk_grid_attach (GTK_GRID(grid), dialog->vscales[i],
+		gtk_grid_attach (GTK_GRID(dialog->grid), dialog->vscales[i],
 		                 i+1, 1, 1, 3);
 	}
 
@@ -394,7 +404,7 @@ pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent)
 		gtk_label_set_justify (GTK_LABEL(label), GTK_JUSTIFY_CENTER);
 		gtk_misc_set_alignment (GTK_MISC(label), 0.5, 0.5);
 
-		gtk_grid_attach (GTK_GRID(grid), GTK_WIDGET(label),
+		gtk_grid_attach (GTK_GRID(dialog->grid), GTK_WIDGET(label),
 		                 i+2, 4, 1, 1);
 	}
 
@@ -403,20 +413,24 @@ pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent)
 	dialog->preset_combobox = gtk_combo_box_text_new ();
 	gtk_widget_set_halign (GTK_WIDGET(dialog->preset_combobox), GTK_ALIGN_CENTER);
 	gtk_container_set_border_width (GTK_CONTAINER(dialog->preset_combobox), 4);
-
-	gtk_grid_attach (GTK_GRID(grid), dialog->preset_combobox,
-	                 2, 0, 10, 1);
+	gtk_grid_attach (GTK_GRID(dialog->grid), dialog->preset_combobox,
+	                 0, 0, 12, 1);
 
   	for (i = 0; i < G_N_ELEMENTS(presets_names); i++)
 		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(dialog->preset_combobox), _(presets_names[i]));
 
 	/* Create the dialog */
 
-	w_dialog = gtk_dialog_new ();
-	gtk_window_set_transient_for (GTK_WINDOW(w_dialog), GTK_WINDOW(parent));
-	gtk_window_set_destroy_with_parent (GTK_WINDOW(w_dialog), TRUE);
-	gtk_window_set_title (GTK_WINDOW(w_dialog), _("Equalizer"));
-  	gtk_window_set_default_size(GTK_WINDOW (w_dialog), 400, 200);
+        w_dialog = gtk_dialog_new_with_buttons (_("Equalizer"),
+                                                GTK_WINDOW (parent),
+                                                GTK_DIALOG_USE_HEADER_BAR |
+                                                GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                NULL, NULL);
+  	gtk_window_set_default_size(GTK_WINDOW (w_dialog), 400, 350);
+
+        /* HeaderBar */
+        header_bar = gtk_dialog_get_header_bar (GTK_DIALOG (w_dialog));
+        gtk_header_bar_pack_start (GTK_HEADER_BAR (header_bar), GTK_WIDGET (dialog->enable));
 
 	/* Conect the signals */
 
@@ -431,14 +445,14 @@ pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent)
 	/* Append and show the dialog */
 
 	gtk_box_pack_start (GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(w_dialog))),
-	                    grid, TRUE, TRUE, 0);
+	                    dialog->grid, TRUE, TRUE, 0);
 
 	if (dialog->equalizer != NULL && dialog->preamp != NULL) {
 		pragha_equalizer_dialog_bind_bands_to_backend (dialog);
 		pragha_equalizer_dialog_init_bands (dialog);
 	}
 	else {
-		gtk_widget_set_sensitive(GTK_WIDGET(grid), FALSE);
+		gtk_widget_set_sensitive(GTK_WIDGET(dialog->grid), FALSE);
 	}
 
 	gtk_widget_show_all(w_dialog);

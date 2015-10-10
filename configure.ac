@@ -76,7 +76,7 @@ dnl Check for required packages
 XDT_CHECK_PACKAGE([GSTREAMER], [gstreamer-1.0], [$GSTREAMER_REQUIRED])
 XDT_CHECK_PACKAGE([GSTREAMER_BASE], [gstreamer-base-1.0], [$GSTREAMER_REQUIRED])
 XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.36])
-XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [3.8.0])
+XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [3.12.0])
 XDT_CHECK_PACKAGE([SQLITE3], [sqlite3], [3.4])
 XDT_CHECK_PACKAGE([TAGLIB_C], [taglib_c], [1.8])
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-23 20:11-0300\n"
+"POT-Creation-Date: 2015-10-10 12:18-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -50,87 +50,88 @@ msgstr ""
 msgid "Use --help to see a full list of available command line options."
 msgstr ""
 
-#: ../src/pragha-equalizer-dialog.c:50
-msgid "Disabled"
-msgstr ""
-
 #: ../src/pragha-equalizer-dialog.c:51
-msgid "Classical"
+msgid "Normal"
 msgstr ""
 
 #: ../src/pragha-equalizer-dialog.c:52
-msgid "Club"
+msgid "Classical"
 msgstr ""
 
 #: ../src/pragha-equalizer-dialog.c:53
-msgid "Dance"
+msgid "Club"
 msgstr ""
 
 #: ../src/pragha-equalizer-dialog.c:54
-msgid "Full Bass"
+msgid "Dance"
 msgstr ""
 
 #: ../src/pragha-equalizer-dialog.c:55
-msgid "Full Bass and Treble"
+msgid "Full Bass"
 msgstr ""
 
 #: ../src/pragha-equalizer-dialog.c:56
-msgid "Full Treble"
+msgid "Full Bass and Treble"
 msgstr ""
 
 #: ../src/pragha-equalizer-dialog.c:57
-msgid "Laptop Speakers and Headphones"
+msgid "Full Treble"
 msgstr ""
 
 #: ../src/pragha-equalizer-dialog.c:58
-msgid "Large Hall"
+msgid "Laptop Speakers and Headphones"
 msgstr ""
 
 #: ../src/pragha-equalizer-dialog.c:59
-msgid "Live"
+msgid "Large Hall"
 msgstr ""
 
 #: ../src/pragha-equalizer-dialog.c:60
-msgid "Party"
+msgid "Live"
 msgstr ""
 
 #: ../src/pragha-equalizer-dialog.c:61
-msgid "Pop"
+msgid "Party"
 msgstr ""
 
 #: ../src/pragha-equalizer-dialog.c:62
-msgid "Reggae"
+msgid "Pop"
 msgstr ""
 
 #: ../src/pragha-equalizer-dialog.c:63
-msgid "Rock"
+msgid "Reggae"
 msgstr ""
 
 #: ../src/pragha-equalizer-dialog.c:64
-msgid "Ska"
+msgid "Rock"
 msgstr ""
 
 #: ../src/pragha-equalizer-dialog.c:65
-msgid "Smiley Face Curve"
+msgid "Ska"
 msgstr ""
 
 #: ../src/pragha-equalizer-dialog.c:66
-msgid "Soft"
+msgid "Smiley Face Curve"
 msgstr ""
 
 #: ../src/pragha-equalizer-dialog.c:67
-msgid "Soft Rock"
+msgid "Soft"
 msgstr ""
 
 #: ../src/pragha-equalizer-dialog.c:68
-msgid "Techno"
+msgid "Soft Rock"
 msgstr ""
 
 #: ../src/pragha-equalizer-dialog.c:69
+msgid "Techno"
+msgstr ""
+
+#: ../src/pragha-equalizer-dialog.c:70
 msgid "Custom"
 msgstr ""
 
-#: ../src/pragha-equalizer-dialog.c:418
+#. Create the dialog
+#: ../src/pragha-equalizer-dialog.c:424
 msgid "Equalizer"
 msgstr ""
 
@@ -1073,6 +1074,10 @@ msgstr ""
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:644
 msgid "Connect to CDDB server"
+msgstr ""
+
+#: ../plugins/devices/pragha-device-client.c:76
+msgid "Ignore"
 msgstr ""
 
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:89

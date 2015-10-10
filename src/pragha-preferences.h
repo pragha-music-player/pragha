@@ -86,7 +86,8 @@ struct _PraghaPreferencesClass
 #define KEY_AUDIO_DEVICE           "audio_device"
 #define KEY_SOFTWARE_MIXER         "software_mixer"
 #define KEY_SOFTWARE_VOLUME        "software_volume"
-#define KEY_EQ_10_BANDS            "equealizer_10_bands"
+#define KEY_EQ_ENABLED             "equalizer_enabled"
+#define KEY_EQ_10_BANDS            "equalizer_10_bands"
 #define KEY_EQ_PRESET              "equalizer_preset"
 
 #define GROUP_WINDOW   "Window"

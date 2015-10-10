@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Pragha\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-23 20:11-0300\n"
+"POT-Creation-Date: 2015-10-10 12:18-0500\n"
 "PO-Revision-Date: 2015-02-12 19:02+0000\n"
 "Last-Translator: Kyrill Detinov <lazy.kent@opensuse.org>\n"
 "Language-Team: Russian (http://www.transifex.com/p/Pragha/language/ru/)\n"
@@ -53,87 +53,88 @@ msgstr "ИМЯ_ФАЙЛА"
 msgid "Use --help to see a full list of available command line options."
 msgstr "Используйте --help для полного списка опций командной строки."
 
-#: ../src/pragha-equalizer-dialog.c:50
-msgid "Disabled"
-msgstr "Отключен"
-
 #: ../src/pragha-equalizer-dialog.c:51
+msgid "Normal"
+msgstr ""
+
+#: ../src/pragha-equalizer-dialog.c:52
 msgid "Classical"
 msgstr "Классическая музыка"
 
-#: ../src/pragha-equalizer-dialog.c:52
+#: ../src/pragha-equalizer-dialog.c:53
 msgid "Club"
 msgstr "Клубная музыка"
 
-#: ../src/pragha-equalizer-dialog.c:53
+#: ../src/pragha-equalizer-dialog.c:54
 msgid "Dance"
 msgstr "Танцевальная музыка"
 
-#: ../src/pragha-equalizer-dialog.c:54
+#: ../src/pragha-equalizer-dialog.c:55
 msgid "Full Bass"
 msgstr "Усиление басов"
 
-#: ../src/pragha-equalizer-dialog.c:55
+#: ../src/pragha-equalizer-dialog.c:56
 msgid "Full Bass and Treble"
 msgstr "Усиление басов и высоких частот"
 
-#: ../src/pragha-equalizer-dialog.c:56
+#: ../src/pragha-equalizer-dialog.c:57
 msgid "Full Treble"
 msgstr "Усиление высоких частот"
 
-#: ../src/pragha-equalizer-dialog.c:57
+#: ../src/pragha-equalizer-dialog.c:58
 msgid "Laptop Speakers and Headphones"
 msgstr "Ноутбук или наушники"
 
-#: ../src/pragha-equalizer-dialog.c:58
+#: ../src/pragha-equalizer-dialog.c:59
 msgid "Large Hall"
 msgstr "Большой зал"
 
-#: ../src/pragha-equalizer-dialog.c:59
+#: ../src/pragha-equalizer-dialog.c:60
 msgid "Live"
 msgstr "Живое исполнение"
 
-#: ../src/pragha-equalizer-dialog.c:60
+#: ../src/pragha-equalizer-dialog.c:61
 msgid "Party"
 msgstr "Вечеринка"
 
-#: ../src/pragha-equalizer-dialog.c:61
+#: ../src/pragha-equalizer-dialog.c:62
 msgid "Pop"
 msgstr "Поп-музыка"
 
-#: ../src/pragha-equalizer-dialog.c:62
+#: ../src/pragha-equalizer-dialog.c:63
 msgid "Reggae"
 msgstr "Регги"
 
-#: ../src/pragha-equalizer-dialog.c:63
+#: ../src/pragha-equalizer-dialog.c:64
 msgid "Rock"
 msgstr "Рок"
 
-#: ../src/pragha-equalizer-dialog.c:64
+#: ../src/pragha-equalizer-dialog.c:65
 msgid "Ska"
 msgstr "Ска"
 
-#: ../src/pragha-equalizer-dialog.c:65
+#: ../src/pragha-equalizer-dialog.c:66
 msgid "Smiley Face Curve"
 msgstr "Smiley Face Curve"
 
-#: ../src/pragha-equalizer-dialog.c:66
+#: ../src/pragha-equalizer-dialog.c:67
 msgid "Soft"
 msgstr "Мягкая музыка"
 
-#: ../src/pragha-equalizer-dialog.c:67
+#: ../src/pragha-equalizer-dialog.c:68
 msgid "Soft Rock"
 msgstr "Софт-рок"
 
-#: ../src/pragha-equalizer-dialog.c:68
+#: ../src/pragha-equalizer-dialog.c:69
 msgid "Techno"
 msgstr "Техно"
 
-#: ../src/pragha-equalizer-dialog.c:69
+#: ../src/pragha-equalizer-dialog.c:70
 msgid "Custom"
 msgstr "Пользовательский"
 
-#: ../src/pragha-equalizer-dialog.c:418
+#. Create the dialog
+#: ../src/pragha-equalizer-dialog.c:424
 msgid "Equalizer"
 msgstr "Эквалайзер"
 
@@ -1095,6 +1096,10 @@ msgstr "Устройство Audio CD"
 msgid "Connect to CDDB server"
 msgstr "Соединиться с CDDB сервером"
 
+#: ../plugins/devices/pragha-device-client.c:76
+msgid "Ignore"
+msgstr "Игнорировать"
+
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:89
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:262
 msgid "Search music on DLNA server"
@@ -1286,8 +1291,8 @@ msgstr "Искать радио на TuneIn"
 msgid "Search in TuneIn"
 msgstr "Искать на TuneIn"
 
-#~ msgid "Ignore"
-#~ msgstr "Игнорировать"
+#~ msgid "Disabled"
+#~ msgstr "Отключен"
 
 #~ msgid "Use Gnome 3 HIG"
 #~ msgstr "Использовать GNOME 3 HIG"
