@@ -246,13 +246,13 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 
 	/* Create boxs and package all. */
 
-	hbox_title = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-	hbox_artist = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-	hbox_album = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-	hbox_genre = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-	hbox_year = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-	hbox_tno = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-	hbox_comment = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	hbox_title = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
+	hbox_artist = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
+	hbox_album = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
+	hbox_genre = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
+	hbox_year = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
+	hbox_tno = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
+	hbox_comment = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
 
 	hbox_spins = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
 
@@ -521,7 +521,7 @@ pragha_tags_dialog_finalize (GObject *object)
 GtkWidget *
 pragha_tags_dialog_new (void)
 {
-  return g_object_new (PRAGHA_TYPE_TAGS_DIALOG, NULL);
+  return g_object_new (PRAGHA_TYPE_TAGS_DIALOG, "use-header-bar", TRUE, NULL);
 }
 
 
@@ -529,17 +529,9 @@ pragha_tags_dialog_new (void)
  * Track properties dialog
  */
 
-static void
-pragha_track_properties_response(GtkDialog *dialog,
-                                 gint response,
-                                 gpointer data)
-{
-	gtk_widget_destroy(GTK_WIDGET(dialog));
-}
-
 void
-pragha_track_properties_dialog(PraghaMusicobject *mobj,
-                               GtkWidget *parent)
+pragha_track_properties_dialog (PraghaMusicobject *mobj,
+                                GtkWidget *parent)
 {
 	GtkWidget *dialog;
 	GtkWidget *properties_table;
@@ -658,14 +650,13 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 
 	dialog = gtk_dialog_new_with_buttons (_("Details"),
 	                                      GTK_WINDOW(parent),
-	                                      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-	                                      _("_Ok"), GTK_RESPONSE_OK,
+	                                      GTK_DIALOG_MODAL |
+					      GTK_DIALOG_DESTROY_WITH_PARENT |
+					      GTK_DIALOG_USE_HEADER_BAR,
+	                                      NULL,
 	                                      NULL);
 
 	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), properties_table);
-
-	g_signal_connect(G_OBJECT(dialog), "response",
-			G_CALLBACK(pragha_track_properties_response), NULL);
 
 	gtk_widget_show_all(dialog);
 
