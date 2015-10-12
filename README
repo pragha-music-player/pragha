@@ -1,6 +1,6 @@
-Pragha is a Lightweight Music Player for GNU/Linux, based on Gtk and sqlite. It is
-completely written in C, constructed to be fast, light, and simultaneously
-tries to be complete without obstructing the daily work. ;)
+Pragha is a Lightweight Music Player for GNU/Linux, based on Gtk and sqlite.
+It is completely written in C, constructed to be fast, light, and
+simultaneously tries to be complete without obstructing the daily work. ;)
 
 A tiny history of the project.?
 Consonance, An excellent player emerged in the archlinux forums, was
@@ -52,4 +52,5 @@ Optional:
    playlist, last position when saving session, etc.
  * totem-plparser >= 2.26: Support to open many more formats and internet radio
    playlists.
- * gstreamer-plugins-base-devel >= 1.0: Use cubic volume for better volume control.
+ * gstreamer-plugins-base-devel >= 1.0: Use cubic volume for better volume
+   control.
