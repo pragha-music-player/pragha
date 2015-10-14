@@ -1,18 +1,18 @@
 /*************************************************************************/
-/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
-/*                                                                       */
-/* This program is free software: you can redistribute it and/or modify  */
-/* it under the terms of the GNU General Public License as published by  */
-/* the Free Software Foundation, either version 3 of the License, or     */
-/* (at your option) any later version.                                   */
-/*                                                                       */
-/* This program is distributed in the hope that it will be useful,       */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
-/* GNU General Public License for more details.                          */
-/*                                                                       */
-/* You should have received a copy of the GNU General Public License     */
+/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
+/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>			 */
+/*									 */
+/* This program is free software: you can redistribute it and/or modify	 */
+/* it under the terms of the GNU General Public License as published by	 */
+/* the Free Software Foundation, either version 3 of the License, or	 */
+/* (at your option) any later version.					 */
+/*									 */
+/* This program is distributed in the hope that it will be useful,	 */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the	 */
+/* GNU General Public License for more details.				 */
+/*									 */
+/* You should have received a copy of the GNU General Public License	 */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
@@ -98,18 +98,18 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 	comment = taglib_tag_comment(tag);
 
 	g_object_set (mobj,
-	              "title", title,
-	              "artist", artist,
-	              "album", album,
-	              "genre", genre,
-	              "comment", comment,
-	              "year", taglib_tag_year(tag),
-	              "track-no", taglib_tag_track(tag),
-	              "length", taglib_audioproperties_length(audio_prop),
-	              "bitrate", taglib_audioproperties_bitrate(audio_prop),
-	              "channels", taglib_audioproperties_channels(audio_prop),
-	              "samplerate", taglib_audioproperties_samplerate(audio_prop),
-	              NULL);
+		      "title", title,
+		      "artist", artist,
+		      "album", album,
+		      "genre", genre,
+		      "comment", comment,
+		      "year", taglib_tag_year(tag),
+		      "track-no", taglib_tag_track(tag),
+		      "length", taglib_audioproperties_length(audio_prop),
+		      "bitrate", taglib_audioproperties_bitrate(audio_prop),
+		      "channels", taglib_audioproperties_channels(audio_prop),
+		      "samplerate", taglib_audioproperties_samplerate(audio_prop),
+		      NULL);
 
 	free(title);
 	free(artist);
@@ -191,10 +191,12 @@ confirm_tno_multiple_tracks(gint tno, GtkWidget *parent)
 	gint response;
 
 	dialog = gtk_message_dialog_new(GTK_WINDOW(parent),
-	                                GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-	                                GTK_MESSAGE_QUESTION,
-	                                GTK_BUTTONS_YES_NO,
-	                                _("Do you want to set the track number of ALL of the selected tracks to: %d ?"), tno);
+					GTK_DIALOG_MODAL |
+					GTK_DIALOG_DESTROY_WITH_PARENT |
+					GTK_DIALOG_USE_HEADER_BAR,
+					GTK_MESSAGE_QUESTION,
+					GTK_BUTTONS_YES_NO,
+					_("Do you want to set the track number of ALL of the selected tracks to: %d ?"), tno);
 
 	response = gtk_dialog_run(GTK_DIALOG(dialog));
 
@@ -210,9 +212,9 @@ confirm_title_multiple_tracks(const gchar *title, GtkWidget *parent)
 	gint response;
 
 	dialog = gtk_message_dialog_new(GTK_WINDOW(parent),
-	                                GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-	                                GTK_MESSAGE_QUESTION,
-	                                GTK_BUTTONS_YES_NO, _("Do you want to set the title tag of ALL of the selected tracks to: %s ?"), title);
+					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+					GTK_MESSAGE_QUESTION,
+					GTK_BUTTONS_YES_NO, _("Do you want to set the title tag of ALL of the selected tracks to: %s ?"), title);
 
 	response = gtk_dialog_run(GTK_DIALOG(dialog));
 

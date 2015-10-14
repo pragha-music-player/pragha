@@ -1,17 +1,17 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2013 matias <mati86dl@gmail.com>                   */
-/*                                                                       */
-/* This program is free software: you can redistribute it and/or modify  */
-/* it under the terms of the GNU General Public License as published by  */
-/* the Free Software Foundation, either version 3 of the License, or     */
-/* (at your option) any later version.                                   */
-/*                                                                       */
-/* This program is distributed in the hope that it will be useful,       */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
-/* GNU General Public License for more details.                          */
-/*                                                                       */
-/* You should have received a copy of the GNU General Public License     */
+/* Copyright (C) 2011-2013 matias <mati86dl@gmail.com>			 */
+/*									 */
+/* This program is free software: you can redistribute it and/or modify	 */
+/* it under the terms of the GNU General Public License as published by	 */
+/* the Free Software Foundation, either version 3 of the License, or	 */
+/* (at your option) any later version.					 */
+/*									 */
+/* This program is distributed in the hope that it will be useful,	 */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the	 */
+/* GNU General Public License for more details.				 */
+/*									 */
+/* You should have received a copy of the GNU General Public License	 */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
@@ -138,8 +138,8 @@ queue_filter_dialog_refilter (PraghaFilterDialog *fdialog)
 }
 
 static void
-simple_filter_search_keyrelease_handler (GtkEntry           *entry,
-                                         PraghaFilterDialog *fdialog)
+simple_filter_search_keyrelease_handler (GtkEntry	    *entry,
+					 PraghaFilterDialog *fdialog)
 {
 	const gchar *text = NULL;
 	gchar *u_str = NULL;
@@ -214,7 +214,7 @@ pragha_filter_dialog_fill_model (GtkListStore *filter_model, PraghaPlaylist *cpl
 			artist = pragha_musicobject_get_artist(mobj);
 			album = pragha_musicobject_get_album(mobj);
 
-			ch_title = string_is_not_empty(title) ?  g_strdup(title) : get_display_filename (file, FALSE);
+			ch_title = string_is_not_empty(title) ?	 g_strdup(title) : get_display_filename (file, FALSE);
 			ch_artist = string_is_not_empty(artist) ? g_strdup(artist) : g_strdup(_("Unknown Artist"));
 			ch_album = string_is_not_empty(album) ? g_strdup(album) : g_strdup(_("Unknown Album"));
 
@@ -245,7 +245,7 @@ pragha_filter_dialog_activated_cb(GtkTreeView *fliter_view,
 				  GtkTreeViewColumn *column,
 				  GtkWidget *dialog)
 {
-	gtk_dialog_response (GTK_DIALOG(dialog), GTK_RESPONSE_APPLY);
+	gtk_dialog_response (GTK_DIALOG(dialog), GTK_RESPONSE_HELP);
 }
 
 static void
@@ -269,7 +269,7 @@ pragha_filter_dialog_response(GtkDialog *dialog,
 		}
 		toggle_queue_selected_current_playlist (fdialog->cplaylist);
 		break;
-	case GTK_RESPONSE_APPLY:
+	case GTK_RESPONSE_HELP:
 		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(fdialog->filter_view));
 		list = gtk_tree_selection_get_selected_rows (selection, NULL);
 		if (list) {
@@ -367,21 +367,23 @@ pragha_filter_dialog (PraghaPlaylist *playlist)
 	/* The search dialog */
 
 	dialog = gtk_dialog_new_with_buttons (_("Search in playlist"),
-	                                      GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(playlist))),
-	                                      GTK_DIALOG_MODAL,
-	                                      _("_Close"), GTK_RESPONSE_CANCEL,
-	                                      NULL);
-
-	gtk_dialog_add_button (GTK_DIALOG (dialog), _("Add to playback queue"), GTK_RESPONSE_ACCEPT);
-	gtk_dialog_add_button (GTK_DIALOG (dialog), _("_Jump to"), GTK_RESPONSE_APPLY);
-
-	gtk_window_set_default_size (GTK_WINDOW (dialog), 600, 500);
+					      GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(playlist))),
+					      GTK_DIALOG_MODAL |
+					      GTK_DIALOG_DESTROY_WITH_PARENT |
+					      GTK_DIALOG_USE_HEADER_BAR,
+					      _("_Close"), GTK_RESPONSE_CANCEL,
+					      _("Add to playback queue"), GTK_RESPONSE_ACCEPT,
+					      _("_Jump to"), GTK_RESPONSE_HELP,
+					      NULL);
+	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
+	gtk_window_set_default_size (GTK_WINDOW (dialog), 850, 500);
 
 	/* Add to the dialog's main vbox */
 
 	vbox = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+	gtk_container_set_border_width (GTK_CONTAINER (vbox), 5);
 
-	gtk_box_pack_start (GTK_BOX(vbox), search_entry, FALSE, FALSE, 3);
+	gtk_box_pack_start (GTK_BOX(vbox), search_entry, FALSE, FALSE, 5);
 
 	scrollwin = gtk_scrolled_window_new (NULL, NULL);
 	gtk_container_add (GTK_CONTAINER(scrollwin), filter_view);

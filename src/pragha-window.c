@@ -1,18 +1,18 @@
 /*************************************************************************/
-/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
-/*                                                                       */
-/* This program is free software: you can redistribute it and/or modify  */
-/* it under the terms of the GNU General Public License as published by  */
-/* the Free Software Foundation, either version 3 of the License, or     */
-/* (at your option) any later version.                                   */
-/*                                                                       */
-/* This program is distributed in the hope that it will be useful,       */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
-/* GNU General Public License for more details.                          */
-/*                                                                       */
-/* You should have received a copy of the GNU General Public License     */
+/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
+/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>			 */
+/*									 */
+/* This program is free software: you can redistribute it and/or modify	 */
+/* it under the terms of the GNU General Public License as published by	 */
+/* the Free Software Foundation, either version 3 of the License, or	 */
+/* (at your option) any later version.					 */
+/*									 */
+/* This program is distributed in the hope that it will be useful,	 */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the	 */
+/* GNU General Public License for more details.				 */
+/*									 */
+/* You should have received a copy of the GNU General Public License	 */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
@@ -109,11 +109,11 @@ gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, g
 	const gchar *file = pragha_musicobject_get_file (pragha_backend_get_musicobject (backend));
 
 	dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW(pragha_application_get_window(pragha)),
-	                                             GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-	                                             GTK_MESSAGE_QUESTION,
-	                                             GTK_BUTTONS_NONE,
-	                                             _("<b>Error playing current track.</b>\n(%s)\n<b>Reason:</b> %s"),
-	                                             file, error->message);
+						     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+						     GTK_MESSAGE_QUESTION,
+						     GTK_BUTTONS_NONE,
+						     _("<b>Error playing current track.</b>\n(%s)\n<b>Reason:</b> %s"),
+						     file, error->message);
 
 	gtk_dialog_add_button (GTK_DIALOG (dialog), _("_Stop"), GTK_RESPONSE_ACCEPT);
 	gtk_dialog_add_button (GTK_DIALOG (dialog), _("_Next"), GTK_RESPONSE_APPLY);
@@ -121,7 +121,7 @@ gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, g
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_APPLY);
 
 	g_signal_connect(G_OBJECT(dialog), "response",
-	                 G_CALLBACK(backend_error_dialog_response_cb), pragha);
+			 G_CALLBACK(backend_error_dialog_response_cb), pragha);
 
 	gtk_widget_show_all(dialog);
 }
@@ -140,11 +140,11 @@ pragha_window_state_event (GtkWidget *widget, GdkEventWindowState *event, Pragha
 {
 	GtkAction *action_fullscreen;
 
- 	if (event->type == GDK_WINDOW_STATE && (event->changed_mask & GDK_WINDOW_STATE_FULLSCREEN)) {
+	if (event->type == GDK_WINDOW_STATE && (event->changed_mask & GDK_WINDOW_STATE_FULLSCREEN)) {
 		action_fullscreen = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Fullscreen");
 
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_fullscreen),
-		                              (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN) != 0);
+					      (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN) != 0);
 	}
 
 	return FALSE;
@@ -209,8 +209,8 @@ pragha_window_add_widget_to_infobox (PraghaApplication *pragha, GtkWidget *widge
 
 gint
 pragha_menubar_append_plugin_action (PraghaApplication *pragha,
-                                     GtkActionGroup *action_group,
-                                     const gchar *menu_xml)
+				     GtkActionGroup *action_group,
+				     const gchar *menu_xml)
 {
 	GtkUIManager *ui_manager;
 	GError *error = NULL;
@@ -220,9 +220,9 @@ pragha_menubar_append_plugin_action (PraghaApplication *pragha,
 	gtk_ui_manager_insert_action_group (ui_manager, action_group, -1);
 
 	merge_id = gtk_ui_manager_add_ui_from_string (ui_manager,
-	                                              menu_xml,
-	                                              -1,
-	                                              &error);
+						      menu_xml,
+						      -1,
+						      &error);
 
 	if (error) {
 		g_warning ("Adding plugin to menubar: %s", error->message);
@@ -234,8 +234,8 @@ pragha_menubar_append_plugin_action (PraghaApplication *pragha,
 
 void
 pragha_menubar_remove_plugin_action (PraghaApplication *pragha,
-                                     GtkActionGroup *action_group,
-                                     gint merge_id)
+				     GtkActionGroup *action_group,
+				     gint merge_id)
 {
 	GtkUIManager * ui_manager = pragha_application_get_menu_ui_manager (pragha);
 
@@ -281,27 +281,27 @@ pragha_window_save_settings (PraghaApplication *pragha)
 	if (!(state & GDK_WINDOW_STATE_MAXIMIZED) || !(state & GDK_WINDOW_STATE_FULLSCREEN)) {
 		window_size = g_new0(gint, 2);
 		gtk_window_get_size(GTK_WINDOW(window),
-		                    &win_width, &win_height);
+				    &win_width, &win_height);
 		window_size[0] = win_width;
 		window_size[1] = win_height;
 
 		window_position = g_new0(gint, 2);
 		gtk_window_get_position(GTK_WINDOW(window),
-		                        &win_x, &win_y);
+					&win_x, &win_y);
 		window_position[0] = win_x;
 		window_position[1] = win_y;
 
 		pragha_preferences_set_integer_list (preferences,
-		                                     GROUP_WINDOW,
-		                                     KEY_WINDOW_SIZE,
-		                                     window_size,
-		                                     2);
+						     GROUP_WINDOW,
+						     KEY_WINDOW_SIZE,
+						     window_size,
+						     2);
 
 		pragha_preferences_set_integer_list (preferences,
-		                                     GROUP_WINDOW,
-		                                     KEY_WINDOW_POSITION,
-		                                     window_position,
-		                                     2);
+						     GROUP_WINDOW,
+						     KEY_WINDOW_POSITION,
+						     window_position,
+						     2);
 
 		g_free(window_size);
 		g_free(window_position);
@@ -369,6 +369,9 @@ pragha_window_init_menu_actions (PraghaApplication *pragha)
 
 	action = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Playback controls below");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), pragha_preferences_get_controls_below (preferences));
+
+	action = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Use dark mode");
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), pragha_preferences_get_use_dark_mode (preferences));
 }
 
 static void
@@ -410,20 +413,11 @@ pragha_window_init (PraghaApplication *pragha)
 
 static void
 prefrences_change_icon_size (PraghaPreferences *preferences,
-                             GParamSpec        *pspec,
-                             GtkWidget         *button)
+			     GParamSpec	       *pspec,
+			     GtkWidget	       *button)
 {
 	GIcon *icon = NULL;
-
-	const gchar *fallbacks_icon_menu[] = {
-		"open-menu",
-		"emblem-system",
-		"open-menu-symbolic",
-		"emblem-system-symbolic",
-		NULL,
-	};
-
-  	icon = g_themed_icon_new_from_names ((gchar **)fallbacks_icon_menu, -1);
+	icon = g_themed_icon_new ("emblem-system-symbolic");
 	gtk_button_set_image (GTK_BUTTON (button),
 		gtk_image_new_from_gicon(icon, pragha_preferences_get_toolbar_size(preferences)));
 	g_object_unref (icon);
@@ -450,95 +444,88 @@ pragha_window_new (PraghaApplication *pragha)
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
-	const gchar *fallbacks_icon_menu[] = {
-		"open-menu",
-		"emblem-system",
-		"open-menu-symbolic",
-		"emblem-system-symbolic",
-		NULL,
-	};
-
 	CDEBUG(DBG_INFO, "Packaging widgets, and initiating the window");
 
 	preferences = pragha_application_get_preferences (pragha);
 
 	/* Collect widgets. */
 
-	window    = pragha_application_get_window (pragha);
+	window	  = pragha_application_get_window (pragha);
 	playlist  = pragha_application_get_playlist (pragha);
-	library   = pragha_application_get_library (pragha);
+	library	  = pragha_application_get_library (pragha);
 	sidebar1  = pragha_application_get_first_sidebar (pragha);
 	sidebar2  = pragha_application_get_second_sidebar (pragha);
 	statusbar = pragha_application_get_statusbar (pragha);
-	toolbar   = pragha_application_get_toolbar (pragha);
-	menubar   = pragha_application_get_menubar (pragha);
-	pane1     = pragha_application_get_first_pane (pragha);
-	pane2     = pragha_application_get_second_pane (pragha);
-	infobox   = pragha_application_get_infobox_container (pragha);
+	toolbar	  = pragha_application_get_toolbar (pragha);
+	menubar	  = pragha_application_get_menubar (pragha);
+	pane1	  = pragha_application_get_first_pane (pragha);
+	pane2	  = pragha_application_get_second_pane (pragha);
+	infobox	  = pragha_application_get_infobox_container (pragha);
 
 	/* Main window */
 
 	g_signal_connect (G_OBJECT(window), "window-state-event",
-	                  G_CALLBACK(pragha_window_state_event), pragha);
+			  G_CALLBACK(pragha_window_state_event), pragha);
 	g_signal_connect (G_OBJECT(window), "delete_event",
-	                  G_CALLBACK(pragha_close_window), pragha);
+			  G_CALLBACK(pragha_close_window), pragha);
 
 	/* Set Default Size */
 
 	win_size = pragha_preferences_get_integer_list (preferences,
-	                                                GROUP_WINDOW,
-	                                                KEY_WINDOW_SIZE,
-	                                                &cnt);
+							GROUP_WINDOW,
+							KEY_WINDOW_SIZE,
+							&cnt);
 	if (win_size) {
 		gtk_window_set_default_size(GTK_WINDOW(window),
-		                            win_size[0], win_size[1]);
+					    win_size[0], win_size[1]);
 		g_free(win_size);
 	}
 	else {
 		gtk_window_set_default_size(GTK_WINDOW(window),
-		                            MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT);
+					    MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT);
 	}
 
 	/* Set Position */
 
 	win_position = pragha_preferences_get_integer_list (preferences,
-	                                                    GROUP_WINDOW,
-	                                                    KEY_WINDOW_POSITION,
-	                                                    &cnt);
+							    GROUP_WINDOW,
+							    KEY_WINDOW_POSITION,
+							    &cnt);
 
 	if (win_position) {
 		gtk_window_move(GTK_WINDOW(window),
-		                win_position[0], win_position[1]);
+				win_position[0], win_position[1]);
 		g_free(win_position);
 	}
 	else {
 		gtk_window_set_position(GTK_WINDOW(window),
-		                        GTK_WIN_POS_CENTER);
+					GTK_WIN_POS_CENTER);
 	}
 
 	/* Pack widgets: [ Playlist ]
-	 *               [Status Bar]
+	 *		 [Status Bar]
 	 */
 
-	playlist_statusbar_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+	playlist_statusbar_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 3);
+	gtk_container_set_border_width (GTK_CONTAINER (playlist_statusbar_vbox), 3);
 
 	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), GTK_WIDGET(playlist),
-	                    TRUE, TRUE, 0);
+			    TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), GTK_WIDGET(statusbar),
-	                    FALSE, FALSE, 0);
+			    FALSE, FALSE, 0);
 
 	/* Pack widgets: [Sidebar1][ Playlist ]
-	 *               [        ][Status Bar]
+	 *		 [	  ][Status Bar]
 	 */
 
-	gtk_paned_pack1 (GTK_PANED (pane1), GTK_WIDGET(sidebar1), FALSE, TRUE);
+	gtk_paned_pack1 (GTK_PANED (pane1), GTK_WIDGET(sidebar1), TRUE, FALSE);
 	gtk_paned_pack2 (GTK_PANED (pane1), playlist_statusbar_vbox, TRUE, FALSE);
 
 	gtk_paned_set_position (GTK_PANED (pane1),
-		pragha_preferences_get_sidebar_size (preferences));
+				pragha_preferences_get_sidebar_size (preferences));
 
 	/* Pack widgets: [Sidebar1][ Playlist ][Sidebar2]
-	 *               [        ][Status Bar][        ]
+	 *		 [	  ][Status Bar][	]
 	 */
 
 	gtk_paned_pack1 (GTK_PANED (pane2), pane1, TRUE, FALSE);
@@ -547,30 +534,30 @@ pragha_window_new (PraghaApplication *pragha)
 	gtk_paned_set_position (GTK_PANED (pane2),
 		pragha_preferences_get_secondary_sidebar_size (preferences));
 
-	/* Pack widgets: [            Menubar           ]
-	 *               [            Toolbar           ]
-	 *               [            Infobox           ]
-	 *               [Sidebar1][ Playlist ][Sidebar2]
-	 *               [Sidebar1][Status Bar][Sidebar2]
+	/* Pack widgets: [	      Menubar		]
+	 *		 [	      Toolbar		]
+	 *		 [	      Infobox		]
+	 *		 [Sidebar1][ Playlist ][Sidebar2]
+	 *		 [Sidebar1][Status Bar][Sidebar2]
 	 */
 
 	vbox_main = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
 	gtk_box_pack_start (GTK_BOX(vbox_main), menubar,
-	                    FALSE, FALSE, 0);
+			    FALSE, FALSE, 0);
 #if GTK_CHECK_VERSION (3, 12, 0)
 	if (pragha_preferences_get_system_titlebar (preferences))
 #endif
-		gtk_box_pack_start (GTK_BOX(vbox_main), GTK_WIDGET(toolbar),
-		                    FALSE, FALSE, 0);
+	  gtk_box_pack_start (GTK_BOX(vbox_main), GTK_WIDGET(toolbar),
+			      FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(vbox_main), infobox,
-	                    FALSE, FALSE, 0);
+			    FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(vbox_main), pane2,
-	                    TRUE, TRUE, 2);
+			    TRUE, TRUE, 0);
 
 	g_object_bind_property (preferences, "show-menubar",
-	                        menubar, "visible",
-	                        binding_flags);
+				menubar, "visible",
+				binding_flags);
 
 	/* Add menu-button to toolbar */
 
@@ -579,8 +566,7 @@ pragha_window_new (PraghaApplication *pragha)
 	g_object_set(menu_button, "use-popover", FALSE, NULL);
 #endif
 	gtk_button_set_relief(GTK_BUTTON(menu_button), GTK_RELIEF_NONE);
-
-	icon = g_themed_icon_new_from_names ((gchar **)fallbacks_icon_menu, -1);
+	icon = g_themed_icon_new ("emblem-system-symbolic");
 	gtk_button_set_image (GTK_BUTTON (menu_button),
 		gtk_image_new_from_gicon(icon, pragha_preferences_get_toolbar_size(preferences)));
 	g_object_unref (icon);
@@ -590,29 +576,29 @@ pragha_window_new (PraghaApplication *pragha)
 		G_MENU_MODEL (gtk_builder_get_object (menu_ui, "menubar")));
 
 	g_object_bind_property (preferences, "show-menubar",
-	                        menu_button, "visible",
-	                        binding_flags | G_BINDING_INVERT_BOOLEAN);
+				menu_button, "visible",
+				binding_flags | G_BINDING_INVERT_BOOLEAN);
 
 	g_signal_connect (preferences, "notify::toolbar-size",
-	                  G_CALLBACK (prefrences_change_icon_size), menu_button);
+			  G_CALLBACK (prefrences_change_icon_size), menu_button);
 
 	pragha_toolbar_add_extra_button (toolbar, menu_button);
 
 	/* Add library pane to first sidebar. */
 
 	pragha_sidebar_attach_plugin (sidebar1,
-		                          pragha_library_pane_get_widget (library),
-		                          pragha_library_pane_get_pane_title (library),
-		                          pragha_library_pane_get_popup_menu (library));
+					  pragha_library_pane_get_widget (library),
+					  pragha_library_pane_get_pane_title (library),
+					  pragha_library_pane_get_popup_menu (library));
 
 	g_object_bind_property (preferences, "lateral-panel",
-	                        sidebar1, "visible",
-	                        binding_flags);
+				sidebar1, "visible",
+				binding_flags);
 
 	/* Second sidebar visibility depend on their children */
 
 	g_signal_connect (G_OBJECT(sidebar2), "children-changed",
-	                  G_CALLBACK(pragha_sidebar_children_changed), pragha);
+			  G_CALLBACK(pragha_sidebar_children_changed), pragha);
 	pragha_sidebar_style_position (sidebar2, GTK_POS_RIGHT);
 
 	/* Show the widgets individually.

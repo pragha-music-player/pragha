@@ -1,18 +1,18 @@
 /*************************************************************************/
-/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
-/*                                                                       */
-/* This program is free software: you can redistribute it and/or modify  */
-/* it under the terms of the GNU General Public License as published by  */
-/* the Free Software Foundation, either version 3 of the License, or     */
-/* (at your option) any later version.                                   */
-/*                                                                       */
-/* This program is distributed in the hope that it will be useful,       */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
-/* GNU General Public License for more details.                          */
-/*                                                                       */
-/* You should have received a copy of the GNU General Public License     */
+/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
+/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>			 */
+/*									 */
+/* This program is free software: you can redistribute it and/or modify	 */
+/* it under the terms of the GNU General Public License as published by	 */
+/* the Free Software Foundation, either version 3 of the License, or	 */
+/* (at your option) any later version.					 */
+/*									 */
+/* This program is distributed in the hope that it will be useful,	 */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the	 */
+/* GNU General Public License for more details.				 */
+/*									 */
+/* You should have received a copy of the GNU General Public License	 */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
@@ -51,7 +51,7 @@
 
 static void
 pragha_gear_menu_update_playlist_changes (PraghaDatabase    *database,
-                                          PraghaApplication *pragha);
+					  PraghaApplication *pragha);
 
 /*
  * Menubar callbacks.
@@ -72,20 +72,21 @@ static void open_file_action(GtkAction *action, PraghaApplication *pragha);
 static void add_location_action(GtkAction *action, PraghaApplication *pragha);
 static void add_libary_action(GtkAction *action, PraghaApplication *pragha);
 static void pragha_menubar_remove_playlist_action      (GtkAction *action, PraghaApplication *pragha);
-static void pragha_menubar_crop_playlist_action        (GtkAction *action, PraghaApplication *pragha);
+static void pragha_menubar_crop_playlist_action	       (GtkAction *action, PraghaApplication *pragha);
 static void pragha_menubar_clear_playlist_action       (GtkAction *action, PraghaApplication *pragha);
-static void pragha_menubar_save_playlist_action        (GtkAction *action, PraghaApplication *pragha);
+static void pragha_menubar_save_playlist_action	       (GtkAction *action, PraghaApplication *pragha);
 static void pragha_menubar_export_playlist_action      (GtkAction *action, PraghaApplication *pragha);
 static void pragha_menubar_save_selection_action       (GtkAction *action, PraghaApplication *pragha);
 static void pragha_menubar_export_selection_action     (GtkAction *action, PraghaApplication *pragha);
-static void pragha_menu_action_save_playlist           (GtkAction *action, PraghaApplication *pragha);
-static void pragha_menu_action_save_selection          (GtkAction *action, PraghaApplication *pragha);
+static void pragha_menu_action_save_playlist	       (GtkAction *action, PraghaApplication *pragha);
+static void pragha_menu_action_save_selection	       (GtkAction *action, PraghaApplication *pragha);
 static void search_playlist_action(GtkAction *action, PraghaApplication *pragha);
 
 /* View */
 
 static void fullscreen_action (GtkAction *action, PraghaApplication *pragha);
 static void show_controls_below_action (GtkAction *action, PraghaApplication *pragha);
+static void use_dark_mode (GtkAction *action, PraghaApplication *pragha);
 static void jump_to_playing_song_action (GtkAction *action, PraghaApplication *pragha);
 
 /* Tools */
@@ -128,24 +129,24 @@ static const gchar *main_menu_xml = "<ui>					\
 			<menuitem action=\"Add files\"/>			\
 			<menuitem action=\"Add location\"/>			\
 			<placeholder name=\"pragha-append-music-placeholder\"/>		\
-			<separator/>				    			\
+			<separator/>							\
 			<menuitem action=\"Add the library\"/>		\
-			<separator/>				    		\
+			<separator/>						\
 			<menuitem action=\"Remove from playlist\"/>		\
 			<menuitem action=\"Crop playlist\"/>			\
 			<menuitem action=\"Clear playlist\"/>			\
-			<separator/>				    		\
+			<separator/>						\
 			<menu action=\"SavePlaylist\">				\
 				<menuitem action=\"New playlist1\"/>		\
 				<menuitem action=\"Export1\"/>			\
-				<separator/>				    	\
-				<placeholder name=\"pragha-save-playlist-placeholder\"/> 	\
+				<separator/>					\
+				<placeholder name=\"pragha-save-playlist-placeholder\"/>	\
 			</menu>							\
 			<menu action=\"SaveSelection\">				\
 				<menuitem action=\"New playlist2\"/>		\
 				<menuitem action=\"Export2\"/>			\
-				<separator/>				    	\
-				<placeholder name=\"pragha-save-selection-placeholder\"/> 	\
+				<separator/>					\
+				<placeholder name=\"pragha-save-selection-placeholder\"/>	\
 			</menu>							\
 			<separator/>						\
 			<menuitem action=\"Search in playlist\"/>		\
@@ -158,6 +159,7 @@ static const gchar *main_menu_xml = "<ui>					\
 			<menuitem action=\"Playback controls below\"/>	\
 			<menuitem action=\"Show menubar\"/>			\
 			<menuitem action=\"Status bar\"/>			\
+			<menuitem action=\"Use dark mode\"/>			\
 			<separator/>						\
 			<menuitem action=\"Jump to playing song\"/>	\
 		</menu>								\
@@ -253,30 +255,33 @@ static GtkActionEntry main_aentries[] = {
 };
 
 static GtkToggleActionEntry toggles_entries[] = {
-	{"Shuffle", NULL, N_("_Shuffle"),
-	 "<Control>U", "Shuffle Songs", NULL,
-	 FALSE},
-	{"Repeat", NULL, N_("_Repeat"),
-	 "<Control>R", "Repeat Songs", NULL,
-	 FALSE},
-	{"Fullscreen", NULL, N_("_Fullscreen"),
-	 "F11", "Switch between full screen and windowed mode", G_CALLBACK(fullscreen_action),
-	FALSE},
-	{"Lateral panel1", NULL, N_("Lateral _panel"),
-	 "F9", "Lateral panel", NULL,
-	TRUE},
-	{"Lateral panel2", NULL, N_("Secondary lateral panel"),
-	 "<Control>F9", "Secondary lateral panel", NULL,
-	FALSE},
-	{"Playback controls below", NULL, N_("Playback controls below"),
-	 NULL, "Show playback controls below", G_CALLBACK(show_controls_below_action),
-	FALSE},
-	{"Show menubar", NULL, N_("Menubar"),
-	 "<Control>M", "Show menubar", NULL,
-	TRUE},
-	{"Status bar", NULL, N_("Status bar"),
-	 "", "Status bar", NULL,
-	TRUE}
+  {"Shuffle", NULL, N_("_Shuffle"),
+   "<Control>U", "Shuffle Songs", NULL,
+   FALSE},
+  {"Repeat", NULL, N_("_Repeat"),
+   "<Control>R", "Repeat Songs", NULL,
+   FALSE},
+  {"Fullscreen", NULL, N_("_Fullscreen"),
+   "F11", "Switch between full screen and windowed mode", G_CALLBACK(fullscreen_action),
+   FALSE},
+  {"Lateral panel1", NULL, N_("Lateral _panel"),
+   "F9", "Lateral panel", NULL,
+   TRUE},
+  {"Lateral panel2", NULL, N_("Secondary lateral panel"),
+   "<Control>F9", "Secondary lateral panel", NULL,
+   FALSE},
+  {"Playback controls below", NULL, N_("Playback controls below"),
+   NULL, "Show playback controls below", G_CALLBACK(show_controls_below_action),
+   FALSE},
+  {"Show menubar", NULL, N_("Menubar"),
+   "<Control>M", "Show menubar", NULL,
+   TRUE},
+  {"Status bar", NULL, N_("Status bar"),
+   "", "Status bar", NULL,
+   TRUE},
+  {"Use dark mode", NULL, N_("Use dark mode"),
+   NULL, "Use pragha in dark mode", G_CALLBACK(use_dark_mode),
+   FALSE}
 };
 
 /* Sentitive menubar actions depending on the playback status. */
@@ -348,7 +353,7 @@ pragha_menubar_update_playlist_changes (PraghaDatabase *database, PraghaApplicat
 		g_object_unref (action);
 
 		g_signal_connect (G_OBJECT (action), "activate",
-		                  G_CALLBACK (pragha_menu_action_save_playlist), pragha);
+				  G_CALLBACK (pragha_menu_action_save_playlist), pragha);
 
 		gtk_ui_manager_add_ui (ui_manager, playlist_ui_id,
 				       "/Menubar/PlaylistMenu/SavePlaylist/pragha-save-playlist-placeholder",
@@ -363,7 +368,7 @@ pragha_menubar_update_playlist_changes (PraghaDatabase *database, PraghaApplicat
 		g_object_unref (action);
 
 		g_signal_connect (G_OBJECT (action), "activate",
-		                  G_CALLBACK (pragha_menu_action_save_selection), pragha);
+				  G_CALLBACK (pragha_menu_action_save_selection), pragha);
 
 		gtk_ui_manager_add_ui (ui_manager, playlist_ui_id,
 				       "/Menubar/PlaylistMenu/SaveSelection/pragha-save-selection-placeholder",
@@ -494,11 +499,30 @@ show_controls_below_action (GtkAction *action, PraghaApplication *pragha)
 		gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action)));
 
 	toolbar = pragha_application_get_toolbar (pragha);
-	parent  = gtk_widget_get_parent (GTK_WIDGET(toolbar));
+	parent	= gtk_widget_get_parent (GTK_WIDGET(toolbar));
 
 	gint position = pragha_preferences_get_controls_below (preferences) ? 3 : 1;
 
 	gtk_box_reorder_child(GTK_BOX(parent), GTK_WIDGET(toolbar), position);
+}
+
+static void
+use_dark_mode (GtkAction *action, PraghaApplication *pragha) {
+	PraghaPreferences *preferences;
+	GtkSettings *settings;
+	PraghaToolbar *toolbar;
+	GtkWidget *parent;
+	gboolean status;
+
+	preferences = pragha_application_get_preferences (pragha);
+	status = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+	pragha_preferences_set_use_dark_mode (preferences, status);
+
+	settings = gtk_settings_get_default ();
+	g_object_set (G_OBJECT (settings),
+		      "gtk-application-prefer-dark-theme",
+		      status,
+		      NULL);
 }
 
 static void
@@ -645,7 +669,7 @@ static void statistics_action(GtkAction *action, PraghaApplication *pragha)
 	gtk_window_set_title(GTK_WINDOW(dialog), _("Statistics"));
 
 	g_signal_connect (dialog, "response",
-	                  G_CALLBACK (gtk_widget_destroy), NULL);
+			  G_CALLBACK (gtk_widget_destroy), NULL);
 
 	gtk_widget_show_all(dialog);
 }
@@ -695,16 +719,16 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 	gtk_action_group_set_translation_domain (main_actions, GETTEXT_PACKAGE);
 
 	gtk_action_group_add_actions (main_actions,
-	                              main_aentries,
-	                              G_N_ELEMENTS(main_aentries),
-	                              (gpointer)pragha);
+				      main_aentries,
+				      G_N_ELEMENTS(main_aentries),
+				      (gpointer)pragha);
 	gtk_action_group_add_toggle_actions (main_actions,
-	                                     toggles_entries,
-	                                     G_N_ELEMENTS(toggles_entries),
-	                                     pragha);
+					     toggles_entries,
+					     G_N_ELEMENTS(toggles_entries),
+					     pragha);
 
 	gtk_window_add_accel_group (GTK_WINDOW(pragha_application_get_window(pragha)),
-	                            gtk_ui_manager_get_accel_group(menu_ui_manager));
+				    gtk_ui_manager_get_accel_group(menu_ui_manager));
 
 	gtk_ui_manager_insert_action_group (menu_ui_manager, main_actions, 0);
 
@@ -741,15 +765,18 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 	GtkAction *action_status_bar = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Status bar");
 	g_object_bind_property (preferences, "show-status-bar", action_status_bar, "active", binding_flags);
 
+	GtkAction *action_use_dark_mode = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Use dark mode");
+	g_object_bind_property (preferences, "use-dark-mode", action_use_dark_mode, "active", binding_flags);
+
 	GtkAction *action_show_menubar = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Show menubar");
 	g_object_bind_property (preferences, "show-menubar", action_show_menubar, "active", binding_flags);
 
 	g_signal_connect (pragha_application_get_database(pragha), "PlaylistsChanged",
-	                  G_CALLBACK(pragha_menubar_update_playlist_changes), pragha);
+			  G_CALLBACK(pragha_menubar_update_playlist_changes), pragha);
 	pragha_menubar_update_playlist_changes (pragha_application_get_database(pragha), pragha);
 
 	g_signal_connect (pragha_application_get_database(pragha), "PlaylistsChanged",
-	                  G_CALLBACK(pragha_gear_menu_update_playlist_changes), pragha);
+			  G_CALLBACK(pragha_gear_menu_update_playlist_changes), pragha);
 	pragha_gear_menu_update_playlist_changes (pragha_application_get_database(pragha), pragha);
 
 	g_object_unref (main_actions);
@@ -785,8 +812,8 @@ pragha_menubar_new (void)
 
 static void
 pragha_gmenu_prev (GSimpleAction *action,
-                   GVariant      *parameter,
-                   gpointer       user_data)
+		   GVariant	 *parameter,
+		   gpointer	  user_data)
 {
 	PraghaApplication *pragha = user_data;
 	pragha_playback_prev_track (pragha);
@@ -794,8 +821,8 @@ pragha_gmenu_prev (GSimpleAction *action,
 
 static void
 pragha_gmenu_playpause (GSimpleAction *action,
-                        GVariant      *parameter,
-                        gpointer       user_data)
+			GVariant      *parameter,
+			gpointer       user_data)
 {
 	PraghaApplication *pragha = user_data;
 	pragha_playback_play_pause_resume (pragha);
@@ -803,8 +830,8 @@ pragha_gmenu_playpause (GSimpleAction *action,
 
 static void
 pragha_gmenu_stop (GSimpleAction *action,
-                   GVariant      *parameter,
-                   gpointer       user_data)
+		   GVariant	 *parameter,
+		   gpointer	  user_data)
 {
 	PraghaApplication *pragha = user_data;
 	pragha_playback_stop (pragha);
@@ -812,8 +839,8 @@ pragha_gmenu_stop (GSimpleAction *action,
 
 static void
 pragha_gmenu_next (GSimpleAction *action,
-                        GVariant      *parameter,
-                        gpointer       user_data)
+			GVariant      *parameter,
+			gpointer       user_data)
 {
 	PraghaApplication *pragha = user_data;
 	pragha_playback_next_track (pragha);
@@ -821,8 +848,8 @@ pragha_gmenu_next (GSimpleAction *action,
 
 static void
 pragha_gmenu_edit (GSimpleAction *action,
-                   GVariant      *parameter,
-                   gpointer       user_data)
+		   GVariant	 *parameter,
+		   gpointer	  user_data)
 {
 	PraghaApplication *pragha = user_data;
 	pragha_playback_edit_current_track (pragha);
@@ -830,8 +857,8 @@ pragha_gmenu_edit (GSimpleAction *action,
 
 static void
 pragha_gmenu_quit (GSimpleAction *action,
-                   GVariant      *parameter,
-                   gpointer       user_data)
+		   GVariant	 *parameter,
+		   gpointer	  user_data)
 {
 	PraghaApplication *pragha = user_data;
 
@@ -841,8 +868,8 @@ pragha_gmenu_quit (GSimpleAction *action,
 /* Playlist submenu. */
 static void
 pragha_gmenu_open (GSimpleAction *action,
-                   GVariant      *parameter,
-                   gpointer       user_data)
+		   GVariant	 *parameter,
+		   gpointer	  user_data)
 {
 	PraghaApplication *pragha = user_data;
 	pragha_application_open_files (pragha);
@@ -850,8 +877,8 @@ pragha_gmenu_open (GSimpleAction *action,
 
 static void
 pragha_gmenu_location (GSimpleAction *action,
-                       GVariant      *parameter,
-                       gpointer       user_data)
+		       GVariant	     *parameter,
+		       gpointer	      user_data)
 {
 	PraghaApplication *pragha = user_data;
 	pragha_application_add_location (pragha);
@@ -859,8 +886,8 @@ pragha_gmenu_location (GSimpleAction *action,
 
 static void
 pragha_gmenu_library (GSimpleAction *action,
-                      GVariant      *parameter,
-                      gpointer       user_data)
+		      GVariant	    *parameter,
+		      gpointer	     user_data)
 {
 	PraghaApplication *pragha = user_data;
 	pragha_application_append_entery_libary (pragha);
@@ -868,8 +895,8 @@ pragha_gmenu_library (GSimpleAction *action,
 
 static void
 pragha_gmenu_remove (GSimpleAction *action,
-                     GVariant      *parameter,
-                     gpointer       user_data)
+		     GVariant	   *parameter,
+		     gpointer	    user_data)
 {
 	PraghaPlaylist *playlist;
 	PraghaApplication *pragha = user_data;
@@ -880,8 +907,8 @@ pragha_gmenu_remove (GSimpleAction *action,
 
 static void
 pragha_gmenu_crop (GSimpleAction *action,
-                   GVariant      *parameter,
-                   gpointer       user_data)
+		   GVariant	 *parameter,
+		   gpointer	  user_data)
 {
 	PraghaPlaylist *playlist;
 	PraghaApplication *pragha = user_data;
@@ -892,8 +919,8 @@ pragha_gmenu_crop (GSimpleAction *action,
 
 static void
 pragha_gmenu_playlist_export (GSimpleAction *action,
-                              GVariant      *parameter,
-                              gpointer       user_data)
+			      GVariant	    *parameter,
+			      gpointer	     user_data)
 {
 	PraghaPlaylist *playlist;
 	PraghaApplication *pragha = user_data;
@@ -905,8 +932,8 @@ pragha_gmenu_playlist_export (GSimpleAction *action,
 
 static void
 pragha_gmenu_playlist_save (GSimpleAction *action,
-                            GVariant      *parameter,
-                            gpointer       user_data)
+			    GVariant	  *parameter,
+			    gpointer	   user_data)
 {
 	PraghaPlaylist *playlist;
 	PraghaApplication *pragha = user_data;
@@ -939,15 +966,15 @@ pragha_database_get_playlist_by_order (PraghaDatabase *cdbase, gint id)
 
 static void
 pragha_gmenu_playlist_append (GSimpleAction *action,
-                              GVariant      *parameter,
-                              gpointer       user_data)
+			      GVariant	    *parameter,
+			      gpointer	     user_data)
 {
 	PraghaApplication *pragha = user_data;
 	PraghaPlaylist *playlist  = pragha_application_get_playlist (pragha);
-	PraghaDatabase *cdbase    = pragha_playlist_get_database (playlist);
+	PraghaDatabase *cdbase	  = pragha_playlist_get_database (playlist);
 
-	const gchar *name         = g_action_get_name (G_ACTION(action));
-	gchar *title              = pragha_database_get_playlist_by_order(cdbase, atoi(name + strlen("playlist")));
+	const gchar *name	  = g_action_get_name (G_ACTION(action));
+	gchar *title		  = pragha_database_get_playlist_by_order(cdbase, atoi(name + strlen("playlist")));
 
 	pragha_playlist_save_playlist (playlist, title);
 
@@ -956,8 +983,8 @@ pragha_gmenu_playlist_append (GSimpleAction *action,
 
 static void
 pragha_gmenu_selection_export (GSimpleAction *action,
-                               GVariant      *parameter,
-                               gpointer       user_data)
+			       GVariant	     *parameter,
+			       gpointer	      user_data)
 {
 	PraghaPlaylist *playlist;
 	PraghaApplication *pragha = user_data;
@@ -968,8 +995,8 @@ pragha_gmenu_selection_export (GSimpleAction *action,
 
 static void
 pragha_gmenu_selection_save (GSimpleAction *action,
-                             GVariant      *parameter,
-                             gpointer       user_data)
+			     GVariant	   *parameter,
+			     gpointer	    user_data)
 {
 	PraghaPlaylist *playlist;
 	PraghaApplication *pragha = user_data;
@@ -980,15 +1007,15 @@ pragha_gmenu_selection_save (GSimpleAction *action,
 
 static void
 pragha_gmenu_selection_append (GSimpleAction *action,
-                               GVariant      *parameter,
-                               gpointer       user_data)
+			       GVariant	     *parameter,
+			       gpointer	      user_data)
 {
 	PraghaApplication *pragha = user_data;
 	PraghaPlaylist *playlist  = pragha_application_get_playlist (pragha);
-	PraghaDatabase *cdbase    = pragha_playlist_get_database (playlist);
+	PraghaDatabase *cdbase	  = pragha_playlist_get_database (playlist);
 
-	const gchar *name         = g_action_get_name (G_ACTION(action));
-	gchar *title              = pragha_database_get_playlist_by_order(cdbase, atoi(name + strlen("selection")));
+	const gchar *name	  = g_action_get_name (G_ACTION(action));
+	gchar *title		  = pragha_database_get_playlist_by_order(cdbase, atoi(name + strlen("selection")));
 
 	pragha_playlist_save_selection (playlist, title);
 
@@ -997,8 +1024,8 @@ pragha_gmenu_selection_append (GSimpleAction *action,
 
 static void
 pragha_gmenu_clear (GSimpleAction *action,
-                    GVariant      *parameter,
-                    gpointer       user_data)
+		    GVariant	  *parameter,
+		    gpointer	   user_data)
 {
 	PraghaPlaylist *playlist;
 	PraghaApplication *pragha = user_data;
@@ -1009,8 +1036,8 @@ pragha_gmenu_clear (GSimpleAction *action,
 
 static void
 pragha_gmenu_search (GSimpleAction *action,
-                     GVariant      *parameter,
-                     gpointer       user_data)
+		     GVariant	   *parameter,
+		     gpointer	    user_data)
 {
 	PraghaApplication *pragha = user_data;
 	PraghaPlaylist *playlist = pragha_application_get_playlist (pragha);
@@ -1021,8 +1048,8 @@ pragha_gmenu_search (GSimpleAction *action,
 
 static void
 pragha_gmenu_jump_to_song (GSimpleAction *action,
-                           GVariant      *parameter,
-                           gpointer       user_data)
+			   GVariant	 *parameter,
+			   gpointer	  user_data)
 {
 	PraghaPlaylist *playlist;
 
@@ -1036,8 +1063,8 @@ pragha_gmenu_jump_to_song (GSimpleAction *action,
 
 static void
 pragha_gmenu_equalizer (GSimpleAction *action,
-                        GVariant      *parameter,
-                        gpointer       user_data)
+			GVariant      *parameter,
+			gpointer       user_data)
 {
 	PraghaApplication *pragha = user_data;
 	GtkWidget *parent = pragha_application_get_window (pragha);
@@ -1048,8 +1075,8 @@ pragha_gmenu_equalizer (GSimpleAction *action,
 
 static void
 pragha_gmenu_rescan_library (GSimpleAction *action,
-                            GVariant      *parameter,
-                            gpointer       user_data)
+			    GVariant	  *parameter,
+			    gpointer	   user_data)
 {
 	PraghaScanner *scanner;
 	PraghaApplication *pragha = user_data;
@@ -1060,8 +1087,8 @@ pragha_gmenu_rescan_library (GSimpleAction *action,
 
 static void
 pragha_gmenu_update_library (GSimpleAction *action,
-                            GVariant      *parameter,
-                            gpointer       user_data)
+			    GVariant	  *parameter,
+			    gpointer	   user_data)
 {
 	PraghaScanner *scanner;
 	PraghaApplication *pragha = user_data;
@@ -1072,8 +1099,8 @@ pragha_gmenu_update_library (GSimpleAction *action,
 
 static void
 pragha_gmenu_show_statistic (GSimpleAction *action,
-                             GVariant      *parameter,
-                             gpointer       user_data)
+			     GVariant	   *parameter,
+			     gpointer	    user_data)
 {
 	PraghaApplication *pragha = user_data;
 	statistics_action (NULL, pragha);
@@ -1081,8 +1108,8 @@ pragha_gmenu_show_statistic (GSimpleAction *action,
 
 static void
 pragha_gmenu_show_preferences (GSimpleAction *action,
-                               GVariant      *parameter,
-                               gpointer       user_data)
+			       GVariant	     *parameter,
+			       gpointer	      user_data)
 {
 	PreferencesDialog *dialog;
 	PraghaApplication *pragha = user_data;
@@ -1094,8 +1121,8 @@ pragha_gmenu_show_preferences (GSimpleAction *action,
 
 static void
 pragha_gmenu_show_homepage (GSimpleAction *action,
-                            GVariant      *parameter,
-                            gpointer       user_data)
+			    GVariant	  *parameter,
+			    gpointer	   user_data)
 {
 	PraghaApplication *pragha = user_data;
 	const gchar *uri = "http://pragha.wikispaces.com/";
@@ -1105,8 +1132,8 @@ pragha_gmenu_show_homepage (GSimpleAction *action,
 
 static void
 pragha_gmenu_show_community (GSimpleAction *action,
-                             GVariant      *parameter,
-                             gpointer       user_data)
+			     GVariant	   *parameter,
+			     gpointer	    user_data)
 {
 	PraghaApplication *pragha = user_data;
 	const gchar *uri = "http://bbs.archlinux.org/viewtopic.php?id=46171";
@@ -1116,8 +1143,8 @@ pragha_gmenu_show_community (GSimpleAction *action,
 
 static void
 pragha_gmenu_show_wiki (GSimpleAction *action,
-                        GVariant      *parameter,
-                        gpointer       user_data)
+			GVariant      *parameter,
+			gpointer       user_data)
 {
 	PraghaApplication *pragha = user_data;
 	const gchar *uri = "http://pragha.wikispaces.com/";
@@ -1127,8 +1154,8 @@ pragha_gmenu_show_wiki (GSimpleAction *action,
 
 static void
 pragha_gmenu_translate (GSimpleAction *action,
-                        GVariant      *parameter,
-                        gpointer       user_data)
+			GVariant      *parameter,
+			gpointer       user_data)
 {
 	PraghaApplication *pragha = user_data;
 	const gchar *uri = "http://www.transifex.net/projects/p/Pragha/";
@@ -1137,8 +1164,8 @@ pragha_gmenu_translate (GSimpleAction *action,
 
 static void
 pragha_gmenu_about (GSimpleAction *action,
-                    GVariant      *parameter,
-                    gpointer       user_data)
+		    GVariant	  *parameter,
+		    gpointer	   user_data)
 {
 	PraghaApplication *pragha = user_data;
 	pragha_application_about_dialog (pragha);
@@ -1150,8 +1177,8 @@ pragha_gmenu_about (GSimpleAction *action,
 
 void
 pragha_menubar_set_enable_action (GtkWindow  *window,
-                                  const char *action_name,
-                                  gboolean    enabled)
+				  const char *action_name,
+				  gboolean    enabled)
 {
 	GAction *action;
 	action = g_action_map_lookup_action (G_ACTION_MAP (window), action_name);
@@ -1160,7 +1187,7 @@ pragha_menubar_set_enable_action (GtkWindow  *window,
 
 GMenu *
 pragha_menubar_get_menu_section (PraghaApplication *pragha,
-                                 const char        *id)
+				 const char	   *id)
 {
 	GObject *object;
 	GtkBuilder *builder;
@@ -1176,7 +1203,7 @@ pragha_menubar_get_menu_section (PraghaApplication *pragha,
 
 static void
 pragha_menubar_emthy_menu_section (PraghaApplication *pragha,
-                                   const char        *id)
+				   const char	     *id)
 {
 	GMenu *menu;
 	GtkBuilder *builder;
@@ -1207,9 +1234,9 @@ pragha_menubar_emthy_menu_section (PraghaApplication *pragha,
 
 void
 pragha_menubar_append_action (PraghaApplication *pragha,
-                              const gchar       *placeholder,
-                              GSimpleAction     *action,
-                              GMenuItem         *item)
+			      const gchar	*placeholder,
+			      GSimpleAction	*action,
+			      GMenuItem		*item)
 {
 	GActionMap *map;
 	GMenu *place;
@@ -1224,8 +1251,8 @@ pragha_menubar_append_action (PraghaApplication *pragha,
 
 void
 pragha_menubar_remove_action (PraghaApplication *pragha,
-                              const gchar       *placeholder,
-                              const gchar       *action_name)
+			      const gchar	*placeholder,
+			      const gchar	*action_name)
 {
 	GtkBuilder *builder;
 	GActionMap *map;
@@ -1251,11 +1278,11 @@ pragha_menubar_remove_action (PraghaApplication *pragha,
 
 void
 pragha_menubar_append_submenu (PraghaApplication  *pragha,
-                               const gchar        *placeholder,
-                               const gchar        *xml_ui,
-                               const gchar        *menu_id,
-                               const gchar        *label,
-                               gpointer            user_data)
+			       const gchar	  *placeholder,
+			       const gchar	  *xml_ui,
+			       const gchar	  *menu_id,
+			       const gchar	  *label,
+			       gpointer		   user_data)
 {
 	GtkBuilder *builder;
 	GError *error = NULL;
@@ -1284,8 +1311,8 @@ pragha_menubar_append_submenu (PraghaApplication  *pragha,
 
 void
 pragha_menubar_remove_by_id (PraghaApplication *pragha,
-                             const gchar       *placeholder,
-                             const gchar       *item_id)
+			     const gchar       *placeholder,
+			     const gchar       *item_id)
 {
 	GtkBuilder *builder;
 	GMenu *menu;
@@ -1329,7 +1356,7 @@ pragha_gear_menu_update_playlist_changes (PraghaDatabase *database, PraghaApplic
 
 		action = g_simple_action_new (selection_name, NULL);
 		g_signal_connect (G_OBJECT (action), "activate",
-		                  G_CALLBACK (pragha_gmenu_playlist_append), pragha);
+				  G_CALLBACK (pragha_gmenu_playlist_append), pragha);
 		action_name = g_strdup_printf ("win.%s", selection_name);
 
 		item = g_menu_item_new (name, action_name);
@@ -1343,7 +1370,7 @@ pragha_gear_menu_update_playlist_changes (PraghaDatabase *database, PraghaApplic
 
 		action = g_simple_action_new (selection_name, NULL);
 		g_signal_connect (G_OBJECT (action), "activate",
-		                  G_CALLBACK (pragha_gmenu_selection_append), pragha);
+				  G_CALLBACK (pragha_gmenu_selection_append), pragha);
 
 		action_name = g_strdup_printf ("win.%s", selection_name);
 		item = g_menu_item_new (name, action_name);
@@ -1365,8 +1392,8 @@ pragha_gear_menu_update_playlist_changes (PraghaDatabase *database, PraghaApplic
 
 static void
 activate_toggle (GSimpleAction *action,
-                 GVariant      *parameter,
-                 gpointer       user_data)
+		 GVariant      *parameter,
+		 gpointer	user_data)
 {
 	GVariant *state;
 
@@ -1376,10 +1403,10 @@ activate_toggle (GSimpleAction *action,
 }
 
 static gboolean
-binding_gboolean_to_variant (GBinding     *binding,
-                             const GValue *from_value,
-                             GValue       *to_value,
-                             gpointer      user_data)
+binding_gboolean_to_variant (GBinding	  *binding,
+			     const GValue *from_value,
+			     GValue	  *to_value,
+			     gpointer	   user_data)
 {
 	GVariant *vvalue = g_variant_new_boolean (g_value_get_boolean (from_value));
 	g_value_set_variant (to_value, vvalue);
@@ -1387,10 +1414,10 @@ binding_gboolean_to_variant (GBinding     *binding,
 }
 
 static gboolean
-binding_variant_to_gboolean (GBinding     *binding,
-                             const GValue *from_value,
-                             GValue       *to_value,
-                             gpointer      user_data)
+binding_variant_to_gboolean (GBinding	  *binding,
+			     const GValue *from_value,
+			     GValue	  *to_value,
+			     gpointer	   user_data)
 {
 	gboolean vbool = g_variant_get_boolean(g_value_get_variant(from_value));
 	g_value_set_boolean (to_value, vbool);
@@ -1403,89 +1430,91 @@ binding_variant_to_gboolean (GBinding     *binding,
 
 static GActionEntry win_entries[] = {
 	/* Playback submenu. */
-	{ "prev",             pragha_gmenu_prev,             NULL, NULL,    NULL },
-	{ "play",             pragha_gmenu_playpause,        NULL, NULL,    NULL },
-	{ "stop",             pragha_gmenu_stop,             NULL, NULL,    NULL },
-	{ "next",             pragha_gmenu_next,             NULL, NULL,    NULL },
-	{ "shuffle",          activate_toggle,               NULL, "false", NULL },
-	{ "repeat",           activate_toggle,               NULL, "false", NULL },
-	{ "edit",             pragha_gmenu_edit,             NULL, NULL,    NULL },
-	{ "quit",             pragha_gmenu_quit,             NULL, NULL,    NULL },
+	{ "prev",	      pragha_gmenu_prev,	     NULL, NULL,    NULL },
+	{ "play",	      pragha_gmenu_playpause,	     NULL, NULL,    NULL },
+	{ "stop",	      pragha_gmenu_stop,	     NULL, NULL,    NULL },
+	{ "next",	      pragha_gmenu_next,	     NULL, NULL,    NULL },
+	{ "shuffle",	      activate_toggle,		     NULL, "false", NULL },
+	{ "repeat",	      activate_toggle,		     NULL, "false", NULL },
+	{ "edit",	      pragha_gmenu_edit,	     NULL, NULL,    NULL },
+	{ "quit",	      pragha_gmenu_quit,	     NULL, NULL,    NULL },
 	/* Playlist submenu. */
-	{ "open",             pragha_gmenu_open,             NULL, NULL,    NULL },
-	{ "location",         pragha_gmenu_location,         NULL, NULL,    NULL },
-	{ "library",          pragha_gmenu_library,          NULL, NULL,    NULL },
-	{ "remove",           pragha_gmenu_remove,           NULL, NULL,    NULL },
-	{ "crop",             pragha_gmenu_crop,             NULL, NULL,    NULL },
-	{ "clear",            pragha_gmenu_clear,            NULL, NULL,    NULL },
+	{ "open",	      pragha_gmenu_open,	     NULL, NULL,    NULL },
+	{ "location",	      pragha_gmenu_location,	     NULL, NULL,    NULL },
+	{ "library",	      pragha_gmenu_library,	     NULL, NULL,    NULL },
+	{ "remove",	      pragha_gmenu_remove,	     NULL, NULL,    NULL },
+	{ "crop",	      pragha_gmenu_crop,	     NULL, NULL,    NULL },
+	{ "clear",	      pragha_gmenu_clear,	     NULL, NULL,    NULL },
 	{ "export_playlist",  pragha_gmenu_playlist_export,  NULL, NULL,    NULL },
 	{ "new_playlist",     pragha_gmenu_playlist_save,    NULL, NULL,    NULL },
 	{ "export_selection", pragha_gmenu_selection_export, NULL, NULL,    NULL },
 	{ "new_selection",    pragha_gmenu_selection_save,   NULL, NULL,    NULL },
-	{ "search",           pragha_gmenu_search,           NULL, NULL,    NULL },
+	{ "search",	      pragha_gmenu_search,	     NULL, NULL,    NULL },
 	/* View Submenu */
-	{ "sidebar1",         activate_toggle,               NULL, "false", NULL },
-	{ "sidebar2",         activate_toggle,               NULL, "false", NULL },
-	{ "menubar",          activate_toggle,               NULL, "true",  NULL },
-	{ "status-bar",       activate_toggle,               NULL, "false", NULL },
-	{ "jump-song",        pragha_gmenu_jump_to_song,     NULL, NULL,    NULL },
+	{ "sidebar1",	      activate_toggle,		     NULL, "false", NULL },
+	{ "sidebar2",	      activate_toggle,		     NULL, "false", NULL },
+	{ "menubar",	      activate_toggle,		     NULL, "true",  NULL },
+	{ "status-bar",	      activate_toggle,		     NULL, "false", NULL },
+	{ "use-dark-mode",    activate_toggle,		     NULL, "false", NULL },
+	{ "jump-song",	      pragha_gmenu_jump_to_song,     NULL, NULL,    NULL },
 	/* Tools submenu */
-	{ "equalizer",        pragha_gmenu_equalizer,        NULL, NULL,    NULL },
-	{ "lib-rescan",       pragha_gmenu_rescan_library,   NULL, NULL,    NULL },
-	{ "lib-update",       pragha_gmenu_update_library,   NULL, NULL,    NULL },
-	{ "statistics",       pragha_gmenu_show_statistic,   NULL, NULL,    NULL },
+	{ "equalizer",	      pragha_gmenu_equalizer,	     NULL, NULL,    NULL },
+	{ "lib-rescan",	      pragha_gmenu_rescan_library,   NULL, NULL,    NULL },
+	{ "lib-update",	      pragha_gmenu_update_library,   NULL, NULL,    NULL },
+	{ "statistics",	      pragha_gmenu_show_statistic,   NULL, NULL,    NULL },
 	{ "preferences",      pragha_gmenu_show_preferences, NULL, NULL,    NULL },
 	/* Help submenu */
-	{ "homepage",         pragha_gmenu_show_homepage,    NULL, NULL,    NULL },
-	{ "community",        pragha_gmenu_show_community,   NULL, NULL,    NULL },
-	{ "wiki",             pragha_gmenu_show_wiki,        NULL, NULL,    NULL },
-	{ "translate",        pragha_gmenu_translate,        NULL, NULL,    NULL },
-	{ "about",            pragha_gmenu_about,            NULL, NULL,    NULL }
+	{ "homepage",	      pragha_gmenu_show_homepage,    NULL, NULL,    NULL },
+	{ "community",	      pragha_gmenu_show_community,   NULL, NULL,    NULL },
+	{ "wiki",	      pragha_gmenu_show_wiki,	     NULL, NULL,    NULL },
+	{ "translate",	      pragha_gmenu_translate,	     NULL, NULL,    NULL },
+	{ "about",	      pragha_gmenu_about,	     NULL, NULL,    NULL }
 };
 
 static const gchar *menu_ui = \
-	NEW_MENU("menubar") \
-		NEW_ACCEL_ITEM("_Add files",                           "&lt;Control&gt;O",     "win", "open") \
-		NEW_ITEM      ("Add _location",                                                "win", "location") \
-		NEW_ITEM      ("_Add the library",                                             "win", "library") \
-		NEW_PLACEHOLDER("pragha-plugins-append-music") \
-		SEPARATOR \
-		NEW_ACCEL_ITEM     ("Edit track information",          "&lt;Control&gt;E",     "win", "edit") \
-		NEW_ITEM           ("E_qualizer",                                              "win", "equalizer") \
-		SEPARATOR \
-		NEW_ITEM      ("Remove selection from playlist",                               "win", "remove") \
-		NEW_ACCEL_ITEM("Crop playlist",                        "&lt;Control&gt;C",     "win", "crop") \
-		NEW_ACCEL_ITEM("Clear playlist",                       "&lt;Control&gt;L",     "win", "clear") \
-		NEW_SUBMENU("Save playlist") \
-			NEW_ACCEL_ITEM("New playlist",                     "&lt;Control&gt;S",     "win", "new_playlist") \
-			NEW_ITEM      ("Export",                                                   "win", "export_playlist") \
-			SEPARATOR \
-			NEW_PLACEHOLDER("playlist-submenu") \
-		CLOSE_SUBMENU \
-		NEW_SUBMENU("Save selection") \
-			NEW_ACCEL_ITEM("New playlist",             "&lt;Shift&gt;&lt;Control&gt;S","win", "new_selection") \
-			NEW_ITEM      ("Export",                                                   "win", "export_selection") \
-			SEPARATOR \
-			NEW_PLACEHOLDER("selection-submenu") \
-		CLOSE_SUBMENU \
-		SEPARATOR \
-		NEW_ACCEL_ITEM("_Search in playlist",                  "&lt;Control&gt;F",     "win", "search") \
-		NEW_ACCEL_ITEM("Jump to playing song",                 "&lt;Control&gt;J",     "win", "jump-song") \
-		SEPARATOR \
-		NEW_ACCEL_ITEM     ("Show lateral _panel",             "F9",                   "win", "sidebar1") \
-		NEW_ACCEL_ITEM     ("Show secondary lateral panel",    "&lt;Control&gt;F9",    "win", "sidebar2") \
-		NEW_ACCEL_ITEM     ("Show menubar",                    "&lt;Control&gt;M",     "win", "menubar") \
-		NEW_ITEM           ("Show status bar",                                         "win", "status-bar") \
-		SEPARATOR \
-		NEW_PLACEHOLDER("pragha-plugins-placeholder") \
-		SEPARATOR \
-		NEW_ITEM      ("_Rescan library",                                              "win", "lib-rescan") \
-		NEW_ITEM      ("_Update library",                                              "win", "lib-update") \
-		SEPARATOR \
-		NEW_ACCEL_ITEM("_Preferences",                         "&lt;Control&gt;P",     "win", "preferences") \
-		NEW_ITEM      ("About",                                                        "win", "about") \
-		NEW_ACCEL_ITEM("_Quit",                                "&lt;Control&gt;Q",     "win", "quit") \
-	CLOSE_MENU;
+  NEW_MENU("menubar")							\
+  NEW_ACCEL_ITEM("_Add files",				 "&lt;Control&gt;O",	 "win", "open") \
+  NEW_ITEM	("Add _location",						 "win", "location") \
+  NEW_ITEM	("_Add the library",						 "win", "library") \
+  NEW_PLACEHOLDER("pragha-plugins-append-music") \
+  SEPARATOR \
+  NEW_ACCEL_ITEM     ("Edit track information",		 "&lt;Control&gt;E",	 "win", "edit") \
+  NEW_ITEM	     ("E_qualizer",						 "win", "equalizer") \
+  SEPARATOR \
+  NEW_ITEM	("Remove selection from playlist",				 "win", "remove") \
+  NEW_ACCEL_ITEM("Crop playlist",			 "&lt;Control&gt;C",	 "win", "crop") \
+  NEW_ACCEL_ITEM("Clear playlist",			 "&lt;Control&gt;L",	 "win", "clear") \
+  NEW_SUBMENU("Save playlist") \
+  NEW_ACCEL_ITEM("New playlist",		     "&lt;Control&gt;S",     "win", "new_playlist") \
+  NEW_ITEM	("Export",						     "win", "export_playlist") \
+  SEPARATOR \
+  NEW_PLACEHOLDER("playlist-submenu") \
+  CLOSE_SUBMENU \
+  NEW_SUBMENU("Save selection") \
+  NEW_ACCEL_ITEM("New playlist",	     "&lt;Shift&gt;&lt;Control&gt;S","win", "new_selection") \
+  NEW_ITEM	("Export",						     "win", "export_selection") \
+  SEPARATOR \
+  NEW_PLACEHOLDER("selection-submenu") \
+  CLOSE_SUBMENU \
+  SEPARATOR \
+  NEW_ACCEL_ITEM("_Search in playlist",			 "&lt;Control&gt;F",	 "win", "search") \
+  NEW_ACCEL_ITEM("Jump to playing song",		 "&lt;Control&gt;J",	 "win", "jump-song") \
+  SEPARATOR \
+  NEW_ACCEL_ITEM     ("Show lateral _panel",		 "F9",			 "win", "sidebar1") \
+  NEW_ACCEL_ITEM     ("Show secondary lateral panel",	 "&lt;Control&gt;F9",	 "win", "sidebar2") \
+  NEW_ACCEL_ITEM     ("Show menubar",			 "&lt;Control&gt;M",	 "win", "menubar") \
+  NEW_ITEM	     ("Show status bar",					 "win", "status-bar") \
+  NEW_ITEM	     ("Use dark mode",						 "win", "use-dark-mode") \
+  SEPARATOR \
+  NEW_PLACEHOLDER("pragha-plugins-placeholder") \
+  SEPARATOR \
+  NEW_ITEM	("_Rescan library",						 "win", "lib-rescan") \
+  NEW_ITEM	("_Update library",						 "win", "lib-update") \
+  SEPARATOR \
+  NEW_ACCEL_ITEM("_Preferences",			 "&lt;Control&gt;P",	 "win", "preferences") \
+  NEW_ITEM	("About",							 "win", "about") \
+  NEW_ACCEL_ITEM("_Quit",				 "&lt;Control&gt;Q",	 "win", "quit") \
+  CLOSE_MENU;
 
 
 GtkBuilder *
@@ -1515,7 +1544,7 @@ pragha_gmenu_toolbar_new (PraghaApplication *pragha)
 	/* Add the menu */
 
 	g_action_map_add_action_entries (G_ACTION_MAP (map),
-	                                 win_entries, G_N_ELEMENTS (win_entries), pragha);
+					 win_entries, G_N_ELEMENTS (win_entries), pragha);
 
 	/* Insensitive second sidebar */
 
@@ -1528,55 +1557,63 @@ pragha_gmenu_toolbar_new (PraghaApplication *pragha)
 
 	action = g_action_map_lookup_action (map, "shuffle");
 	g_object_bind_property_full (preferences, "shuffle",
-	                             action, "state",
-	                             binding_flags,
-	                             binding_gboolean_to_variant,
-	                             binding_variant_to_gboolean,
-	                             NULL,
-	                             NULL);
+				     action, "state",
+				     binding_flags,
+				     binding_gboolean_to_variant,
+				     binding_variant_to_gboolean,
+				     NULL,
+				     NULL);
 
 	action = g_action_map_lookup_action (map, "repeat");
 	g_object_bind_property_full (preferences, "repeat",
-	                             action, "state",
-	                             binding_flags,
-	                             binding_gboolean_to_variant,
-	                             binding_variant_to_gboolean,
-	                             NULL,
-	                             NULL);
+				     action, "state",
+				     binding_flags,
+				     binding_gboolean_to_variant,
+				     binding_variant_to_gboolean,
+				     NULL,
+				     NULL);
 
 	action = g_action_map_lookup_action (map, "sidebar1");
 	g_object_bind_property_full (preferences, "lateral-panel",
-	                             action, "state",
-	                             binding_flags,
-	                             binding_gboolean_to_variant,
-	                             binding_variant_to_gboolean,
-	                             NULL,
-	                             NULL);
+				     action, "state",
+				     binding_flags,
+				     binding_gboolean_to_variant,
+				     binding_variant_to_gboolean,
+				     NULL,
+				     NULL);
 	action = g_action_map_lookup_action (map, "sidebar2");
 	g_object_bind_property_full (preferences, "secondary-lateral-panel",
-	                             action, "state",
-	                             binding_flags,
-	                             binding_gboolean_to_variant,
-	                             binding_variant_to_gboolean,
-	                             NULL,
-	                             NULL);
+				     action, "state",
+				     binding_flags,
+				     binding_gboolean_to_variant,
+				     binding_variant_to_gboolean,
+				     NULL,
+				     NULL);
 
 	action = g_action_map_lookup_action (map, "status-bar");
 	g_object_bind_property_full (preferences, "show-status-bar",
-	                             action, "state",
-	                             binding_flags,
-	                             binding_gboolean_to_variant,
-	                             binding_variant_to_gboolean,
-	                             NULL,
-	                             NULL);
+				     action, "state",
+				     binding_flags,
+				     binding_gboolean_to_variant,
+				     binding_variant_to_gboolean,
+				     NULL,
+				     NULL);
 	action = g_action_map_lookup_action (map, "menubar");
 	g_object_bind_property_full (preferences, "show-menubar",
-	                             action, "state",
-	                             binding_flags,
-	                             binding_gboolean_to_variant,
-	                             binding_variant_to_gboolean,
-	                             NULL,
-	                             NULL);
+				     action, "state",
+				     binding_flags,
+				     binding_gboolean_to_variant,
+				     binding_variant_to_gboolean,
+				     NULL,
+				     NULL);
+	action = g_action_map_lookup_action (map, "use-dark-mode");
+	g_object_bind_property_full (preferences, "use-dark-mode",
+				     action, "state",
+				     binding_flags,
+				     binding_gboolean_to_variant,
+				     binding_variant_to_gboolean,
+				     NULL,
+				     NULL);
 
 	return builder;
 }

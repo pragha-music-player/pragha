@@ -1,18 +1,18 @@
 /*************************************************************************/
-/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
-/*                                                                       */
-/* This program is free software: you can redistribute it and/or modify  */
-/* it under the terms of the GNU General Public License as published by  */
-/* the Free Software Foundation, either version 3 of the License, or     */
-/* (at your option) any later version.                                   */
-/*                                                                       */
-/* This program is distributed in the hope that it will be useful,       */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
-/* GNU General Public License for more details.                          */
-/*                                                                       */
-/* You should have received a copy of the GNU General Public License     */
+/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
+/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>			 */
+/*									 */
+/* This program is free software: you can redistribute it and/or modify	 */
+/* it under the terms of the GNU General Public License as published by	 */
+/* the Free Software Foundation, either version 3 of the License, or	 */
+/* (at your option) any later version.					 */
+/*									 */
+/* This program is distributed in the hope that it will be useful,	 */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the	 */
+/* GNU General Public License for more details.				 */
+/*									 */
+/* You should have received a copy of the GNU General Public License	 */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
@@ -79,25 +79,25 @@ gsize levenshtein_strcmp(const gchar * s, const gchar * t)
 
     for (i=1; i<n; i++)
     {
-        // Current char in string s
-        gunichar cats = g_utf8_get_char(g_utf8_offset_to_pointer(s,i-1));
+	// Current char in string s
+	gunichar cats = g_utf8_get_char(g_utf8_offset_to_pointer(s,i-1));
 
-        for (j=1; j<m; j++)
-        {
-            // Do -1 only once
-            int jm1 = j-1,
-                im1 = i-1;
+	for (j=1; j<m; j++)
+	{
+	    // Do -1 only once
+	    int jm1 = j-1,
+		im1 = i-1;
 
-            gunichar tats = g_utf8_get_char(g_utf8_offset_to_pointer(t,jm1));
+	    gunichar tats = g_utf8_get_char(g_utf8_offset_to_pointer(t,jm1));
 
-            // a = above cell, b = left cell, c = left above celli
-            int a = d[im1][j] + 1,
-                b = d[i][jm1] + 1,
-                c = d[im1][jm1] + (tats != cats);
+	    // a = above cell, b = left cell, c = left above celli
+	    int a = d[im1][j] + 1,
+		b = d[i][jm1] + 1,
+		c = d[im1][jm1] + (tats != cats);
     
-            // Now compute the minimum of a,b,c and set MIN(a,b,c) to cell d[i][j]
-            d[i][j] = (a < b) ? MIN(a,c) : MIN(b,c);
-        }
+	    // Now compute the minimum of a,b,c and set MIN(a,b,c) to cell d[i][j]
+	    d[i][j] = (a < b) ? MIN(a,c) : MIN(b,c);
+	}
     }
 
     // The result is stored in the very right down cell
@@ -132,7 +132,7 @@ g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance)
 	gint needle_len = 0, haystack_len = 0, count = 0;
 	gchar *needle_buf = NULL, *rv = NULL;
  
- 	haystack_len = g_utf8_strlen(haystack, -1);
+	haystack_len = g_utf8_strlen(haystack, -1);
 	needle_len = g_utf8_strlen(needle, -1);
 
 	/* UTF-8 bytes are 4 bytes length in the worst case */
@@ -481,9 +481,11 @@ void open_url(const gchar *url, GtkWidget *parent)
 	if (!success) {
 		GtkWidget *d;
 		d = gtk_message_dialog_new (GTK_WINDOW (parent),
-					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-					GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-					"%s", _("Unable to open the browser"));
+					    GTK_DIALOG_MODAL |
+					    GTK_DIALOG_DESTROY_WITH_PARENT |
+					    GTK_DIALOG_USE_HEADER_BAR,
+					    GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+					    "%s", _("Unable to open the browser"));
 		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG (d),
 							 "%s", "No methods supported");
 		g_signal_connect (d, "response", G_CALLBACK (gtk_widget_destroy), NULL);
@@ -496,11 +498,11 @@ void open_url(const gchar *url, GtkWidget *parent)
    basis of the position of combo_order */
 
 void
-pragha_utils_set_menu_position (GtkMenu  *menu,
-                                gint     *x,
-                                gint     *y,
-                                gboolean *push_in,
-                                gpointer  user_data)
+pragha_utils_set_menu_position (GtkMenu	 *menu,
+				gint	 *x,
+				gint	 *y,
+				gboolean *push_in,
+				gpointer  user_data)
 {
 	GtkWidget *widget;
 	GtkAllocation allocation;

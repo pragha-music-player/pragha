@@ -1,18 +1,18 @@
 /*************************************************************************/
-/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2015 matias <mati86dl@gmail.com>                   */
-/*                                                                       */
-/* This program is free software: you can redistribute it and/or modify  */
-/* it under the terms of the GNU General Public License as published by  */
-/* the Free Software Foundation, either version 3 of the License, or     */
-/* (at your option) any later version.                                   */
-/*                                                                       */
-/* This program is distributed in the hope that it will be useful,       */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
-/* GNU General Public License for more details.                          */
-/*                                                                       */
-/* You should have received a copy of the GNU General Public License     */
+/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
+/* Copyright (C) 2009-2015 matias <mati86dl@gmail.com>			 */
+/*									 */
+/* This program is free software: you can redistribute it and/or modify	 */
+/* it under the terms of the GNU General Public License as published by	 */
+/* the Free Software Foundation, either version 3 of the License, or	 */
+/* (at your option) any later version.					 */
+/*									 */
+/* This program is distributed in the hope that it will be useful,	 */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the	 */
+/* GNU General Public License for more details.				 */
+/*									 */
+/* You should have received a copy of the GNU General Public License	 */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
@@ -57,37 +57,37 @@ struct _PraghaApplication {
 
 	/* Main window and icon */
 
-	GtkWidget         *mainwindow;
+	GtkWidget	  *mainwindow;
 
 	/* Main stuff */
 
-	PraghaBackend     *backend;
+	PraghaBackend	  *backend;
 	PraghaPreferences *preferences;
-	PraghaDatabase    *cdbase;
-	PraghaArtCache    *art_cache;
-	PraghaMusicEnum   *enum_map;
+	PraghaDatabase	  *cdbase;
+	PraghaArtCache	  *art_cache;
+	PraghaMusicEnum	  *enum_map;
 
-	PraghaScanner     *scanner;
+	PraghaScanner	  *scanner;
 
 	PreferencesDialog *setting_dialog;
 
 	/* Main widgets */
 
-	GtkUIManager      *menu_ui_manager;
-	GtkBuilder        *menu_ui;
-	PraghaToolbar     *toolbar;
-	GtkWidget         *infobox;
-	GtkWidget         *pane1;
-	GtkWidget         *pane2;
-	PraghaSidebar     *sidebar1;
-	PraghaSidebar     *sidebar2;
+	GtkUIManager	  *menu_ui_manager;
+	GtkBuilder	  *menu_ui;
+	PraghaToolbar	  *toolbar;
+	GtkWidget	  *infobox;
+	GtkWidget	  *pane1;
+	GtkWidget	  *pane2;
+	PraghaSidebar	  *sidebar1;
+	PraghaSidebar	  *sidebar2;
 	PraghaLibraryPane *library;
-	PraghaPlaylist    *playlist;
-	PraghaStatusbar   *statusbar;
+	PraghaPlaylist	  *playlist;
+	PraghaStatusbar	  *statusbar;
 
 	PraghaStatusIcon  *status_icon;
 
-	GBinding          *sidebar2_binding;
+	GBinding	  *sidebar2_binding;
 
 #ifdef HAVE_LIBPEAS
 	PraghaPluginsEngine *plugins_engine;
@@ -105,7 +105,7 @@ G_DEFINE_TYPE (PraghaApplication, pragha_application, GTK_TYPE_APPLICATION);
 static void
 pragha_open_files_dialog_close_button_cb (GtkWidget *widget, gpointer data)
 {
-    gtk_widget_destroy(GTK_WIDGET(data));
+    gtk_widget_destroy (GTK_WIDGET (data));
 }
 
 static void
@@ -116,8 +116,7 @@ pragha_open_files_dialog_add_button_cb (GtkWidget *widget, gpointer data)
 	gboolean add_recursively;
 	GList *mlist = NULL;
 
-	GtkWidget *window = g_object_get_data(data, "window");
-	GtkWidget *chooser = g_object_get_data(data, "chooser");
+	GtkWidget *dialog = g_object_get_data(data, "dialog");
 	GtkWidget *toggle = g_object_get_data(data, "toggle-button");
 	PraghaApplication *pragha = g_object_get_data(data, "pragha");
 
@@ -126,13 +125,13 @@ pragha_open_files_dialog_add_button_cb (GtkWidget *widget, gpointer data)
 	add_recursively = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle));
 	pragha_preferences_set_add_recursively (preferences, add_recursively);
 
-	gchar *last_folder = gtk_file_chooser_get_current_folder ((GtkFileChooser *) chooser);
+	gchar *last_folder = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (dialog));
 	pragha_preferences_set_last_folder (preferences, last_folder);
 	g_free (last_folder);
 
-	files = gtk_file_chooser_get_filenames((GtkFileChooser *) chooser);
+	files = gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER (dialog));
 
-	gtk_widget_destroy(window);
+	gtk_widget_destroy(dialog);
 
 	if (files) {
 		for (l = files; l != NULL; l = l->next) {
@@ -148,12 +147,12 @@ pragha_open_files_dialog_add_button_cb (GtkWidget *widget, gpointer data)
 
 static gboolean
 pragha_open_files_dialog_keypress (GtkWidget   *dialog,
-                                   GdkEventKey *event,
-                                   gpointer     data)
+				   GdkEventKey *event,
+				   gpointer	data)
 {
     if (event->keyval == GDK_KEY_Escape) {
-        gtk_widget_destroy(dialog);
-        return TRUE;
+	gtk_widget_destroy(dialog);
+	return TRUE;
     }
     return FALSE;
 }
@@ -162,7 +161,7 @@ void
 pragha_application_open_files (PraghaApplication *pragha)
 {
 	PraghaPreferences *preferences;
-	GtkWidget *window, *hbox, *vbox, *chooser, *bbox, *toggle, *close_button, *add_button;
+	GtkWidget *dialog, *hbox, *vbox, *chooser, *bbox, *toggle, *close_button, *add_button;
 	gpointer storage;
 	gint i = 0;
 	GtkFileFilter *media_filter, *playlist_filter, *all_filter;
@@ -170,97 +169,86 @@ pragha_application_open_files (PraghaApplication *pragha)
 
 	/* Create a file chooser dialog */
 
-	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-
-	gtk_window_set_type_hint (GTK_WINDOW (window), GDK_WINDOW_TYPE_HINT_DIALOG);
-	gtk_window_set_title(GTK_WINDOW(window), (_("Select a file to play")));
-	gtk_window_set_default_size(GTK_WINDOW(window), 700, 450);
-	gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-	gtk_container_set_border_width(GTK_CONTAINER(window), 10);
-
-	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-
-	gtk_container_add(GTK_CONTAINER(window), vbox);
-
-	chooser = gtk_file_chooser_widget_new(GTK_FILE_CHOOSER_ACTION_OPEN);
+	dialog = gtk_file_chooser_dialog_new (_("Select a file to play"),
+					      GTK_WINDOW(pragha_application_get_window(pragha)),
+					      GTK_FILE_CHOOSER_ACTION_OPEN,
+					      NULL);
+	gtk_window_set_default_size(GTK_WINDOW(dialog), 700, 450);
+	gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+	gtk_window_set_modal (GTK_WINDOW (dialog), TRUE);
 
 	/* Set various properties */
 
-	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(chooser), TRUE);
-
+	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(dialog), TRUE);
+	
 	preferences = pragha_application_get_preferences (pragha);
 	last_folder = pragha_preferences_get_last_folder (preferences);
 	if (string_is_not_empty(last_folder))
-		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(chooser), last_folder);
-
-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), last_folder);
 
 	toggle = gtk_check_button_new_with_label(_("Add files recursively"));
 	if(pragha_preferences_get_add_recursively (preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle), TRUE);
 
-	bbox = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
-	gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_END);
-	gtk_box_set_spacing(GTK_BOX(bbox), 6);
+	gtk_file_chooser_set_extra_widget (GTK_FILE_CHOOSER (dialog), toggle);
 
-	close_button = gtk_button_new_with_mnemonic (_("_Cancel"));
-	add_button = gtk_button_new_with_mnemonic (_("_Add"));
-	gtk_container_add(GTK_CONTAINER(bbox), close_button);
-	gtk_container_add(GTK_CONTAINER(bbox), add_button);
+	/* Add buttons */
 
-	gtk_box_pack_start(GTK_BOX(hbox), toggle, TRUE, TRUE, 3);
-	gtk_box_pack_end(GTK_BOX(hbox), bbox, FALSE, FALSE, 3);
+	close_button = gtk_dialog_add_button (GTK_DIALOG (dialog),
+					      _("_Cancel"),
+					      GTK_RESPONSE_CANCEL);
+	add_button = gtk_dialog_add_button (GTK_DIALOG (dialog),
+					    _("_Add"),
+					    GTK_RESPONSE_OK);
+	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_OK);
 
-	gtk_box_pack_end(GTK_BOX(vbox), hbox, FALSE, FALSE, 3);
-	gtk_box_pack_end(GTK_BOX(vbox), chooser, TRUE, TRUE, 3);
-
-	/* Create file filters  */
+	/* Create file filters	*/
 
 	media_filter = gtk_file_filter_new();
 	gtk_file_filter_set_name(GTK_FILE_FILTER(media_filter), _("Supported media"));
 	
 	while (mime_wav[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
-		                              mime_wav[i++]);
+					      mime_wav[i++]);
 	i = 0;
 	while (mime_mpeg[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
-		                              mime_mpeg[i++]);
+					      mime_mpeg[i++]);
 	i = 0;
 	while (mime_flac[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
-		                              mime_flac[i++]);
+					      mime_flac[i++]);
 	i = 0;
 	while (mime_ogg[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
-		                              mime_ogg[i++]);
+					      mime_ogg[i++]);
 
 	i = 0;
 	while (mime_asf[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
-		                              mime_asf[i++]);
+					      mime_asf[i++]);
 	i = 0;
 	while (mime_mp4[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
-		                              mime_mp4[i++]);
+					      mime_mp4[i++]);
 	i = 0;
 	while (mime_ape[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
-		                              mime_ape[i++]);
+					      mime_ape[i++]);
 	i = 0;
 	while (mime_tracker[i])
 	 gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
-		                              mime_tracker[i++]);
+					      mime_tracker[i++]);
 
 	#ifdef HAVE_PLPARSER
 	i = 0;
 	while (mime_playlist[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
-		                              mime_playlist[i++]);
+					      mime_playlist[i++]);
 	i = 0;
 	while (mime_dual[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
-		                              mime_dual[i++]);
+					      mime_dual[i++]);
 	#else
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.m3u");
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.M3U");
@@ -281,11 +269,11 @@ pragha_application_open_files (PraghaApplication *pragha)
 	i = 0;
 	while (mime_playlist[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(playlist_filter),
-		                              mime_playlist[i++]);
+					      mime_playlist[i++]);
 	i = 0;
 	while (mime_dual[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(playlist_filter),
-		                              mime_dual[i++]);
+					      mime_dual[i++]);
 	#else
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.m3u");
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.M3U");
@@ -306,37 +294,33 @@ pragha_application_open_files (PraghaApplication *pragha)
 	gtk_file_filter_set_name (GTK_FILE_FILTER(all_filter), _("All files"));
 	gtk_file_filter_add_pattern (GTK_FILE_FILTER(all_filter), "*");
 
-	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER(chooser),
-	                             GTK_FILE_FILTER(media_filter));
-	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER(chooser),
-	                             GTK_FILE_FILTER(playlist_filter));
-	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER(chooser),
-	                             GTK_FILE_FILTER(all_filter));
-
-	gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(chooser),
-	                            GTK_FILE_FILTER(media_filter));
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER(dialog),
+				     GTK_FILE_FILTER(media_filter));
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER(dialog),
+				     GTK_FILE_FILTER(playlist_filter));
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER(dialog),
+				     GTK_FILE_FILTER(all_filter));
+	gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(dialog),
+				    GTK_FILE_FILTER(media_filter));
 
 	storage = g_object_new(G_TYPE_OBJECT, NULL);
-	g_object_set_data(storage, "window", window);
-	g_object_set_data(storage, "chooser", chooser);
+	g_object_set_data(storage, "dialog", dialog);
 	g_object_set_data(storage, "toggle-button", toggle);
 	g_object_set_data(storage, "pragha", pragha);
 
 	g_signal_connect (add_button, "clicked",
-	                  G_CALLBACK(pragha_open_files_dialog_add_button_cb), storage);
-	g_signal_connect (chooser, "file-activated",
-	                  G_CALLBACK(pragha_open_files_dialog_add_button_cb), storage);
+			  G_CALLBACK(pragha_open_files_dialog_add_button_cb), storage);
+	g_signal_connect (dialog, "file-activated",
+			  G_CALLBACK(pragha_open_files_dialog_add_button_cb), storage);
 	g_signal_connect (close_button, "clicked",
-	                  G_CALLBACK(pragha_open_files_dialog_close_button_cb), window);
-	g_signal_connect (window, "destroy",
-	                  G_CALLBACK(gtk_widget_destroy), window);
-	g_signal_connect (window, "key-press-event",
-	                  G_CALLBACK(pragha_open_files_dialog_keypress), NULL);
+			  G_CALLBACK(pragha_open_files_dialog_close_button_cb), dialog);
+	g_signal_connect (dialog, "destroy",
+			  G_CALLBACK(gtk_widget_destroy), dialog);
+	g_signal_connect (dialog, "key-press-event",
+			  G_CALLBACK(pragha_open_files_dialog_keypress), NULL);
 
-	gtk_window_set_transient_for(GTK_WINDOW (window), GTK_WINDOW(pragha_application_get_window(pragha)));
-	gtk_window_set_destroy_with_parent (GTK_WINDOW (window), TRUE);
-
-	gtk_widget_show_all(window);
+	gtk_window_set_destroy_with_parent (GTK_WINDOW (dialog), TRUE);
+	gtk_widget_show_all(dialog);
 }
 
 /* Build a dialog to get a new playlist name */
@@ -400,11 +384,13 @@ pragha_application_add_location (PraghaApplication *pragha)
 	}
 
 	dialog = gtk_dialog_new_with_buttons (_("Add a location"),
-	                                      GTK_WINDOW(pragha_application_get_window(pragha)),
-	                                      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-	                                      _("_Cancel"), GTK_RESPONSE_CANCEL,
-	                                      _("_Ok"), GTK_RESPONSE_ACCEPT,
-	                                      NULL);
+					      GTK_WINDOW(pragha_application_get_window(pragha)),
+					      GTK_DIALOG_MODAL |
+					      GTK_DIALOG_DESTROY_WITH_PARENT |
+					      GTK_DIALOG_USE_HEADER_BAR,
+					      _("_Cancel"), GTK_RESPONSE_CANCEL,
+					      _("_Ok"), GTK_RESPONSE_ACCEPT,
+					      NULL);
 
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
 
@@ -496,8 +482,8 @@ pragha_application_append_entery_libary (PraghaApplication *pragha)
 			list = g_list_prepend (list, mobj);
 		else
 			g_warning ("Unable to retrieve details for"
-			            " location_id : %d",
-			            location_id);
+				    " location_id : %d",
+				    location_id);
 
 		pragha_process_gtk_events ();
 	}
@@ -529,15 +515,15 @@ pragha_application_about_dialog (PraghaApplication *pragha)
 		NULL};
 
 	gtk_show_about_dialog(GTK_WINDOW(mainwindow),
-	                      "logo-icon-name", "pragha",
-	                      "authors", authors,
-	                      "translator-credits", _("translator-credits"),
-	                      "comments", "A lightweight GTK+ music player",
-	                      "copyright", "(C) 2007-2009 Sujith\n(C) 2009-2015 Matias",
-	                      "license-type", GTK_LICENSE_GPL_3_0,
-	                      "name", PACKAGE_NAME,
-	                      "version", PACKAGE_VERSION,
-	                      NULL);
+			      "logo-icon-name", "pragha",
+			      "authors", authors,
+			      "translator-credits", _("translator-credits"),
+			      "comments", "A lightweight GTK+ music player",
+			      "copyright", "(C) 2007-2009 Sujith\n(C) 2009-2015 Matias",
+			      "license-type", GTK_LICENSE_GPL_3_0,
+			      "name", PACKAGE_NAME,
+			      "version", PACKAGE_VERSION,
+			      NULL);
 }
 
 static void
@@ -547,7 +533,7 @@ pragha_library_pane_append_tracks (PraghaLibraryPane *library, PraghaApplication
 	list = pragha_library_pane_get_mobj_list (library);
 	if (list) {
 		pragha_playlist_append_mobj_list (pragha->playlist,
-			                              list);
+						      list);
 		g_list_free(list);
 	}
 }
@@ -561,7 +547,7 @@ pragha_library_pane_replace_tracks (PraghaLibraryPane *library, PraghaApplicatio
 		pragha_playlist_remove_all (pragha->playlist);
 
 		pragha_playlist_append_mobj_list (pragha->playlist,
-			                              list);
+						      list);
 		g_list_free(list);
 	}
 }
@@ -575,7 +561,7 @@ pragha_library_pane_replace_tracks_and_play (PraghaLibraryPane *library, PraghaA
 		pragha_playlist_remove_all (pragha->playlist);
 
 		pragha_playlist_append_mobj_list (pragha->playlist,
-			                              list);
+						      list);
 
 		if (pragha_backend_get_state (pragha->backend) != ST_STOPPED)
 			pragha_playback_next_track(pragha);
@@ -619,9 +605,9 @@ pragha_playlist_update_statusbar_playtime (PraghaPlaylist *playlist, PraghaAppli
 
 	tot_str = convert_length_str(total_playtime);
 	str = g_strdup_printf("%i %s - %s",
-	                      no_tracks,
-	                      ngettext("Track", "Tracks", no_tracks),
-	                      tot_str);
+			      no_tracks,
+			      ngettext("Track", "Tracks", no_tracks),
+			      tot_str);
 
 	CDEBUG(DBG_VERBOSE, "Updating status bar with new playtime: %s", tot_str);
 
@@ -685,7 +671,7 @@ pragha_system_titlebar_changed_cb (PraghaPreferences *preferences, GParamSpec *p
 	menubar = pragha_application_get_menubar (pragha);
 	g_object_ref(toolbar);
 
-	parent  = gtk_widget_get_parent (GTK_WIDGET(menubar));
+	parent	= gtk_widget_get_parent (GTK_WIDGET(menubar));
 
 	if (pragha_preferences_get_system_titlebar (preferences)) {
 		gtk_widget_hide(GTK_WIDGET(window));
@@ -702,7 +688,7 @@ pragha_system_titlebar_changed_cb (PraghaPreferences *preferences, GParamSpec *p
 		gtk_window_set_title (GTK_WINDOW(window), _("Pragha Music Player"));
 
 		gtk_box_pack_start (GTK_BOX(parent), GTK_WIDGET(toolbar),
-		                    FALSE, FALSE, 0);
+				    FALSE, FALSE, 0);
 		gtk_box_reorder_child(GTK_BOX(parent), GTK_WIDGET(toolbar), 1);
 
 		pragha_toolbar_set_style(toolbar, TRUE);
@@ -931,7 +917,7 @@ pragha_application_construct_window (PraghaApplication *pragha)
 	pragha_window_new (pragha);
 
 	gtk_window_set_title (GTK_WINDOW(pragha->mainwindow),
-	                      _("Pragha Music Player"));
+			      _("Pragha Music Player"));
 }
 
 static void
@@ -1017,7 +1003,7 @@ pragha_application_startup (GApplication *application)
 
 	pragha->enum_map = pragha_music_enum_get ();
 	g_signal_connect (pragha->enum_map, "enum-removed",
-	                  G_CALLBACK(pragha_enum_map_removed_handler), pragha);
+			  G_CALLBACK(pragha_enum_map_removed_handler), pragha);
 
 #ifdef HAVE_LIBPEAS
 	pragha->plugins_engine = pragha_plugins_engine_new (G_OBJECT(pragha));
@@ -1025,21 +1011,21 @@ pragha_application_startup (GApplication *application)
 
 	pragha->art_cache = pragha_art_cache_get ();
 	g_signal_connect (pragha->art_cache, "cache-changed",
-	                  G_CALLBACK(pragha_art_cache_changed_handler), pragha);
+			  G_CALLBACK(pragha_art_cache_changed_handler), pragha);
 
 	pragha->backend = pragha_backend_new ();
 
 	g_signal_connect (pragha->backend, "finished",
-	                  G_CALLBACK(pragha_backend_finished_song), pragha);
+			  G_CALLBACK(pragha_backend_finished_song), pragha);
 	g_signal_connect (pragha->backend, "tags-changed",
-	                  G_CALLBACK(pragha_backend_tags_changed), pragha);
+			  G_CALLBACK(pragha_backend_tags_changed), pragha);
 
 	g_signal_connect (pragha->backend, "error",
-	                 G_CALLBACK(gui_backend_error_show_dialog_cb), pragha);
+			 G_CALLBACK(gui_backend_error_show_dialog_cb), pragha);
 	g_signal_connect (pragha->backend, "error",
-	                  G_CALLBACK(gui_backend_error_update_current_playlist_cb), pragha);
+			  G_CALLBACK(gui_backend_error_update_current_playlist_cb), pragha);
 	g_signal_connect (pragha->backend, "notify::state",
-	                  G_CALLBACK (pragha_menubar_update_playback_state_cb), pragha);
+			  G_CALLBACK (pragha_menubar_update_playback_state_cb), pragha);
 
 	/*
 	 * Collect widgets and construct the window.
@@ -1051,75 +1037,75 @@ pragha_application_startup (GApplication *application)
 
 	toolbar = pragha->toolbar;
 	g_signal_connect_swapped (toolbar, "prev",
-	                          G_CALLBACK(pragha_playback_prev_track), pragha);
+				  G_CALLBACK(pragha_playback_prev_track), pragha);
 	g_signal_connect_swapped (toolbar, "play",
-	                          G_CALLBACK(pragha_playback_play_pause_resume), pragha);
+				  G_CALLBACK(pragha_playback_play_pause_resume), pragha);
 	g_signal_connect_swapped (toolbar, "stop",
-	                          G_CALLBACK(pragha_playback_stop), pragha);
+				  G_CALLBACK(pragha_playback_stop), pragha);
 	g_signal_connect_swapped (toolbar, "next",
-	                          G_CALLBACK(pragha_playback_next_track), pragha);
+				  G_CALLBACK(pragha_playback_next_track), pragha);
 	g_signal_connect (toolbar, "unfull-activated",
-	                  G_CALLBACK(pragha_window_unfullscreen), pragha);
+			  G_CALLBACK(pragha_window_unfullscreen), pragha);
 	g_signal_connect (toolbar, "album-art-activated",
-	                  G_CALLBACK(pragha_playback_show_current_album_art), pragha);
+			  G_CALLBACK(pragha_playback_show_current_album_art), pragha);
 	g_signal_connect_swapped (toolbar, "track-info-activated",
-	                          G_CALLBACK(pragha_playback_edit_current_track), pragha);
+				  G_CALLBACK(pragha_playback_edit_current_track), pragha);
 	g_signal_connect (toolbar, "track-progress-activated",
-	                  G_CALLBACK(pragha_playback_seek_fraction), pragha);
+			  G_CALLBACK(pragha_playback_seek_fraction), pragha);
 
 	playlist = pragha->playlist;
 	g_signal_connect (playlist, "playlist-set-track",
-	                  G_CALLBACK(pragha_playback_set_playlist_track), pragha);
+			  G_CALLBACK(pragha_playback_set_playlist_track), pragha);
 	g_signal_connect (playlist, "playlist-change-tags",
-	                  G_CALLBACK(pragha_playlist_update_change_tags), pragha);
+			  G_CALLBACK(pragha_playlist_update_change_tags), pragha);
 	g_signal_connect (playlist, "playlist-changed",
-	                  G_CALLBACK(pragha_playlist_update_statusbar_playtime), pragha);
+			  G_CALLBACK(pragha_playlist_update_statusbar_playtime), pragha);
 	pragha_playlist_update_statusbar_playtime (playlist, pragha);
 		
 	g_signal_connect (pragha->library, "library-append-playlist",
-	                  G_CALLBACK(pragha_library_pane_append_tracks), pragha);
+			  G_CALLBACK(pragha_library_pane_append_tracks), pragha);
 	g_signal_connect (pragha->library, "library-replace-playlist",
-	                  G_CALLBACK(pragha_library_pane_replace_tracks), pragha);
+			  G_CALLBACK(pragha_library_pane_replace_tracks), pragha);
 	g_signal_connect (pragha->library, "library-replace-playlist-and-play",
-	                  G_CALLBACK(pragha_library_pane_replace_tracks_and_play), pragha);
+			  G_CALLBACK(pragha_library_pane_replace_tracks_and_play), pragha);
 
 	g_signal_connect (G_OBJECT(pragha->mainwindow), "window-state-event",
-	                  G_CALLBACK(pragha_toolbar_window_state_event), toolbar);
+			  G_CALLBACK(pragha_toolbar_window_state_event), toolbar);
 	g_signal_connect (G_OBJECT(toolbar), "notify::timer-remaining-mode",
-	                  G_CALLBACK(pragha_toolbar_show_ramaning_time_cb), pragha->backend);
+			  G_CALLBACK(pragha_toolbar_show_ramaning_time_cb), pragha->backend);
 
 	g_signal_connect (pragha->backend, "notify::state",
-	                  G_CALLBACK(pragha_toolbar_playback_state_cb), toolbar);
+			  G_CALLBACK(pragha_toolbar_playback_state_cb), toolbar);
 	g_signal_connect (pragha->backend, "tick",
-	                 G_CALLBACK(pragha_toolbar_update_playback_progress), toolbar);
+			 G_CALLBACK(pragha_toolbar_update_playback_progress), toolbar);
 	g_signal_connect (pragha->backend, "buffering",
-	                  G_CALLBACK(pragha_toolbar_update_buffering_cb), toolbar);
+			  G_CALLBACK(pragha_toolbar_update_buffering_cb), toolbar);
 
 	g_signal_connect (pragha->backend, "notify::state",
-	                  G_CALLBACK (update_current_playlist_view_playback_state_cb), pragha->playlist);
+			  G_CALLBACK (update_current_playlist_view_playback_state_cb), pragha->playlist);
 
 	g_object_bind_property (pragha->backend, "volume",
-	                        toolbar, "volume",
-	                        binding_flags);
+				toolbar, "volume",
+				binding_flags);
 
 	g_object_bind_property (pragha->preferences, "timer-remaining-mode",
-	                        toolbar, "timer-remaining-mode",
-	                        binding_flags);
+				toolbar, "timer-remaining-mode",
+				binding_flags);
 
 	g_signal_connect (pragha->preferences, "LibraryChanged",
-	                  G_CALLBACK (pragha_libary_list_changed_cb), pragha);
+			  G_CALLBACK (pragha_libary_list_changed_cb), pragha);
 	g_signal_connect (pragha->preferences, "NeedRestart",
-	                  G_CALLBACK (pragha_need_restart_cb), pragha);
+			  G_CALLBACK (pragha_need_restart_cb), pragha);
 
 #if GTK_CHECK_VERSION (3, 12, 0)
 	g_signal_connect (pragha->preferences, "notify::system-titlebar",
-	                  G_CALLBACK (pragha_system_titlebar_changed_cb), pragha);
+			  G_CALLBACK (pragha_system_titlebar_changed_cb), pragha);
 #endif
 
 	pragha->sidebar2_binding =
 		g_object_bind_property (pragha->preferences, "secondary-lateral-panel",
-		                        pragha->sidebar2, "visible",
-		                        binding_flags);
+					pragha->sidebar2, "visible",
+					binding_flags);
 
 	pragha->setting_dialog = pragha_preferences_dialog_new (pragha->mainwindow);
 
@@ -1130,7 +1116,7 @@ pragha_application_startup (GApplication *application)
 	pragha_plugins_engine_startup (pragha->plugins_engine);
 
 	pragha_preferences_set_secondary_lateral_panel(pragha->preferences,
-	                                               sidebar2_visible);
+						       sidebar2_visible);
 	#endif
 
 	/* If first run and the desktop is gnome adapts style. */
@@ -1282,9 +1268,9 @@ PraghaApplication *
 pragha_application_new ()
 {
 	return g_object_new (PRAGHA_TYPE_APPLICATION,
-	                     "application-id", "org.pragha",
-	                     "flags", G_APPLICATION_HANDLES_COMMAND_LINE | G_APPLICATION_HANDLES_OPEN,
-	                     NULL);
+			     "application-id", "org.pragha",
+			     "flags", G_APPLICATION_HANDLES_COMMAND_LINE | G_APPLICATION_HANDLES_OPEN,
+			     NULL);
 }
 
 gint main(gint argc, gchar *argv[])

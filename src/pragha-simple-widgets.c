@@ -1,17 +1,17 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2014 matias <mati86dl@gmail.com>                   */
-/*                                                                       */
-/* This program is free software: you can redistribute it and/or modify  */
-/* it under the terms of the GNU General Public License as published by  */
-/* the Free Software Foundation, either version 3 of the License, or     */
-/* (at your option) any later version.                                   */
-/*                                                                       */
-/* This program is distributed in the hope that it will be useful,       */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
-/* GNU General Public License for more details.                          */
-/*                                                                       */
-/* You should have received a copy of the GNU General Public License     */
+/* Copyright (C) 2009-2014 matias <mati86dl@gmail.com>			 */
+/*									 */
+/* This program is free software: you can redistribute it and/or modify	 */
+/* it under the terms of the GNU General Public License as published by	 */
+/* the Free Software Foundation, either version 3 of the License, or	 */
+/* (at your option) any later version.					 */
+/*									 */
+/* This program is distributed in the hope that it will be useful,	 */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the	 */
+/* GNU General Public License for more details.				 */
+/*									 */
+/* You should have received a copy of the GNU General Public License	 */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
@@ -45,9 +45,9 @@ gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon_name)
 
 	gtk_icon_size_lookup (GTK_ICON_SIZE_DIALOG, &width, &height);
 	icon = gtk_icon_theme_load_icon (gtk_icon_theme_get_default (),
-	                                 icon_name ? icon_name : "dialog-information",
-	                                 width,
-	                                 GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
+					 icon_name ? icon_name : "dialog-information",
+					 width,
+					 GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
 	image = gtk_image_new_from_pixbuf (GDK_PIXBUF(icon));
 	g_object_unref (icon);
 
@@ -59,7 +59,7 @@ gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon_name)
 	g_free(markup);
 
 	gtk_style_context_add_class (gtk_widget_get_style_context (xfce_heading),
-	                             GTK_STYLE_CLASS_ENTRY);
+				     GTK_STYLE_CLASS_ENTRY);
 
 	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
@@ -98,8 +98,8 @@ G_DEFINE_TYPE(PraghaTrackProgress, pragha_track_progress, GTK_TYPE_PROGRESS_BAR)
 
 static void
 pragha_track_progress_get_preferred_height (GtkWidget *widget,
-                                            gint      *minimum,
-                                            gint      *natural)
+					    gint      *minimum,
+					    gint      *natural)
 {
 	if (minimum)
 		*minimum = 14;
@@ -150,8 +150,8 @@ G_DEFINE_TYPE(PraghaContainer, pragha_container, GTK_TYPE_BOX)
 
 static void
 pragha_container_get_preferred_width (GtkWidget *widget,
-                                      gint      *minimum,
-                                      gint      *natural)
+				      gint	*minimum,
+				      gint	*natural)
 {
 	if (minimum)
 		*minimum = 140;
@@ -200,7 +200,7 @@ struct _PraghaToolbarButtonClass {
 struct _PraghaToolbarButton {
 	GtkButton   __parent;
 
-	gchar       *icon_name;
+	gchar	    *icon_name;
 	GtkIconSize  icon_size;
 };
 
@@ -218,7 +218,7 @@ pragha_toolbar_button_update_icon (PraghaToolbarButton *button)
 {
 	gtk_button_set_image (GTK_BUTTON(button),
 		gtk_image_new_from_icon_name (button->icon_name,
-		                              button->icon_size));
+					      button->icon_size));
 }
 
 void
@@ -243,10 +243,10 @@ pragha_toolbar_button_set_icon_size (PraghaToolbarButton *button, GtkIconSize ic
 }
 
 static void
-pragha_toolbar_button_set_property (GObject       *object,
-                                    guint          prop_id,
-                                    const GValue  *value,
-                                    GParamSpec    *pspec)
+pragha_toolbar_button_set_property (GObject	  *object,
+				    guint	   prop_id,
+				    const GValue  *value,
+				    GParamSpec	  *pspec)
 {
 	PraghaToolbarButton *button = PRAGHA_TOOLBAR_BUTTON (object);
 
@@ -265,10 +265,10 @@ pragha_toolbar_button_set_property (GObject       *object,
 }
 
 static void
-pragha_toolbar_button_get_property (GObject     *object,
-                                    guint        prop_id,
-                                    GValue      *value,
-                                    GParamSpec  *pspec)
+pragha_toolbar_button_get_property (GObject	*object,
+				    guint	 prop_id,
+				    GValue	*value,
+				    GParamSpec	*pspec)
 {
 	PraghaToolbarButton *button = PRAGHA_TOOLBAR_BUTTON (object);
 	switch (prop_id)
@@ -290,22 +290,22 @@ pragha_toolbar_button_class_init (PraghaToolbarButtonClass *class)
 {
 	GObjectClass *gobject_class = G_OBJECT_CLASS (class);
 
-  	gobject_class->set_property = pragha_toolbar_button_set_property;
+	gobject_class->set_property = pragha_toolbar_button_set_property;
 	gobject_class->get_property = pragha_toolbar_button_get_property;
 
 	g_object_class_install_property (gobject_class, PROP_ICON_NAME,
-	                                 g_param_spec_string ("icon-name",
-	                                                      "Icon Name",
-	                                                      "The name of the icon from the icon theme",
-	                                                      NULL,
-	                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+					 g_param_spec_string ("icon-name",
+							      "Icon Name",
+							      "The name of the icon from the icon theme",
+							      NULL,
+							      G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 	g_object_class_install_property (gobject_class, PROP_ICON_SIZE,
-	                                 g_param_spec_enum ("icon-size",
-	                                                    "Icon size",
-	                                                     "The icon size",
-	                                                     GTK_TYPE_ICON_SIZE,
-	                                                     GTK_ICON_SIZE_SMALL_TOOLBAR,
-	                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+					 g_param_spec_enum ("icon-size",
+							    "Icon size",
+							     "The icon size",
+							     GTK_TYPE_ICON_SIZE,
+							     GTK_ICON_SIZE_SMALL_TOOLBAR,
+							     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 }
 
 static void
@@ -323,10 +323,10 @@ pragha_toolbar_button_new (const gchar *icon_name)
 
 	image = gtk_image_new_from_icon_name (icon_name, GTK_ICON_SIZE_LARGE_TOOLBAR);
 	button =  g_object_new (PRAGHA_TYPE_TOOLBAR_BUTTON,
-	                        "image", image,
-	                        "icon-name", icon_name,
-	                        "icon-size", GTK_ICON_SIZE_LARGE_TOOLBAR,
-	                        NULL);
+				"image", image,
+				"icon-name", icon_name,
+				"icon-size", GTK_ICON_SIZE_LARGE_TOOLBAR,
+				NULL);
 
 	return button;
 }
@@ -349,9 +349,9 @@ struct _PraghaToggleButtonClass {
 };
 
 struct _PraghaToggleButton {
-	GtkToggleButton   __parent;
+	GtkToggleButton	  __parent;
 
-	gchar       *icon_name;
+	gchar	    *icon_name;
 	GtkIconSize  icon_size;
 };
 
@@ -362,7 +362,7 @@ pragha_toggle_button_update_icon (PraghaToggleButton *button)
 {
 	gtk_button_set_image (GTK_BUTTON(button),
 		gtk_image_new_from_icon_name (button->icon_name,
-		                              button->icon_size));
+					      button->icon_size));
 }
 
 void
@@ -387,10 +387,10 @@ pragha_toggle_button_set_icon_size (PraghaToggleButton *button, GtkIconSize icon
 }
 
 static void
-pragha_toggle_button_set_property (GObject       *object,
-                                   guint          prop_id,
-                                   const GValue  *value,
-                                   GParamSpec    *pspec)
+pragha_toggle_button_set_property (GObject	 *object,
+				   guint	  prop_id,
+				   const GValue	 *value,
+				   GParamSpec	 *pspec)
 {
 	PraghaToggleButton *button = PRAGHA_TOGGLE_BUTTON (object);
 
@@ -410,9 +410,9 @@ pragha_toggle_button_set_property (GObject       *object,
 
 static void
 pragha_toggle_button_get_property (GObject     *object,
-                                   guint        prop_id,
-                                   GValue      *value,
-                                   GParamSpec  *pspec)
+				   guint	prop_id,
+				   GValue      *value,
+				   GParamSpec  *pspec)
 {
 	PraghaToggleButton *button = PRAGHA_TOGGLE_BUTTON (object);
 	switch (prop_id)
@@ -434,22 +434,22 @@ pragha_toggle_button_class_init (PraghaToggleButtonClass *class)
 {
 	GObjectClass *gobject_class = G_OBJECT_CLASS (class);
 
-  	gobject_class->set_property = pragha_toggle_button_set_property;
+	gobject_class->set_property = pragha_toggle_button_set_property;
 	gobject_class->get_property = pragha_toggle_button_get_property;
 
 	g_object_class_install_property (gobject_class, PROP_ICON_NAME,
-	                                 g_param_spec_string ("icon-name",
-	                                                      "Icon Name",
-	                                                      "The name of the icon from the icon theme",
-	                                                      NULL,
-	                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+					 g_param_spec_string ("icon-name",
+							      "Icon Name",
+							      "The name of the icon from the icon theme",
+							      NULL,
+							      G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 	g_object_class_install_property (gobject_class, PROP_ICON_SIZE,
-	                                 g_param_spec_enum ("icon-size",
-	                                                    "Icon size",
-	                                                     "The icon size",
-	                                                     GTK_TYPE_ICON_SIZE,
-	                                                     GTK_ICON_SIZE_SMALL_TOOLBAR,
-	                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+					 g_param_spec_enum ("icon-size",
+							    "Icon size",
+							     "The icon size",
+							     GTK_TYPE_ICON_SIZE,
+							     GTK_ICON_SIZE_SMALL_TOOLBAR,
+							     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 }
 
 static void
@@ -467,10 +467,10 @@ pragha_toggle_button_new (const gchar *icon_name)
 
 	image = gtk_image_new_from_icon_name (icon_name, GTK_ICON_SIZE_LARGE_TOOLBAR);
 	button =  g_object_new (PRAGHA_TYPE_TOGGLE_BUTTON,
-	                        "image", image,
-	                        "icon-name", icon_name,
-	                        "icon-size", GTK_ICON_SIZE_LARGE_TOOLBAR,
-	                        NULL);
+				"image", image,
+				"icon-name", icon_name,
+				"icon-size", GTK_ICON_SIZE_LARGE_TOOLBAR,
+				NULL);
 
 	return button;
 }

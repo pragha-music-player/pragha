@@ -1,17 +1,17 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
 /* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>			 */
-/* 									 */
+/*									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
 /* the Free Software Foundation, either version 3 of the License, or	 */
 /* (at your option) any later version.					 */
-/* 									 */
+/*									 */
 /* This program is distributed in the hope that it will be useful,	 */
 /* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	 */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the	 */
 /* GNU General Public License for more details.				 */
-/* 									 */
+/*									 */
 /* You should have received a copy of the GNU General Public License	 */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
@@ -58,35 +58,31 @@ static gchar *
 get_playlist_dialog(PraghaPlaylistActionRange type, GtkWidget *parent)
 {
 	GtkWidget *dialog;
-	GtkWidget *table, *label, *entry;
+	GtkWidget *table, *entry;
 	gchar *playlist = NULL;
 	gint result;
 	guint row = 0;
 
 	table = pragha_hig_workarea_table_new();
 
-	if(type == SAVE_COMPLETE)
-		pragha_hig_workarea_table_add_section_title(table, &row, _("Save playlist"));
-	else
-		pragha_hig_workarea_table_add_section_title(table, &row, _("Save selection"));
-
-	label = gtk_label_new_with_mnemonic(_("Playlist"));
-
 	entry = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(entry), 255);
 	gtk_entry_set_activates_default (GTK_ENTRY(entry), TRUE);
 	gtk_widget_grab_focus(GTK_WIDGET(entry));
 
-	pragha_hig_workarea_table_add_row(table, &row, label, entry);
+	pragha_hig_workarea_table_add_wide_control(table, &row, entry);
 
 	dialog = gtk_dialog_new_with_buttons (NULL,
-	                                     GTK_WINDOW(parent),
-	                                     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-	                                     _("_Cancel"), GTK_RESPONSE_CANCEL,
-	                                     _("_Ok"), GTK_RESPONSE_ACCEPT,
-	                                     NULL);
+					      GTK_WINDOW(parent),
+					      GTK_DIALOG_MODAL |
+					      GTK_DIALOG_DESTROY_WITH_PARENT |
+					      GTK_DIALOG_USE_HEADER_BAR,
+					     _("_Cancel"), GTK_RESPONSE_CANCEL,
+					     _("_Ok"), GTK_RESPONSE_ACCEPT,
+					     NULL);
 
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
+	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, -1);
 
 	if(type == SAVE_COMPLETE)
 		gtk_window_set_title (GTK_WINDOW(dialog), _("Save playlist"));
@@ -123,10 +119,10 @@ get_playlist_name(PraghaPlaylistActionRange type, GtkWidget *parent)
 		if (playlist && !g_ascii_strcasecmp(playlist, SAVE_PLAYLIST_STATE)) {
 			GtkWidget *dialog;
 			dialog = gtk_message_dialog_new_with_markup(GTK_WINDOW(parent),
-			                                            GTK_DIALOG_MODAL,
-			                                            GTK_MESSAGE_INFO,
-			                                            GTK_BUTTONS_OK,
-			                                            _("<b>con_playlist</b> is a reserved playlist name"));
+								    GTK_DIALOG_MODAL,
+								    GTK_MESSAGE_INFO,
+								    GTK_BUTTONS_OK,
+								    _("<b>con_playlist</b> is a reserved playlist name"));
 			gtk_dialog_run(GTK_DIALOG(dialog));
 			gtk_widget_destroy(dialog);
 			g_free(playlist);
@@ -147,10 +143,10 @@ overwrite_existing_playlist(const gchar *playlist, GtkWidget *parent)
 	gint response;
 
 	dialog = gtk_message_dialog_new(GTK_WINDOW(parent),
-	                                GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-	                                GTK_MESSAGE_QUESTION,
-	                                GTK_BUTTONS_YES_NO,
-	                                _("Do you want to overwrite the playlist: %s ?"), playlist);
+					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT |GTK_DIALOG_USE_HEADER_BAR,
+					GTK_MESSAGE_QUESTION,
+					GTK_BUTTONS_YES_NO,
+					_("Do you want to overwrite the playlist: %s ?"), playlist);
 
 	response = gtk_dialog_run(GTK_DIALOG(dialog));
 
@@ -250,9 +246,9 @@ exit_list:
 #ifdef HAVE_PLPARSER
 static void
 pragha_parser_append_foreach_playlist (GtkTreeModel *model,
-                                       GtkTreePath  *path,
-                                       GtkTreeIter  *iter,
-                                       gpointer      data)
+				       GtkTreePath  *path,
+				       GtkTreeIter  *iter,
+				       gpointer	     data)
 {
 	TotemPlPlaylistIter pl_iter;
 	PraghaMusicobject *mobj;
@@ -269,28 +265,28 @@ pragha_parser_append_foreach_playlist (GtkTreeModel *model,
 
 	totem_pl_playlist_append (playlist, &pl_iter);
 	totem_pl_playlist_set (playlist, &pl_iter,
-	                       TOTEM_PL_PARSER_FIELD_URI, uri,
-	                       NULL);
+			       TOTEM_PL_PARSER_FIELD_URI, uri,
+			       NULL);
 
 	g_free(uri);
 }
 
 static gboolean
 pragha_parser_append_foreach_track_list (GtkTreeModel *model,
-                                         GtkTreePath  *path,
-                                         GtkTreeIter  *iter,
-                                         gpointer      data)
+					 GtkTreePath  *path,
+					 GtkTreeIter  *iter,
+					 gpointer      data)
 {
 	pragha_parser_append_foreach_playlist (model,
-		                                   path,
-		                                   iter,
-		                                   data);
+						   path,
+						   iter,
+						   data);
 	return FALSE;
 }
 
 static gboolean
 pragha_parser_save_full_track_list (PraghaPlaylist *cplaylist,
-                                    const gchar    *filename)
+				    const gchar	   *filename)
 {
 	TotemPlPlaylist *playlist;
 	TotemPlParser *pl;
@@ -302,8 +298,8 @@ pragha_parser_save_full_track_list (PraghaPlaylist *cplaylist,
 	file = g_file_new_for_path (filename);
 
 	gtk_tree_model_foreach(pragha_playlist_get_model(cplaylist),
-	                       pragha_parser_append_foreach_track_list,
-	                       playlist);
+			       pragha_parser_append_foreach_track_list,
+			       playlist);
 
 
 	if (totem_pl_parser_save (pl, playlist, file, "Title", TOTEM_PL_PARSER_M3U, NULL) != TRUE) {
@@ -320,7 +316,7 @@ pragha_parser_save_full_track_list (PraghaPlaylist *cplaylist,
 
 static gboolean
 pragha_parser_save_selection_track_list (PraghaPlaylist *cplaylist,
-                                         const gchar    *filename)
+					 const gchar	*filename)
 {
 	TotemPlPlaylist *playlist;
 	TotemPlParser *pl;
@@ -334,12 +330,12 @@ pragha_parser_save_selection_track_list (PraghaPlaylist *cplaylist,
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(pragha_playlist_get_view(cplaylist)));
 	gtk_tree_selection_selected_foreach(selection,
-	                                    pragha_parser_append_foreach_playlist,
-	                                    playlist);
+					    pragha_parser_append_foreach_playlist,
+					    playlist);
 
 	if (totem_pl_parser_save (pl, playlist, file, "Title", TOTEM_PL_PARSER_M3U, NULL) != TRUE) {
-        g_error ("Playlist writing failed.");
-        ret = FALSE;
+	g_error ("Playlist writing failed.");
+	ret = FALSE;
     }
 
 	g_object_unref (playlist);
@@ -426,8 +422,8 @@ void add_playlist_current_playlist(gchar *splaylist, PraghaApplication *pragha)
 
 GList *
 add_playlist_to_mobj_list(PraghaDatabase *cdbase,
-                          const gchar *playlist,
-                          GList *list)
+			  const gchar *playlist,
+			  GList *list)
 {
 	gint playlist_id, location_id;
 	PraghaMusicobject *mobj;
@@ -463,8 +459,8 @@ bad:
 
 GList *
 add_radio_to_mobj_list(PraghaDatabase *cdbase,
-                       const gchar *radio,
-                       GList *list)
+		       const gchar *radio,
+		       GList *list)
 {
 	gint radio_id;
 	PraghaMusicobject *mobj;
@@ -504,7 +500,6 @@ gchar* rename_playlist_dialog(const gchar *oplaylist, GtkWidget *parent)
 	/* Create dialog window */
 
 	table = pragha_hig_workarea_table_new();
-	pragha_hig_workarea_table_add_section_title(table, &row, _("Choose a new name"));
 
 	entry = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(entry), 255);
@@ -512,13 +507,15 @@ gchar* rename_playlist_dialog(const gchar *oplaylist, GtkWidget *parent)
 	pragha_hig_workarea_table_add_wide_control(table, &row, entry);
 
 	dialog = gtk_dialog_new_with_buttons (_("Rename"),
-	                                      GTK_WINDOW(parent),
-	                                      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-	                                      _("_Cancel"), GTK_RESPONSE_CANCEL,
-	                                      _("_Ok"), GTK_RESPONSE_ACCEPT,
-	                                      NULL);
-
+					      GTK_WINDOW(parent),
+					      GTK_DIALOG_MODAL |
+					      GTK_DIALOG_DESTROY_WITH_PARENT |
+					      GTK_DIALOG_USE_HEADER_BAR,
+					      _("_Cancel"), GTK_RESPONSE_CANCEL,
+					      _("_Ok"), GTK_RESPONSE_ACCEPT,
+					      NULL);
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
+	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, -1);
 
 	gtk_entry_set_text(GTK_ENTRY(entry), oplaylist);
 
@@ -584,14 +581,14 @@ playlist_export_dialog_get_filename(const gchar *prefix, GtkWidget *parent)
 	gint resp;
 
 	dialog = gtk_file_chooser_dialog_new (_("Export playlist to file"),
-	                                      GTK_WINDOW(parent),
-	                                      GTK_FILE_CHOOSER_ACTION_SAVE,
-	                                      _("_Cancel"), GTK_RESPONSE_CANCEL,
-	                                      _("_Save"), GTK_RESPONSE_ACCEPT,
-	                                      NULL);
+					      GTK_WINDOW(parent),
+					      GTK_FILE_CHOOSER_ACTION_SAVE,
+					      _("_Cancel"), GTK_RESPONSE_CANCEL,
+					      _("_Save"), GTK_RESPONSE_ACCEPT,
+					      NULL);
 
 	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog),
-	                                               TRUE);
+						       TRUE);
 
 	playlistm3u = g_strdup_printf("%s.m3u", prefix);
 	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER(dialog), playlistm3u);
@@ -616,7 +613,7 @@ void export_playlist (PraghaPlaylist* cplaylist, PraghaPlaylistActionRange choic
 	gchar *filename = NULL;
 
 	filename = playlist_export_dialog_get_filename(_("Playlists"),
-	                                               gtk_widget_get_toplevel(GTK_WIDGET(cplaylist)));
+						       gtk_widget_get_toplevel(GTK_WIDGET(cplaylist)));
 	if (!filename)
 		return;
 
@@ -643,7 +640,7 @@ void export_playlist (PraghaPlaylist* cplaylist, PraghaPlaylistActionRange choic
 	GError *err = NULL;
 
 	filename = playlist_export_dialog_get_filename(_("Playlists"),
-	                                               gtk_widget_get_toplevel(GTK_WIDGET(cplaylist)));
+						       gtk_widget_get_toplevel(GTK_WIDGET(cplaylist)));
 
 	if (!filename)
 		goto exit;
@@ -690,9 +687,9 @@ exit:
 #ifdef HAVE_PLPARSER
 static void
 _on_pl_entry_parsed (TotemPlParser *parser,
-                     gchar         *uri,
-                     gpointer       metadata,
-                     GSList       **plitems)
+		     gchar	   *uri,
+		     gpointer	    metadata,
+		     GSList	  **plitems)
 {
 	gchar *filename = NULL;
 
@@ -717,7 +714,7 @@ pragha_totem_pl_parser_parse_from_uri (const gchar *uri)
 	pl_parser = totem_pl_parser_new ();
 	//g_object_set (pl_parser, "recurse", FALSE, NULL);
 	g_signal_connect (G_OBJECT(pl_parser), "entry-parsed",
-	                  G_CALLBACK(_on_pl_entry_parsed), &plitems);
+			  G_CALLBACK(_on_pl_entry_parsed), &plitems);
 
 	base = get_display_filename(uri, TRUE);
 
@@ -755,7 +752,7 @@ pragha_pl_parser_parse_xspf (const gchar *filename)
 
 	if (!g_file_load_contents (file, NULL, &contents, &size, NULL, NULL)) {
 		goto out;
-    	}
+	}
 
 	if (g_utf8_validate (contents, -1, NULL) == FALSE) {
 		gchar *fixed;
@@ -1088,8 +1085,8 @@ append_files_to_playlist(PraghaDatabase *cdbase, GSList *list, gint playlist_id)
 
 void
 save_playlist(PraghaPlaylist* cplaylist,
-              gint playlist_id,
-              PraghaPlaylistActionRange type)
+	      gint playlist_id,
+	      PraghaPlaylistActionRange type)
 {
 	PraghaMusicobject *mobj = NULL;
 	GList *mlist = NULL, *i;
@@ -1111,7 +1108,7 @@ save_playlist(PraghaPlaylist* cplaylist,
 		for (i=mlist; i != NULL; i = i->next) {
 			mobj = i->data;
 			if (pragha_musicobject_is_local_file(mobj)) {
-			    	file = g_strdup(pragha_musicobject_get_file(mobj));
+				file = g_strdup(pragha_musicobject_get_file(mobj));
 				files = g_slist_prepend(files, file);
 			}
 			else if(pragha_musicobject_get_source(mobj) == FILE_HTTP) {
@@ -1131,8 +1128,8 @@ save_playlist(PraghaPlaylist* cplaylist,
 
 void
 new_playlist(PraghaPlaylist* cplaylist,
-             const gchar *playlist,
-             PraghaPlaylistActionRange type)
+	     const gchar *playlist,
+	     PraghaPlaylistActionRange type)
 {
 	gint playlist_id = 0;
 
@@ -1173,8 +1170,8 @@ void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, PraghaPla
 
 gchar *
 new_radio (PraghaPlaylist *playlist,
-           const gchar    *uri,
-           const gchar    *basename)
+	   const gchar	  *uri,
+	   const gchar	  *basename)
 {
 	PraghaDatabase *cdbase;
 	gchar *name = NULL;
@@ -1199,9 +1196,9 @@ new_radio (PraghaPlaylist *playlist,
 		} while (pragha_database_find_radio (cdbase, name));
 	}
 
-  	/* Save a new radio */
+	/* Save a new radio */
 
-  	radio_id = pragha_database_add_new_radio (cdbase, name);
+	radio_id = pragha_database_add_new_radio (cdbase, name);
 	pragha_database_add_radio_track (cdbase, radio_id, uri);
 
 	return name;
@@ -1234,11 +1231,11 @@ replace_or_append_dialog(PraghaPlaylist *cplaylist, const gchar *playlist, Pragh
 	g_free(string_options);
 
 	dialog = gtk_dialog_new_with_buttons (NULL,
-	                                      GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(cplaylist))),
-	                                      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-	                                      _("_Cancel"), GTK_RESPONSE_CANCEL,
-	                                      _("_Ok"), GTK_RESPONSE_ACCEPT,
-	                                      NULL);
+					      GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(cplaylist))),
+					      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+					      _("_Cancel"), GTK_RESPONSE_CANCEL,
+					      _("_Ok"), GTK_RESPONSE_ACCEPT,
+					      NULL);
 
 	if(type == SAVE_COMPLETE)
 		gtk_window_set_title (GTK_WINDOW(dialog), _("Save playlist"));
