@@ -413,11 +413,20 @@ pragha_window_init (PraghaApplication *pragha)
 
 static void
 prefrences_change_icon_size (PraghaPreferences *preferences,
-			     GParamSpec	       *pspec,
-			     GtkWidget	       *button)
+                             GParamSpec        *pspec,
+                             GtkWidget         *button)
 {
 	GIcon *icon = NULL;
-	icon = g_themed_icon_new ("emblem-system-symbolic");
+
+	const gchar *fallbacks_icon_menu[] = {
+		"open-menu",
+		"emblem-system",
+		"open-menu-symbolic",
+		"emblem-system-symbolic",
+		NULL,
+	};
+
+  	icon = g_themed_icon_new_from_names ((gchar **)fallbacks_icon_menu, -1);
 	gtk_button_set_image (GTK_BUTTON (button),
 		gtk_image_new_from_gicon(icon, pragha_preferences_get_toolbar_size(preferences)));
 	g_object_unref (icon);
@@ -442,7 +451,15 @@ pragha_window_new (PraghaApplication *pragha)
 	gsize cnt = 0;
 
 	const GBindingFlags binding_flags =
-		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
+	  G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
+
+	const gchar *fallbacks_icon_menu[] = {
+		"open-menu",
+		"emblem-system",
+		"open-menu-symbolic",
+		"emblem-system-symbolic",
+		NULL,
+	};
 
 	CDEBUG(DBG_INFO, "Packaging widgets, and initiating the window");
 
@@ -566,7 +583,8 @@ pragha_window_new (PraghaApplication *pragha)
 	g_object_set(menu_button, "use-popover", FALSE, NULL);
 #endif
 	gtk_button_set_relief(GTK_BUTTON(menu_button), GTK_RELIEF_NONE);
-	icon = g_themed_icon_new ("emblem-system-symbolic");
+
+	icon = g_themed_icon_new_from_names ((gchar **)fallbacks_icon_menu, -1);
 	gtk_button_set_image (GTK_BUTTON (menu_button),
 		gtk_image_new_from_gicon(icon, pragha_preferences_get_toolbar_size(preferences)));
 	g_object_unref (icon);
