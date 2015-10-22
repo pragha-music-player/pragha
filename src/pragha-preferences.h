@@ -106,7 +106,6 @@ struct _PraghaPreferencesClass
 #define KEY_SYSTEM_TITLEBAR	   "system_titlebar"
 #define KEY_CONTROLS_BELOW	   "controls_below"
 #define KEY_SHOW_MENUBAR	   "show_menubar"
-#define KEY_USE_DARK_MODE	   "use_dark_mode"
 
 /* Some default preferences. */
 

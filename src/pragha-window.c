@@ -369,9 +369,6 @@ pragha_window_init_menu_actions (PraghaApplication *pragha)
 
 	action = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Playback controls below");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), pragha_preferences_get_controls_below (preferences));
-
-	action = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Use dark mode");
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), pragha_preferences_get_use_dark_mode (preferences));
 }
 
 static void

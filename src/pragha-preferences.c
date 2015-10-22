@@ -74,7 +74,6 @@ struct _PraghaPreferencesPrivate
 	gboolean   show_menubar;
 	gboolean   system_titlebar;
 	gboolean   controls_below;
-	gboolean   use_dark_mode;
 	gboolean   remember_state;
 	gchar	  *start_mode;
 	/* Misc preferences. */
@@ -116,7 +115,6 @@ enum
 	PROP_SHOW_MENUBAR,
 	PROP_SYSTEM_TITLEBAR,
 	PROP_CONTROLS_BELOW,
-	PROP_USE_DARK_MODE,
 	PROP_REMEMBER_STATE,
 	PROP_START_MODE,
 	PROP_LAST_FOLDER,
@@ -1264,33 +1262,6 @@ pragha_preferences_set_controls_below (PraghaPreferences *preferences,
 }
 
 /**
- * pragha_preferences_get_use_dark_mode:
- *
- */
-gboolean
-pragha_preferences_get_use_dark_mode (PraghaPreferences *preferences)
-{
-	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), FALSE);
-
-	return preferences->priv->use_dark_mode;
-}
-
-/**
- * pragha_preferences_set_use_dark_mode:
- *
- */
-void
-pragha_preferences_set_use_dark_mode (PraghaPreferences *preferences,
-				       gboolean use_dark_mode)
-{
-	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
-
-	preferences->priv->use_dark_mode = use_dark_mode;
-
-	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_USE_DARK_MODE]);
-}
-
-/**
  * pragha_preferences_get_remember_state:
  *
  */
@@ -1488,7 +1459,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gboolean approximate_search, instant_search;
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
 	gboolean lateral_panel, secondary_lateral_panel, show_album_art, show_status_bar, \
-	  show_status_icon, show_menubar, system_titlebar, controls_below, use_dark_mode, remember_state;
+	  show_status_icon, show_menubar, system_titlebar, controls_below, remember_state;
 	gchar *album_art_pattern;
 	gchar *start_mode, *last_folder, *last_folder_converted = NULL;
 	gboolean add_recursively, timer_remaining_mode, hide_instead_close;
@@ -1869,18 +1840,6 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_controls_below(preferences, controls_below);
 	}
 
-	use_dark_mode = g_key_file_get_boolean(priv->rc_keyfile,
-					       GROUP_WINDOW,
-					       KEY_USE_DARK_MODE,
-					       &error);
-	if (error) {
-		g_error_free(error);
-		error = NULL;
-	}
-	else {
-		pragha_preferences_set_use_dark_mode (preferences, use_dark_mode);
-	}
-
 	remember_state = g_key_file_get_boolean(priv->rc_keyfile,
 						GROUP_WINDOW,
 						KEY_REMEMBER_STATE,
@@ -2102,10 +2061,6 @@ pragha_preferences_finalize (GObject *object)
 			       priv->controls_below);
 	g_key_file_set_boolean(priv->rc_keyfile,
 			       GROUP_WINDOW,
-			       KEY_USE_DARK_MODE,
-			       priv->use_dark_mode);
-	g_key_file_set_boolean(priv->rc_keyfile,
-			       GROUP_WINDOW,
 			       KEY_REMEMBER_STATE,
 			       priv->remember_state);
 	g_key_file_set_string(priv->rc_keyfile,
@@ -2250,9 +2205,6 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_CONTROLS_BELOW:
 			g_value_set_boolean (value, pragha_preferences_get_controls_below(preferences));
 			break;
-		case PROP_USE_DARK_MODE:
-			g_value_set_boolean (value, pragha_preferences_get_use_dark_mode(preferences));
-			break;
 		case PROP_REMEMBER_STATE:
 			g_value_set_boolean (value, pragha_preferences_get_remember_state(preferences));
 			break;
@@ -2365,9 +2317,6 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_CONTROLS_BELOW:
 			pragha_preferences_set_controls_below(preferences, g_value_get_boolean(value));
-			break;
-		case PROP_USE_DARK_MODE:
-			pragha_preferences_set_use_dark_mode (preferences, g_value_get_boolean(value));
 			break;
 		case PROP_REMEMBER_STATE:
 			pragha_preferences_set_remember_state(preferences, g_value_get_boolean(value));
@@ -2714,17 +2663,6 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		g_param_spec_boolean("controls-below",
 				     "ControlsBelow",
 				     "Controls Below Preference",
-				      FALSE,
-				      PRAGHA_PREF_PARAMS);
-
-	/**
-	  * PraghaPreferences:use_dark_mode:
-	  *
-	  */
-	gParamSpecs[PROP_USE_DARK_MODE] =
-		g_param_spec_boolean("use-dark-mode",
-				     "DarkMode",
-				     "Dark Mode Preference",
 				      FALSE,
 				      PRAGHA_PREF_PARAMS);
 

@@ -86,7 +86,6 @@ static void search_playlist_action(GtkAction *action, PraghaApplication *pragha)
 
 static void fullscreen_action (GtkAction *action, PraghaApplication *pragha);
 static void show_controls_below_action (GtkAction *action, PraghaApplication *pragha);
-static void use_dark_mode (GtkAction *action, PraghaApplication *pragha);
 static void jump_to_playing_song_action (GtkAction *action, PraghaApplication *pragha);
 
 /* Tools */
@@ -159,7 +158,6 @@ static const gchar *main_menu_xml = "<ui>					\
 			<menuitem action=\"Playback controls below\"/>	\
 			<menuitem action=\"Show menubar\"/>			\
 			<menuitem action=\"Status bar\"/>			\
-			<menuitem action=\"Use dark mode\"/>			\
 			<separator/>						\
 			<menuitem action=\"Jump to playing song\"/>	\
 		</menu>								\
@@ -278,10 +276,7 @@ static GtkToggleActionEntry toggles_entries[] = {
    TRUE},
   {"Status bar", NULL, N_("Status bar"),
    "", "Status bar", NULL,
-   TRUE},
-  {"Use dark mode", NULL, N_("Use dark mode"),
-   NULL, "Use pragha in dark mode", G_CALLBACK(use_dark_mode),
-   FALSE}
+   TRUE}
 };
 
 /* Sentitive menubar actions depending on the playback status. */
@@ -504,25 +499,6 @@ show_controls_below_action (GtkAction *action, PraghaApplication *pragha)
 	gint position = pragha_preferences_get_controls_below (preferences) ? 3 : 1;
 
 	gtk_box_reorder_child(GTK_BOX(parent), GTK_WIDGET(toolbar), position);
-}
-
-static void
-use_dark_mode (GtkAction *action, PraghaApplication *pragha) {
-	PraghaPreferences *preferences;
-	GtkSettings *settings;
-	PraghaToolbar *toolbar;
-	GtkWidget *parent;
-	gboolean status;
-
-	preferences = pragha_application_get_preferences (pragha);
-	status = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
-	pragha_preferences_set_use_dark_mode (preferences, status);
-
-	settings = gtk_settings_get_default ();
-	g_object_set (G_OBJECT (settings),
-		      "gtk-application-prefer-dark-theme",
-		      status,
-		      NULL);
 }
 
 static void
@@ -764,9 +740,6 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 
 	GtkAction *action_status_bar = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Status bar");
 	g_object_bind_property (preferences, "show-status-bar", action_status_bar, "active", binding_flags);
-
-	GtkAction *action_use_dark_mode = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Use dark mode");
-	g_object_bind_property (preferences, "use-dark-mode", action_use_dark_mode, "active", binding_flags);
 
 	GtkAction *action_show_menubar = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Show menubar");
 	g_object_bind_property (preferences, "show-menubar", action_show_menubar, "active", binding_flags);
@@ -1455,7 +1428,6 @@ static GActionEntry win_entries[] = {
 	{ "sidebar2",	      activate_toggle,		     NULL, "false", NULL },
 	{ "menubar",	      activate_toggle,		     NULL, "true",  NULL },
 	{ "status-bar",	      activate_toggle,		     NULL, "false", NULL },
-	{ "use-dark-mode",    activate_toggle,		     NULL, "false", NULL },
 	{ "jump-song",	      pragha_gmenu_jump_to_song,     NULL, NULL,    NULL },
 	/* Tools submenu */
 	{ "equalizer",	      pragha_gmenu_equalizer,	     NULL, NULL,    NULL },
@@ -1504,7 +1476,6 @@ static const gchar *menu_ui = \
   NEW_ACCEL_ITEM     ("Show secondary lateral panel",	 "&lt;Control&gt;F9",	 "win", "sidebar2") \
   NEW_ACCEL_ITEM     ("Show menubar",			 "&lt;Control&gt;M",	 "win", "menubar") \
   NEW_ITEM	     ("Show status bar",					 "win", "status-bar") \
-  NEW_ITEM	     ("Use dark mode",						 "win", "use-dark-mode") \
   SEPARATOR \
   NEW_PLACEHOLDER("pragha-plugins-placeholder") \
   SEPARATOR \
@@ -1606,14 +1577,5 @@ pragha_gmenu_toolbar_new (PraghaApplication *pragha)
 				     binding_variant_to_gboolean,
 				     NULL,
 				     NULL);
-	action = g_action_map_lookup_action (map, "use-dark-mode");
-	g_object_bind_property_full (preferences, "use-dark-mode",
-				     action, "state",
-				     binding_flags,
-				     binding_gboolean_to_variant,
-				     binding_variant_to_gboolean,
-				     NULL,
-				     NULL);
-
 	return builder;
 }
