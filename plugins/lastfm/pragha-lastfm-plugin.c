@@ -30,10 +30,6 @@
 #include <gmodule.h>
 #include <gtk/gtk.h>
 
-#include <cdio/paranoia/cdda.h>
-#include <cdio/cd_types.h>
-#include <cddb/cddb.h>
-
 #include <libpeas/peas.h>
 
 #include "src/pragha.h"
