@@ -1,0 +1,9 @@
+[Plugin]
+Module=pampache
+Name=Ampache Client
+Description=Play music on a Ampache server
+Authors=Matias De lellis <mati86dl@gmail.com>
+Copyright=Copyright © 2015 Matias De lellis
+Website=https://github.com/matiasdelellis/pragha
+Help=https://github.com/matiasdelellis/pragha
+

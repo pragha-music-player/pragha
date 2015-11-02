@@ -259,6 +259,7 @@ AC_CONFIG_FILES([src/Makefile])
 if test x"$LIBPEAS_FOUND" = x"yes"; then
 AC_CONFIG_FILES([plugins/Makefile])
 AC_CONFIG_FILES([plugins/acoustid/Makefile])
+AC_CONFIG_FILES([plugins/ampache/Makefile])
 AC_CONFIG_FILES([plugins/mpris2/Makefile])
 AC_CONFIG_FILES([plugins/keybinder/Makefile])
 AC_CONFIG_FILES([plugins/gnome-media-keys/Makefile])
@@ -293,6 +294,7 @@ echo "   * Search metadata on AcoustID.....................(Need libsoup >= 2.38
 echo "   * Search radios on TuneIn.........................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
 echo "   * Share music library on DLNA............(Need rygel-server-2.2 >= 0.20).: $RYGEL_FOUND"
 echo "   * Play songs on DLNA Servers..................(Need grilo-0.2 >= 0.2.10).: $GRILO_FOUND"
+echo "   * Append music on Ampache server..................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
 echo "   * Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
 echo "   * EXPERIMENTAL management of removable devices..........(Need gudev-1.0).: $GUDEV_FOUND"
 echo "   * EXPERIMENTAL management of mtp devices....:(Need gudev-1.0 and libmtp).: $LIBMTP_FOUND"

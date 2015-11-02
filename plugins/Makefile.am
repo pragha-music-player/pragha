@@ -36,6 +36,7 @@ endif
 
 if HAVE_LIBSOUP
 SUBDIRS += acoustid
+SUBDIRS += ampache
 SUBDIRS += tunein
 endif
 
