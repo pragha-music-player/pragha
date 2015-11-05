@@ -65,6 +65,9 @@ struct _PraghaAmpachePluginPrivate {
 	gint                  songs_count;
 
 	GtkWidget            *setting_widget;
+	GtkWidget            *server_entry;
+	GtkWidget            *user_entry;
+	GtkWidget            *pass_entry;
 
 	GtkActionGroup       *action_group_main_menu;
 	guint                 merge_id_main_menu;
@@ -74,16 +77,25 @@ PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_AMPACHE_PLUGIN,
                         PraghaAmpachePlugin,
                         pragha_ampache_plugin)
 
+/*
+ * Definitions
+ */
 
-#define AMPACHE_SERVER   "http://SERVER.com"
-#define AMPACHE_USERNAME "user"
-#define AMPACHE_PASSWORD "password"
+#define GROUP_KEY_AMPACHE  "ampache"
+#define KEY_AMPACHE_SERVER "server"
+#define KEY_AMPACHE_USER   "username"
+#define KEY_AMPACHE_PASS   "password"
 
 /*
  *
  */
 static void
 pragha_ampache_plugin_search_music (PraghaAmpachePlugin *plugin);
+
+static void
+pragha_ampache_plugin_authenticate (PraghaAmpachePlugin *plugin);
+static void
+pragha_ampache_plugin_deauthenticate (PraghaAmpachePlugin *plugin);
 
 /*
  * Menu actions
@@ -137,6 +149,112 @@ pragha_ampache_plugin_unescape_response (const gchar *response)
 	}
 
 	return rest;
+}
+
+/*
+ * Settings.
+ */
+
+static gchar *
+pragha_ampache_plugin_get_server (PraghaPreferences *preferences)
+{
+	gchar *plugin_group = NULL, *string = NULL;
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, GROUP_KEY_AMPACHE);
+
+	string = pragha_preferences_get_string (preferences,
+	                                        plugin_group,
+	                                        KEY_AMPACHE_SERVER);
+
+	g_free (plugin_group);
+
+	return string;
+}
+
+static void
+pragha_ampache_plugin_set_server (PraghaPreferences *preferences, const gchar *server)
+{
+	gchar *plugin_group = NULL;
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, GROUP_KEY_AMPACHE);
+
+	if (string_is_not_empty(server))
+		pragha_preferences_set_string (preferences,
+		                               plugin_group,
+		                               KEY_AMPACHE_SERVER,
+		                               server);
+	else
+ 		pragha_preferences_remove_key (preferences,
+		                               plugin_group,
+		                               KEY_AMPACHE_SERVER);
+
+	g_free (plugin_group);
+}
+
+static gchar *
+pragha_ampache_plugin_get_user (PraghaPreferences *preferences)
+{
+	gchar *plugin_group = NULL, *string = NULL;
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, GROUP_KEY_AMPACHE);
+
+	string = pragha_preferences_get_string (preferences,
+	                                        plugin_group,
+	                                        KEY_AMPACHE_USER);
+
+	g_free (plugin_group);
+
+	return string;
+}
+
+static void
+pragha_ampache_plugin_set_user (PraghaPreferences *preferences, const gchar *user)
+{
+	gchar *plugin_group = NULL;
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, GROUP_KEY_AMPACHE);
+
+	if (string_is_not_empty(user))
+		pragha_preferences_set_string (preferences,
+		                               plugin_group,
+		                               KEY_AMPACHE_USER,
+		                               user);
+	else
+ 		pragha_preferences_remove_key (preferences,
+		                               plugin_group,
+		                               KEY_AMPACHE_USER);
+
+	g_free (plugin_group);
+}
+
+static gchar *
+pragha_ampache_plugin_get_password (PraghaPreferences *preferences)
+{
+	gchar *plugin_group = NULL, *string = NULL;
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, GROUP_KEY_AMPACHE);
+
+	string = pragha_preferences_get_string (preferences,
+	                                        plugin_group,
+	                                        KEY_AMPACHE_PASS);
+
+	g_free (plugin_group);
+
+	return string;
+}
+
+static void
+pragha_ampache_plugin_set_password (PraghaPreferences *preferences, const gchar *pass)
+{
+	gchar *plugin_group = NULL;
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, GROUP_KEY_AMPACHE);
+
+	if (string_is_not_empty(pass))
+		pragha_preferences_set_string (preferences,
+		                               plugin_group,
+		                               KEY_AMPACHE_PASS,
+		                               pass);
+	else
+ 		pragha_preferences_remove_key (preferences,
+		                               plugin_group,
+		                               KEY_AMPACHE_PASS);
+
+	g_free (plugin_group);
 }
 
 /*
@@ -252,9 +370,6 @@ pragha_ampache_plugin_search_music (PraghaAmpachePlugin *plugin)
 }
 
 /*
- *
- */
-/*
  * Ampache Settings
  */
 static void
@@ -262,16 +377,56 @@ pragha_ampache_preferences_dialog_response (GtkDialog           *dialog,
                                             gint                 response_id,
                                             PraghaAmpachePlugin *plugin)
 {
+	PraghaPreferences *preferences;
+	const gchar *entry_server = NULL, *entry_user = NULL, *entry_pass = NULL;
+	gchar *test_server = NULL, *test_user = NULL, *test_pass = NULL;
+	gboolean changed = FALSE;
+
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	preferences = pragha_preferences_get ();
+
+	test_server = pragha_ampache_plugin_get_server (preferences);
+	test_user = pragha_ampache_plugin_get_user (preferences);
+	test_pass = pragha_ampache_plugin_get_password (preferences);
+
 	switch(response_id) {
-	case GTK_RESPONSE_CANCEL:
-		g_print ("Cancel activate ampache\n");
-		break;
-	case GTK_RESPONSE_OK:
-		g_print ("Activate ampache\n");
-		break;
-	default:
-		break;
+		case GTK_RESPONSE_CANCEL:
+			pragha_gtk_entry_set_text (GTK_ENTRY(priv->server_entry), test_server);
+			pragha_gtk_entry_set_text (GTK_ENTRY(priv->user_entry), test_user);
+			pragha_gtk_entry_set_text (GTK_ENTRY(priv->pass_entry), test_pass);
+			break;
+		case GTK_RESPONSE_OK:
+			entry_server = gtk_entry_get_text (GTK_ENTRY(priv->server_entry));
+			entry_user = gtk_entry_get_text (GTK_ENTRY(priv->user_entry));
+			entry_pass = gtk_entry_get_text (GTK_ENTRY(priv->pass_entry));
+
+			if (g_strcmp0 (test_server, entry_server)) {
+				pragha_ampache_plugin_set_server (preferences, entry_server);
+				changed = TRUE;
+			}
+			if (g_strcmp0 (test_user, entry_user)) {
+				pragha_ampache_plugin_set_user (preferences, entry_user);
+				changed = TRUE;
+			}
+			if (g_strcmp0 (test_pass, entry_pass)) {
+				pragha_ampache_plugin_set_password (preferences, entry_pass);
+				changed = TRUE;
+			}
+
+			if (changed) {
+				pragha_ampache_plugin_deauthenticate (plugin);
+				pragha_ampache_plugin_authenticate (plugin);
+			}
+			break;
+		default:
+			break;
 	}
+
+	g_object_unref (preferences);
+	g_free (test_server);
+	g_free (test_user);
+	g_free (test_pass);
 }
 
 static void
@@ -289,7 +444,7 @@ pragha_ampache_plugin_append_setting (PraghaAmpachePlugin *plugin)
 
 	label = gtk_label_new (_("Server"));
 	ampache_server = gtk_entry_new ();
-	gtk_entry_set_max_length (GTK_ENTRY(ampache_server), 16);
+	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(ampache_server), GTK_ENTRY_ICON_PRIMARY, "network-server");
 	gtk_entry_set_activates_default (GTK_ENTRY(ampache_server), TRUE);
 
 	pragha_hig_workarea_table_add_row (table, &row, label, ampache_server);
@@ -297,6 +452,7 @@ pragha_ampache_plugin_append_setting (PraghaAmpachePlugin *plugin)
 
 	label = gtk_label_new (_("Username"));
 	ampache_uname = gtk_entry_new ();
+	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(ampache_uname), GTK_ENTRY_ICON_PRIMARY, "system-users");
 	gtk_entry_set_max_length (GTK_ENTRY(ampache_uname), LASTFM_UNAME_LEN);
 	gtk_entry_set_activates_default (GTK_ENTRY(ampache_uname), TRUE);
 
@@ -304,9 +460,10 @@ pragha_ampache_plugin_append_setting (PraghaAmpachePlugin *plugin)
 
 	label = gtk_label_new (_("Password"));
 	ampache_pass = gtk_entry_new ();
+	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(ampache_pass), GTK_ENTRY_ICON_PRIMARY, "changes-prevent");
 	gtk_entry_set_max_length (GTK_ENTRY(ampache_pass), LASTFM_PASS_LEN);
 	gtk_entry_set_visibility (GTK_ENTRY(ampache_pass), FALSE);
-	gtk_entry_set_invisible_char (GTK_ENTRY(ampache_pass), '*');
+	//gtk_entry_set_invisible_char (GTK_ENTRY(ampache_pass), '*');
 	gtk_entry_set_activates_default (GTK_ENTRY(ampache_pass), TRUE);
 
 	pragha_hig_workarea_table_add_row (table, &row, label, ampache_pass);
@@ -314,6 +471,9 @@ pragha_ampache_plugin_append_setting (PraghaAmpachePlugin *plugin)
 	/* Append panes */
 
 	priv->setting_widget = table;
+	priv->server_entry = ampache_server;
+	priv->user_entry = ampache_uname;
+	priv->pass_entry = ampache_pass;
 
 	dialog = pragha_application_get_preferences_dialog (priv->pragha);
 	pragha_preferences_append_services_setting (dialog,
@@ -377,6 +537,7 @@ pragha_ampache_get_auth_done (SoupSession *session,
 static void
 pragha_ampache_plugin_authenticate (PraghaAmpachePlugin *plugin)
 {
+	PraghaPreferences *preferences;
 	SoupSession *session = NULL;
 	SoupMessage *msg = NULL;
 	GChecksum *hash = NULL;
@@ -387,9 +548,18 @@ pragha_ampache_plugin_authenticate (PraghaAmpachePlugin *plugin)
 
 	/* Get settings */
 
-	priv->server = g_strdup (AMPACHE_SERVER);
-	priv->username = g_strdup (AMPACHE_USERNAME);
-	priv->password = g_strdup (AMPACHE_PASSWORD);
+	preferences = pragha_preferences_get ();
+	priv->server = pragha_ampache_plugin_get_server (preferences);
+	priv->username = pragha_ampache_plugin_get_user (preferences);
+	priv->password = pragha_ampache_plugin_get_password (preferences);
+	g_object_unref (preferences);
+
+	if (string_is_empty (priv->server))
+		return;
+	if (string_is_empty (priv->username))
+		return;
+	if (string_is_empty (priv->password))
+		return;
 
 	/* Authenticate */
 
@@ -423,6 +593,31 @@ pragha_ampache_plugin_authenticate (PraghaAmpachePlugin *plugin)
 	g_free (url);
 }
 
+static void
+pragha_ampache_plugin_deauthenticate (PraghaAmpachePlugin *plugin)
+{
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	if (priv->server) {
+		g_free (priv->server);
+		priv->server = NULL;
+	}
+	if (priv->username) {
+		g_free (priv->username);
+		priv->username = NULL;
+	}
+	if (priv->username) {
+		g_free (priv->username);
+		priv->username = NULL;
+	}
+	if (priv->auth) {
+		g_free (priv->auth);
+		priv->auth = NULL;
+	}
+	if (priv->songs_count > 0)
+		priv->songs_count = 0;
+}
+
 /*
  * Plugin.
  */
@@ -439,10 +634,6 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
 	CDEBUG(DBG_PLUGIN, "Ampache Server plugin %s", G_STRFUNC);
-
-	/* Authenticate */
-
-	pragha_ampache_plugin_authenticate (plugin);
 
 	/* Attach main menu */
 
@@ -468,16 +659,33 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	pragha_menubar_append_action (priv->pragha, "pragha-plugins-placeholder", action, item);
 
 	pragha_ampache_plugin_append_setting (plugin);
+
+	/* Authenticate */
+
+	pragha_ampache_plugin_authenticate (plugin);
 }
 
 static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
-	PraghaAmpachePlugin *plugin = PRAGHA_AMPACHE_PLUGIN (activatable);
+	PraghaPreferences *preferences;
+	gchar *plugin_group = NULL;
 
+	PraghaAmpachePlugin *plugin = PRAGHA_AMPACHE_PLUGIN (activatable);
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 
 	CDEBUG(DBG_PLUGIN, "Ampache Server plugin %s", G_STRFUNC);
+
+	/* Settings */
+
+	preferences = pragha_application_get_preferences (priv->pragha);
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, GROUP_KEY_AMPACHE);
+	if (!pragha_plugins_is_shutdown(pragha_application_get_plugins_engine(priv->pragha))) {
+		pragha_preferences_remove_group (preferences, plugin_group);
+	}
+	g_free (plugin_group);
+
+	/* Menu Action */
 
 	pragha_menubar_remove_plugin_action (priv->pragha,
 	                                     priv->action_group_main_menu,
