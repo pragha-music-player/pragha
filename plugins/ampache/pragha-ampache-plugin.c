@@ -267,6 +267,8 @@ pragha_ampache_xml_get_media (XMLNode *xml)
 	PraghaMusicobject *mobj;
 	XMLNode *xi = NULL;
 	gchar *url = NULL, *title =  NULL, *artist = NULL, *album = NULL;
+	gchar *lenghtc = NULL;
+	gint lenght = 0;
 
 	xi = xmlnode_get (xml, CCA{"song", "url", NULL }, NULL, NULL);
 	if (xi && string_is_not_empty(xi->content))
@@ -284,12 +286,20 @@ pragha_ampache_xml_get_media (XMLNode *xml)
 	if (xi && string_is_not_empty(xi->content))
 		album = pragha_ampache_plugin_unescape_response (xi->content);
 
+	xi = xmlnode_get (xml, CCA{"song", "time", NULL }, NULL, NULL);
+	if (xi && string_is_not_empty(xi->content)){
+		lenghtc = pragha_ampache_plugin_unescape_response (xi->content);
+		lenght = atoi (lenghtc);
+		g_free (lenghtc);
+	}
+
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 	                     "file", url,
 	                     "source", FILE_HTTP,
 	                     "title", title,
 	                     "artist", artist,
 	                     "album", album,
+	                     "length", lenght,
 	                     NULL);
 
 	g_free (url);
