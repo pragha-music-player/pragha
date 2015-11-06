@@ -64,6 +64,9 @@ struct _PraghaAmpachePluginPrivate {
 	gchar                *auth;
 	gint                  songs_count;
 
+	gint                  threads;
+	GHashTable           *tracks_table;
+
 	GtkWidget            *setting_widget;
 	GtkWidget            *server_entry;
 	GtkWidget            *user_entry;
@@ -90,7 +93,9 @@ PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_AMPACHE_PLUGIN,
  *
  */
 static void
-pragha_ampache_plugin_search_music (PraghaAmpachePlugin *plugin);
+pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin);
+static void
+pragha_ampache_plugin_append_cache (PraghaAmpachePlugin *plugin);
 
 static void
 pragha_ampache_plugin_authenticate (PraghaAmpachePlugin *plugin);
@@ -103,7 +108,7 @@ pragha_ampache_plugin_deauthenticate (PraghaAmpachePlugin *plugin);
 static void
 pragha_ampache_plugin_search_music_action (GtkAction *action, PraghaAmpachePlugin *plugin)
 {
-	pragha_ampache_plugin_search_music (plugin);
+	pragha_ampache_plugin_append_cache (plugin);
 }
 
 static void
@@ -111,7 +116,7 @@ pragha_gmenu_ampcahe_plugin_search_music_action (GSimpleAction *action,
                                                  GVariant      *parameter,
                                                  gpointer       user_data)
 {
-	pragha_ampache_plugin_search_music (PRAGHA_AMPACHE_PLUGIN(user_data));
+	pragha_ampache_plugin_append_cache (PRAGHA_AMPACHE_PLUGIN(user_data));
 }
 
 static const GtkActionEntry main_menu_actions [] = {
@@ -149,6 +154,59 @@ pragha_ampache_plugin_unescape_response (const gchar *response)
 	}
 
 	return rest;
+}
+
+/*
+ * Basic Cache.
+ */
+static void
+pragha_ampache_plugin_append_cache (PraghaAmpachePlugin *plugin)
+{
+	PraghaPlaylist *playlist;
+	GHashTableIter iter;
+	gpointer key, value;
+	PraghaMusicobject *mobj = NULL;
+	GList *list = NULL;
+
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	g_hash_table_iter_init (&iter, priv->tracks_table);
+	while (g_hash_table_iter_next (&iter, &key, &value)) {
+		mobj = value;
+		if (G_LIKELY(mobj)) {
+			list = g_list_append (list, mobj);
+			g_object_ref (mobj);
+		}
+		/* Have to give control to GTK periodically ... */
+		pragha_process_gtk_events ();
+	}
+
+	playlist = pragha_application_get_playlist (priv->pragha);
+	pragha_playlist_append_mobj_list (playlist, list);
+	g_list_free(list);
+}
+
+static void
+pragha_ampache_cache_clear (PraghaAmpachePlugin *plugin)
+{
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	g_hash_table_remove_all (priv->tracks_table);
+}
+
+static void
+pragha_ampache_cache_insert_track (PraghaAmpachePlugin *plugin, PraghaMusicobject *mobj)
+{
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	const gchar *file = pragha_musicobject_get_file(mobj);
+
+	if (string_is_empty(file))
+		return;
+
+	g_hash_table_insert (priv->tracks_table,
+	                     g_strdup(file),
+	                     mobj);
 }
 
 /*
@@ -315,15 +373,21 @@ pragha_ampache_get_songs_done (SoupSession *session,
                                SoupMessage *msg,
                                gpointer     user_data)
 {
-	PraghaPlaylist *playlist = NULL;
+	PraghaStatusbar *statusbar;
 	PraghaMusicobject *mobj;
 	XMLNode *xml = NULL, *xi;
-	GList *list = NULL;
+	gchar *summary = NULL;
 
 	PraghaAmpachePlugin *plugin = user_data;
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 
-	remove_watch_cursor (pragha_application_get_window(priv->pragha));
+	priv->threads--;
+	if (priv->threads == 0) {
+		summary = g_strdup_printf(_("Finished importing your Ampache collection"));
+	}
+	else {
+		summary = g_strdup_printf(_("Ampache import progress %i"), priv->threads);
+	}
 
 	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
 		return;
@@ -334,25 +398,29 @@ pragha_ampache_get_songs_done (SoupSession *session,
 	for (;xi;xi=xi->next) {
 		mobj = pragha_ampache_xml_get_media (xi);
 		if (G_LIKELY(mobj))
-			list = g_list_prepend (list, mobj);
+			pragha_ampache_cache_insert_track (plugin, mobj);
+
+		/* Have to give control to GTK periodically ... */
+		pragha_process_gtk_events ();
 	}
 
-	if (list) {
-		playlist = pragha_application_get_playlist (priv->pragha);
-		pragha_playlist_append_mobj_list (playlist, list);
-		g_list_free (list);
+	if (summary != NULL) {
+		statusbar = pragha_statusbar_get ();
+		pragha_statusbar_set_misc_text (statusbar, summary);
+		g_object_unref (statusbar);
+		g_free(summary);
 	}
 
 	xmlnode_free (xml);
 }
 
-
 static void
-pragha_ampache_plugin_search_music (PraghaAmpachePlugin *plugin)
+pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin)
 {
 	SoupSession *session;
 	SoupMessage *msg;
 	gchar *url = NULL;
+	const guint limit = 500;
 	guint i = 0;
 
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
@@ -362,14 +430,14 @@ pragha_ampache_plugin_search_music (PraghaAmpachePlugin *plugin)
 	if (!priv->auth)
 		return;
 
-	set_watch_cursor (pragha_application_get_window(priv->pragha));
+	priv->threads = priv->songs_count/limit;
 
 	/* Get auth */
 	session = soup_session_sync_new ();
 
-	for (i=0 ; i <= priv->songs_count/500; i++) {
-		url = g_strdup_printf("%s/server/xml.server.php?action=songs&offset=%i&limit=500&auth=%s",
-		                      priv->server, i*500, priv->auth);
+	for (i = 0 ; i <= priv->threads; i++) {
+		url = g_strdup_printf("%s/server/xml.server.php?action=songs&offset=%i&limit=%i&auth=%s",
+		                      priv->server, i*limit, limit, priv->auth);
 
 		msg = soup_message_new ("GET", url);
 		soup_session_queue_message (session, msg,
@@ -473,7 +541,6 @@ pragha_ampache_plugin_append_setting (PraghaAmpachePlugin *plugin)
 	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(ampache_pass), GTK_ENTRY_ICON_PRIMARY, "changes-prevent");
 	gtk_entry_set_max_length (GTK_ENTRY(ampache_pass), LASTFM_PASS_LEN);
 	gtk_entry_set_visibility (GTK_ENTRY(ampache_pass), FALSE);
-	//gtk_entry_set_invisible_char (GTK_ENTRY(ampache_pass), '*');
 	gtk_entry_set_activates_default (GTK_ENTRY(ampache_pass), TRUE);
 
 	pragha_hig_workarea_table_add_row (table, &row, label, ampache_pass);
@@ -540,6 +607,8 @@ pragha_ampache_get_auth_done (SoupSession *session,
 		priv->songs_count = atoi (songs_count);
 		g_free (songs_count);
 	}
+
+	pragha_ampache_plugin_cache_music (plugin);
 
 	xmlnode_free (xml);
 }
@@ -608,6 +677,8 @@ pragha_ampache_plugin_deauthenticate (PraghaAmpachePlugin *plugin)
 {
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 
+	pragha_ampache_cache_clear (plugin);
+
 	if (priv->server) {
 		g_free (priv->server);
 		priv->server = NULL;
@@ -642,6 +713,11 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
+
+	priv->tracks_table = g_hash_table_new_full (g_str_hash,
+	                                            g_str_equal,
+	                                            g_free,
+	                                            g_object_unref);
 
 	CDEBUG(DBG_PLUGIN, "Ampache Server plugin %s", G_STRFUNC);
 
@@ -685,6 +761,14 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 
 	CDEBUG(DBG_PLUGIN, "Ampache Server plugin %s", G_STRFUNC);
+
+	/* Close */
+
+	pragha_ampache_plugin_deauthenticate (plugin);
+
+	/* Cache */
+
+	g_hash_table_destroy (priv->tracks_table);
 
 	/* Settings */
 
