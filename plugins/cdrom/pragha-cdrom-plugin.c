@@ -65,6 +65,9 @@
 struct _PraghaCdromPluginPrivate {
 	PraghaApplication *pragha;
 
+	guint64             bus_hooked;
+	guint64             device_hooked;
+
 	GtkWidget          *device_setting_widget;
 	GtkWidget          *audio_cd_device_w;
 	GtkWidget          *cddb_setting_widget;
@@ -169,7 +172,8 @@ new_musicobject_from_cdda (PraghaApplication *pragha,
 	start = cdio_cddap_track_firstsector(cdda_drive, track_no);
 	end = cdio_cddap_track_lastsector(cdda_drive, track_no);
 
-	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
+	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
+	                     NULL);
 
 	preferences = pragha_application_get_preferences (pragha);
 	if (pragha_preferences_get_use_cddb (preferences) && cddb_disc) {
@@ -470,9 +474,16 @@ pragha_cdrom_plugin_device_added (PraghaDeviceClient *device_client,
 	GtkWidget *dialog;
 
 	PraghaCdromPlugin *plugin = user_data;
+	PraghaCdromPluginPrivate *priv = plugin->priv;
 
 	if (device_type != PRAGHA_DEVICE_AUDIO_CD)
 		return;
+
+	if (priv->bus_hooked || priv->device_hooked)
+		return;
+
+	priv->bus_hooked = g_udev_device_get_property_as_uint64 (u_device, "BUSNUM");
+	priv->device_hooked = g_udev_device_get_property_as_uint64 (u_device, "DEVNUM");
 
 	dialog = pragha_gudev_dialog_new (NULL, _("Audio/Data CD"), "media-optical",
 	                                 _("An audio CD was inserted"), NULL,
@@ -490,10 +501,27 @@ pragha_cdrom_plugin_device_removed (PraghaDeviceClient *device_client,
                                     GUdevDevice        *u_device,
                                     gpointer            user_data)
 {
+	PraghaMusicEnum *enum_map = NULL;
+	guint64 busnum = 0;
+	guint64 devnum = 0;
+
+	PraghaCdromPlugin *plugin = user_data;
+	PraghaCdromPluginPrivate *priv = plugin->priv;
+
 	if (device_type != PRAGHA_DEVICE_AUDIO_CD)
 		return;
 
-	g_print ("CDROM REMOVEDDDDD.. Cri cri.. never detect it.. .\n");
+	busnum = g_udev_device_get_property_as_uint64(u_device, "BUSNUM");
+	devnum = g_udev_device_get_property_as_uint64(u_device, "DEVNUM");
+
+	if (busnum == priv->bus_hooked && devnum == priv->device_hooked) {
+		priv->bus_hooked = 0;
+		priv->device_hooked = 0;
+
+		enum_map = pragha_music_enum_get ();
+		pragha_music_enum_map_remove (enum_map, "FILE_CDDA");
+		g_object_unref (enum_map);
+	}
 }
 #endif
 
