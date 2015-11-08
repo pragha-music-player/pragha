@@ -468,7 +468,7 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 
 		if (folders_added) {
 			for (list = folders_added; list != NULL; list = list->next) {
-				pragha_provider_add_new (provider, list->data, "local", list->data);
+				pragha_provider_add_new (provider, list->data, "local", list->data, "drive-harddisk");
 			}
 			test_change = TRUE;
 		}

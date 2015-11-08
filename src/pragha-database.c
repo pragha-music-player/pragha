@@ -1014,6 +1014,7 @@ pragha_database_init_schema (PraghaDatabase *database)
 			"name VARCHAR(255),"
 			"type INT,"
 			"friendly_name TEXT,"
+			"icon_name TEXT,"
 			"UNIQUE(name));",
 
 		"CREATE TABLE IF NOT EXISTS PROVIDER_TYPE "

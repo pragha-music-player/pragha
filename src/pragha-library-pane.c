@@ -162,6 +162,9 @@ static void pragha_library_pane_edit_tags_action                   (GtkAction *a
 static void pragha_library_pane_delete_from_hdd_action             (GtkAction *action, PraghaLibraryPane *library);
 static void pragha_library_pane_delete_from_db_action              (GtkAction *action, PraghaLibraryPane *library);
 
+static gint
+get_library_icon_size (void);
+
 /*
  * Menus definitions
  *
@@ -1854,6 +1857,7 @@ void
 library_pane_view_reload(PraghaLibraryPane *clibrary)
 {
 	PraghaDatabaseProvider *provider;
+	GdkPixbuf *pixbuf = NULL;
 	GtkTreeModel *model, *filter_model;
 	GtkTreeIter iter;
 	GSList *provider_list, *l;
@@ -1913,14 +1917,23 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 		gtk_tree_store_append (GTK_TREE_STORE(model),
 		                       &iter,
 		                       NULL);
+
+		pixbuf  = gtk_icon_theme_load_icon (gtk_icon_theme_get_default (),
+		                                    pragha_provider_get_icon_name (provider, l->data),
+		                                    get_library_icon_size(), GTK_ICON_LOOKUP_FORCE_SIZE,
+		                                    NULL);
+
 		gtk_tree_store_set (GTK_TREE_STORE(model), &iter,
-		                    L_PIXBUF, clibrary->pixbuf_dir,
+		                    L_PIXBUF, pixbuf ? pixbuf : clibrary->pixbuf_dir,
 		                    L_NODE_DATA, pragha_provider_get_friendly_name (provider, l->data),
 		                    L_NODE_BOLD, PANGO_WEIGHT_BOLD,
 		                    L_NODE_TYPE, NODE_CATEGORY,
 		                    L_MACH, FALSE,
 		                    L_VISIBILE, TRUE,
 		                    -1);
+
+		if (pixbuf)
+			g_object_unref (pixbuf);
 
 		if (pragha_preferences_get_library_style(clibrary->preferences) == FOLDERS) {
 			pragha_library_view_append_provider_by_folder (clibrary, model, &iter, l->data);

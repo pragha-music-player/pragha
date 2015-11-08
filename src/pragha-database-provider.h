@@ -59,7 +59,9 @@ void
 pragha_provider_add_new (PraghaDatabaseProvider *provider,
                          const gchar            *name,
                          const gchar            *type,
-                         const gchar            *friendly_name);
+                         const gchar            *friendly_name,
+                         const gchar            *icon_name);
+
 void
 pragha_provider_remove (PraghaDatabaseProvider *provider,
                         const gchar            *name);
@@ -72,6 +74,9 @@ pragha_provider_get_handled_list (PraghaDatabaseProvider *provider);
 
 gchar *
 pragha_provider_get_friendly_name (PraghaDatabaseProvider *provider, const gchar *name);
+
+gchar *
+pragha_provider_get_icon_name (PraghaDatabaseProvider *provider, const gchar *name);
 
 void
 pragha_provider_visibility_changed (PraghaDatabaseProvider *provider);

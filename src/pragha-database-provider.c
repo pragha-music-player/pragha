@@ -42,14 +42,15 @@ void
 pragha_provider_add_new (PraghaDatabaseProvider *provider,
                          const gchar            *name,
                          const gchar            *type,
-                         const gchar            *friendly_name)
+                         const gchar            *friendly_name,
+                         const gchar            *icon_name)
 {
 	gint provider_type_id = 0;
 	PraghaPreparedStatement *statement;
 
 	PraghaDatabaseProviderPrivate *priv = provider->priv;
 
-	const gchar *sql = "INSERT INTO PROVIDER (name, type, friendly_name) VALUES (?, ?, ?)";
+	const gchar *sql = "INSERT INTO PROVIDER (name, type, friendly_name, icon_name) VALUES (?, ?, ?, ?)";
 
 	if ((provider_type_id = pragha_database_find_provider_type (priv->database, type)) == 0)
 		provider_type_id = pragha_database_add_new_provider_type (priv->database, type);
@@ -58,6 +59,7 @@ pragha_provider_add_new (PraghaDatabaseProvider *provider,
 	pragha_prepared_statement_bind_string (statement, 1, name);
 	pragha_prepared_statement_bind_int    (statement, 2, provider_type_id);
 	pragha_prepared_statement_bind_string (statement, 3, friendly_name);
+	pragha_prepared_statement_bind_string (statement, 4, icon_name);
 	pragha_prepared_statement_step (statement);
 	pragha_prepared_statement_free (statement);
 }
@@ -170,6 +172,23 @@ pragha_provider_get_friendly_name (PraghaDatabaseProvider *provider, const gchar
 	return friendly_name;
 }
 
+gchar *
+pragha_provider_get_icon_name (PraghaDatabaseProvider *provider, const gchar *name)
+{
+	PraghaPreparedStatement *statement;
+	PraghaDatabaseProviderPrivate *priv = provider->priv;
+	gchar *icon_name = NULL;
+
+	const gchar *sql = "SELECT icon_name FROM PROVIDER WHERE name = ?";
+
+	statement = pragha_database_create_statement (priv->database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, name);
+	pragha_prepared_statement_step (statement);
+	icon_name = g_strdup(pragha_prepared_statement_get_string (statement, 0));
+	pragha_prepared_statement_free (statement);
+
+	return icon_name;
+}
 
 /*
  * Signals.

@@ -52,7 +52,7 @@ static void info_bar_response_cb(GtkInfoBar *info_bar, gint response_id, gpointe
 			break;
 		case GTK_RESPONSE_YES:
 			provider = pragha_database_provider_get ();
-			pragha_provider_add_new (provider, dir, "local", _("Local Music"));
+			pragha_provider_add_new (provider, dir, "local", _("Local Music"), "drive-harddisk");
 			g_object_unref (G_OBJECT (provider));
 
 			scanner = pragha_application_get_scanner (pragha);
