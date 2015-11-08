@@ -45,6 +45,7 @@
 #include "src/pragha-utils.h"
 #include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-playlist.h"
+#include "src/pragha-database-provider.h"
 
 #include "plugins/pragha-plugin-macros.h"
 
@@ -199,7 +200,7 @@ pragha_dlna_plugin_playlist_changed (PraghaPlaylist   *playlist,
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
 {
-	PraghaDatabase *cdbase;
+	PraghaDatabaseProvider *provider;
 	PraghaPlaylist *playlist;
     GError *error = NULL;
 	struct ifaddrs *addrs,*tmp;
@@ -232,9 +233,10 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	}
 	freeifaddrs (addrs);
 
-	cdbase = pragha_application_get_database (priv->pragha);
-	g_signal_connect (cdbase, "TracksChanged",
-		              G_CALLBACK(pragha_dlna_plugin_database_changed), plugin);
+	provider = pragha_database_provider_get ();
+	g_signal_connect (provider, "UpdateDone",
+	                  G_CALLBACK(pragha_dlna_plugin_database_changed), plugin);
+	g_object_unref (provider);
 
 	playlist = pragha_application_get_playlist (priv->pragha);
 	g_signal_connect (playlist, "playlist-changed",
