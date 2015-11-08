@@ -224,10 +224,11 @@ pragha_scanner_finished_dialog_delete (GtkDialog *dialog, GdkEvent  *event, gpoi
 static gboolean
 pragha_scanner_worker_finished (gpointer data)
 {
-	GtkWidget *msg_dialog;
-	gchar *last_scan_time = NULL;
 	PraghaPreferences *preferences;
 	PraghaDatabase *database;
+	PraghaDatabaseProvider *provider;
+	GtkWidget *msg_dialog;
+	gchar *last_scan_time = NULL;
 	GSList *list;
 
 	PraghaScanner *scanner = data;
@@ -283,8 +284,11 @@ pragha_scanner_worker_finished (gpointer data)
 
 		pragha_database_commit_transaction (database);
 
-		pragha_database_change_tracks_done (database);
 		g_object_unref(database);
+
+		provider = pragha_database_provider_get ();
+		pragha_provider_update_done (provider);
+		g_object_unref (provider);
 
 		remove_watch_cursor(scanner->hbox);
 		remove_watch_cursor(msg_dialog);

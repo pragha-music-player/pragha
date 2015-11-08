@@ -407,7 +407,6 @@ pragha_preferences_dialog_restore_changes (PreferencesDialog *dialog)
 static void
 pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 {
-	PraghaDatabase *database;
 	PraghaDatabaseProvider *provider;
 	GSList *list, *library_dir = NULL, *folder_scanned = NULL, *folders_added = NULL, *folders_deleted = NULL;
 	gchar *window_state_sink = NULL;
@@ -512,9 +511,9 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 	pragha_preferences_set_fuse_folders (dialog->preferences, pref_toggled);
 
 	if ((style == FOLDERS) && (pref_setted != pref_toggled)) {
-		database = pragha_database_get ();
-		pragha_database_change_tracks_done (database);
-		g_object_unref (database);
+		provider = pragha_database_provider_get ();
+		pragha_provider_update_done (provider);
+		g_object_unref (provider);
 	}
 
 	/* Save sort by year preference, and reload view if needed */
@@ -525,9 +524,9 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 	pragha_preferences_set_sort_by_year (dialog->preferences, pref_toggled);
 
 	if ((style != FOLDERS) && (pref_setted != pref_toggled)) {
-		database = pragha_database_get ();
-		pragha_database_change_tracks_done (database);
-		g_object_unref (database);
+		provider = pragha_database_provider_get ();
+		pragha_provider_update_done (provider);
+		g_object_unref (provider);
 	}
 
 	/*

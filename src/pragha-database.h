@@ -197,9 +197,6 @@ void
 pragha_database_change_playlists_done(PraghaDatabase *database);
 
 void
-pragha_database_change_tracks_done(PraghaDatabase *database);
-
-void
 pragha_database_compatibilize_version (PraghaDatabase *database);
 
 gint

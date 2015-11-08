@@ -172,6 +172,15 @@ pragha_provider_want_update (PraghaDatabaseProvider *provider)
 	g_signal_emit (provider, signals[SIGNAL_WANT_UPDATE], 0);
 }
 
+void
+pragha_provider_update_done (PraghaDatabaseProvider *provider)
+{
+	g_return_if_fail(PRAGHA_IS_DATABASE_PROVIDER(provider));
+
+	g_signal_emit (provider, signals[SIGNAL_UPDATE_DONE], 0);
+}
+
+
 /*
  * PraghaDatabaseProvider implementation.
  */

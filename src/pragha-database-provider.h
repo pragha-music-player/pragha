@@ -76,6 +76,9 @@ pragha_provider_visibility_changed (PraghaDatabaseProvider *provider);
 void
 pragha_provider_want_update (PraghaDatabaseProvider *provider);
 
+void
+pragha_provider_update_done (PraghaDatabaseProvider *provider);
+
 PraghaDatabaseProvider *
 pragha_database_provider_get (void);
 

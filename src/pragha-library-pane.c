@@ -2014,7 +2014,7 @@ update_library_playlist_changes (PraghaDatabase *database,
 }
 
 static void
-update_library_tracks_changes(PraghaDatabase *database, PraghaLibraryPane *library)
+update_library_tracks_changes(PraghaDatabaseProvider *provider, PraghaLibraryPane *library)
 {
 	/*
 	 * Rework to olny update library tree!!!.
@@ -2467,6 +2467,7 @@ exit:
 static void
 pragha_library_pane_delete_from_hdd_action (GtkAction *action, PraghaLibraryPane *library)
 {
+	PraghaDatabaseProvider *provider;
 	GtkWidget *dialog;
 	GtkWidget *toggle_unlink;
 	GtkTreeModel *model;
@@ -2512,7 +2513,10 @@ pragha_library_pane_delete_from_hdd_action (GtkAction *action, PraghaLibraryPane
 			g_array_free(loc_arr, TRUE);
 
 			pragha_database_flush_stale_entries (library->cdbase);
-			pragha_database_change_tracks_done(library->cdbase);
+
+			provider = pragha_database_provider_get ();
+			pragha_provider_update_done (provider);
+			g_object_unref (provider);
 		}
 
 		g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
@@ -2522,6 +2526,7 @@ pragha_library_pane_delete_from_hdd_action (GtkAction *action, PraghaLibraryPane
 static void
 pragha_library_pane_delete_from_db_action (GtkAction *action, PraghaLibraryPane *library)
 {
+	PraghaDatabaseProvider *provider;
 	GtkWidget *dialog;
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
@@ -2559,7 +2564,10 @@ pragha_library_pane_delete_from_db_action (GtkAction *action, PraghaLibraryPane 
 			pragha_database_commit_transaction (library->cdbase);
 
 			pragha_database_flush_stale_entries (library->cdbase);
-			pragha_database_change_tracks_done(library->cdbase);
+
+			provider = pragha_database_provider_get ();
+			pragha_provider_update_done (provider);
+			g_object_unref (provider);
 		}
 
 		g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
@@ -2862,6 +2870,8 @@ pragha_library_pane_get_pane_context_menu(PraghaLibraryPane *clibrary)
 static void
 pragha_library_pane_init (PraghaLibraryPane *library)
 {
+	PraghaDatabaseProvider *provider;
+
 	gtk_orientable_set_orientation (GTK_ORIENTABLE (library), GTK_ORIENTATION_VERTICAL);
 
 	/* Get usefuls instances */
@@ -2921,11 +2931,14 @@ pragha_library_pane_init (PraghaLibraryPane *library)
 
 	g_signal_connect (library->cdbase, "PlaylistsChanged",
 	                  G_CALLBACK (update_library_playlist_changes), library);
-	g_signal_connect (library->cdbase, "TracksChanged",
-	                  G_CALLBACK (update_library_tracks_changes), library);
 
 	g_signal_connect (library->preferences, "notify::library-style",
 	                  G_CALLBACK (library_pane_change_style), library);
+
+	provider = pragha_database_provider_get ();
+	g_signal_connect (provider, "UpdateDone",
+	                  G_CALLBACK (update_library_tracks_changes), library);
+	g_object_unref (provider);
 
 	gtk_widget_show_all (GTK_WIDGET(library));
 }
