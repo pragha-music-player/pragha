@@ -42,6 +42,7 @@
 #include "pragha-utils.h"
 #include "pragha-music-enum.h"
 #include "pragha-playlists-mgmt.h"
+#include "pragha-database-provider.h"
 
 #ifdef G_OS_WIN32
 #include "../win32/win32dep.h"
@@ -61,11 +62,12 @@ struct _PraghaApplication {
 
 	/* Main stuff */
 
-	PraghaBackend     *backend;
-	PraghaPreferences *preferences;
-	PraghaDatabase    *cdbase;
-	PraghaArtCache    *art_cache;
-	PraghaMusicEnum   *enum_map;
+	PraghaBackend          *backend;
+	PraghaPreferences      *preferences;
+	PraghaDatabase         *cdbase;
+	PraghaDatabaseProvider *provider;
+	PraghaArtCache         *art_cache;
+	PraghaMusicEnum        *enum_map;
 
 	PraghaScanner     *scanner;
 
@@ -978,6 +980,10 @@ pragha_application_dispose (GObject *object)
 		g_object_unref (pragha->preferences);
 		pragha->preferences = NULL;
 	}
+	if (pragha->provider) {
+		g_object_unref (pragha->provider);
+		pragha->provider = NULL;
+	}
 	if (pragha->cdbase) {
 		g_object_unref (pragha->cdbase);
 		pragha->cdbase = NULL;
@@ -1009,6 +1015,7 @@ pragha_application_startup (GApplication *application)
 	if (pragha_database_start_successfully(pragha->cdbase) == FALSE) {
 		g_error("Unable to init music dbase");
 	}
+	pragha->provider = pragha_database_provider_get ();
 
 	version = pragha_preferences_get_installed_version (pragha->preferences);
 	if (string_is_not_empty (version) && (g_ascii_strcasecmp (version, "1.3.1") < 0)) {

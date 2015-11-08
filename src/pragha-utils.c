@@ -268,6 +268,62 @@ gchar* convert_length_str(gint length)
 
 /* Check if str is present in list ( containing gchar* elements in 'data' ) */
 
+gboolean
+pragha_string_list_is_present (GSList *list, const gchar *str)
+{
+	GSList *i;
+	gchar *lstr;
+	gboolean ret = FALSE;
+
+	if (!str || !list)
+		return FALSE;
+
+	for (i = list; i != NULL; i = i->next) {
+		lstr = i->data;
+		if (!g_ascii_strcasecmp(str, lstr)) {
+			ret = TRUE;
+			break;
+		}
+	}
+	return ret;
+}
+
+gboolean
+pragha_string_list_is_not_present (GSList *list, const gchar *str)
+{
+	return !pragha_string_list_is_present (list, str);
+}
+
+GSList *
+pragha_string_list_get_added (GSList *list, GSList *new_list)
+{
+	GSList *i, *ret_list = NULL;
+	gchar *lstr;
+
+	for (i = new_list; i != NULL; i = i->next) {
+		lstr = i->data;
+		if (pragha_string_list_is_not_present(list, lstr)) {
+			ret_list = g_slist_append(ret_list, g_strdup(lstr));
+		}
+	}
+	return ret_list;
+}
+
+GSList *
+pragha_string_list_get_removed (GSList *list, GSList *new_list)
+{
+	GSList *i, *ret_list = NULL;
+	gchar *lstr;
+
+	for (i = list; i != NULL; i = i->next) {
+		lstr = i->data;
+		if (pragha_string_list_is_not_present(new_list, lstr)) {
+			ret_list = g_slist_append(ret_list, g_strdup(lstr));
+		}
+	}
+	return ret_list;
+}
+
 gboolean is_present_str_list(const gchar *str, GSList *list)
 {
 	GSList *i;

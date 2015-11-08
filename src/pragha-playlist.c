@@ -3201,7 +3201,7 @@ static void init_playlist_current_playlist(PraghaPlaylist *cplaylist)
 			if ((location_id = pragha_database_find_location (cplaylist->cdbase, file)))
 				mobj = new_musicobject_from_db(cplaylist->cdbase, location_id);
 			else
-				mobj = new_musicobject_from_file(file);
+				mobj = new_musicobject_from_file(file, NULL);
 		}
 		else {
 			mobj = new_musicobject_from_location(file + strlen("Radio:/"), file + strlen("Radio:/"));

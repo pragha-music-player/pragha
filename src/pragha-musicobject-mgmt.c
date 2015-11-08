@@ -26,7 +26,7 @@
 #include "pragha-tags-mgmt.h"
 
 PraghaMusicobject *
-new_musicobject_from_file(const gchar *file)
+new_musicobject_from_file(const gchar *file, const gchar *provider)
 {
 	PraghaMusicobject *mobj = NULL;
 	gchar *mime_type = NULL;
@@ -39,6 +39,7 @@ new_musicobject_from_file(const gchar *file)
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 	                     "file", file,
 	                     "source", FILE_LOCAL,
+	                     "provider", provider,
 	                     "mime-type", mime_type,
 	                     NULL);
 

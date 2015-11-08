@@ -502,7 +502,7 @@ append_mobj_list_from_folder(GList *list, gchar *dir_name)
 			file_type = pragha_file_get_media_type (ab_file);
 			switch (file_type) {
 				case MEDIA_TYPE_AUDIO:
-					mobj = new_musicobject_from_file (ab_file);
+					mobj = new_musicobject_from_file (ab_file, NULL);
 					if (G_LIKELY(mobj))
 						list = g_list_append(list, mobj);
 					break;
@@ -541,7 +541,7 @@ append_mobj_list_from_unknown_filename(GList *list, gchar *filename)
 		file_type = pragha_file_get_media_type (filename);
 		switch (file_type) {
 			case MEDIA_TYPE_AUDIO:
-				mobj = new_musicobject_from_file (filename);
+				mobj = new_musicobject_from_file (filename, NULL);
 				if (G_LIKELY(mobj)) {
 					list = g_list_append(list, mobj);
 					add_recent_file(filename);

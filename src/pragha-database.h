@@ -71,6 +71,12 @@ gint
 pragha_database_find_location (PraghaDatabase *database, const gchar *location);
 
 gint
+pragha_database_find_provider (PraghaDatabase *database, const gchar *provider);
+
+gint
+pragha_database_find_provider_type (PraghaDatabase *database, const gchar *provider_type);
+
+gint
 pragha_database_find_mime_type (PraghaDatabase *database, const gchar *mime_type);
 
 gint
@@ -96,6 +102,9 @@ pragha_database_find_radio (PraghaDatabase *database, const gchar *radio);
 
 gint
 pragha_database_add_new_location (PraghaDatabase *database, const gchar *location);
+
+gint
+pragha_database_add_new_provider_type (PraghaDatabase *database, const gchar *provider_type);
 
 gint
 pragha_database_add_new_mime_type (PraghaDatabase *database, const gchar *mime_type);
@@ -186,6 +195,7 @@ pragha_database_get_track_count (PraghaDatabase *database);
 
 void
 pragha_database_change_playlists_done(PraghaDatabase *database);
+
 void
 pragha_database_change_tracks_done(PraghaDatabase *database);
 

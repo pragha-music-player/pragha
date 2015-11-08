@@ -25,6 +25,7 @@
 #include <glib/gi18n.h>
 #endif
 
+#include "pragha-database-provider.h"
 #include "pragha-utils.h"
 #include "pragha.h"
 
@@ -36,11 +37,11 @@ gboolean info_bar_import_music_will_be_useful(PraghaApplication *pragha)
 
 static void info_bar_response_cb(GtkInfoBar *info_bar, gint response_id, gpointer user_data)
 {
-	GSList *library_dir = NULL;
-	PraghaPreferences *preferences;
+	PraghaDatabaseProvider *provider;
 	PraghaScanner *scanner;
 
 	PraghaApplication *pragha = user_data;
+
 	const gchar *dir = g_get_user_special_dir(G_USER_DIRECTORY_MUSIC);
 
 	gtk_widget_destroy(GTK_WIDGET(info_bar));
@@ -50,13 +51,9 @@ static void info_bar_response_cb(GtkInfoBar *info_bar, gint response_id, gpointe
 		case GTK_RESPONSE_CANCEL:
 			break;
 		case GTK_RESPONSE_YES:
-			library_dir = g_slist_append(library_dir, g_strdup(dir));
-			preferences = pragha_application_get_preferences (pragha);
-			pragha_preferences_set_filename_list (preferences,
-			                                      GROUP_LIBRARY,
-			                                      KEY_LIBRARY_DIR,
-			                                      library_dir);
-			free_str_list(library_dir);
+			provider = pragha_database_provider_get ();
+			pragha_provider_add_new (provider, dir, "local", _("Local Music"));
+			g_object_unref (G_OBJECT (provider));
 
 			scanner = pragha_application_get_scanner (pragha);
 			pragha_scanner_scan_library (scanner);

@@ -1,17 +1,17 @@
 /*************************************************************************/
-/* Copyright (C) 2012-2013 matias <mati86dl@gmail.com>			 */
-/* 									 */
-/* This program is free software: you can redistribute it and/or modify	 */
-/* it under the terms of the GNU General Public License as published by	 */
-/* the Free Software Foundation, either version 3 of the License, or	 */
-/* (at your option) any later version.					 */
-/* 									 */
-/* This program is distributed in the hope that it will be useful,	 */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	 */
-/* GNU General Public License for more details.				 */
-/* 									 */
-/* You should have received a copy of the GNU General Public License	 */
+/* Copyright (C) 2012-2015 matias <mati86dl@gmail.com>                   */
+/*                                                                       */
+/* This program is free software: you can redistribute it and/or modify  */
+/* it under the terms of the GNU General Public License as published by  */
+/* the Free Software Foundation, either version 3 of the License, or     */
+/* (at your option) any later version.                                   */
+/*                                                                       */
+/* This program is distributed in the hope that it will be useful,       */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
+/* GNU General Public License for more details.                          */
+/*                                                                       */
+/* You should have received a copy of the GNU General Public License     */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
@@ -23,6 +23,7 @@ struct _PraghaMusicobjectPrivate
 {
 	gchar *file;
 	PraghaMusicSource source;
+	gchar *provider;
 	gchar *mime_type;
 	gchar *title;
 	gchar *artist;
@@ -42,6 +43,7 @@ enum
 	PROP_0,
 	PROP_FILE,
 	PROP_SOURCE,
+	PROP_PROVIDER,
 	PROP_MIME_TYPE,
 	PROP_TITLE,
 	PROP_ARTIST,
@@ -81,6 +83,7 @@ pragha_musicobject_dup (PraghaMusicobject *musicobject)
 	return g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 	                     "file", pragha_musicobject_get_file(musicobject),
 	                     "source", pragha_musicobject_get_source (musicobject),
+	                     "provider", pragha_musicobject_get_provider (musicobject),
 	                     "mime-type", pragha_musicobject_get_mime_type(musicobject),
 	                     "title", pragha_musicobject_get_title(musicobject),
 	                     "artist", pragha_musicobject_get_artist(musicobject),
@@ -108,6 +111,7 @@ pragha_musicobject_clean (PraghaMusicobject *musicobject)
 	g_object_set (musicobject,
 	              "file", "",
 	              "source", FILE_NONE,
+	              "provider", "",
 	              "mime-type", "",
 	              "title", "",
 	              "artist", "",
@@ -210,6 +214,36 @@ pragha_musicobject_set_source (PraghaMusicobject *musicobject,
 
 	priv->source = source;
 }
+
+/**
+ * pragha_musicobject_get_provider:
+ *
+ */
+const gchar *
+pragha_musicobject_get_provider (PraghaMusicobject *musicobject)
+{
+	g_return_val_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject), NULL);
+
+	return musicobject->priv->provider;
+}
+/**
+ * pragha_musicobject_set_provider:
+ *
+ */
+void
+pragha_musicobject_set_provider (PraghaMusicobject *musicobject,
+                                 const gchar       *provider)
+{
+	PraghaMusicobjectPrivate *priv;
+
+	g_return_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject));
+
+	priv = musicobject->priv;
+
+	g_free(priv->provider);
+	priv->provider = g_strdup(provider);
+}
+
 
 /**
  * pragha_musicobject_get_mime_type:
@@ -586,6 +620,9 @@ pragha_musicobject_get_property (GObject *object,
 	case PROP_SOURCE:
 		g_value_set_int(value, pragha_musicobject_get_source(musicobject));
 		break;
+	case PROP_PROVIDER:
+		g_value_set_string (value, pragha_musicobject_get_provider(musicobject));
+		break;
 	case PROP_MIME_TYPE:
 		g_value_set_string (value, pragha_musicobject_get_mime_type(musicobject));
 		break;
@@ -641,6 +678,9 @@ pragha_musicobject_set_property (GObject *object,
 		break;
 	case PROP_SOURCE:
 		pragha_musicobject_set_source(musicobject, g_value_get_int(value));
+		break;
+	case PROP_PROVIDER:
+		pragha_musicobject_set_provider(musicobject, g_value_get_string(value));
 		break;
 	case PROP_MIME_TYPE:
 		pragha_musicobject_set_mime_type(musicobject, g_value_get_string(value));
@@ -717,6 +757,17 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                  FILE_USER_L,
 		                  FILE_NONE,
 		                  G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+	/**
+	  * PraghaMusicobject:provider:
+	  *
+	  */
+	gParamSpecs[PROP_PROVIDER] =
+		g_param_spec_string("provider",
+		                    "Provider",
+		                    "The Provider",
+		                    "",
+		                    PRAGHA_MUSICOBJECT_PARAM_STRING);
 
 	/**
 	  * PraghaMusicobject:mime_type:

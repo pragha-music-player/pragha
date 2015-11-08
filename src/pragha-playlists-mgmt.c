@@ -447,7 +447,7 @@ add_playlist_to_mobj_list(PraghaDatabase *cdbase,
 		if ((location_id = pragha_database_find_location (cdbase, file)))
 			mobj = new_musicobject_from_db(cdbase, location_id);
 		else
-			mobj = new_musicobject_from_file (file);
+			mobj = new_musicobject_from_file (file, NULL);
 
 		if (G_LIKELY(mobj))
 			list = g_list_append(list, mobj);
@@ -986,7 +986,7 @@ pragha_pl_parser_append_mobj_list_by_extension (GList *mlist, const gchar *file)
 #endif
 
 	for (i = list; i != NULL; i = i->next) {
-		mobj = new_musicobject_from_file(i->data);
+		mobj = new_musicobject_from_file(i->data, NULL);
 		if (G_LIKELY(mobj))
 			mlist = g_list_append(mlist, mobj);
 
@@ -1019,7 +1019,7 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, PraghaAppl
 
 	for (i = list; i != NULL; i = i->next) {
 		try++;
-		mobj = new_musicobject_from_file(i->data);
+		mobj = new_musicobject_from_file(i->data, NULL);
 		if (G_LIKELY(mobj)) {
 			added++;
 			mlist = g_list_append(mlist, mobj);

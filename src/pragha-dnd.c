@@ -96,7 +96,7 @@ pragha_dnd_uri_list_get_mobj_list (GtkSelectionData *data)
 				list = append_mobj_list_from_folder(list, filename);
 			}
 			else {
-				mobj = new_musicobject_from_file(filename);
+				mobj = new_musicobject_from_file(filename, NULL);
 				if (G_LIKELY(mobj))
 					list = g_list_prepend(list, mobj);
 			}
@@ -127,7 +127,7 @@ pragha_dnd_plain_text_get_mobj_list (GtkSelectionData *data)
 		list = append_mobj_list_from_folder(list, filename);
 	}
 	else {
-		mobj = new_musicobject_from_file(filename);
+		mobj = new_musicobject_from_file(filename, NULL);
 		if (G_LIKELY(mobj))
 			list = g_list_prepend(list, mobj);
 

@@ -1,18 +1,18 @@
 /*************************************************************************/
-/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>			 */
-/* Copyright (C) 2012-2013 Pavel Vasin					 */
-/* 									 */
+/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
+/* Copyright (C) 2009-2015 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2012-2013 Pavel Vasin                                   */
+/*                                                                       */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
-/* the Free Software Foundation, either version 3 of the License, or	 */
-/* (at your option) any later version.					 */
-/* 									 */
-/* This program is distributed in the hope that it will be useful,	 */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	 */
-/* GNU General Public License for more details.				 */
-/* 									 */
+/* the Free Software Foundation, either version 3 of the License, or     */
+/* (at your option) any later version.                                   */
+/*                                                                       */
+/* This program is distributed in the hope that it will be useful,       */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
+/* GNU General Public License for more details.                          */
+/*                                                                       */
 /* You should have received a copy of the GNU General Public License	 */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
@@ -141,6 +141,39 @@ pragha_database_find_location (PraghaDatabase *database, const gchar *location)
 }
 
 gint
+pragha_database_find_provider (PraghaDatabase *database, const gchar *provider)
+{
+	PraghaPreparedStatement *statement;
+	gint provider_id = 0;
+
+	const gchar *sql = "SELECT id FROM PROVIDER WHERE name = ?";
+
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, provider);
+	if (pragha_prepared_statement_step (statement))
+		provider_id = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+	return provider_id;
+}
+
+gint
+pragha_database_find_provider_type (PraghaDatabase *database, const gchar *provider_type)
+{
+	PraghaPreparedStatement *statement;
+	gint provider_type_id = 0;
+
+	const gchar *sql = "SELECT id FROM PROVIDER_TYPE WHERE name = ?";
+
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, provider_type);
+	if (pragha_prepared_statement_step (statement))
+		provider_type_id = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+
+	return provider_type_id;
+}
+
+gint
 pragha_database_find_mime_type (PraghaDatabase *database, const gchar *mime_type)
 {
 	gint mime_type_id = 0;
@@ -254,6 +287,21 @@ pragha_database_add_new_location (PraghaDatabase *database, const gchar *locatio
 	pragha_prepared_statement_free (statement);
 
 	return pragha_database_find_location (database, location);
+}
+
+gint
+pragha_database_add_new_provider_type (PraghaDatabase *database, const gchar *provider_type)
+{
+	PraghaPreparedStatement *statement;
+
+	const gchar *sql = "INSERT INTO PROVIDER_TYPE (name) VALUES (?)";
+
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, provider_type);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	return pragha_database_find_provider_type (database, provider_type);
 }
 
 gint
@@ -566,6 +614,7 @@ pragha_database_delete_radio (PraghaDatabase *database, const gchar *radio)
 static void
 pragha_database_add_new_track (PraghaDatabase *database,
                                gint location_id,
+                               gint provider_id,
                                gint mime_type_id,
                                gint artist_id,
                                gint album_id,
@@ -581,6 +630,7 @@ pragha_database_add_new_track (PraghaDatabase *database,
 {
 	const gchar *sql = "INSERT INTO TRACK ("
 				"location, "
+				"provider, "
 				"file_type, "
 				"track_no, "
 				"artist, "
@@ -594,22 +644,23 @@ pragha_database_add_new_track (PraghaDatabase *database,
 				"channels, "
 				"title) "
 				"VALUES "
-				"(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				"(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
 	pragha_prepared_statement_bind_int (statement, 1, location_id);
-	pragha_prepared_statement_bind_int (statement, 2, mime_type_id);
-	pragha_prepared_statement_bind_int (statement, 3, track_no);
-	pragha_prepared_statement_bind_int (statement, 4, artist_id);
-	pragha_prepared_statement_bind_int (statement, 5, album_id);
-	pragha_prepared_statement_bind_int (statement, 6, genre_id);
-	pragha_prepared_statement_bind_int (statement, 7, year_id);
-	pragha_prepared_statement_bind_int (statement, 8, comment_id);
-	pragha_prepared_statement_bind_int (statement, 9, bitrate);
-	pragha_prepared_statement_bind_int (statement, 10, samplerate);
-	pragha_prepared_statement_bind_int (statement, 11, length);
-	pragha_prepared_statement_bind_int (statement, 12, channels);
-	pragha_prepared_statement_bind_string (statement, 13, title);
+	pragha_prepared_statement_bind_int (statement, 2, provider_id);
+	pragha_prepared_statement_bind_int (statement, 3, mime_type_id);
+	pragha_prepared_statement_bind_int (statement, 4, track_no);
+	pragha_prepared_statement_bind_int (statement, 5, artist_id);
+	pragha_prepared_statement_bind_int (statement, 6, album_id);
+	pragha_prepared_statement_bind_int (statement, 7, genre_id);
+	pragha_prepared_statement_bind_int (statement, 8, year_id);
+	pragha_prepared_statement_bind_int (statement, 9, comment_id);
+	pragha_prepared_statement_bind_int (statement, 10, bitrate);
+	pragha_prepared_statement_bind_int (statement, 11, samplerate);
+	pragha_prepared_statement_bind_int (statement, 12, length);
+	pragha_prepared_statement_bind_int (statement, 13, channels);
+	pragha_prepared_statement_bind_string (statement, 14, title);
 	pragha_prepared_statement_step (statement);
 	pragha_prepared_statement_free (statement);
 }
@@ -617,16 +668,22 @@ pragha_database_add_new_track (PraghaDatabase *database,
 void
 pragha_database_add_new_musicobject (PraghaDatabase *database, PraghaMusicobject *mobj)
 {
-	const gchar *file, *mime_type, *artist, *album, *genre, *comment;
-	gint location_id = 0, mime_type_id = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id;
+	const gchar *file, *provider, *mime_type, *artist, *album, *genre, *comment;
+	gint location_id = 0, provider_id = 0, mime_type_id = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id;
 
-	if (mobj) {
+	if (G_LIKELY(mobj)) {
 		file = pragha_musicobject_get_file (mobj);
+		provider = pragha_musicobject_get_provider (mobj);
 		mime_type = pragha_musicobject_get_mime_type (mobj);
 		artist = pragha_musicobject_get_artist (mobj);
 		album = pragha_musicobject_get_album (mobj);
 		genre = pragha_musicobject_get_genre (mobj);
 		comment = pragha_musicobject_get_comment (mobj);
+
+		/* If not have an associated provider not be stored in the database. */
+
+		if ((provider_id = pragha_database_find_provider (database, provider)) == 0)
+			return;
 
 		/* Write location */
 
@@ -667,6 +724,7 @@ pragha_database_add_new_musicobject (PraghaDatabase *database, PraghaMusicobject
 
 		pragha_database_add_new_track (database,
 		                               location_id,
+		                               provider_id,
 		                               mime_type_id,
 		                               artist_id,
 		                               album_id,
@@ -927,12 +985,13 @@ pragha_database_init_schema (PraghaDatabase *database)
 	gint i;
 
 	const gchar *queries[] = {
-		"PRAGMA user_version=131",
+		"PRAGMA user_version=133",
 
 		"PRAGMA synchronous=OFF",
 
 		"CREATE TABLE IF NOT EXISTS TRACK "
 			"(location INT PRIMARY KEY,"
+			"provider INT,"
 			"track_no INT,"
 			"artist INT,"
 			"album INT,"
@@ -949,6 +1008,18 @@ pragha_database_init_schema (PraghaDatabase *database)
 		"CREATE TABLE IF NOT EXISTS LOCATION "
 			"(id INTEGER PRIMARY KEY,"
 			"name TEXT,"
+			"UNIQUE(name));",
+
+		"CREATE TABLE IF NOT EXISTS PROVIDER "
+			"(id INTEGER PRIMARY KEY,"
+			"name VARCHAR(255),"
+			"type INT,"
+			"friendly_name TEXT,"
+			"UNIQUE(name));",
+
+		"CREATE TABLE IF NOT EXISTS PROVIDER_TYPE "
+			"(id INTEGER PRIMARY KEY,"
+			"name VARCHAR(255),"
 			"UNIQUE(name));",
 
 		"CREATE TABLE IF NOT EXISTS MIME_TYPE "
@@ -1032,6 +1103,7 @@ pragha_database_change_tracks_done(PraghaDatabase *database)
 	g_signal_emit (database, signals[SIGNAL_TRACKS_CHANGED], 0);
 }
 
+
 /**
  * pragha_database_compatibilize_version:
  *
@@ -1039,7 +1111,7 @@ pragha_database_change_tracks_done(PraghaDatabase *database)
 void
 pragha_database_compatibilize_version (PraghaDatabase *database)
 {
-	gint i;
+	/*gint i;
 
 	const gchar *mime_types[] = {
 		"audio/x-wav",
@@ -1051,15 +1123,20 @@ pragha_database_compatibilize_version (PraghaDatabase *database)
 		"audio/ape",
 		"audio/x-mod"
 	};
-	const gchar *sql = "UPDATE TRACK SET file_type = file_type + 1";
+
+	const gchar *sql_queries[] = {
+		"UPDATE TRACK SET file_type = file_type + 1",
+		"ALTER TABLE TRACK ADD COLUMN provider INT"
+	};
 
 	for (i = 0; i < G_N_ELEMENTS(mime_types); i++) {
 		if (!pragha_database_find_mime_type (database, mime_types[i]))
 			pragha_database_add_new_mime_type (database, mime_types[i]);
-
 	}
 
-	pragha_database_exec_query (database, sql);
+	for (i = 0; i < G_N_ELEMENTS(sql_queries); i++) {
+		pragha_database_exec_query (database, sql_queries[i]);
+	}*/
 }
 
 gint

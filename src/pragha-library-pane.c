@@ -42,6 +42,8 @@
 #include "pragha-tags-dialog.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
+#include "pragha-database.h"
+#include "pragha-database-provider.h"
 #include "pragha-dnd.h"
 
 #ifdef G_OS_WIN32
@@ -1740,13 +1742,17 @@ library_view_complete_folder_view(GtkTreeModel *model,
                                   PraghaLibraryPane *clibrary)
 
 {
+	PraghaDatabaseProvider *provider;
 	PraghaPreparedStatement *statement;
 	const gchar *sql = NULL, *filepath = NULL;
 	gchar *mask = NULL;
 	GtkTreeIter iter, *f_iter;
 	GSList *list = NULL, *library_dir = NULL;
 
-	library_dir = pragha_preferences_get_library_list (clibrary->preferences);
+	provider = pragha_database_provider_get ();
+	library_dir = pragha_provider_get_list (provider);
+	g_object_unref (G_OBJECT (provider));
+
 	for(list = library_dir ; list != NULL ; list=list->next) {
 		/*If no need to fuse folders, add headers and set p_iter */
 		if(!pragha_preferences_get_fuse_folders(clibrary->preferences)) {

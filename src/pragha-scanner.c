@@ -36,6 +36,7 @@
 #include "pragha-playlists-mgmt.h"
 #include "pragha-simple-async.h"
 #include "pragha-statusbar.h"
+#include "pragha-database-provider.h"
 
 struct _PraghaScanner {
 	/* Widgets */
@@ -46,6 +47,7 @@ struct _PraghaScanner {
 	GSList            *folder_list;
 	GSList            *folder_scanned;
 	GSList            *playlists;
+	gchar             *curr_provider;
 
 	GTimeVal          last_update;
 	/* Threads */
@@ -298,11 +300,6 @@ pragha_scanner_worker_finished (gpointer data)
 			                     last_scan_time);
 		g_free(last_scan_time);
 
-		pragha_preferences_set_filename_list(preferences,
-			                             GROUP_LIBRARY,
-			                             KEY_LIBRARY_SCANNED,
-			                             scanner->folder_list);
-
 		pragha_preferences_set_lock_library (preferences, FALSE);
 
 		g_object_unref(G_OBJECT(preferences));
@@ -373,7 +370,7 @@ pragha_scanner_scan_handler(PraghaScanner *scanner, const gchar *dir_name)
 			file_type = pragha_file_get_media_type (ab_file);
 			switch (file_type) {
 				case MEDIA_TYPE_AUDIO:
-					mobj = new_musicobject_from_file(ab_file);
+					mobj = new_musicobject_from_file(ab_file, scanner->curr_provider);
 					if (G_LIKELY(mobj))
 						 g_hash_table_insert(scanner->tracks_table,
 							                 g_strdup(pragha_musicobject_get_file(mobj)),
@@ -453,7 +450,7 @@ pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 			mobj = g_hash_table_lookup(scanner->tracks_table,
 			                           ab_file);
 			if(!mobj) {
-				mobj = new_musicobject_from_file(ab_file);
+				mobj = new_musicobject_from_file(ab_file, scanner->curr_provider);
 				if (G_LIKELY(mobj))
 					 g_hash_table_insert(scanner->tracks_table,
 					                     g_strdup(pragha_musicobject_get_file(mobj)),
@@ -463,7 +460,7 @@ pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 			else {
 				if ((g_stat(ab_file, &sbuf) == 0) &&
 				    (sbuf.st_mtime > scanner->last_update.tv_sec)) {
-					mobj = new_musicobject_from_file(ab_file);
+					mobj = new_musicobject_from_file(ab_file, scanner->curr_provider);
 					if (G_LIKELY(mobj)) {
 						g_hash_table_replace(scanner->tracks_table,
 						                     g_strdup(pragha_musicobject_get_file(mobj)),
@@ -512,8 +509,12 @@ pragha_scanner_update_worker(gpointer data)
 		if(g_cancellable_is_cancelled (scanner->cancellable))
 			break;
 
-		if(is_present_str_list(list->data, scanner->folder_scanned))
+		if(is_present_str_list(list->data, scanner->folder_scanned)) {
+			if (scanner->curr_provider)
+				g_free (scanner->curr_provider);
+			scanner->curr_provider = g_strdup (list->data);
 			pragha_scanner_update_handler(scanner, list->data);
+		}
 	}
 
 	/* Then add news folder in library */
@@ -521,8 +522,12 @@ pragha_scanner_update_worker(gpointer data)
 		if(g_cancellable_is_cancelled (scanner->cancellable))
 			break;
 
-		if(!is_present_str_list(list->data, scanner->folder_scanned))
+		if(!is_present_str_list(list->data, scanner->folder_scanned)) {
+			if (scanner->curr_provider)
+				g_free (scanner->curr_provider);
+			scanner->curr_provider = g_strdup (list->data);
 			pragha_scanner_scan_handler(scanner, list->data);
+		}
 	}
 
 	return scanner;
@@ -533,6 +538,7 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 {
 	PraghaPreferences *preferences;
 	PraghaDatabase *database;
+	PraghaDatabaseProvider *provider;
 	PraghaPreparedStatement *statement;
 	PraghaMusicobject *mobj = NULL;
 	gchar *mask = NULL, *last_scan_time = NULL;
@@ -557,21 +563,16 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 			g_warning("Unable to convert last rescan time");
 		g_free(last_scan_time);
 	}
-
-	scanner->folder_list =
-		pragha_preferences_get_filename_list(preferences,
-		                                     GROUP_LIBRARY,
-		                                     KEY_LIBRARY_DIR);
-	scanner->folder_scanned =
-		pragha_preferences_get_filename_list(preferences,
-		                                     GROUP_LIBRARY,
-		                                     KEY_LIBRARY_SCANNED);
 	g_object_unref(G_OBJECT(preferences));
+
+	provider = pragha_database_provider_get ();
+	scanner->folder_list = pragha_provider_get_list (provider);
+	scanner->folder_scanned = pragha_provider_get_handled_list (provider);
+	g_object_unref (provider);
 
 	/* Update the gui */
 
 	scanner->update_timeout = g_timeout_add_seconds(1, (GSourceFunc)pragha_scanner_update_progress, scanner);
-
 
 	pragha_preferences_set_show_status_bar (preferences, TRUE);
 	gtk_widget_show_all(scanner->hbox);
@@ -615,6 +616,7 @@ void
 pragha_scanner_scan_library(PraghaScanner *scanner)
 {
 	PraghaPreferences *preferences;
+	PraghaDatabaseProvider *provider;
 	gchar *last_scan_time = NULL;
 
 	if(scanner->update_timeout)
@@ -633,16 +635,12 @@ pragha_scanner_scan_library(PraghaScanner *scanner)
 			g_warning("Unable to convert last rescan time");
 		g_free(last_scan_time);
 	}
-
-	scanner->folder_list =
-		pragha_preferences_get_filename_list(preferences,
-		                                     GROUP_LIBRARY,
-		                                     KEY_LIBRARY_DIR);
-	scanner->folder_scanned =
-		pragha_preferences_get_filename_list(preferences,
-		                                     GROUP_LIBRARY,
-		                                     KEY_LIBRARY_SCANNED);
 	g_object_unref(G_OBJECT(preferences));
+
+	provider = pragha_database_provider_get ();
+	scanner->folder_list = pragha_provider_get_list (provider);
+	scanner->folder_scanned = pragha_provider_get_handled_list (provider);
+	g_object_unref (provider);
 
 	/* Update the gui */
 

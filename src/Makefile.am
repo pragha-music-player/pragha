@@ -20,6 +20,8 @@ pragha_SOURCES = \
 	pragha-backend.c \
 	pragha-backend.h \
 	pragha-cmdline.c \
+	pragha-database-provider.c \
+	pragha-database-provider.h \
 	pragha-database.c \
 	pragha-database.h \
 	pragha-debug.c \
