@@ -70,6 +70,9 @@ pragha_provider_get_list (PraghaDatabaseProvider *provider);
 GSList *
 pragha_provider_get_handled_list (PraghaDatabaseProvider *provider);
 
+gchar *
+pragha_provider_get_friendly_name (PraghaDatabaseProvider *provider, const gchar *name);
+
 void
 pragha_provider_visibility_changed (PraghaDatabaseProvider *provider);
 

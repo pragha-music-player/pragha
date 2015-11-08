@@ -413,6 +413,10 @@ pragha_scanner_scan_worker(gpointer data)
 		if(g_cancellable_is_cancelled (scanner->cancellable))
 			break;
 
+		if (scanner->curr_provider)
+			g_free (scanner->curr_provider);
+		scanner->curr_provider = g_strdup (list->data);
+
 		pragha_scanner_scan_handler(scanner, list->data);
 	}
 

@@ -49,7 +49,6 @@ struct _PraghaPreferencesPrivate
 	/* LibraryPane preferences */
 	gint       library_style;
 	gboolean   sort_by_year;
-	gboolean   fuse_folders;
 	/* Playlist preferences. */
 	gboolean   shuffle;
 	gboolean   repeat;
@@ -93,7 +92,6 @@ enum
 	PROP_APPROXIMATE_SEARCH,
 	PROP_LIBRARY_STYLE,
 	PROP_LIBRARY_SORT_BY_YEAR,
-	PROP_LIBRARY_FUSE_FOLDERS,
 	PROP_SHUFFLE,
 	PROP_REPEAT,
 	PROP_USE_HINT,
@@ -662,33 +660,6 @@ pragha_preferences_set_sort_by_year (PraghaPreferences *preferences,
 	preferences->priv->sort_by_year = sort_by_year;
 
 	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_LIBRARY_SORT_BY_YEAR]);
-}
-
-/**
- * pragha_preferences_get_fuse_folders:
- *
- */
-gboolean
-pragha_preferences_get_fuse_folders (PraghaPreferences *preferences)
-{
-	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), FALSE);
-
-	return preferences->priv->fuse_folders;
-}
-
-/**
- * pragha_preferences_fuse_folders:
- *
- */
-void
-pragha_preferences_set_fuse_folders (PraghaPreferences *preferences,
-                                     gboolean fuse_folders)
-{
-	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
-
-	preferences->priv->fuse_folders = fuse_folders;
-
-	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_LIBRARY_FUSE_FOLDERS]);
 }
 
 /**
@@ -1467,10 +1438,11 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gdouble software_volume;
 	gint library_style, sidebar_size, secondary_sidebar_size, album_art_size;
 	GtkIconSize toolbar_size;
-	gboolean fuse_folders, sort_by_year;
+	gboolean sort_by_year;
 	const gchar *user_config_dir;
 	gchar *pragha_config_dir = NULL;
 	GError *error = NULL;
+
 	PraghaPreferencesPrivate *priv = preferences->priv;
 
 	/* First check preferences folder or create it */
@@ -1610,18 +1582,6 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 	else {
 		pragha_preferences_set_sort_by_year(preferences, sort_by_year);
-	}
-
-	fuse_folders = g_key_file_get_boolean(priv->rc_keyfile,
-	                                      GROUP_LIBRARY,
-	                                      KEY_FUSE_FOLDERS,
-	                                      &error);
-	if (error) {
-		g_error_free(error);
-		error = NULL;
-	}
-	else {
-		pragha_preferences_set_fuse_folders(preferences, fuse_folders);
 	}
 
 	restore_playlist = g_key_file_get_boolean(priv->rc_keyfile,
@@ -1964,10 +1924,6 @@ pragha_preferences_finalize (GObject *object)
 	                       GROUP_LIBRARY,
 	                       KEY_SORT_BY_YEAR,
 	                       priv->sort_by_year);
-	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_LIBRARY,
-	                       KEY_FUSE_FOLDERS,
-	                       priv->fuse_folders);
 
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_PLAYLIST,
@@ -2139,9 +2095,6 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_LIBRARY_SORT_BY_YEAR:
 			g_value_set_boolean (value, pragha_preferences_get_sort_by_year(preferences));
 			break;
-		case PROP_LIBRARY_FUSE_FOLDERS:
-			g_value_set_boolean (value, pragha_preferences_get_fuse_folders(preferences));
-			break;
 		case PROP_SHUFFLE:
 			g_value_set_boolean (value, pragha_preferences_get_shuffle(preferences));
 			break;
@@ -2251,9 +2204,6 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_LIBRARY_SORT_BY_YEAR:
 			pragha_preferences_set_sort_by_year(preferences, g_value_get_boolean(value));
-			break;
-		case PROP_LIBRARY_FUSE_FOLDERS:
-			pragha_preferences_set_fuse_folders(preferences, g_value_get_boolean(value));
 			break;
 		case PROP_SHUFFLE:
 			pragha_preferences_set_shuffle(preferences, g_value_get_boolean(value));
@@ -2412,17 +2362,6 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		g_param_spec_boolean("sort-by-year",
 		                     "SortByYear",
 		                     "Sort By Year Preference",
-		                     TRUE,
-		                     PRAGHA_PREF_PARAMS);
-
-	/**
-	  * PraghaPreferences:fuse_folders:
-	  *
-	  */
-	gParamSpecs[PROP_LIBRARY_FUSE_FOLDERS] =
-		g_param_spec_boolean("fuse-folders",
-		                     "FuseFolders",
-		                     "Fuse Folders Preference",
 		                     TRUE,
 		                     PRAGHA_PREF_PARAMS);
 

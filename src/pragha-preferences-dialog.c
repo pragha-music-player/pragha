@@ -73,7 +73,6 @@ struct _PreferencesDialog {
 	GtkWidget *album_art_pattern_w;
 
 	GtkWidget *library_view_w;
-	GtkWidget *fuse_folders_w;
 	GtkWidget *sort_by_year_w;
 
 	GtkWidget *instant_filter_w;
@@ -306,9 +305,6 @@ pragha_preferences_dialog_restore_changes (PreferencesDialog *dialog)
 	g_slist_free_full (library_list, g_free);
 	g_object_unref (G_OBJECT (provider));
 
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->fuse_folders_w),
-		pragha_preferences_get_fuse_folders(dialog->preferences));
-
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->sort_by_year_w),
 		pragha_preferences_get_sort_by_year(dialog->preferences));
 
@@ -502,19 +498,6 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 	 * Library view changes
 	 */
 	style = pragha_preferences_get_library_style (dialog->preferences);
-
-	/* Save fuse folders preference, and reload view if needed */
-
-	pref_setted = pragha_preferences_get_fuse_folders (dialog->preferences);
-	pref_toggled = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(dialog->fuse_folders_w));
-
-	pragha_preferences_set_fuse_folders (dialog->preferences, pref_toggled);
-
-	if ((style == FOLDERS) && (pref_setted != pref_toggled)) {
-		provider = pragha_database_provider_get ();
-		pragha_provider_update_done (provider);
-		g_object_unref (provider);
-	}
 
 	/* Save sort by year preference, and reload view if needed */
 
@@ -878,8 +861,6 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 	g_slist_free_full (library_dir, g_free);
 	g_object_unref (G_OBJECT (provider));
 
-	if (pragha_preferences_get_fuse_folders(dialog->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->fuse_folders_w), TRUE);
 	if (pragha_preferences_get_sort_by_year(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->sort_by_year_w), TRUE);
 }
@@ -967,7 +948,7 @@ pref_create_library_page (PreferencesDialog *dialog)
 {
 	GtkWidget *table;
 	GtkWidget *library_view, *library_view_scroll, *library_bbox_align, *library_bbox, *library_add, \
-		*library_remove, *hbox_library, *fuse_folders, *sort_by_year, *infobar, *label;
+		*library_remove, *hbox_library, *sort_by_year, *infobar, *label;
 	GtkListStore *library_store;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
@@ -1026,16 +1007,12 @@ pref_create_library_page (PreferencesDialog *dialog)
 
 	pragha_hig_workarea_table_add_wide_tall_control(table, &row, hbox_library);
 
-	fuse_folders = gtk_check_button_new_with_label(_("Merge folders in the folders estructure view"));
-	pragha_hig_workarea_table_add_wide_control(table, &row, fuse_folders);
-
 	sort_by_year = gtk_check_button_new_with_label(_("Sort albums by release year"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, sort_by_year);
 
 	/* Store references */
 
 	dialog->library_view_w = library_view;
-	dialog->fuse_folders_w = fuse_folders;
 	dialog->sort_by_year_w = sort_by_year;
 
 	/* Setup signal handlers */

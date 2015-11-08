@@ -152,6 +152,25 @@ pragha_provider_get_handled_list (PraghaDatabaseProvider *provider)
 	return list;
 }
 
+gchar *
+pragha_provider_get_friendly_name (PraghaDatabaseProvider *provider, const gchar *name)
+{
+	PraghaPreparedStatement *statement;
+	PraghaDatabaseProviderPrivate *priv = provider->priv;
+	gchar *friendly_name = NULL;
+
+	const gchar *sql = "SELECT friendly_name FROM PROVIDER WHERE name = ?";
+
+	statement = pragha_database_create_statement (priv->database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, name);
+	pragha_prepared_statement_step (statement);
+	friendly_name = g_strdup(pragha_prepared_statement_get_string (statement, 0));
+	pragha_prepared_statement_free (statement);
+
+	return friendly_name;
+}
+
+
 /*
  * Signals.
  */
