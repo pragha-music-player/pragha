@@ -155,9 +155,9 @@ pragha_preferences_set_audio_cd_device (PraghaPreferences *preferences,
 
 static PraghaMusicobject *
 new_musicobject_from_cdda (PraghaApplication *pragha,
-                           cdrom_drive_t *cdda_drive,
-                           cddb_disc_t *cddb_disc,
-                           gint track_no)
+                           cdrom_drive_t     *cdda_drive,
+                           cddb_disc_t       *cddb_disc,
+                           gint               track_no)
 {
 	PraghaPreferences *preferences;
 	PraghaMusicEnum *enum_map = NULL;
@@ -167,8 +167,7 @@ new_musicobject_from_cdda (PraghaApplication *pragha,
 
 	CDEBUG(DBG_PLUGIN, "Creating new musicobject from cdda: %d", track_no);
 
-	channels = cdio_get_track_channels(cdda_drive->p_cdio,
-					   track_no);
+	channels = cdio_get_track_channels(cdda_drive->p_cdio, track_no);
 	start = cdio_cddap_track_firstsector(cdda_drive, track_no);
 	end = cdio_cddap_track_lastsector(cdda_drive, track_no);
 
@@ -227,7 +226,8 @@ new_musicobject_from_cdda (PraghaApplication *pragha,
 }
 
 static gint
-cddb_add_tracks (cdrom_drive_t *cdda_drive, cddb_disc_t *cddb_disc)
+pragha_cdrom_plugin_add_cddb_tracks (cdrom_drive_t *cdda_drive,
+                                     cddb_disc_t   *cddb_disc)
 {
 	cddb_track_t *track;
 	lba_t lba;
@@ -254,18 +254,18 @@ cddb_add_tracks (cdrom_drive_t *cdda_drive, cddb_disc_t *cddb_disc)
 	return 0;
 }
 
-static void
-add_audio_cd_tracks (PraghaApplication *pragha, cdrom_drive_t *cdda_drive, cddb_disc_t *cddb_disc)
+static GList *
+pragha_cdrom_plugin_get_mobj_list (PraghaApplication *pragha,
+                                   cdrom_drive_t     *cdda_drive,
+                                   cddb_disc_t       *cddb_disc)
 {
-	PraghaPlaylist *playlist;
 	PraghaMusicobject *mobj;
-
 	gint num_tracks = 0, i = 0;
 	GList *list = NULL;
 
 	num_tracks = cdio_cddap_tracks(cdda_drive);
 	if (!num_tracks)
-		return;
+		return NULL;
 
 	for (i = 1; i <= num_tracks; i++) {
 		mobj = new_musicobject_from_cdda(pragha, cdda_drive, cddb_disc, i);
@@ -274,15 +274,11 @@ add_audio_cd_tracks (PraghaApplication *pragha, cdrom_drive_t *cdda_drive, cddb_
 
 		pragha_process_gtk_events ();
 	}
-	if (list) {
-		playlist = pragha_application_get_playlist (pragha);
-		pragha_playlist_append_mobj_list(playlist, list);
-		g_list_free (list);
-	}
+	return list;
 }
 
-static cdrom_drive_t*
-find_audio_cd (PraghaApplication *pragha)
+static cdrom_drive_t *
+pragha_cdrom_plugin_get_drive (PraghaApplication *pragha)
 {
 	cdrom_drive_t *drive = NULL;
 	gchar **cdda_devices = NULL;
@@ -305,7 +301,8 @@ find_audio_cd (PraghaApplication *pragha)
 			g_warning("Unable to identify Audio CD");
 			goto exit;
 		}
-	} else {
+	}
+	else {
 		CDEBUG(DBG_PLUGIN, "Trying Audio CD Device: %s", audio_cd_device);
 
 		drive = cdio_cddap_identify(audio_cd_device, 0, NULL);
@@ -321,16 +318,19 @@ exit:
 	return drive;
 }
 
-void
+static void
 pragha_application_append_audio_cd (PraghaApplication *pragha)
 {
+	PraghaPlaylist *playlist;
+	PraghaPreferences *preferences;
 	lba_t lba;
 	gint matches;
+	cdrom_drive_t *cdda_drive = NULL;
 	cddb_disc_t *cddb_disc = NULL;
 	cddb_conn_t *cddb_conn = NULL;
-	PraghaPreferences *preferences;
+	GList *list = NULL;
 
-	cdrom_drive_t *cdda_drive = find_audio_cd(pragha);
+	cdda_drive = pragha_cdrom_plugin_get_drive (pragha);
 	if (!cdda_drive)
 		return;
 
@@ -349,13 +349,12 @@ pragha_application_append_audio_cd (PraghaApplication *pragha)
 		if (!cddb_disc)
 			goto add;
 
-		lba = cdio_get_track_lba(cdda_drive->p_cdio,
-					 CDIO_CDROM_LEADOUT_TRACK);
+		lba = cdio_get_track_lba(cdda_drive->p_cdio, CDIO_CDROM_LEADOUT_TRACK);
 		if (lba == CDIO_INVALID_LBA)
 			goto add;
 
 		cddb_disc_set_length(cddb_disc, FRAMES_TO_SECONDS(lba));
-		if (cddb_add_tracks(cdda_drive, cddb_disc) < 0)
+		if (pragha_cdrom_plugin_add_cddb_tracks(cdda_drive, cddb_disc) < 0)
 			goto add;
 
 		if (!cddb_disc_calc_discid(cddb_disc))
@@ -367,18 +366,24 @@ pragha_application_append_audio_cd (PraghaApplication *pragha)
 		if (matches == -1)
 			goto add;
 
-		if (!cddb_read(cddb_conn,
-			       cddb_disc)) {
+		if (!cddb_read(cddb_conn, cddb_disc)) {
 			cddb_error_print(cddb_errno(cddb_conn));
 			goto add;
 		}
 
 		CDEBUG(DBG_PLUGIN, "Successfully initialized CDDB");
+
 		goto add;
 	}
 
 add:
-	add_audio_cd_tracks(pragha, cdda_drive, cddb_disc);
+	list = pragha_cdrom_plugin_get_mobj_list (pragha, cdda_drive, cddb_disc);
+	if (list) {
+		playlist = pragha_application_get_playlist (pragha);
+		pragha_playlist_append_mobj_list(playlist, list);
+		g_list_free (list);
+	}
+
 	CDEBUG(DBG_PLUGIN, "Successfully opened Audio CD device");
 
 	if (cdda_drive)
@@ -405,7 +410,9 @@ pragha_musicobject_is_cdda_type (PraghaMusicobject *mobj)
 static void
 pragha_cdrom_plugin_set_device (PraghaBackend *backend, GObject *obj, gpointer user_data)
 {
+	PraghaPreferences *preferences;
 	PraghaMusicobject *mobj = NULL;
+	const gchar *audio_cd_device;
 	GObject *source;
 
 	PraghaCdromPlugin *plugin = user_data;
@@ -417,8 +424,8 @@ pragha_cdrom_plugin_set_device (PraghaBackend *backend, GObject *obj, gpointer u
 
 	g_object_get (obj, "source", &source, NULL);
 	if (source) {
-		PraghaPreferences *preferences = pragha_application_get_preferences (priv->pragha);
-		const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device (preferences);
+		preferences = pragha_application_get_preferences (priv->pragha);
+		audio_cd_device = pragha_preferences_get_audio_cd_device (preferences);
 		if (audio_cd_device) {
 			g_object_set (source, "device", audio_cd_device, NULL);
 		}
