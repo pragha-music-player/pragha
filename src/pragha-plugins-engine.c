@@ -74,9 +74,6 @@ pragha_plugins_engine_shutdown (PraghaPluginsEngine *engine)
 
 	engine->shutdown = TRUE;
 
-	g_signal_handlers_disconnect_by_func (engine->peas_exten_set, (GCallback) on_extension_added, engine);
-	g_signal_handlers_disconnect_by_func (engine->peas_exten_set, (GCallback) on_extension_removed, engine);
-
 	loaded_plugins = peas_engine_get_loaded_plugins (engine->peas_engine);
 	if (loaded_plugins) {
 		preferences = pragha_application_get_preferences (PRAGHA_APPLICATION(engine->object));

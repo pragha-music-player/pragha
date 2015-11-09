@@ -163,7 +163,7 @@ pragha_provider_get_list_by_type (PraghaDatabaseProvider *provider,
 
 	PraghaDatabaseProviderPrivate *priv = provider->priv;
 
-	const gchar *sql = "SELECT name FROM PROVIDER WHERE type != ?";
+	const gchar *sql = "SELECT name FROM PROVIDER WHERE type = ?";
 
 	statement = pragha_database_create_statement (priv->database, sql);
 
