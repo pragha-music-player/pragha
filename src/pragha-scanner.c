@@ -574,8 +574,8 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 	g_object_unref(G_OBJECT(preferences));
 
 	provider = pragha_database_provider_get ();
-	scanner->folder_list = pragha_provider_get_list (provider);
-	scanner->folder_scanned = pragha_provider_get_handled_list (provider);
+	scanner->folder_list = pragha_provider_get_list_by_type (provider, "local");
+	scanner->folder_scanned = pragha_provider_get_handled_list_by_type (provider, "local");
 	g_object_unref (provider);
 
 	/* Update the gui */
@@ -646,8 +646,8 @@ pragha_scanner_scan_library(PraghaScanner *scanner)
 	g_object_unref(G_OBJECT(preferences));
 
 	provider = pragha_database_provider_get ();
-	scanner->folder_list = pragha_provider_get_list (provider);
-	scanner->folder_scanned = pragha_provider_get_handled_list (provider);
+	scanner->folder_list = pragha_provider_get_list_by_type (provider, "local");
+	scanner->folder_scanned = pragha_provider_get_handled_list_by_type (provider, "local");
 	g_object_unref (provider);
 
 	/* Update the gui */

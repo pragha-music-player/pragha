@@ -300,7 +300,7 @@ pragha_preferences_dialog_restore_changes (PreferencesDialog *dialog)
 	 * Collection settings.
 	 */
 	provider = pragha_database_provider_get ();
-	library_list = pragha_provider_get_list (provider);
+	library_list = pragha_provider_get_list_by_type (provider, "local");
 	pragha_preferences_dialog_set_library_list(dialog, library_list);
 	g_slist_free_full (library_list, g_free);
 	g_object_unref (G_OBJECT (provider));
@@ -458,7 +458,7 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 
 	provider = pragha_database_provider_get ();
 
-	folder_scanned = pragha_provider_get_list (provider);
+	folder_scanned = pragha_provider_get_list_by_type (provider, "local");
 	library_dir = pragha_preferences_dialog_get_library_list (dialog);
 
 	library_locked = pragha_preferences_get_lock_library (dialog->preferences);
@@ -856,7 +856,7 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 	/* Lbrary Options */
 
 	provider = pragha_database_provider_get ();
-	library_dir = pragha_provider_get_list (provider);
+	library_dir = pragha_provider_get_list_by_type (provider, "local");
 	pragha_preferences_dialog_set_library_list(dialog, library_dir);
 	g_slist_free_full (library_dir, g_free);
 	g_object_unref (G_OBJECT (provider));
@@ -1237,7 +1237,7 @@ pragha_preferences_dialog_show (PreferencesDialog *dialog)
 
 	if (string_is_empty (pragha_preferences_get_installed_version (dialog->preferences))) {
 		provider = pragha_database_provider_get ();
-		library_list = pragha_provider_get_list (provider);
+		library_list = pragha_provider_get_list_by_type (provider, "local");
 		g_object_unref (G_OBJECT (provider));
 
 		pragha_preferences_dialog_set_library_list (dialog, library_list);

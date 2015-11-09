@@ -154,6 +154,57 @@ pragha_provider_get_handled_list (PraghaDatabaseProvider *provider)
 	return list;
 }
 
+GSList *
+pragha_provider_get_list_by_type (PraghaDatabaseProvider *provider,
+                                  const gchar            *provider_type)
+{
+	PraghaPreparedStatement *statement;
+	GSList *list = NULL;
+
+	PraghaDatabaseProviderPrivate *priv = provider->priv;
+
+	const gchar *sql = "SELECT name FROM PROVIDER WHERE type != ?";
+
+	statement = pragha_database_create_statement (priv->database, sql);
+
+	pragha_prepared_statement_bind_int (statement, 1,
+		pragha_database_find_provider_type (priv->database, provider_type));
+
+	while (pragha_prepared_statement_step (statement)) {
+		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
+		list = g_slist_append (list, g_strdup(name));
+	}
+	pragha_prepared_statement_free (statement);
+
+	return list;
+}
+
+GSList *
+pragha_provider_get_handled_list_by_type (PraghaDatabaseProvider *provider,
+                                          const gchar            *provider_type)
+{
+	PraghaPreparedStatement *statement;
+	GSList *list = NULL;
+
+	PraghaDatabaseProviderPrivate *priv = provider->priv;
+
+	const gchar *sql = "SELECT name FROM PROVIDER WHERE id IN (SELECT provider FROM TRACK) AND type = ?";
+
+	statement = pragha_database_create_statement (priv->database, sql);
+
+	pragha_prepared_statement_bind_int (statement, 1,
+		pragha_database_find_provider_type (priv->database, provider_type));
+
+	while (pragha_prepared_statement_step (statement)) {
+		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
+		list = g_slist_append (list, g_strdup(name));
+	}
+
+	pragha_prepared_statement_free (statement);
+
+	return list;
+}
+
 gchar *
 pragha_provider_get_friendly_name (PraghaDatabaseProvider *provider, const gchar *name)
 {

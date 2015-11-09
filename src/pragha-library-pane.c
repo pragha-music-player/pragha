@@ -1747,8 +1747,7 @@ pragha_library_view_append_provider_by_folder (PraghaLibraryPane *clibrary,
 
 {
 	PraghaPreparedStatement *statement;
-	const gchar *sql = NULL, *filepath = NULL;
-	//GtkTreeIter iter, *f_iter;
+	const gchar *sql = NULL, *filepath = NULL, *filename = NULL;
 	gint provider_id = 0;
 
 	sql = "SELECT name, id FROM LOCATION WHERE id IN (SELECT location FROM TRACK WHERE PROVIDER = ?) ORDER BY name DESC";
@@ -1759,9 +1758,19 @@ pragha_library_view_append_provider_by_folder (PraghaLibraryPane *clibrary,
 	pragha_prepared_statement_bind_int (statement, 1, provider_id);
 
 	while (pragha_prepared_statement_step (statement)) {
-		filepath = pragha_prepared_statement_get_string(statement, 0) + strlen(provider) + 1;
+		filepath = pragha_prepared_statement_get_string(statement, 0);
+
+		/* FIXME: Handle uris like cdda:// */
+		filename = g_strrstr (filepath, "://");
+		if (filename) {
+			filename += strlen("://");
+		}
+		else {
+			filename = filepath + strlen(provider) + 1;
+		}
+
 		add_folder_file(model,
-		                filepath,
+		                filename,
 		                pragha_prepared_statement_get_int(statement, 1),
 		                p_iter,
 		                clibrary);
