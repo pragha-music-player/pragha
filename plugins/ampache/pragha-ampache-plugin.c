@@ -49,6 +49,7 @@
 #include "src/pragha-window.h"
 #include "src/pragha-hig.h"
 #include "src/xml_helper.h"
+#include "src/pragha-database-provider.h"
 
 #include "plugins/pragha-plugin-macros.h"
 
@@ -58,14 +59,13 @@ struct _PraghaAmpachePluginPrivate {
 	PraghaApplication    *pragha;
 
 	gchar                *server;
-	gchar                *username;
-	gchar                *password;
 
 	gchar                *auth;
 	gint                  songs_count;
 
-	gint                  threads;
+	gint                  pending_threads;
 	GHashTable           *tracks_table;
+	gint                  songs_cache;
 
 	GtkWidget            *setting_widget;
 	GtkWidget            *server_entry;
@@ -90,12 +90,8 @@ PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_AMPACHE_PLUGIN,
 #define KEY_AMPACHE_PASS   "password"
 
 /*
- *
+ * Propotypes
  */
-static void
-pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin);
-static void
-pragha_ampache_plugin_append_cache (PraghaAmpachePlugin *plugin);
 
 static void
 pragha_ampache_plugin_authenticate (PraghaAmpachePlugin *plugin);
@@ -105,30 +101,52 @@ pragha_ampache_plugin_deauthenticate (PraghaAmpachePlugin *plugin);
 /*
  * Menu actions
  */
+
 static void
-pragha_ampache_plugin_search_music_action (GtkAction *action, PraghaAmpachePlugin *plugin)
+pragha_ampache_plugin_upgrade_database (PraghaAmpachePlugin *plugin)
 {
-	pragha_ampache_plugin_append_cache (plugin);
+	PraghaDatabaseProvider *provider;
+	PraghaDatabase *database;
+
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	database = pragha_database_get ();
+	if (pragha_database_find_provider (database, priv->server)) {
+		provider = pragha_database_provider_get ();
+		pragha_provider_remove (provider, priv->server);
+		pragha_provider_update_done (provider);
+		g_object_unref (provider);
+	}
+	g_object_unref (database);
+
+	pragha_ampache_plugin_deauthenticate (plugin);
+	pragha_ampache_plugin_authenticate (plugin);
 }
 
 static void
-pragha_gmenu_ampcahe_plugin_search_music_action (GSimpleAction *action,
-                                                 GVariant      *parameter,
-                                                 gpointer       user_data)
+pragha_ampache_plugin_upgrade_database_action (GtkAction *action, PraghaAmpachePlugin *plugin)
 {
-	pragha_ampache_plugin_append_cache (PRAGHA_AMPACHE_PLUGIN(user_data));
+	pragha_ampache_plugin_upgrade_database (plugin);
+}
+
+static void
+pragha_ampache_plugin_upgrade_database_gmenu_action (GSimpleAction *action,
+                                                     GVariant      *parameter,
+                                                     gpointer       user_data)
+{
+	PraghaAmpachePlugin *plugin = user_data;
+	pragha_ampache_plugin_upgrade_database (plugin);
 }
 
 static const GtkActionEntry main_menu_actions [] = {
-	{"Append music on Ampache Server", NULL, N_("Search music on Ampache server"),
-	 "", "Append music on Ampache Server", G_CALLBACK(pragha_ampache_plugin_search_music_action)}
-};
+	{"Refresh the Apache database", NULL, N_("Refresh the Apache database"),
+	 "", "Refresh the Apache database", G_CALLBACK(pragha_ampache_plugin_upgrade_database_action)}};
 
 static const gchar *main_menu_xml = "<ui>								\
 	<menubar name=\"Menubar\">											\
 		<menu action=\"ToolsMenu\">										\
 			<placeholder name=\"pragha-plugins-placeholder\">			\
-				<menuitem action=\"Append music on Ampache Server\"/>	\
+				<menuitem action=\"Refresh the Apache database\"/>		\
 				<separator/>											\
 			</placeholder>												\
 		</menu>															\
@@ -156,35 +174,22 @@ pragha_ampache_plugin_unescape_response (const gchar *response)
 	return rest;
 }
 
+static void
+pragha_ampache_plugin_add_track_db (gpointer key,
+                                    gpointer value,
+                                    gpointer user_data)
+{
+	PraghaMusicobject *mobj = value;
+	PraghaDatabase *database = user_data;
+
+	pragha_database_add_new_musicobject (database, mobj);
+
+	pragha_process_gtk_events ();
+}
+
 /*
  * Basic Cache.
  */
-static void
-pragha_ampache_plugin_append_cache (PraghaAmpachePlugin *plugin)
-{
-	PraghaPlaylist *playlist;
-	GHashTableIter iter;
-	gpointer key, value;
-	PraghaMusicobject *mobj = NULL;
-	GList *list = NULL;
-
-	PraghaAmpachePluginPrivate *priv = plugin->priv;
-
-	g_hash_table_iter_init (&iter, priv->tracks_table);
-	while (g_hash_table_iter_next (&iter, &key, &value)) {
-		mobj = value;
-		if (G_LIKELY(mobj)) {
-			list = g_list_append (list, mobj);
-			g_object_ref (mobj);
-		}
-		/* Have to give control to GTK periodically ... */
-		pragha_process_gtk_events ();
-	}
-
-	playlist = pragha_application_get_playlist (priv->pragha);
-	pragha_playlist_append_mobj_list (playlist, list);
-	g_list_free(list);
-}
 
 static void
 pragha_ampache_cache_clear (PraghaAmpachePlugin *plugin)
@@ -195,14 +200,29 @@ pragha_ampache_cache_clear (PraghaAmpachePlugin *plugin)
 }
 
 static void
+pragha_ampache_save_cache (PraghaAmpachePlugin *plugin)
+{
+	PraghaDatabase *database;
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	database = pragha_database_get ();
+	g_hash_table_foreach (priv->tracks_table,
+	                      pragha_ampache_plugin_add_track_db,
+	                      database);
+	g_object_unref (database);
+}
+
+static void
 pragha_ampache_cache_insert_track (PraghaAmpachePlugin *plugin, PraghaMusicobject *mobj)
 {
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 
 	const gchar *file = pragha_musicobject_get_file(mobj);
 
-	if (string_is_empty(file))
+	if (string_is_empty(file)) {
+		g_critical ("emthyy!!");
 		return;
+	}
 
 	g_hash_table_insert (priv->tracks_table,
 	                     g_strdup(file),
@@ -274,7 +294,7 @@ pragha_ampache_plugin_set_user (PraghaPreferences *preferences, const gchar *use
 		                               KEY_AMPACHE_USER,
 		                               user);
 	else
- 		pragha_preferences_remove_key (preferences,
+		pragha_preferences_remove_key (preferences,
 		                               plugin_group,
 		                               KEY_AMPACHE_USER);
 
@@ -322,7 +342,7 @@ pragha_ampache_plugin_set_password (PraghaPreferences *preferences, const gchar 
 PraghaMusicobject *
 pragha_ampache_xml_get_media (XMLNode *xml)
 {
-	PraghaMusicobject *mobj;
+	PraghaMusicobject *mobj = NULL;
 	XMLNode *xi = NULL;
 	gchar *url = NULL, *title =  NULL, *artist = NULL, *album = NULL;
 	gchar *lenghtc = NULL;
@@ -373,6 +393,7 @@ pragha_ampache_get_songs_done (SoupSession *session,
                                SoupMessage *msg,
                                gpointer     user_data)
 {
+	PraghaDatabaseProvider *provider;
 	PraghaStatusbar *statusbar;
 	PraghaMusicobject *mobj;
 	XMLNode *xml = NULL, *xi;
@@ -381,46 +402,70 @@ pragha_ampache_get_songs_done (SoupSession *session,
 	PraghaAmpachePlugin *plugin = user_data;
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 
-	priv->threads--;
-	if (priv->threads == 0) {
-		summary = g_strdup_printf(_("Finished importing your Ampache collection"));
+	/* Set thread as handled */
+
+	priv->pending_threads--;
+
+	/* Check error */
+
+	if (SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
+	{
+		xml = tinycxml_parse ((gchar *)msg->response_body->data);
+
+		xi = xmlnode_get (xml, CCA{"root", "song", NULL }, NULL, NULL);
+		for (;xi;xi=xi->next) {
+			mobj = pragha_ampache_xml_get_media (xi);
+			if (G_LIKELY(mobj)) {
+				pragha_musicobject_set_provider (mobj, priv->server);
+				pragha_ampache_cache_insert_track (plugin, mobj);
+			}
+			priv->songs_cache++;
+
+			/* Have to give control to GTK periodically ... */
+			pragha_process_gtk_events ();
+		}
+		xmlnode_free (xml);
 	}
 	else {
-		summary = g_strdup_printf(_("Ampache import progress %i"), priv->threads);
+		g_warning ("Ampache Server plugin %s: Error: %d %s",
+		           G_STRFUNC, msg->status_code, msg->reason_phrase);
 	}
 
-	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
-		return;
+	/* Show status update to user. */
 
-	xml = tinycxml_parse ((gchar *)msg->response_body->data);
-
-	xi = xmlnode_get (xml, CCA{"root", "song", NULL }, NULL, NULL);
-	for (;xi;xi=xi->next) {
-		mobj = pragha_ampache_xml_get_media (xi);
-		if (G_LIKELY(mobj))
-			pragha_ampache_cache_insert_track (plugin, mobj);
-
-		/* Have to give control to GTK periodically ... */
-		pragha_process_gtk_events ();
+	if (priv->pending_threads > 0) {
+		summary = g_strdup_printf(_("%i files analyzed of %i detected"),
+		                          priv->songs_cache, priv->songs_count);
+	}
+	else {
+		summary = g_strdup_printf(_("Library scan complete"));
 	}
 
-	if (summary != NULL) {
-		statusbar = pragha_statusbar_get ();
-		pragha_statusbar_set_misc_text (statusbar, summary);
-		g_object_unref (statusbar);
-		g_free(summary);
-	}
+	statusbar = pragha_statusbar_get ();
+	pragha_statusbar_set_misc_text (statusbar, summary);
+	g_object_unref (statusbar);
+	g_free(summary);
 
-	xmlnode_free (xml);
+	/* If last thread save on database. */
+
+	if (priv->pending_threads == 0) {
+		pragha_ampache_save_cache (plugin);
+		pragha_ampache_cache_clear (plugin);
+
+		provider = pragha_database_provider_get ();
+		pragha_provider_update_done (provider);
+		g_object_unref (provider);
+	}
 }
 
 static void
 pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin)
 {
+	PraghaDatabaseProvider *provider;
 	SoupSession *session;
 	SoupMessage *msg;
 	gchar *url = NULL;
-	const guint limit = 500;
+	const guint limit = 100;
 	guint i = 0;
 
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
@@ -430,14 +475,26 @@ pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin)
 	if (!priv->auth)
 		return;
 
-	priv->threads = priv->songs_count/limit;
+	/* Add provider */
 
-	/* Get auth */
-	session = soup_session_sync_new ();
+	provider = pragha_database_provider_get ();
+	pragha_provider_add_new (provider,
+	                         priv->server,
+	                         "Ampache",
+	                         priv->server,
+	                         "folder-remote");
+	g_object_unref (provider);
 
-	for (i = 0 ; i <= priv->threads; i++) {
+	/* Launch threads to get music */
+
+	priv->pending_threads = priv->songs_count/limit + 1;
+	session = soup_session_sync_new_with_options (SOUP_SESSION_MAX_CONNS, 2, NULL);
+
+	for (i = 0 ; i < priv->pending_threads; i++) {
 		url = g_strdup_printf("%s/server/xml.server.php?action=songs&offset=%i&limit=%i&auth=%s",
 		                      priv->server, i*limit, limit, priv->auth);
+
+		g_print ("Threads url: %s\n", url);
 
 		msg = soup_message_new ("GET", url);
 		soup_session_queue_message (session, msg,
@@ -455,6 +512,8 @@ pragha_ampache_preferences_dialog_response (GtkDialog           *dialog,
                                             gint                 response_id,
                                             PraghaAmpachePlugin *plugin)
 {
+	PraghaDatabase *database;
+	PraghaDatabaseProvider *provider;
 	PraghaPreferences *preferences;
 	const gchar *entry_server = NULL, *entry_user = NULL, *entry_pass = NULL;
 	gchar *test_server = NULL, *test_user = NULL, *test_pass = NULL;
@@ -468,7 +527,8 @@ pragha_ampache_preferences_dialog_response (GtkDialog           *dialog,
 	test_user = pragha_ampache_plugin_get_user (preferences);
 	test_pass = pragha_ampache_plugin_get_password (preferences);
 
-	switch(response_id) {
+	switch(response_id)
+	{
 		case GTK_RESPONSE_CANCEL:
 			pragha_gtk_entry_set_text (GTK_ENTRY(priv->server_entry), test_server);
 			pragha_gtk_entry_set_text (GTK_ENTRY(priv->user_entry), test_user);
@@ -492,7 +552,25 @@ pragha_ampache_preferences_dialog_response (GtkDialog           *dialog,
 				changed = TRUE;
 			}
 
-			if (changed) {
+			if (changed)
+			{
+				/* Remove old and new provider if exist */
+
+				database = pragha_database_get ();
+				if (pragha_database_find_provider (database, test_server)) {
+					provider = pragha_database_provider_get ();
+					pragha_provider_remove (provider, test_server);
+					pragha_provider_update_done (provider);
+					g_object_unref (provider);
+				}
+				if (pragha_database_find_provider (database, entry_server)) {
+					provider = pragha_database_provider_get ();
+					pragha_provider_remove (provider, entry_server);
+					pragha_provider_update_done (provider);
+					g_object_unref (provider);
+				}
+				g_object_unref (database);
+
 				pragha_ampache_plugin_deauthenticate (plugin);
 				pragha_ampache_plugin_authenticate (plugin);
 			}
@@ -510,11 +588,14 @@ pragha_ampache_preferences_dialog_response (GtkDialog           *dialog,
 static void
 pragha_ampache_plugin_append_setting (PraghaAmpachePlugin *plugin)
 {
+	PraghaPreferences *preferences;
 	PreferencesDialog *dialog;
 	GtkWidget *table, *label, *ampache_server, *ampache_uname, *ampache_pass;
 	guint row = 0;
 
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	preferences = pragha_preferences_get ();
 
 	table = pragha_hig_workarea_table_new ();
 
@@ -522,6 +603,8 @@ pragha_ampache_plugin_append_setting (PraghaAmpachePlugin *plugin)
 
 	label = gtk_label_new (_("Server"));
 	ampache_server = gtk_entry_new ();
+	pragha_gtk_entry_set_text (GTK_ENTRY(ampache_server),
+		pragha_ampache_plugin_get_server (preferences));
 	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(ampache_server), GTK_ENTRY_ICON_PRIMARY, "network-server");
 	gtk_entry_set_activates_default (GTK_ENTRY(ampache_server), TRUE);
 
@@ -530,6 +613,8 @@ pragha_ampache_plugin_append_setting (PraghaAmpachePlugin *plugin)
 
 	label = gtk_label_new (_("Username"));
 	ampache_uname = gtk_entry_new ();
+	pragha_gtk_entry_set_text (GTK_ENTRY(ampache_uname),
+		pragha_ampache_plugin_get_user (preferences));
 	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(ampache_uname), GTK_ENTRY_ICON_PRIMARY, "system-users");
 	gtk_entry_set_max_length (GTK_ENTRY(ampache_uname), LASTFM_UNAME_LEN);
 	gtk_entry_set_activates_default (GTK_ENTRY(ampache_uname), TRUE);
@@ -538,6 +623,8 @@ pragha_ampache_plugin_append_setting (PraghaAmpachePlugin *plugin)
 
 	label = gtk_label_new (_("Password"));
 	ampache_pass = gtk_entry_new ();
+	pragha_gtk_entry_set_text (GTK_ENTRY(ampache_pass),
+		pragha_ampache_plugin_get_password (preferences));
 	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(ampache_pass), GTK_ENTRY_ICON_PRIMARY, "changes-prevent");
 	gtk_entry_set_max_length (GTK_ENTRY(ampache_pass), LASTFM_PASS_LEN);
 	gtk_entry_set_visibility (GTK_ENTRY(ampache_pass), FALSE);
@@ -560,6 +647,8 @@ pragha_ampache_plugin_append_setting (PraghaAmpachePlugin *plugin)
 	pragha_preferences_dialog_connect_handler (dialog,
 	                                           G_CALLBACK(pragha_ampache_preferences_dialog_response),
 	                                           plugin);
+
+	g_object_unref (preferences);
 }
 
 static void
@@ -585,60 +674,75 @@ pragha_ampache_get_auth_done (SoupSession *session,
                               SoupMessage *msg,
                               gpointer     user_data)
 {
+	PraghaDatabase *database;
 	XMLNode *xml = NULL, *xi;
 	gchar *songs_count = NULL;
 
 	PraghaAmpachePlugin *plugin = user_data;
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 
-	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
-		return;
+	if (SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
+	{
+		xml = tinycxml_parse ((gchar *)msg->response_body->data);
 
-	xml = tinycxml_parse ((gchar *)msg->response_body->data);
+		xi = xmlnode_get (xml, CCA{"root", "auth", NULL }, NULL, NULL);
+		if (xi && string_is_not_empty(xi->content)) {
+			priv->auth = pragha_ampache_plugin_unescape_response (xi->content);
+		}
 
-	xi = xmlnode_get (xml, CCA{"root", "auth", NULL }, NULL, NULL);
-	if (xi && string_is_not_empty(xi->content)) {
-		priv->auth = pragha_ampache_plugin_unescape_response (xi->content);
+		xi = xmlnode_get (xml, CCA{"root", "songs", NULL }, NULL, NULL);
+		if (xi && string_is_not_empty(xi->content)) {
+			songs_count = pragha_ampache_plugin_unescape_response (xi->content);
+			priv->songs_count = atoi (songs_count);
+			g_free (songs_count);
+		}
+
+		if (priv->auth != NULL) {
+			database = pragha_database_get ();
+			if (!pragha_database_find_provider (database, priv->server))
+				pragha_ampache_plugin_cache_music (plugin);
+			g_object_unref (database);
+		}
+		else {
+			g_warning ("Ampache auth failed");
+		}
+
+		xmlnode_free (xml);
 	}
-
-	xi = xmlnode_get (xml, CCA{"root", "songs", NULL }, NULL, NULL);
-	if (xi && string_is_not_empty(xi->content)) {
-		songs_count = pragha_ampache_plugin_unescape_response (xi->content);
-		priv->songs_count = atoi (songs_count);
-		g_free (songs_count);
+	else
+	{
+		g_warning ("AUTH ERROR: Unexpected status %d %s\n", msg->status_code, msg->reason_phrase);
 	}
-
-	pragha_ampache_plugin_cache_music (plugin);
-
-	xmlnode_free (xml);
 }
 
 static void
 pragha_ampache_plugin_authenticate (PraghaAmpachePlugin *plugin)
 {
-	PraghaPreferences *preferences;
 	SoupSession *session = NULL;
 	SoupMessage *msg = NULL;
 	GChecksum *hash = NULL;
-	time_t timestamp = 0;
+	const gchar *server = NULL, *username = NULL, *password = NULL;
 	gchar *url = NULL, *timestampc = NULL, *key = NULL, *passphraseh = NULL, *passphrasec = NULL;
+	time_t timestamp = 0;
 
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 
 	/* Get settings */
 
-	preferences = pragha_preferences_get ();
-	priv->server = pragha_ampache_plugin_get_server (preferences);
-	priv->username = pragha_ampache_plugin_get_user (preferences);
-	priv->password = pragha_ampache_plugin_get_password (preferences);
-	g_object_unref (preferences);
+	server = gtk_entry_get_text (GTK_ENTRY(priv->server_entry));
+	username = gtk_entry_get_text (GTK_ENTRY(priv->user_entry));
+	password = gtk_entry_get_text (GTK_ENTRY(priv->pass_entry));
 
-	if (string_is_empty (priv->server))
+	if (string_is_empty (server))
 		return;
-	if (string_is_empty (priv->username))
+	if (string_is_empty (username))
 		return;
-	if (string_is_empty (priv->password))
+	if (string_is_empty (password))
 		return;
+
+	/* Set new server as alias of provider */
+
+	priv->server = g_strdup (server);
 
 	/* Authenticate */
 
@@ -646,7 +750,7 @@ pragha_ampache_plugin_authenticate (PraghaAmpachePlugin *plugin)
 	timestampc = g_strdup_printf("%i", (gint)timestamp);
 
 	hash = g_checksum_new (G_CHECKSUM_SHA256);
-	g_checksum_update (hash, (guchar *)priv->password, strlen(priv->password));
+	g_checksum_update (hash, (guchar *)password, strlen(password));
 	key = g_strdup(g_checksum_get_string(hash));
 
 	g_checksum_reset (hash);
@@ -656,7 +760,7 @@ pragha_ampache_plugin_authenticate (PraghaAmpachePlugin *plugin)
 	passphraseh = g_strdup(g_checksum_get_string(hash));
 
 	url = g_strdup_printf("%s/server/xml.server.php?action=handshake&auth=%s&timestamp=%s&version=350001&user=%s",
-	                      priv->server, passphraseh, timestampc, priv->username);
+	                      server, passphraseh, timestampc, username);
 
 	session = soup_session_sync_new ();
 	msg = soup_message_new ("GET", url);
@@ -677,19 +781,9 @@ pragha_ampache_plugin_deauthenticate (PraghaAmpachePlugin *plugin)
 {
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 
-	pragha_ampache_cache_clear (plugin);
-
 	if (priv->server) {
 		g_free (priv->server);
 		priv->server = NULL;
-	}
-	if (priv->username) {
-		g_free (priv->username);
-		priv->username = NULL;
-	}
-	if (priv->username) {
-		g_free (priv->username);
-		priv->username = NULL;
 	}
 	if (priv->auth) {
 		g_free (priv->auth);
@@ -736,13 +830,15 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	/* Gear Menu */
 
-	action = g_simple_action_new ("append-ampache", NULL);
+	action = g_simple_action_new ("refresh-ampache", NULL);
 	g_signal_connect (G_OBJECT (action), "activate",
-	                  G_CALLBACK (pragha_gmenu_ampcahe_plugin_search_music_action), plugin);
+	                  G_CALLBACK (pragha_ampache_plugin_upgrade_database_gmenu_action), plugin);
 
-	item = g_menu_item_new (_("Append music on Ampache server"), "win.append-ampache");
+	item = g_menu_item_new (_("Refresh the Apache database"), "win.refresh-ampache");
 
 	pragha_menubar_append_action (priv->pragha, "pragha-plugins-placeholder", action, item);
+
+	/* Append setting */
 
 	pragha_ampache_plugin_append_setting (plugin);
 
@@ -754,6 +850,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
+	PraghaDatabaseProvider *provider;
 	PraghaPreferences *preferences;
 	gchar *plugin_group = NULL;
 
@@ -762,22 +859,31 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	CDEBUG(DBG_PLUGIN, "Ampache Server plugin %s", G_STRFUNC);
 
-	/* Close */
-
-	pragha_ampache_plugin_deauthenticate (plugin);
-
 	/* Cache */
 
 	g_hash_table_destroy (priv->tracks_table);
 
-	/* Settings */
+	/* If user disable the plugin (Pragha not shutdown) */
 
-	preferences = pragha_application_get_preferences (priv->pragha);
-	plugin_group = pragha_preferences_get_plugin_group_name (preferences, GROUP_KEY_AMPACHE);
-	if (!pragha_plugins_is_shutdown(pragha_application_get_plugins_engine(priv->pragha))) {
+	if (!pragha_plugins_is_shutdown(pragha_application_get_plugins_engine(priv->pragha)))
+	{
+		/* Remove provider from gui. */
+
+		if (priv->server) {
+			provider = pragha_database_provider_get ();
+			pragha_provider_remove (provider,
+			                        priv->server);
+			pragha_provider_update_done (provider);
+			g_object_unref (provider);
+		}
+
+		/* Remove settings */
+
+		preferences = pragha_application_get_preferences (priv->pragha);
+		plugin_group = pragha_preferences_get_plugin_group_name (preferences, GROUP_KEY_AMPACHE);
 		pragha_preferences_remove_group (preferences, plugin_group);
+		g_free (plugin_group);
 	}
-	g_free (plugin_group);
 
 	/* Menu Action */
 
@@ -786,7 +892,13 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	                                     priv->merge_id_main_menu);
 	priv->merge_id_main_menu = 0;
 
-	pragha_menubar_remove_action (priv->pragha, "pragha-plugins-placeholder", "append-ampache");
+	pragha_menubar_remove_action (priv->pragha, "pragha-plugins-placeholder", "refresh-ampache");
+
+	/* Close */
+
+	pragha_ampache_plugin_deauthenticate (plugin);
+
+	/* Setting dialog widget */
 
 	pragha_ampache_plugin_remove_setting (plugin);
 }

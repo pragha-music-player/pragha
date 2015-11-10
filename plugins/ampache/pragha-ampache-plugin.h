@@ -21,8 +21,6 @@
 #include <gtk/gtk.h>
 #include <libpeas/peas.h>
 
-#include "src/pragha.h"
-
 G_BEGIN_DECLS
 
 #define PRAGHA_TYPE_AMPACHE_PLUGIN         (pragha_ampache_plugin_get_type ())
