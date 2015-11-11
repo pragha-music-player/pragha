@@ -118,7 +118,7 @@ pragha_musicobject_new_from_mtp_track (LIBMTP_track_t *track)
 	enum_map = pragha_music_enum_get();
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 	                     "file", uri,
-	                     "source", pragha_music_enum_map_get(enum_map, "FILE_MTP"),
+	                     "source", pragha_music_enum_map_get(enum_map, "MTP"),
 	                     NULL);
 	g_object_unref (enum_map);
 
@@ -173,7 +173,7 @@ pragha_musicobject_is_mtp_file (PraghaMusicobject *mobj)
 	PraghaMusicSource file_source = FILE_NONE;
 
 	enum_map = pragha_music_enum_get ();
-	file_source = pragha_music_enum_map_get(enum_map, "FILE_MTP");
+	file_source = pragha_music_enum_map_get(enum_map, "MTP");
 	g_object_unref (enum_map);
 
 	return (file_source == pragha_musicobject_get_source (mobj));
