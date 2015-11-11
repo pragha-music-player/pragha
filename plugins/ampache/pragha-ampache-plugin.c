@@ -42,6 +42,7 @@
 #include "src/pragha.h"
 #include "src/pragha-utils.h"
 #include "src/pragha-musicobject-mgmt.h"
+#include "src/pragha-music-enum.h"
 #include "src/pragha-playlist.h"
 #include "src/pragha-menubar.h"
 #include "src/pragha-musicobject.h"
@@ -219,10 +220,8 @@ pragha_ampache_cache_insert_track (PraghaAmpachePlugin *plugin, PraghaMusicobjec
 
 	const gchar *file = pragha_musicobject_get_file(mobj);
 
-	if (string_is_empty(file)) {
-		g_critical ("emthyy!!");
+	if (string_is_empty(file))
 		return;
-	}
 
 	g_hash_table_insert (priv->tracks_table,
 	                     g_strdup(file),
@@ -480,7 +479,7 @@ pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin)
 	provider = pragha_database_provider_get ();
 	pragha_provider_add_new (provider,
 	                         priv->server,
-	                         "Ampache",
+	                         "AMPACHE",
 	                         priv->server,
 	                         "folder-remote");
 	g_object_unref (provider);
@@ -493,8 +492,6 @@ pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin)
 	for (i = 0 ; i < priv->pending_threads; i++) {
 		url = g_strdup_printf("%s/server/xml.server.php?action=songs&offset=%i&limit=%i&auth=%s",
 		                      priv->server, i*limit, limit, priv->auth);
-
-		g_print ("Threads url: %s\n", url);
 
 		msg = soup_message_new ("GET", url);
 		soup_session_queue_message (session, msg,
@@ -794,12 +791,58 @@ pragha_ampache_plugin_deauthenticate (PraghaAmpachePlugin *plugin)
 }
 
 /*
+ * Gstreamer.source.
+ */
+
+static gboolean
+pragha_musicobject_is_ampache_file (PraghaMusicobject *mobj)
+{
+	PraghaMusicEnum *enum_map = NULL;
+	PraghaMusicSource file_source = FILE_NONE;
+
+	enum_map = pragha_music_enum_get ();
+	file_source = pragha_music_enum_map_get(enum_map, "AMPACHE");
+	g_object_unref (enum_map);
+
+	return (file_source == pragha_musicobject_get_source (mobj));
+}
+
+static void
+pragha_ampache_plugin_prepare_source (PraghaBackend       *backend,
+                                      PraghaAmpachePlugin *plugin)
+{
+	PraghaMusicobject *mobj;
+	GRegex *regex;
+	const gchar *filename = NULL;
+	gchar *uri = NULL, *ssid = NULL;
+
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	mobj = pragha_backend_get_musicobject (backend);
+	if (!pragha_musicobject_is_ampache_file (mobj))
+		return;
+
+	filename =  pragha_musicobject_get_file (mobj);
+
+	regex = g_regex_new ("ssid=(.[^&]*)&",
+	                     G_REGEX_MULTILINE | G_REGEX_RAW, 0, NULL);
+
+	/* FIXME: Any expert on regex here to improve it? */
+	ssid = g_strdup_printf ("ssid=%s&", priv->auth);
+	uri = g_regex_replace_literal (regex, filename, -1, 0, ssid, 0, NULL);
+	pragha_backend_set_playback_uri (backend, uri);
+	g_free (uri);
+	g_free (ssid);
+}
+
+/*
  * Plugin.
  */
 
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
 {
+	PraghaBackend *backend;
 	GMenuItem *item;
 	GSimpleAction *action;
 
@@ -814,6 +857,13 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                                            g_object_unref);
 
 	CDEBUG(DBG_PLUGIN, "Ampache Server plugin %s", G_STRFUNC);
+
+	/* Backend signals */
+
+	backend = pragha_application_get_backend (priv->pragha);
+	g_signal_connect (backend, "prepare-source",
+	                  G_CALLBACK(pragha_ampache_plugin_prepare_source), plugin);
+
 
 	/* Attach main menu */
 
@@ -850,6 +900,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
+	PraghaBackend *backend;
 	PraghaDatabaseProvider *provider;
 	PraghaPreferences *preferences;
 	gchar *plugin_group = NULL;
@@ -884,6 +935,9 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 		pragha_preferences_remove_group (preferences, plugin_group);
 		g_free (plugin_group);
 	}
+
+	backend = pragha_application_get_backend (priv->pragha);
+	g_signal_handlers_disconnect_by_func (backend, pragha_ampache_plugin_prepare_source, plugin);
 
 	/* Menu Action */
 

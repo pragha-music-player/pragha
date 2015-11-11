@@ -209,7 +209,7 @@ new_musicobject_from_cdda (PraghaCdromPlugin *plugin,
 	}
 
 	enum_map = pragha_music_enum_get ();
-	pragha_musicobject_set_source (mobj, pragha_music_enum_map_get(enum_map, "FILE_CDDA"));
+	pragha_musicobject_set_source (mobj, pragha_music_enum_map_get(enum_map, "CDROM"));
 	g_object_unref (enum_map);
 
 	if (priv->disc_id)
@@ -438,7 +438,7 @@ pragha_musicobject_is_cdda_type (PraghaMusicobject *mobj)
 	PraghaMusicSource file_source = FILE_NONE;
 
 	enum_map = pragha_music_enum_get ();
-	file_source = pragha_music_enum_map_get(enum_map, "FILE_CDDA");
+	file_source = pragha_music_enum_map_get(enum_map, "CDROM");
 	g_object_unref (enum_map);
 
 	return (file_source == pragha_musicobject_get_source (mobj));
@@ -575,7 +575,7 @@ pragha_cdrom_plugin_device_removed (PraghaDeviceClient *device_client,
 		}
 
 		enum_map = pragha_music_enum_get ();
-		pragha_music_enum_map_remove (enum_map, "FILE_CDDA");
+		pragha_music_enum_map_remove (enum_map, "CDROM");
 		g_object_unref (enum_map);
 	}
 }
@@ -834,7 +834,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	#endif
 
 	enum_map = pragha_music_enum_get ();
-	pragha_music_enum_map_get (enum_map, "FILE_CDDA");
+	pragha_music_enum_map_get (enum_map, "CDROM");
 	g_object_unref (enum_map);
 
 	/* Settings */
@@ -896,7 +896,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	/* Crop library to not save from playlist */
 
 	enum_map = pragha_music_enum_get ();
-	pragha_music_enum_map_remove (enum_map, "FILE_CDDA");
+	pragha_music_enum_map_remove (enum_map, "CDROM");
 	g_object_unref (enum_map);
 
 	/* If plugin is disables by user remove the rest of preferences */
