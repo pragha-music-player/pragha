@@ -66,6 +66,10 @@ void
 pragha_provider_remove (PraghaDatabaseProvider *provider,
                         const gchar            *name);
 
+void
+pragha_provider_forget_songs (PraghaDatabaseProvider *provider,
+                              const gchar            *name);
+
 GSList *
 pragha_provider_get_list (PraghaDatabaseProvider *provider);
 

@@ -112,6 +112,46 @@ pragha_provider_remove (PraghaDatabaseProvider *provider,
 	pragha_database_flush_stale_entries (priv->database);
 }
 
+void
+pragha_provider_forget_songs (PraghaDatabaseProvider *provider,
+                              const gchar            *name)
+{
+	PraghaPreparedStatement *statement;
+	gint provider_id = 0;
+	const gchar *sql;
+
+	PraghaDatabaseProviderPrivate *priv = provider->priv;
+
+	if ((provider_id = pragha_database_find_provider (priv->database, name)) == 0)
+		return;
+
+	/* Delete all tracks of provider */
+
+	sql = "DELETE FROM TRACK WHERE provider = ?";
+	statement = pragha_database_create_statement (priv->database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, provider_id);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	/* Delete the location entries */
+
+	sql = "DELETE FROM LOCATION WHERE id NOT IN (SELECT location FROM TRACK)";
+	statement = pragha_database_create_statement (priv->database, sql);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	/* Delete all entries from PLAYLIST_TRACKS which match given dir */
+
+	sql = "DELETE FROM PLAYLIST_TRACKS WHERE file NOT IN (SELECT name FROM LOCATION)";
+	statement = pragha_database_create_statement (priv->database, sql);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	/* Now flush unused artists, albums, genres, years */
+
+	pragha_database_flush_stale_entries (priv->database);
+}
+
 GSList *
 pragha_provider_get_list (PraghaDatabaseProvider *provider)
 {

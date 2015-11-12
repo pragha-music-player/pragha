@@ -268,14 +268,20 @@ pragha_scanner_worker_finished (gpointer data)
 		set_watch_cursor(scanner->hbox);
 
 		database = pragha_database_get();
+		provider = pragha_database_provider_get ();
 
 		pragha_database_begin_transaction (database);
 
-		pragha_database_flush (database);
+		/* Remove songs of local providers */
+
+		for (list = scanner->folder_list; list != NULL; list = list->next)
+			pragha_provider_forget_songs (provider, list->data);
+
+		/* Append new songs */
+
 		g_hash_table_foreach (scanner->tracks_table,
 		                      pragha_scanner_add_track_db,
 		                      database);
-
 
 		/* Import playlist detected. */
 
@@ -284,11 +290,10 @@ pragha_scanner_worker_finished (gpointer data)
 
 		pragha_database_commit_transaction (database);
 
-		g_object_unref(database);
-
-		provider = pragha_database_provider_get ();
 		pragha_provider_update_done (provider);
+
 		g_object_unref (provider);
+		g_object_unref(database);
 
 		remove_watch_cursor(scanner->hbox);
 		remove_watch_cursor(msg_dialog);
@@ -549,7 +554,7 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 	PraghaDatabaseProvider *provider;
 	PraghaPreparedStatement *statement;
 	PraghaMusicobject *mobj = NULL;
-	gchar *mask = NULL, *last_scan_time = NULL;
+	gchar *last_scan_time = NULL;
 	const gchar *sql = NULL;
 	guint location_id;
 	GSList *list;
@@ -580,7 +585,8 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 
 	/* Update the gui */
 
-	scanner->update_timeout = g_timeout_add_seconds(1, (GSourceFunc)pragha_scanner_update_progress, scanner);
+	scanner->update_timeout =
+		g_timeout_add_seconds(1, (GSourceFunc)pragha_scanner_update_progress, scanner);
 
 	pragha_preferences_set_show_status_bar (preferences, TRUE);
 	gtk_widget_show_all(scanner->hbox);
@@ -588,12 +594,16 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 	/* Append the files from database that no changed. */
 
 	database = pragha_database_get();
-	for(list = scanner->folder_scanned ; list != NULL; list = list->next) {
-		if(is_present_str_list(list->data, scanner->folder_list)) {
-			sql = "SELECT id FROM LOCATION WHERE name LIKE ?";
+	for (list = scanner->folder_scanned; list != NULL; list = list->next)
+	{
+		if (pragha_string_list_is_present (scanner->folder_list, list->data))
+		{
+			sql = "SELECT location FROM TRACK WHERE provider = ?";
 			statement = pragha_database_create_statement (database, sql);
-			mask = g_strconcat (list->data, "%", NULL);
-			pragha_prepared_statement_bind_string (statement, 1, mask);
+
+			pragha_prepared_statement_bind_int (statement, 1,
+				pragha_database_find_provider (database, list->data));
+
 			while (pragha_prepared_statement_step (statement)) {
 				location_id = pragha_prepared_statement_get_int (statement, 0);
 				mobj = new_musicobject_from_db(database, location_id);
@@ -606,7 +616,6 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 				pragha_process_gtk_events ();
 			}
 			pragha_prepared_statement_free (statement);
-			g_free(mask);
 		}
 	}
 	g_object_unref(database);
