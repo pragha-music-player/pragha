@@ -693,6 +693,7 @@ pragha_mtp_plugin_device_removed (PraghaDeviceClient *device_client,
                                   GUdevDevice        *u_device,
                                   gpointer            user_data)
 {
+	PraghaDatabaseProvider *provider;
 	PraghaMusicEnum *enum_map = NULL;
 	guint64 busnum = 0;
 	guint64 devnum = 0;
@@ -708,6 +709,13 @@ pragha_mtp_plugin_device_removed (PraghaDeviceClient *device_client,
 
 	if (busnum == priv->bus_hooked && devnum == priv->device_hooked) {
 		pragha_mtp_plugin_remove_menu_action (plugin);
+
+		provider = pragha_database_provider_get ();
+		pragha_provider_remove (provider,
+		                        priv->device_id);
+		pragha_provider_update_done (provider);
+		g_object_unref (provider);
+
 		pragha_mtp_cache_clear (plugin);
 
 		pragha_mtp_clear_hook_device (plugin);
