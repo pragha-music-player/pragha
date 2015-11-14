@@ -407,6 +407,7 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 	GSList *list, *library_dir = NULL, *folder_scanned = NULL, *folders_added = NULL, *folders_deleted = NULL;
 	gchar *window_state_sink = NULL;
 	const gchar *album_art_pattern;
+	gchar *prov_base = NULL;
 	gboolean show_album_art, instant_search, approximate_search, restore_playlist, add_recursively, use_hint;
 	gboolean test_change = FALSE, pref_setted, pref_toggled, library_locked;
 #if GTK_CHECK_VERSION (3, 12, 0)
@@ -468,7 +469,9 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 
 		if (folders_added) {
 			for (list = folders_added; list != NULL; list = list->next) {
-				pragha_provider_add_new (provider, list->data, "local", list->data, "drive-harddisk");
+				prov_base = g_filename_display_basename (list->data);
+				pragha_provider_add_new (provider, list->data, "local", prov_base, "drive-harddisk");
+				g_free (prov_base);
 			}
 			test_change = TRUE;
 		}
