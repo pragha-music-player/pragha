@@ -3182,29 +3182,38 @@ pragha_playlist_save_playlist_state (PraghaPlaylist* cplaylist)
 /* Init current playlist on application bringup,
    restore stored playlist */
 
-static void init_playlist_current_playlist(PraghaPlaylist *cplaylist)
+static void
+pragha_playlist_restore_tracks (PraghaPlaylist *cplaylist)
 {
+	PraghaPreparedStatement *statement;
 	gint playlist_id, location_id;
+	const gchar *filename = NULL;
 	PraghaMusicobject *mobj;
 	GList *list = NULL;
 
+	const gchar *sql = "SELECT file FROM PLAYLIST_TRACKS WHERE playlist = ?";
+
+	pragha_database_begin_transaction (cplaylist->cdbase);
+
 	playlist_id = pragha_database_find_playlist (cplaylist->cdbase, SAVE_PLAYLIST_STATE);
 
-	const gchar *sql = "SELECT file FROM PLAYLIST_TRACKS WHERE playlist = ?";
-	PraghaPreparedStatement *statement = pragha_database_create_statement (cplaylist->cdbase, sql);
+	statement = pragha_database_create_statement (cplaylist->cdbase, sql);
 	pragha_prepared_statement_bind_int (statement, 1, playlist_id);
 
-	while (pragha_prepared_statement_step (statement)) {
-		const gchar *file = pragha_prepared_statement_get_string (statement, 0);
+	while (pragha_prepared_statement_step (statement))
+	{
+		filename = pragha_prepared_statement_get_string (statement, 0);
 		/* TODO: Fix this negradaaa!. */
-		if(g_str_has_prefix(file, "Radio:/") == FALSE) {
-			if ((location_id = pragha_database_find_location (cplaylist->cdbase, file)))
+		if(g_str_has_prefix(filename, "Radio:/") == FALSE)
+		{
+			if ((location_id = pragha_database_find_location (cplaylist->cdbase, filename)))
 				mobj = new_musicobject_from_db(cplaylist->cdbase, location_id);
 			else
-				mobj = new_musicobject_from_file(file, NULL);
+				mobj = new_musicobject_from_file(filename, NULL);
 		}
-		else {
-			mobj = new_musicobject_from_location(file + strlen("Radio:/"), file + strlen("Radio:/"));
+		else
+		{
+			mobj = new_musicobject_from_location (filename + strlen("Radio:/"), filename + strlen("Radio:/"));
 		}
 
 		if (G_LIKELY(mobj))
@@ -3212,6 +3221,8 @@ static void init_playlist_current_playlist(PraghaPlaylist *cplaylist)
 	}
 
 	pragha_prepared_statement_free (statement);
+
+	pragha_database_commit_transaction (cplaylist->cdbase);
 
 	if (list) {
 		pragha_playlist_append_mobj_list(cplaylist, list);
@@ -3225,7 +3236,7 @@ pragha_playlist_init_playlist_state (PraghaPlaylist *cplaylist)
 	gchar *ref = NULL;
 	GtkTreePath *path = NULL;
 
-	init_playlist_current_playlist(cplaylist);
+	pragha_playlist_restore_tracks (cplaylist);
 
 	ref = pragha_preferences_get_string(cplaylist->preferences,
 	                                    GROUP_PLAYLIST,

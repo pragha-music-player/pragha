@@ -1065,25 +1065,6 @@ pragha_pl_get_first_playlist_item (const gchar *uri)
 	return file;
 }
 
-/* Appennd a tracks list to a playlist using the given type */
-
-static void
-append_files_to_playlist(PraghaDatabase *cdbase, GSList *list, gint playlist_id)
-{
-	gchar *file;
-	GSList *i = NULL;
-
-	pragha_database_begin_transaction (cdbase);
-
-	for (i=list; i != NULL; i = i->next) {
-		file = i->data;
-		pragha_database_add_playlist_track (cdbase, playlist_id, file);
-		g_free(file);
-	}
-
-	pragha_database_commit_transaction (cdbase);
-}
-
 /* Save tracks to a playlist using the given type */
 
 void
@@ -1091,10 +1072,9 @@ save_playlist(PraghaPlaylist* cplaylist,
               gint playlist_id,
               PraghaPlaylistActionRange type)
 {
-	PraghaMusicobject *mobj = NULL;
+	PraghaDatabase *cdbase = NULL;
 	GList *mlist = NULL, *i;
-	GSList *files = NULL;
-	gchar *file = NULL;
+	const gchar *filename = NULL;
 
 	switch(type) {
 	case SAVE_COMPLETE:
@@ -1107,26 +1087,29 @@ save_playlist(PraghaPlaylist* cplaylist,
 		break;
 	}
 
-	if(mlist != NULL) {
-		for (i=mlist; i != NULL; i = i->next) {
-			mobj = i->data;
-			if (pragha_musicobject_is_local_file(mobj)) {
-			    	file = g_strdup(pragha_musicobject_get_file(mobj));
-				files = g_slist_prepend(files, file);
-			}
-			else if(pragha_musicobject_get_source(mobj) == FILE_HTTP) {
+	cdbase = pragha_playlist_get_database (cplaylist);
+	pragha_database_begin_transaction (cdbase);
+	if (mlist != NULL)
+	{
+		for (i = mlist; i != NULL; i = i->next)
+		{
+			filename = pragha_musicobject_get_file (PRAGHA_MUSICOBJECT(i->data));
+			if(pragha_musicobject_get_source (PRAGHA_MUSICOBJECT(i->data)) == FILE_HTTP)
+			{
 				/* TODO: Fix this negradaaa!. */
-				file = g_strdup_printf("Radio:/%s", pragha_musicobject_get_file(mobj));
-				files = g_slist_prepend(files, file);
+				gchar *file = g_strdup_printf("Radio:/%s", filename);
+				pragha_database_add_playlist_track (cdbase, playlist_id, file);
+				g_free (file);
+			}
+			else
+			{
+				filename = pragha_musicobject_get_file (PRAGHA_MUSICOBJECT(i->data));
+				pragha_database_add_playlist_track (cdbase, playlist_id, filename);
 			}
 		}
 		g_list_free(mlist);
 	}
-
-	if(files != NULL) {
-		append_files_to_playlist(pragha_playlist_get_database(cplaylist), files, playlist_id);
-		g_slist_free(files);
-	}
+	pragha_database_commit_transaction (cdbase);
 }
 
 void
