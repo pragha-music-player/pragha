@@ -3567,6 +3567,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(column, renderer, "pixbuf", P_STATUS_PIXBUF, NULL);
 
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
 	gtk_tree_view_column_set_resizable(column, FALSE);
 	gtk_tree_view_append_column (GTK_TREE_VIEW(view), column);
 
@@ -3584,7 +3585,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  "text",
 							  P_TRACK_NO,
 							  NULL);
-
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_TRACK_NO);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
@@ -3605,6 +3606,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  "text",
 							  P_TITLE,
 							  NULL);
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_TITLE);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
@@ -3625,6 +3627,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  "text",
 							  P_ARTIST,
 							  NULL);
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_ARTIST);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
@@ -3645,6 +3648,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  "text",
 							  P_ALBUM,
 							  NULL);
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_ALBUM);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
@@ -3665,6 +3669,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  "text",
 							  P_GENRE,
 							  NULL);
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_GENRE);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
@@ -3685,6 +3690,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  "text",
 							  P_BITRATE,
 							  NULL);
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_BITRATE);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
@@ -3705,6 +3711,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  "text",
 							  P_YEAR,
 							  NULL);
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_YEAR);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
@@ -3725,6 +3732,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  "text",
 							  P_COMMENT,
 							  NULL);
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_COMMENT);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
@@ -3745,6 +3753,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  "text",
 							  P_LENGTH,
 							  NULL);
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_LENGTH);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
@@ -3764,6 +3773,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  "text",
 							  P_FILENAME,
 							  NULL);
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_FILENAME);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
@@ -3784,6 +3794,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  "text",
 							  P_MIMETYPE,
 							  NULL);
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_MIMETYPE);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
@@ -3837,6 +3848,10 @@ create_current_playlist_view (PraghaPlaylist *cplaylist)
 	current_playlist = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(current_playlist));
 	sortable = GTK_TREE_SORTABLE(model);
+
+	/* Set fixed height */
+
+	gtk_tree_view_set_fixed_height_mode (GTK_TREE_VIEW(current_playlist), TRUE);
 
 	/* Disable interactive search */
 

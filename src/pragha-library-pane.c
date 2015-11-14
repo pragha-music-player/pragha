@@ -2681,12 +2681,14 @@ pragha_library_pane_tree_new(PraghaLibraryPane *clibrary)
 
 	library_filter_tree = gtk_tree_model_filter_new(GTK_TREE_MODEL(clibrary->library_store), NULL);
 	gtk_tree_model_filter_set_visible_column(GTK_TREE_MODEL_FILTER(library_filter_tree),
-						 L_VISIBILE);
+	                                         L_VISIBILE);
+
 	/* Create the tree view */
 
 	library_tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(library_filter_tree));
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(library_tree), FALSE);
 	gtk_tree_view_set_show_expanders(GTK_TREE_VIEW(library_tree), TRUE);
+	gtk_tree_view_set_fixed_height_mode (GTK_TREE_VIEW(library_tree), TRUE);
 
 	/* Selection mode is multiple */
 
@@ -2696,6 +2698,7 @@ pragha_library_pane_tree_new(PraghaLibraryPane *clibrary)
 	/* Create column and cell renderers */
 
 	column = gtk_tree_view_column_new();
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
 
 	renderer = gtk_cell_renderer_pixbuf_new();
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
