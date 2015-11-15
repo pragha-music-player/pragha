@@ -109,8 +109,25 @@ pragha_musicobject_new_from_mtp_track (LIBMTP_track_t *track)
 {
 	PraghaMusicEnum *enum_map = NULL;
 	PraghaMusicobject *mobj = NULL;
-	gchar *uri = NULL;
-	
+	gchar *mime_type = NULL, *uri = NULL;
+
+	/* First chech mime_type */
+
+	if (track->filetype == LIBMTP_FILETYPE_FLAC)
+		mime_type = g_strdup ("audio/x-flac");
+	else if (track->filetype == LIBMTP_FILETYPE_MP3)
+		mime_type = g_strdup ("audio/mpeg");
+	else if (track->filetype == LIBMTP_FILETYPE_OGG)
+		mime_type = g_strdup ("audio/ogg");
+	else if (track->filetype == LIBMTP_FILETYPE_WAV)
+		mime_type = g_strdup ("audio/x-wav");
+	else if (track->filetype == LIBMTP_FILETYPE_WMA)
+		mime_type = g_strdup ("audio/x-ms-wma");
+	else if (track->filetype == LIBMTP_FILETYPE_MP4)
+		mime_type = g_strdup ("audio/x-m4a");
+	else
+		return NULL;
+
 	uri = g_strdup_printf ("mtp://%i-%s", track->item_id, track->filename);
 
 	CDEBUG(DBG_MOBJ, "Creating new musicobject to MTP: %s", uri);
@@ -118,6 +135,7 @@ pragha_musicobject_new_from_mtp_track (LIBMTP_track_t *track)
 	enum_map = pragha_music_enum_get();
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 	                     "file", uri,
+	                     "mime-type", mime_type,
 	                     "source", pragha_music_enum_map_get(enum_map, "MTP"),
 	                     NULL);
 	g_object_unref (enum_map);
@@ -139,7 +157,8 @@ pragha_musicobject_new_from_mtp_track (LIBMTP_track_t *track)
 	if (track->nochannels)
 		pragha_musicobject_set_channels (mobj, track->nochannels);
 
-	g_free(uri);
+	g_free (uri);
+	g_free (mime_type);
 
 	return mobj;
 }

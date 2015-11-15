@@ -245,6 +245,54 @@ pragha_mtp_cache_insert_track (PraghaMtpPlugin *plugin, PraghaMusicobject *mobj)
 	                     mobj);
 }
 
+static void
+pragha_mtp_plugin_cache_storage_recursive (LIBMTP_mtpdevice_t *device,
+                                           guint               storageid,
+                                           gint                leaf,
+                                           PraghaMtpPlugin    *plugin)
+{
+	PraghaMusicobject *mobj = NULL;
+	LIBMTP_file_t *files;
+
+	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	files = LIBMTP_Get_Files_And_Folders (device,
+	                                      storageid,
+	                                      leaf);
+
+	if (files != NULL)
+	{
+		LIBMTP_file_t *file, *tmp;
+
+		file = files;
+		while (file != NULL)
+		{
+			if (file->filetype == LIBMTP_FILETYPE_FOLDER)
+			{
+				pragha_mtp_plugin_cache_storage_recursive (device, storageid, file->item_id, plugin);
+			}
+			else if (LIBMTP_FILETYPE_IS_AUDIO(file->filetype))
+			{
+				LIBMTP_track_t *track;
+
+				track = LIBMTP_Get_Trackmetadata(device, file->item_id);
+
+				mobj = pragha_musicobject_new_from_mtp_track (track);
+				if (G_LIKELY(mobj))
+				{
+					pragha_musicobject_set_provider (mobj, priv->device_id);
+					pragha_mtp_cache_insert_track (plugin, mobj);
+				}
+
+				LIBMTP_destroy_track_t(track);
+			}
+			tmp = file;
+			file = file->next;
+			LIBMTP_destroy_file_t(tmp);
+		}
+	}
+}
+
 /*
  * Menu actions
  */
@@ -491,46 +539,18 @@ pragha_mtp_plugin_remove_menu_action (PraghaMtpPlugin *plugin)
 	                             "mtp-sudmenu");
 }
 
-static int
-progressfunc (uint64_t const sent, uint64_t const total, void const *const data)
-{
-	/* Have to give control to GTK periodically ... */
-	pragha_process_gtk_events ();
-
-	return 0;
-}
-
 static void
 pragha_mtp_plugin_cache_tracks (PraghaMtpPlugin *plugin)
 {
 	PraghaDatabaseProvider *provider;
-	PraghaMusicobject *mobj = NULL;
-	LIBMTP_track_t *tracks, *track, *tmp;
+	LIBMTP_devicestorage_t *storage;
 
 	PraghaMtpPluginPrivate *priv = plugin->priv;
 
-	tracks = LIBMTP_Get_Tracklisting_With_Callback (priv->mtp_device, progressfunc, NULL); // Slow!.
+	/* Get music recursively */
 
-	if (!tracks)
-		return;
-
-	/* Cache music */
-
-	track = tracks;
-	while (track != NULL) {
-		mobj = pragha_musicobject_new_from_mtp_track (track);
-		if (G_LIKELY(mobj)) {
-			pragha_musicobject_set_provider (mobj, priv->device_id);
-			pragha_mtp_cache_insert_track (plugin, mobj);
-		}
-
-		tmp = track;
-		track = track->next;
-
-		LIBMTP_destroy_track_t(tmp);
-
-		/* Have to give control to GTK periodically ... */
-		pragha_process_gtk_events ();
+	for (storage = priv->mtp_device->storage; storage != 0; storage = storage->next) {
+		pragha_mtp_plugin_cache_storage_recursive (priv->mtp_device, storage->id, 0, plugin);
 	}
 
 	/* Add provider */
@@ -592,10 +612,12 @@ pragha_mtp_detected_ask_action_response (GtkWidget *dialog,
 	switch (response)
 	{
 		case PRAGHA_DEVICE_RESPONSE_PLAY:
-			pragha_mtp_plugin_append_cache (plugin);
+			pragha_mtp_plugin_cache_tracks (plugin);
+			pragha_mtp_plugin_append_menu_action (plugin);
 			break;
 		case PRAGHA_DEVICE_RESPONSE_NONE:
 		default:
+			pragha_mtp_clear_hook_device (plugin);
 			break;
 	}
 	gtk_widget_destroy (dialog);
@@ -652,6 +674,7 @@ pragha_mtp_plugin_device_added (PraghaDeviceClient *device_client,
 			break;
 		}
 	}
+
 	if (!raw_device) {
 		g_warning("No mach any mtp device with bus, testing first.");
 		raw_device = &device_list[0];
@@ -662,9 +685,7 @@ pragha_mtp_plugin_device_added (PraghaDeviceClient *device_client,
 		return;
 	}
 
-	/* Get device and reorder by free space. */
-
-	mtp_device = LIBMTP_Open_Raw_Device(raw_device); // Slow!.
+	mtp_device = LIBMTP_Open_Raw_Device_Uncached (raw_device);
 	LIBMTP_Get_Storage (mtp_device, LIBMTP_STORAGE_SORTBY_FREESPACE);
 
 	/* Hook device */
@@ -679,10 +700,7 @@ pragha_mtp_plugin_device_added (PraghaDeviceClient *device_client,
 		priv->friend_name = LIBMTP_Get_Modelname (priv->mtp_device);
 	priv->device_id = LIBMTP_Get_Serialnumber (priv->mtp_device);
 
-	pragha_mtp_plugin_cache_tracks (plugin);
-
 	pragha_mtp_detected_ask_action (plugin);
-	pragha_mtp_plugin_append_menu_action (plugin);
 
 	g_free (device_list);
 }
