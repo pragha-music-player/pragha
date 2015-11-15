@@ -1094,18 +1094,7 @@ save_playlist(PraghaPlaylist* cplaylist,
 		for (i = mlist; i != NULL; i = i->next)
 		{
 			filename = pragha_musicobject_get_file (PRAGHA_MUSICOBJECT(i->data));
-			if(pragha_musicobject_get_source (PRAGHA_MUSICOBJECT(i->data)) == FILE_HTTP)
-			{
-				/* TODO: Fix this negradaaa!. */
-				gchar *file = g_strdup_printf("Radio:/%s", filename);
-				pragha_database_add_playlist_track (cdbase, playlist_id, file);
-				g_free (file);
-			}
-			else
-			{
-				filename = pragha_musicobject_get_file (PRAGHA_MUSICOBJECT(i->data));
-				pragha_database_add_playlist_track (cdbase, playlist_id, filename);
-			}
+			pragha_database_add_playlist_track (cdbase, playlist_id, filename);
 		}
 		g_list_free(mlist);
 	}

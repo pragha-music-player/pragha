@@ -3193,6 +3193,10 @@ pragha_playlist_restore_tracks (PraghaPlaylist *cplaylist)
 
 	const gchar *sql = "SELECT file FROM PLAYLIST_TRACKS WHERE playlist = ?";
 
+	/* Set watch cursor early */
+	set_watch_cursor (GTK_WIDGET(cplaylist));
+	pragha_playlist_set_changing(cplaylist, TRUE);
+
 	pragha_database_begin_transaction (cplaylist->cdbase);
 
 	playlist_id = pragha_database_find_playlist (cplaylist->cdbase, SAVE_PLAYLIST_STATE);
@@ -3203,21 +3207,22 @@ pragha_playlist_restore_tracks (PraghaPlaylist *cplaylist)
 	while (pragha_prepared_statement_step (statement))
 	{
 		filename = pragha_prepared_statement_get_string (statement, 0);
-		/* TODO: Fix this negradaaa!. */
-		if(g_str_has_prefix(filename, "Radio:/") == FALSE)
+		if ((location_id = pragha_database_find_location (cplaylist->cdbase, filename)))
 		{
-			if ((location_id = pragha_database_find_location (cplaylist->cdbase, filename)))
-				mobj = new_musicobject_from_db(cplaylist->cdbase, location_id);
-			else
-				mobj = new_musicobject_from_file(filename, NULL);
+			mobj = new_musicobject_from_db(cplaylist->cdbase, location_id);
+		}
+		else if (g_str_has_prefix(filename, "http:/") ||
+		         g_str_has_prefix(filename, "https:/"))
+		{
+			mobj = new_musicobject_from_location (filename, NULL);
 		}
 		else
 		{
-			mobj = new_musicobject_from_location (filename + strlen("Radio:/"), filename + strlen("Radio:/"));
+			mobj = new_musicobject_from_file(filename, NULL);
 		}
 
 		if (G_LIKELY(mobj))
-			list = g_list_append(list, mobj);
+			list = g_list_prepend (list, mobj);
 	}
 
 	pragha_prepared_statement_free (statement);
