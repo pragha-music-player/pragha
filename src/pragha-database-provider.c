@@ -30,6 +30,8 @@ struct _PraghaDatabaseProviderPrivate
 enum {
 	SIGNAL_VISIBILITY,
 	SIGNAL_WANT_UPDATE,
+	SIGNAL_WANT_UPGRADE,
+	SIGNAL_WANT_REMOVE,
 	SIGNAL_UPDATE_DONE,
 	LAST_SIGNAL
 };
@@ -294,12 +296,29 @@ pragha_provider_visibility_changed (PraghaDatabaseProvider *provider)
 }
 
 void
-pragha_provider_want_update (PraghaDatabaseProvider *provider)
+pragha_provider_want_upgrade (PraghaDatabaseProvider *provider, gint provider_id)
 {
 	g_return_if_fail(PRAGHA_IS_DATABASE_PROVIDER(provider));
 
-	g_signal_emit (provider, signals[SIGNAL_WANT_UPDATE], 0);
+	g_signal_emit (provider, signals[SIGNAL_WANT_UPDATE], 0, provider_id);
 }
+
+void
+pragha_provider_want_update (PraghaDatabaseProvider *provider, gint provider_id)
+{
+	g_return_if_fail(PRAGHA_IS_DATABASE_PROVIDER(provider));
+
+	g_signal_emit (provider, signals[SIGNAL_WANT_UPDATE], 0, provider_id);
+}
+
+void
+pragha_provider_want_remove (PraghaDatabaseProvider *provider, gint provider_id)
+{
+	g_return_if_fail(PRAGHA_IS_DATABASE_PROVIDER(provider));
+
+	g_signal_emit (provider, signals[SIGNAL_WANT_UPDATE], 0, provider_id);
+}
+
 
 void
 pragha_provider_update_done (PraghaDatabaseProvider *provider)
@@ -345,14 +364,32 @@ pragha_database_provider_class_init (PraghaDatabaseProviderClass *klass)
 		              g_cclosure_marshal_VOID__VOID,
 		              G_TYPE_NONE, 0);
 
+	signals[SIGNAL_WANT_UPGRADE] =
+		g_signal_new ("WantUpgrade",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaDatabaseProviderClass, want_upgrade),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__INT,
+		              G_TYPE_NONE, 1, G_TYPE_INT);
+
 	signals[SIGNAL_WANT_UPDATE] =
 		g_signal_new ("WantUpdate",
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (PraghaDatabaseProviderClass, want_update),
 		              NULL, NULL,
-		              g_cclosure_marshal_VOID__VOID,
-		              G_TYPE_NONE, 0);
+		              g_cclosure_marshal_VOID__INT,
+		              G_TYPE_NONE, 1, G_TYPE_INT);
+
+	signals[SIGNAL_WANT_REMOVE] =
+		g_signal_new ("WantRemove",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaDatabaseProviderClass, want_remove),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__INT,
+		              G_TYPE_NONE, 1, G_TYPE_INT);
 
 	signals[SIGNAL_UPDATE_DONE] =
 		g_signal_new ("UpdateDone",
