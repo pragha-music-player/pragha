@@ -3229,6 +3229,9 @@ pragha_playlist_restore_tracks (PraghaPlaylist *cplaylist)
 
 	pragha_database_commit_transaction (cplaylist->cdbase);
 
+	pragha_playlist_set_changing(cplaylist, FALSE);
+	remove_watch_cursor (GTK_WIDGET(cplaylist));
+
 	if (list) {
 		pragha_playlist_append_mobj_list(cplaylist, list);
 		g_list_free (list);
