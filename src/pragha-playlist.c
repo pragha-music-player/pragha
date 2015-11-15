@@ -3271,7 +3271,7 @@ init_current_playlist_columns(PraghaPlaylist* cplaylist)
 	GList *list = NULL, *i;
 	GSList *j;
 	gint k = 0;
-	gint *col_widths;
+	gint *col_widths, icon_size;
 	gsize cnt = 0, isize;
 
 	columns = pragha_preferences_get_string_list(cplaylist->preferences,
@@ -3354,10 +3354,11 @@ init_current_playlist_columns(PraghaPlaylist* cplaylist)
 		g_warning("(%s): No columns in playlist view", __func__);
 
 	/* Always show queue and status pixbuf colum */
+	icon_size = get_playlist_icon_size ();
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view), 0);
 	gtk_tree_view_column_set_visible(col, TRUE);
 	gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
-	gtk_tree_view_column_set_fixed_width(col, 36);
+	gtk_tree_view_column_set_fixed_width (col, 2*icon_size);
 }
 
 static GtkWidget*
@@ -3557,6 +3558,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 		*label_filename,
 		*label_mimetype;
 	GtkWidget *col_button;
+	gint icon_size = 0;
 
 	label_track = gtk_label_new(_("Track"));
 	label_title = gtk_label_new(_("Title"));
@@ -3574,15 +3576,18 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 
 	/* Column : Queue Bubble and Status Pixbuf */
 
+	icon_size = get_playlist_icon_size();
+
 	column = gtk_tree_view_column_new ();
 
 	renderer = gtk_cell_renderer_bubble_new ();
-	gtk_cell_renderer_set_fixed_size (renderer, 14, -1);
+	gtk_cell_renderer_set_fixed_size (renderer, icon_size, -1);
 	gtk_tree_view_column_pack_start (column, renderer, FALSE);
 	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer), 1);
 	gtk_tree_view_column_set_attributes(column, renderer, "markup", P_QUEUE, "show-bubble", P_BUBBLE, NULL);
 
 	renderer = gtk_cell_renderer_pixbuf_new();
+	gtk_cell_renderer_set_fixed_size (renderer, icon_size, -1);
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(column, renderer, "pixbuf", P_STATUS_PIXBUF, NULL);
 
