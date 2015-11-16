@@ -3096,7 +3096,7 @@ pragha_library_pane_init (PraghaLibraryPane *library)
 	                  G_CALLBACK (library_pane_change_style), library);
 
 	provider = pragha_database_provider_get ();
-	g_signal_connect (provider, "UpdateDone",
+	g_signal_connect (provider, "update-done",
 	                  G_CALLBACK (update_library_tracks_changes), library);
 	g_object_unref (provider);
 

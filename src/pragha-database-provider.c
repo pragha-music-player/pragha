@@ -356,7 +356,7 @@ pragha_database_provider_class_init (PraghaDatabaseProviderClass *klass)
 	object_class->dispose = pragha_database_provider_dispose;
 
 	signals[SIGNAL_VISIBILITY] =
-		g_signal_new ("VisibilityChanged",
+		g_signal_new ("visibility-changed",
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (PraghaDatabaseProviderClass, visibility_changed),
@@ -365,7 +365,7 @@ pragha_database_provider_class_init (PraghaDatabaseProviderClass *klass)
 		              G_TYPE_NONE, 0);
 
 	signals[SIGNAL_WANT_UPGRADE] =
-		g_signal_new ("WantUpgrade",
+		g_signal_new ("want-upgrade",
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (PraghaDatabaseProviderClass, want_upgrade),
@@ -374,7 +374,7 @@ pragha_database_provider_class_init (PraghaDatabaseProviderClass *klass)
 		              G_TYPE_NONE, 1, G_TYPE_INT);
 
 	signals[SIGNAL_WANT_UPDATE] =
-		g_signal_new ("WantUpdate",
+		g_signal_new ("want-update",
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (PraghaDatabaseProviderClass, want_update),
@@ -383,7 +383,7 @@ pragha_database_provider_class_init (PraghaDatabaseProviderClass *klass)
 		              G_TYPE_NONE, 1, G_TYPE_INT);
 
 	signals[SIGNAL_WANT_REMOVE] =
-		g_signal_new ("WantRemove",
+		g_signal_new ("want-remove",
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (PraghaDatabaseProviderClass, want_remove),
@@ -392,7 +392,7 @@ pragha_database_provider_class_init (PraghaDatabaseProviderClass *klass)
 		              G_TYPE_NONE, 1, G_TYPE_INT);
 
 	signals[SIGNAL_UPDATE_DONE] =
-		g_signal_new ("UpdateDone",
+		g_signal_new ("update-done",
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (PraghaDatabaseProviderClass, update_done),

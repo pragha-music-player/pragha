@@ -668,6 +668,58 @@ pragha_libary_list_changed_cb (PraghaPreferences *preferences, PraghaApplication
 }
 
 static void
+pragha_application_provider_want_update (PraghaDatabaseProvider *provider,
+                                         gint                    provider_id,
+                                         PraghaApplication      *pragha)
+{
+	PraghaDatabase *database;
+	PraghaScanner *scanner;
+	PraghaPreparedStatement *statement;
+	const gchar *sql, *provider_type;
+
+	sql = "SELECT name FROM provider_type WHERE id IN (SELECT type FROM provider WHERE id = ?)";
+
+	database = pragha_application_get_database (pragha);
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, provider_id);
+	if (pragha_prepared_statement_step (statement))
+		provider_type = pragha_prepared_statement_get_string (statement, 0);
+
+	if (g_ascii_strcasecmp (provider_type, "local") == 0)
+	{
+		scanner = pragha_application_get_scanner (pragha);
+		pragha_scanner_update_library (scanner);
+	}
+	pragha_prepared_statement_free (statement);
+}
+
+static void
+pragha_application_provider_want_upgrade (PraghaDatabaseProvider *provider,
+                                          gint                    provider_id,
+                                          PraghaApplication      *pragha)
+{
+	PraghaDatabase *database;
+	PraghaScanner *scanner;
+	PraghaPreparedStatement *statement;
+	const gchar *sql, *provider_type;
+
+	sql = "SELECT name FROM provider_type WHERE id IN (SELECT type FROM provider WHERE id = ?)";
+
+	database = pragha_application_get_database (pragha);
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, provider_id);
+	if (pragha_prepared_statement_step (statement))
+		provider_type = pragha_prepared_statement_get_string (statement, 0);
+
+	if (g_ascii_strcasecmp (provider_type, "local") == 0)
+	{
+		scanner = pragha_application_get_scanner (pragha);
+		pragha_scanner_scan_library (scanner);
+	}
+	pragha_prepared_statement_free (statement);
+}
+
+static void
 pragha_need_restart_cb (PraghaPreferences *preferences, PraghaApplication *pragha)
 {
 	GtkWidget *infobar = pragha_info_bar_need_restart (pragha);
@@ -1015,12 +1067,17 @@ pragha_application_startup (GApplication *application)
 	if (pragha_database_start_successfully(pragha->cdbase) == FALSE) {
 		g_error("Unable to init music dbase");
 	}
-	pragha->provider = pragha_database_provider_get ();
 
 	version = pragha_preferences_get_installed_version (pragha->preferences);
 	if (string_is_not_empty (version) && (g_ascii_strcasecmp (version, "1.3.1") < 0)) {
 		pragha_database_compatibilize_version (pragha->cdbase);
 	}
+
+	pragha->provider = pragha_database_provider_get ();
+	g_signal_connect (pragha->provider, "want-upgrade",
+	                  G_CALLBACK(pragha_application_provider_want_upgrade), pragha);
+	g_signal_connect (pragha->provider, "want-update",
+	                  G_CALLBACK(pragha_application_provider_want_update), pragha);
 
 	pragha->enum_map = pragha_music_enum_get ();
 	g_signal_connect (pragha->enum_map, "enum-removed",

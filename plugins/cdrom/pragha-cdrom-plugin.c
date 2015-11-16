@@ -528,7 +528,8 @@ pragha_cdrom_plugin_device_added (PraghaDeviceClient *device_client,
 	priv->bus_hooked = g_udev_device_get_property_as_uint64 (u_device, "BUSNUM");
 	priv->device_hooked = g_udev_device_get_property_as_uint64 (u_device, "DEVNUM");
 
-	dialog = pragha_gudev_dialog_new (NULL, _("Audio/Data CD"), "media-optical",
+	dialog = pragha_gudev_dialog_new (pragha_application_get_window (priv->pragha),
+	                                 _("Audio/Data CD"), "media-optical",
 	                                 _("An audio CD was inserted"), NULL,
 	                                 _("Add Audio _CD"), PRAGHA_DEVICE_RESPONSE_PLAY);
 

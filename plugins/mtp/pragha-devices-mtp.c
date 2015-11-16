@@ -627,7 +627,11 @@ static void
 pragha_mtp_detected_ask_action (PraghaMtpPlugin *plugin)
 {
 	GtkWidget *dialog;
-	dialog = pragha_gudev_dialog_new (NULL, _("MTP Device"), "multimedia-player",
+
+	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	dialog = pragha_gudev_dialog_new (pragha_application_get_window (priv->pragha),
+	                                  _("MTP Device"), "multimedia-player",
 	                                  _("Was inserted an MTP Device"), NULL,
 	                                  _("Append songs of device"), PRAGHA_DEVICE_RESPONSE_PLAY);
 
