@@ -28,7 +28,6 @@ struct _PraghaDatabaseProviderPrivate
 };
 
 enum {
-	SIGNAL_VISIBILITY,
 	SIGNAL_WANT_UPDATE,
 	SIGNAL_WANT_UPGRADE,
 	SIGNAL_WANT_REMOVE,
@@ -288,14 +287,6 @@ pragha_provider_get_icon_name (PraghaDatabaseProvider *provider, const gchar *na
  */
 
 void
-pragha_provider_visibility_changed (PraghaDatabaseProvider *provider)
-{
-	g_return_if_fail(PRAGHA_IS_DATABASE_PROVIDER(provider));
-
-	g_signal_emit (provider, signals[SIGNAL_VISIBILITY], 0);
-}
-
-void
 pragha_provider_want_upgrade (PraghaDatabaseProvider *provider, gint provider_id)
 {
 	g_return_if_fail(PRAGHA_IS_DATABASE_PROVIDER(provider));
@@ -354,15 +345,6 @@ pragha_database_provider_class_init (PraghaDatabaseProviderClass *klass)
 
 	object_class = G_OBJECT_CLASS(klass);
 	object_class->dispose = pragha_database_provider_dispose;
-
-	signals[SIGNAL_VISIBILITY] =
-		g_signal_new ("visibility-changed",
-		              G_TYPE_FROM_CLASS (object_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (PraghaDatabaseProviderClass, visibility_changed),
-		              NULL, NULL,
-		              g_cclosure_marshal_VOID__VOID,
-		              G_TYPE_NONE, 0);
 
 	signals[SIGNAL_WANT_UPGRADE] =
 		g_signal_new ("want-upgrade",

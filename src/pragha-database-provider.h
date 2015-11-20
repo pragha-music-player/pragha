@@ -46,7 +46,6 @@ struct _PraghaDatabaseProviderClass
 {
 	GObjectClass parent_class;
 
-	void (*visibility_changed) (PraghaDatabaseProvider *provider);
 	void (*want_upgrade)       (PraghaDatabaseProvider *provider, gint provider_id);
 	void (*want_update)        (PraghaDatabaseProvider *provider, gint provider_id);
 	void (*want_remove)        (PraghaDatabaseProvider *provider, gint provider_id);
@@ -91,9 +90,6 @@ pragha_provider_get_friendly_name (PraghaDatabaseProvider *provider, const gchar
 
 gchar *
 pragha_provider_get_icon_name (PraghaDatabaseProvider *provider, const gchar *name);
-
-void
-pragha_provider_visibility_changed (PraghaDatabaseProvider *provider);
 
 void
 pragha_provider_want_upgrade (PraghaDatabaseProvider *provider, gint provider_id);
