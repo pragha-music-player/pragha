@@ -86,11 +86,19 @@ PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_MTP_PLUGIN,
                         pragha_mtp_plugin)
 
 /*
+ * Prototypes
+ */
+static void
+pragha_mtp_plugin_remove_menu_action (PraghaMtpPlugin *plugin);
+static void
+pragha_mtp_clear_hook_device (PraghaMtpPlugin *plugin);
+
+/*
  * Menu Actions.
  */
-static void pragha_mtp_action_send_to_device   (GtkAction *action, PraghaMtpPlugin *plugin);
-static void pragha_mtp_action_append_songs     (GtkAction *action, PraghaMtpPlugin *plugin);
-static void pragha_mtp_action_show_device_info (GtkAction *action, PraghaMtpPlugin *plugin);
+static void pragha_mtp_action_send_to_device    (GtkAction *action, PraghaMtpPlugin *plugin);
+static void pragha_mtp_action_disconnect_device (GtkAction *action, PraghaMtpPlugin *plugin);
+static void pragha_mtp_action_show_device_info  (GtkAction *action, PraghaMtpPlugin *plugin);
 
 static const GtkActionEntry mtp_sendto_actions [] = {
 	{"Send to MTP", NULL, "Fake MTP device",
@@ -110,8 +118,8 @@ static const gchar *mtp_sendto_xml = "<ui>					\
 
 static const GtkActionEntry mtp_menu_actions [] = {
 	{"MtpDevice", "multimedia-player", "Fake MTP device"},
-	{"Add MTP library", "list-add", N_("_Add the library"),
-	"", "Add all the library", G_CALLBACK(pragha_mtp_action_append_songs)},
+	{"Disconnect device", NULL, N_("Disconnect device"),
+	"", "Disconnect device", G_CALLBACK(pragha_mtp_action_disconnect_device)},
 	{"Show device info", "dialog-information", N_("Show device info"),
 	"", "Show device info", G_CALLBACK(pragha_mtp_action_show_device_info)},
 };
@@ -121,7 +129,7 @@ static const gchar *mtp_menu_xml = "<ui>					\
 		<menu action=\"ToolsMenu\">					\
 			<placeholder name=\"pragha-plugins-placeholder\">	\
 				<menu action=\"MtpDevice\">			\
-					<menuitem action=\"Add MTP library\"/>	\
+					<menuitem action=\"Disconnect device\"/>	\
 					<separator/>				\
 					<menuitem action=\"Show device info\"/>	\
 				</menu>						\
@@ -135,11 +143,11 @@ static const gchar *mtp_menu_xml = "<ui>					\
  * Gear Menu.
  */
 static void
-pragha_gmenu_mtp_add_library_action (GSimpleAction *action,
-                                     GVariant      *parameter,
-                                     gpointer       user_data)
+pragha_gmenu_mtp_disconnect_device_action (GSimpleAction *action,
+                                           GVariant      *parameter,
+                                           gpointer       user_data)
 {
-	pragha_mtp_action_append_songs (NULL, PRAGHA_MTP_PLUGIN(user_data));
+	pragha_mtp_action_disconnect_device (NULL, PRAGHA_MTP_PLUGIN(user_data));
 }
 
 static void
@@ -151,15 +159,15 @@ pragha_gmenu_mtp_show_device_info_action (GSimpleAction *action,
 }
 
 static GActionEntry mtp_entries[] = {
-	{ "mtp-library",  pragha_gmenu_mtp_add_library_action,       NULL, NULL, NULL },
-	{ "mtp-info",     pragha_gmenu_mtp_show_device_info_action,  NULL, NULL, NULL }
+	{ "mtp-disconnect", pragha_gmenu_mtp_disconnect_device_action, NULL, NULL, NULL },
+	{ "mtp-info",       pragha_gmenu_mtp_show_device_info_action,  NULL, NULL, NULL }
 };
 
 static const gchar *mtp_menu_ui = \
 	NEW_MENU("menubar") \
 		OPEN_PLACEHOLDER("pragha-plugins-placeholder") \
 			NEW_NAMED_SUBMENU("mtp-sudmenu", "Unknown MTP device") \
-				NEW_ITEM("Add MTP library",        "win", "mtp-library") \
+				NEW_ITEM("Disconnect library",     "win", "mtp-disconnect") \
 				NEW_ITEM("Show device info",       "win", "mtp-info") \
 			CLOSE_SUBMENU \
 		CLOSE_PLACEHOLDER \
@@ -168,34 +176,6 @@ static const gchar *mtp_menu_ui = \
 /*
  * Basic Cache..
  */
-
-static void
-pragha_mtp_plugin_append_cache (PraghaMtpPlugin *plugin)
-{
-	PraghaPlaylist *playlist;
-	GHashTableIter iter;
-	gpointer key, value;
-	PraghaMusicobject *mobj = NULL;
-	GList *list = NULL;
-
-	PraghaMtpPluginPrivate *priv = plugin->priv;
-
-	g_hash_table_iter_init (&iter, priv->tracks_table);
-	while (g_hash_table_iter_next (&iter, &key, &value)) {
-		mobj = value;
-		if (G_LIKELY(mobj)) {
-			list = g_list_append (list, mobj);
-			g_object_ref (mobj);
-		}
-		/* Have to give control to GTK periodically ... */
-		pragha_process_gtk_events ();
-	}
-
-	playlist = pragha_application_get_playlist (priv->pragha);
-	pragha_playlist_append_mobj_list (playlist, list);
-	g_list_free(list);
-}
-
 static void
 pragha_mtp_plugin_add_track_db (gpointer key,
                                 gpointer value,
@@ -345,9 +325,34 @@ pragha_mtp_action_send_to_device (GtkAction *action, PraghaMtpPlugin *plugin)
 }
 
 static void
-pragha_mtp_action_append_songs (GtkAction *action, PraghaMtpPlugin *plugin)
+pragha_mtp_action_disconnect_device (GtkAction *action, PraghaMtpPlugin *plugin)
 {
-	pragha_mtp_plugin_append_cache (plugin);
+	PraghaDatabaseProvider *provider;
+	PraghaMusicEnum *enum_map = NULL;
+
+	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
+
+	/* Remove music on playlist */
+
+	enum_map = pragha_music_enum_get ();
+	pragha_music_enum_map_remove (enum_map, "MTP");
+	g_object_unref (enum_map);
+
+	/* Remove provider */
+
+	provider = pragha_database_provider_get ();
+	pragha_provider_remove (provider,
+	                        priv->device_id);
+	pragha_provider_update_done (provider);
+	g_object_unref (provider);
+
+	/* Remove cache and clear the rest */
+
+	pragha_mtp_plugin_remove_menu_action (plugin);
+	pragha_mtp_cache_clear (plugin);
+	pragha_mtp_clear_hook_device (plugin);
 }
 
 static void
