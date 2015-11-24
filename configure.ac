@@ -39,9 +39,11 @@ AC_ARG_ENABLE(debug,[  --enable-debug    Turn on debugging],[
 	CFLAGS="$CFLAGS -DNDEBUG"
 ])
 
+dnl ***********************************************************************
+dnl Check for win32 platform
+dnl ***********************************************************************
 case "${host}" in
-        i[[3456789]]86-mingw32*) WIN32="yes" ;;
-        *cygwin*) WIN32="yes" ;;
+        *-*-mingw*|*-*-cygwin*) WIN32="yes" ;;
         *) WIN32="no" ;;
 esac
 AM_CONDITIONAL([WIN32], test "$WIN32" = "yes")
@@ -280,7 +282,11 @@ echo ""
 echo "Build Configuration for $PACKAGE version $VERSION"
 echo ""
 echo "  Gtk version used......: $GTK_VERSION"
+echo "  Gstreamer version used: $GSTREAMER_VERSION"
+echo ""
 echo "  Prefix................: ${prefix}"
+echo "  Host..................: ${host}"
+echo ""
 echo "  Debug enabled.........: $debug"
 echo ""
 echo "  Plugins enabled.......: $LIBPEAS_FOUND"

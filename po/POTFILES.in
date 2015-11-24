@@ -18,6 +18,7 @@ src/pragha-window.c
 src/pragha.c
 data/pragha.desktop.in
 plugins/acoustid/pragha-acoustid-plugin.c
+plugins/ampache/pragha-ampache-plugin.c
 plugins/cdrom/pragha-cdrom-plugin.c
 plugins/devices/pragha-device-client.c
 plugins/devices/pragha-devices-plugin.c
