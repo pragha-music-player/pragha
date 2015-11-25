@@ -257,6 +257,7 @@ AC_CONFIG_FILES([data/icons/64x64/Makefile])
 AC_CONFIG_FILES([data/icons/128x128/Makefile])
 AC_CONFIG_FILES([po/Makefile.in])
 AC_CONFIG_FILES([src/Makefile])
+AC_CONFIG_FILES([win32/Makefile])
 
 if test x"$LIBPEAS_FOUND" = x"yes"; then
 AC_CONFIG_FILES([plugins/Makefile])

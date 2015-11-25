@@ -1,7 +1,8 @@
 SUBDIRS = \
 	data  \
 	po    \
-	src
+	src   \
+	win32
 
 if HAVE_LIBPEAS
 SUBDIRS += plugins
