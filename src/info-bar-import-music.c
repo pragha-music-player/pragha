@@ -35,11 +35,10 @@ gboolean info_bar_import_music_will_be_useful(PraghaApplication *pragha)
 
 	const char *home = getenv ("HOME");
 	const char *dir = g_get_user_special_dir (G_USER_DIRECTORY_MUSIC);
-	//if G_USER_DIRECTORY_MUSIC equals $HOME then it is not set
-	gboolean is_g_user_directory_music_set = !(strcmp (dir,home) == 0);
+	//if G_USER_DIRECTORY_MUSIC equals $HOME then it is not set properly
+	gboolean is_g_user_directory_music_set = dir && (strcmp (dir,home) != 0);
 	return pragha_application_is_first_run (pragha) &&
-	         is_g_user_directory_music_set &&
-	         dir;
+	         is_g_user_directory_music_set;
 }
 
 static void info_bar_response_cb(GtkInfoBar *info_bar, gint response_id, gpointer user_data)
