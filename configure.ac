@@ -161,9 +161,9 @@ dnl Check rygel
 RYGEL_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
 XDT_CHECK_OPTIONAL_PACKAGE([RYGEL],
-                           [rygel-server-2.2], [0.20.0],
-                           [rygel-server-2.2],
-                           [rygel-server-2.2 library], [yes])
+                           [rygel-server-2.6], [0.20.0],
+                           [rygel-server-2.6],
+                           [rygel-server-2.6 library], [yes])
 else
 AM_CONDITIONAL([HAVE_RYGEL], 0)
 fi
