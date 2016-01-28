@@ -161,7 +161,7 @@ dnl Check rygel
 RYGEL_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
 XDT_CHECK_OPTIONAL_PACKAGE([RYGEL],
-                           [rygel-server-2.6], [0.20.0],
+                           [rygel-server-2.6], [0.26.0],
                            [rygel-server-2.6],
                            [rygel-server-2.6 library], [yes])
 else
@@ -172,7 +172,7 @@ dnl Check grilo
 GRILO_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
 XDT_CHECK_OPTIONAL_PACKAGE([GRILO],
-                           [grilo-0.2], [0.2.10],
+                           [grilo-0.2], [0.2.12],
                            [grilo-0.2],
                            [grilo-0.2 library], [yes])
 else
@@ -299,8 +299,8 @@ echo "   * Controls Pragha using multimedia keys....(Need keybinder-3.0 >= 0.2.0
 echo "   * Search lyrics, artists info and albums art.....(Need libglyr >= 1.0.1).: $LIBGLYR_FOUND"
 echo "   * Search metadata on AcoustID.....................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
 echo "   * Search radios on TuneIn.........................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
-echo "   * Share music library on DLNA............(Need rygel-server-2.2 >= 0.20).: $RYGEL_FOUND"
-echo "   * Play songs on DLNA Servers..................(Need grilo-0.2 >= 0.2.10).: $GRILO_FOUND"
+echo "   * Share music library on DLNA............(Need rygel-server-2.2 >= 0.26).: $RYGEL_FOUND"
+echo "   * Play songs on DLNA Servers..................(Need grilo-0.2 >= 0.2.12).: $GRILO_FOUND"
 echo "   * Append music on Ampache server..................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
 echo "   * Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
 echo "   * EXPERIMENTAL management of removable devices..........(Need gudev-1.0).: $GUDEV_FOUND"

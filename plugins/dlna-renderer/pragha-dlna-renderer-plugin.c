@@ -145,7 +145,7 @@ pragha_dlna_renderer_append_source (GList     *list,
 	caps = grl_source_get_caps (source, GRL_OP_BROWSE);
 	options = grl_operation_options_new (caps);
 
-	grl_operation_options_set_flags (options, GRL_RESOLVE_IDLE_RELAY);
+	grl_operation_options_set_resolution_flags (options, GRL_RESOLVE_IDLE_RELAY);
 
 	medias = grl_source_browse_sync (source, container, keys, options, NULL);
 	for (media_iter = medias; media_iter; media_iter = g_list_next (media_iter)) {
@@ -236,7 +236,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	grl_init (NULL, NULL);
 
 	registry = grl_registry_get_default ();
-	if (!grl_registry_load_plugin_by_id (registry, "grl-upnp", &error)) {
+	if (!grl_registry_load_plugin_by_id (registry, "grl-dleyna", &error)) {
 		g_print ("Failed to load plugins: %s\n\n", error->message);
  	}
 
