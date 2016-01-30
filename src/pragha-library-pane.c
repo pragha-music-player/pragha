@@ -2837,6 +2837,11 @@ pragha_library_pane_tree_new(PraghaLibraryPane *clibrary)
 	gtk_tree_view_set_show_expanders(GTK_TREE_VIEW(library_tree), TRUE);
 	gtk_tree_view_set_fixed_height_mode (GTK_TREE_VIEW(library_tree), TRUE);
 
+	/* Set sidebar style */
+
+	gtk_style_context_add_class (gtk_widget_get_style_context (GTK_WIDGET(library_tree)),
+	                             GTK_STYLE_CLASS_SIDEBAR);
+
 	/* Selection mode is multiple */
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(library_tree));
@@ -2897,7 +2902,6 @@ pragha_library_pane_create_widget (PraghaLibraryPane *library)
 	                                GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(library_tree_scroll),
 	                                     GTK_SHADOW_IN);
-	gtk_container_set_border_width (GTK_CONTAINER(library_tree_scroll), 2);
 
 	/* Package all */
 
@@ -3033,6 +3037,7 @@ pragha_library_pane_init (PraghaLibraryPane *library)
 	PraghaDatabaseProvider *provider;
 
 	gtk_orientable_set_orientation (GTK_ORIENTABLE (library), GTK_ORIENTATION_VERTICAL);
+	g_object_set (G_OBJECT(library), "spacing", 2, NULL);
 
 	/* Get usefuls instances */
 
@@ -3053,9 +3058,6 @@ pragha_library_pane_init (PraghaLibraryPane *library)
 	/* Create main widget */
 
 	pragha_library_pane_create_widget (library);
-
-	gtk_style_context_add_class (gtk_widget_get_style_context (GTK_WIDGET(library)),
-	                             GTK_STYLE_CLASS_SIDEBAR);
 
 	/* Create context menus */
 

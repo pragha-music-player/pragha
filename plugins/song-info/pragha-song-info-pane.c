@@ -233,8 +233,6 @@ pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
 	gtk_scrolled_window_set_hadjustment (GTK_SCROLLED_WINDOW(pane), NULL);
 	gtk_scrolled_window_set_vadjustment (GTK_SCROLLED_WINDOW(pane), NULL);
 
-	gtk_container_set_border_width (GTK_CONTAINER (pane), 2);
-
 	gtk_container_add (GTK_CONTAINER (pane), view);
 
 	gtk_widget_show_all (GTK_WIDGET(pane));

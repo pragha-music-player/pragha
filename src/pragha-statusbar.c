@@ -47,6 +47,8 @@ pragha_statusbar_init (PraghaStatusbar *statusbar)
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
+	g_object_set (G_OBJECT(statusbar), "margin", 0, NULL);
+
 	statusbar->main_context_id = gtk_statusbar_get_context_id (GTK_STATUSBAR (statusbar), "Main text");
 	statusbar->misc_context_id = gtk_statusbar_get_context_id (GTK_STATUSBAR (statusbar), "Misc info text");
 
