@@ -502,7 +502,7 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	 */
 	vbox_aling = gtk_alignment_new(0.5, 0.5, 1, 0);
 
- 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+ 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(vbox_aling), GTK_WIDGET(vbox));
 
  	/*
