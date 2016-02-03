@@ -41,7 +41,12 @@ pragha_hig_workarea_table_add_section_title(GtkWidget *table, guint *row, const 
 
 	section_label = gtk_label_new(section_title);
 
-	gtk_misc_set_alignment(GTK_MISC(section_label), 0.0, 0.5);
+#if GTK_CHECK_VERSION (3, 14, 0)
+	gtk_label_set_xalign (GTK_LABEL(section_label), 0);
+#else
+	gtk_misc_set_alignment (GTK_MISC(section_label), 0, 0.5);
+#endif
+
 	gtk_label_set_attribute_bold(GTK_LABEL(section_label));
 
 	gtk_grid_attach (GTK_GRID(table), section_label, 0, *row, 2, 1);
@@ -76,7 +81,12 @@ pragha_hig_workarea_table_add_wide_tall_control(GtkWidget *table, guint *row, Gt
 void
 pragha_hig_workarea_table_add_row(GtkWidget *table, guint *row, GtkWidget *label, GtkWidget *control)
 {
-	gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+#if GTK_CHECK_VERSION (3, 14, 0)
+	gtk_label_set_xalign (GTK_LABEL(label), 0);
+#else
+	gtk_misc_set_alignment (GTK_MISC(label), 0, 0.5);
+#endif
+
 	gtk_widget_set_margin_start (GTK_WIDGET(label), 12);
 
 	gtk_grid_attach (GTK_GRID(table), label, 0, *row, 1, 1);
