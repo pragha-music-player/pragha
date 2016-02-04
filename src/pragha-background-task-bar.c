@@ -40,6 +40,8 @@ struct _PraghaBackgroundTaskBarClass {
 struct _PraghaBackgroundTaskBar {
 	GtkBox    _parent;
 
+	GBinding *label_binding;
+
 	gint      task_count;
 
 	GtkWidget *popover;
@@ -86,7 +88,7 @@ pragha_background_task_bar_init (PraghaBackgroundTaskBar *taskbar)
 
 	gtk_container_add (GTK_CONTAINER(taskbar), GTK_WIDGET(event_box));
 
-	taskbar->label = gtk_label_new (_("There are background tasks working."));
+	taskbar->label = gtk_label_new (_("There are background tasks working"));
 	taskbar->spinner = gtk_spinner_new ();
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
@@ -112,13 +114,43 @@ pragha_background_task_bar_init (PraghaBackgroundTaskBar *taskbar)
 	gtk_widget_hide(GTK_WIDGET(taskbar));
 }
 
+static void
+pragha_background_task_bar_show_first_description (PraghaBackgroundTaskBar *taskbar)
+{
+	GtkListBoxRow *row;
+	row = gtk_list_box_get_row_at_index (GTK_LIST_BOX(taskbar->listbox), 0);
+	taskbar->label_binding =
+		g_object_bind_property (PRAGHA_BACKGROUND_TASK_WIDGET (row), "description",
+		                        taskbar->label, "label",
+		                        G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL);
+}
+
+static void
+pragha_background_task_bar_show_generic_description (PraghaBackgroundTaskBar *taskbar)
+{
+	g_binding_unbind (taskbar->label_binding);
+
+	gtk_label_set_markup (GTK_LABEL(taskbar->label), _("There are background tasks working"));
+}
+
 void
 pragha_background_task_bar_prepend_widget (PraghaBackgroundTaskBar *taskbar,
                                            GtkWidget               *widget)
 {
+	/* Append the widget and ref it */
+
 	gtk_list_box_prepend (GTK_LIST_BOX(taskbar->listbox), widget);
 
 	taskbar->task_count++;
+
+	/* Update description */
+
+	if (taskbar->task_count == 1)
+		pragha_background_task_bar_show_first_description (taskbar);
+	else
+		pragha_background_task_bar_show_generic_description (taskbar);
+
+	/* Show widgets */
 
 	gtk_widget_show_all (widget);
 	gtk_widget_show_all (GTK_WIDGET(taskbar));
@@ -131,9 +163,21 @@ void
 pragha_background_task_bar_remove_widget (PraghaBackgroundTaskBar *taskbar,
                                           GtkWidget               *widget)
 {
+	/* Remove the widget and unref it */
+
 	gtk_container_remove (GTK_CONTAINER(taskbar->listbox), widget);
 
 	taskbar->task_count--;
+
+	/* Update description */
+
+	if (taskbar->task_count == 1)
+		pragha_background_task_bar_show_first_description (taskbar);
+	else
+		pragha_background_task_bar_show_generic_description (taskbar);
+
+	/* Hide widgets when unnecessary */
+
 	if (taskbar->task_count == 0) {
 		gtk_widget_hide (GTK_WIDGET(taskbar->popover));
 		gtk_spinner_stop (GTK_SPINNER(taskbar->spinner));

@@ -17,14 +17,6 @@
 
 #include "pragha-background-task-widget.h"
 
-#define PRAGHA_TYPE_BACKGROUND_TASK_WIDGET (pragha_background_task_widget_get_type())
-#define PRAGHA_BACKGROUND_TASK_WIDGET(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_BACKGROUND_TASK_WIDGET, PraghaBackgroundTaskWidget))
-#define PRAGHA_BACKGROUND_TASK_WIDGET_CONST(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_BACKGROUND_TASK_WIDGET, PraghaBackgroundTaskWidget const))
-#define PRAGHA_BACKGROUND_TASK_WIDGET_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PRAGHA_TYPE_BACKGROUND_TASK_WIDGET, PraghaBackgroundTaskWidgetClass))
-#define PRAGHA_IS_BACKGROUND_TASK_WIDGET(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_BACKGROUND_TASK_WIDGET))
-#define PRAGHA_IS_BACKGROUND_TASK_WIDGET_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_BACKGROUND_TASK_WIDGET))
-#define PRAGHA_BACKGROUND_TASK_WIDGET_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_BACKGROUND_TASK_WIDGET, PraghaBackgroundTaskWidgetClass))
-
 typedef struct _PraghaBackgroundTaskWidgetClass PraghaBackgroundTaskWidgetClass;
 
 struct _PraghaBackgroundTaskWidgetClass {
@@ -68,6 +60,8 @@ pragha_background_task_widget_set_description (PraghaBackgroundTaskWidget *taskw
 	taskwidget->description = g_strdup (description);
 
 	gtk_progress_bar_set_text (GTK_PROGRESS_BAR(taskwidget->progress), description);
+
+	g_object_notify_by_pspec (G_OBJECT(taskwidget), properties[PROP_DESCRIPTION]);
 }
 
 const gchar *
