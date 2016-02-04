@@ -1,17 +1,17 @@
 /*************************************************************************/
-/* Copyright (C) 2013 matias <mati86dl@gmail.com>			 */
-/* 									 */
-/* This program is free software: you can redistribute it and/or modify	 */
-/* it under the terms of the GNU General Public License as published by	 */
-/* the Free Software Foundation, either version 3 of the License, or	 */
-/* (at your option) any later version.					 */
-/* 									 */
-/* This program is distributed in the hope that it will be useful,	 */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	 */
-/* GNU General Public License for more details.				 */
-/* 									 */
-/* You should have received a copy of the GNU General Public License	 */
+/* Copyright (C) 2013-2016 matias <mati86dl@gmail.com>                   */
+/*                                                                       */
+/* This program is free software: you can redistribute it and/or modify  */
+/* it under the terms of the GNU General Public License as published by  */
+/* the Free Software Foundation, either version 3 of the License, or     */
+/* (at your option) any later version.                                   */
+/*                                                                       */
+/* This program is distributed in the hope that it will be useful,       */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
+/* GNU General Public License for more details.                          */
+/*                                                                       */
+/* You should have received a copy of the GNU General Public License     */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
@@ -35,13 +35,15 @@
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-simple-async.h"
-#include "pragha-statusbar.h"
 #include "pragha-database-provider.h"
+
+#include "pragha-statusbar.h"
+#include "pragha-background-task-widget.h"
 
 struct _PraghaScanner {
 	/* Widgets */
-	GtkWidget         *hbox;
-	GtkWidget         *progress_bar;
+	PraghaBackgroundTaskWidget *task_widget;
+
 	/* Cache */
 	GHashTable        *tracks_table;
 	GSList            *folder_list;
@@ -90,15 +92,15 @@ pragha_scanner_update_progress(gpointer user_data)
 
 	if(no_files > 0) {
 		fraction = (gdouble)files_scanned / (gdouble)no_files;
-		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(scanner->progress_bar), fraction);
+		pragha_background_task_widget_set_job_progress (scanner->task_widget, fraction*100);
 
 		data = g_strdup_printf(_("%i files analyzed of %i detected"), files_scanned, no_files);
-		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(scanner->progress_bar), data);
+		pragha_background_task_widget_set_description (scanner->task_widget, data);
 		g_free(data);
 	}
 	else {
-		gtk_progress_bar_pulse(GTK_PROGRESS_BAR(scanner->progress_bar));
-		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(scanner->progress_bar), _("Searching files to analyze"));
+		pragha_background_task_widget_set_job_progress (scanner->task_widget, 0);
+		pragha_background_task_widget_set_description (scanner->task_widget, _("Searching files to analyze"));
 	}
 
 	return TRUE;
@@ -224,6 +226,7 @@ pragha_scanner_finished_dialog_delete (GtkDialog *dialog, GdkEvent  *event, gpoi
 static gboolean
 pragha_scanner_worker_finished (gpointer data)
 {
+	PraghaStatusbar *statusbar;
 	PraghaPreferences *preferences;
 	PraghaDatabase *database;
 	PraghaDatabaseProvider *provider;
@@ -238,14 +241,19 @@ pragha_scanner_worker_finished (gpointer data)
 	g_source_remove(scanner->update_timeout);
 
 	/* Ensure that the other thread has finished */
+
 	g_thread_join (scanner->no_files_thread);
 
 	/* If not cancelled, update database and show a dialog */
+
 	if(!g_cancellable_is_cancelled (scanner->cancellable)) {
 		/* Hide the scanner and show the dialog */
 
-		gtk_widget_hide(scanner->hbox);
-		msg_dialog = gtk_message_dialog_new(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(scanner->hbox))),
+		statusbar = pragha_statusbar_get ();
+		pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(scanner->task_widget));
+		g_object_unref(G_OBJECT(statusbar));
+
+		msg_dialog = gtk_message_dialog_new(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(scanner->task_widget))),
 		                                    GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 		                                    GTK_MESSAGE_INFO,
 		                                    GTK_BUTTONS_OK,
@@ -265,7 +273,6 @@ pragha_scanner_worker_finished (gpointer data)
 		/* Save new database and update the library view */
 
 		set_watch_cursor(msg_dialog);
-		set_watch_cursor(scanner->hbox);
 
 		database = pragha_database_get();
 		provider = pragha_database_provider_get ();
@@ -295,7 +302,6 @@ pragha_scanner_worker_finished (gpointer data)
 		g_object_unref (provider);
 		g_object_unref(database);
 
-		remove_watch_cursor(scanner->hbox);
 		remove_watch_cursor(msg_dialog);
 
 		/* Save finished time and folders scanned. */
@@ -318,11 +324,10 @@ pragha_scanner_worker_finished (gpointer data)
 		pragha_preferences_set_lock_library (preferences, FALSE);
 		g_object_unref(G_OBJECT(preferences));
 
-		gtk_widget_hide(scanner->hbox);
+		statusbar = pragha_statusbar_get ();
+		pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(scanner->task_widget));
+		g_object_unref(G_OBJECT(statusbar));
 	}
-
-	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(scanner->progress_bar), NULL);
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(scanner->progress_bar), 0.0);
 
 	/* Clean memory */
 
@@ -549,6 +554,7 @@ pragha_scanner_update_worker(gpointer data)
 void
 pragha_scanner_update_library(PraghaScanner *scanner)
 {
+	PraghaStatusbar *statusbar;
 	PraghaPreferences *preferences;
 	PraghaDatabase *database;
 	PraghaDatabaseProvider *provider;
@@ -589,7 +595,10 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 		g_timeout_add_seconds(1, (GSourceFunc)pragha_scanner_update_progress, scanner);
 
 	pragha_preferences_set_show_status_bar (preferences, TRUE);
-	gtk_widget_show_all(scanner->hbox);
+
+	statusbar = pragha_statusbar_get ();
+	pragha_statusbar_add_task_widget (statusbar, GTK_WIDGET(scanner->task_widget));
+	g_object_unref(G_OBJECT(statusbar));
 
 	/* Append the files from database that no changed. */
 
@@ -632,6 +641,7 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 void
 pragha_scanner_scan_library(PraghaScanner *scanner)
 {
+	PraghaStatusbar *statusbar;
 	PraghaPreferences *preferences;
 	PraghaDatabaseProvider *provider;
 	gchar *last_scan_time = NULL;
@@ -664,7 +674,10 @@ pragha_scanner_scan_library(PraghaScanner *scanner)
 	scanner->update_timeout = g_timeout_add_seconds(1, (GSourceFunc)pragha_scanner_update_progress, scanner);
 
 	pragha_preferences_set_show_status_bar (preferences, TRUE);
-	gtk_widget_show_all(scanner->hbox);
+
+	statusbar = pragha_statusbar_get ();
+	pragha_statusbar_add_task_widget (statusbar, GTK_WIDGET(scanner->task_widget));
+	g_object_unref(G_OBJECT(statusbar));
 
 	/* Launch threads */
 
@@ -694,48 +707,28 @@ pragha_scanner_free(PraghaScanner *scanner)
 	g_slice_free (PraghaScanner, scanner);
 }
 
-static void
-scanner_cancel_click_handler(GtkButton *button,
-                             PraghaScanner *scanner)
-{
-	g_cancellable_cancel (scanner->cancellable);
-}
-
 PraghaScanner *
 pragha_scanner_new()
 {
 	PraghaScanner *scanner;
-	PraghaStatusbar *statusbar;
-	GtkWidget *hbox, *progress_bar, *button, *image;
+	PraghaBackgroundTaskWidget *task_widget;
 
 	scanner = g_slice_new0(PraghaScanner);
 
-	/* Create widgets */
-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	scanner->cancellable = g_cancellable_new ();
+	g_object_ref (G_OBJECT(scanner->cancellable));
 
-	progress_bar = gtk_progress_bar_new();
-	gtk_widget_set_size_request(progress_bar, PROGRESS_BAR_WIDTH, -1);
+	/* Create background task widget */
 
-	gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR(progress_bar), TRUE);
-
-	button = gtk_button_new ();
-	image = gtk_image_new_from_icon_name ("process-stop", GTK_ICON_SIZE_MENU);
-	gtk_button_set_relief (GTK_BUTTON (button), GTK_RELIEF_NONE);
-	gtk_button_set_focus_on_click (GTK_BUTTON (button), FALSE);
-	gtk_container_add (GTK_CONTAINER (button), image);
-
-	g_signal_connect(G_OBJECT (button),
-			 "clicked",
-			 G_CALLBACK(scanner_cancel_click_handler),
-			 scanner);
-
-	gtk_box_pack_start (GTK_BOX (hbox), progress_bar, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+	task_widget = pragha_background_task_widget_new (_("Searching files to analyze"),
+	                                                 "folder-music",
+	                                                 100,
+	                                                 scanner->cancellable);
+	g_object_ref (G_OBJECT(task_widget));
 
 	/* Init the rest and save references */
 
-	scanner->progress_bar = progress_bar;
-	scanner->hbox = hbox;
+	scanner->task_widget = task_widget;
 	scanner->tracks_table = g_hash_table_new_full (g_str_hash,
 	                                               g_str_equal,
 	                                               g_free,
@@ -744,14 +737,7 @@ pragha_scanner_new()
 	g_mutex_init (&scanner->files_scanned_mutex);
 	scanner->no_files = 0;
 	g_mutex_init (&scanner->no_files_mutex);
-	scanner->cancellable = g_cancellable_new ();
 	scanner->update_timeout = 0;
-
-	/* Append the widget */
-
-	statusbar = pragha_statusbar_get ();
-	pragha_statusbar_add_widget(statusbar, hbox);
-	g_object_unref(G_OBJECT(statusbar));
 
 	return scanner;
 }

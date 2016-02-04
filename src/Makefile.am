@@ -19,6 +19,10 @@ pragha_SOURCES = \
 	pragha-art-cache.h \
 	pragha-backend.c \
 	pragha-backend.h \
+	pragha-background-task-bar.c \
+	pragha-background-task-bar.h \
+	pragha-background-task-widget.c \
+	pragha-background-task-widget.h \
 	pragha-cmdline.c \
 	pragha-database-provider.c \
 	pragha-database-provider.h \
