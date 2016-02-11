@@ -53,13 +53,10 @@ gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon_name)
 
 	label = gtk_label_new(NULL);
 	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
+	gtk_widget_set_halign (label, GTK_ALIGN_START);
+
 	markup = g_strdup_printf("<span size='large' weight='bold'>%s</span>", header);
 	gtk_label_set_markup(GTK_LABEL(label), markup);
-#if GTK_CHECK_VERSION (3, 14, 0)
-	gtk_label_set_xalign (GTK_LABEL(label), 0);
-#else
-	gtk_misc_set_alignment (GTK_MISC(label), 0, 0.5);
-#endif
 	g_free(markup);
 
 	gtk_style_context_add_class (gtk_widget_get_style_context (xfce_heading),
