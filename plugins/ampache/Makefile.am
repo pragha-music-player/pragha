@@ -14,7 +14,7 @@ libpampache_la_SOURCES =		\
 libpampache_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 
 libpampache_la_CFLAGS =						\
-	$(LIBSOUP_CFLAGS) 						\
+	$(GRILO_NET_CFLAGS)						\
 	$(GSTREAMER_CFLAGS)						\
 	$(GSTREAMER_BASE_CFLAGS)				\
 	$(GLIB_CFLAGS) 							\
@@ -28,7 +28,7 @@ libpampache_la_CFLAGS =						\
 	-Wall
 
 libpampache_la_LIBADD =						\
-	$(LIBSOUP_LIBS) 						\
+	$(GRILO_NET_LIBS) 						\
 	$(GSTREAMER_LIBS)						\
 	$(GLIB_LIBS) 							\
 	$(GIO_LIBS) 							\

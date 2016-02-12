@@ -128,7 +128,10 @@ pragha_background_task_bar_show_first_description (PraghaBackgroundTaskBar *task
 static void
 pragha_background_task_bar_show_generic_description (PraghaBackgroundTaskBar *taskbar)
 {
-	g_binding_unbind (taskbar->label_binding);
+	if (taskbar->label_binding)  {
+		g_binding_unbind (taskbar->label_binding);
+		taskbar->label_binding = NULL;
+	}
 
 	gtk_label_set_markup (GTK_LABEL(taskbar->label), _("There are background tasks working"));
 }

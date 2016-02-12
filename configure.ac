@@ -179,6 +179,17 @@ else
 AM_CONDITIONAL([HAVE_GRILO], 0)
 fi
 
+dnl Check grilo-net
+GRILO_NET_FOUND="no"
+if test x"$LIBPEAS_FOUND" = x"yes"; then
+XDT_CHECK_OPTIONAL_PACKAGE([GRILO_NET],
+                           [grilo-net-0.2], [0.2.5],
+                           [grilo-net-0.2],
+                           [grilo-net-0.2 library], [yes])
+else
+AM_CONDITIONAL([HAVE_GRILO_NET], 0)
+fi
+
 dnl Check libclastfm
 LIBCLASTFM_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
@@ -301,7 +312,7 @@ echo "   * Search metadata on AcoustID.....................(Need libsoup >= 2.38
 echo "   * Search radios on TuneIn.........................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
 echo "   * Share music library on DLNA............(Need rygel-server-2.2 >= 0.26).: $RYGEL_FOUND"
 echo "   * Play songs on DLNA Servers..................(Need grilo-0.2 >= 0.2.12).: $GRILO_FOUND"
-echo "   * Append music on Ampache server..................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
+echo "   * Append music on Ampache server...........(Need grilo-net-0.2 >= 0.2.5).: $GRILO_NET_FOUND"
 echo "   * Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
 echo "   * EXPERIMENTAL management of removable devices..........(Need gudev-1.0).: $GUDEV_FOUND"
 echo "   * EXPERIMENTAL management of mtp devices....:(Need gudev-1.0 and libmtp).: $LIBMTP_FOUND"

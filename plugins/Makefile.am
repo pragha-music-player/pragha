@@ -36,7 +36,6 @@ endif
 
 if HAVE_LIBSOUP
 SUBDIRS += acoustid
-SUBDIRS += ampache
 SUBDIRS += tunein
 endif
 
@@ -46,6 +45,10 @@ endif
 
 if HAVE_GRILO
 SUBDIRS += dlna-renderer
+endif
+
+if HAVE_GRILO_NET
+SUBDIRS += ampache
 endif
 
 if HAVE_LIBCDIO

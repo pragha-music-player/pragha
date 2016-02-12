@@ -35,7 +35,9 @@
 #include <libpeas/peas.h>
 #include <libpeas-gtk/peas-gtk.h>
 
-#include <libsoup/soup.h>
+#include <grilo-0.2/net/grl-net.h>
+#include <libxml/parser.h>
+#include <libxml/xmlmemory.h>
 
 #include "pragha-ampache-plugin.h"
 
@@ -49,32 +51,36 @@
 #include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-window.h"
 #include "src/pragha-hig.h"
-#include "src/xml_helper.h"
 #include "src/pragha-database-provider.h"
-
+#include "src/pragha-background-task-widget.h"
 #include "plugins/pragha-plugin-macros.h"
 
 typedef struct _PraghaAmpachePluginPrivate PraghaAmpachePluginPrivate;
 
 struct _PraghaAmpachePluginPrivate {
-	PraghaApplication    *pragha;
+	PraghaApplication          *pragha;
 
-	gchar                *server;
+	GrlNetWc                   *glrnet;
+	GCancellable               *cancellable;
 
-	gchar                *auth;
-	gint                  songs_count;
+	gchar                      *server;
 
-	gint                  pending_threads;
-	GHashTable           *tracks_table;
-	gint                  songs_cache;
+	gchar                      *auth;
+	gint                        songs_count;
 
-	GtkWidget            *setting_widget;
-	GtkWidget            *server_entry;
-	GtkWidget            *user_entry;
-	GtkWidget            *pass_entry;
+	gint                        pending_threads;
+	GHashTable                 *tracks_table;
+	gint                        songs_cache;
 
-	GtkActionGroup       *action_group_main_menu;
-	guint                 merge_id_main_menu;
+	PraghaBackgroundTaskWidget *task_widget;
+
+	GtkWidget                  *setting_widget;
+	GtkWidget                  *server_entry;
+	GtkWidget                  *user_entry;
+	GtkWidget                  *pass_entry;
+
+	GtkActionGroup             *action_group_main_menu;
+	guint                       merge_id_main_menu;
 };
 
 PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_AMPACHE_PLUGIN,
@@ -155,25 +161,6 @@ static const gchar *main_menu_xml = "<ui>								\
 </ui>";
 
 /* Helpers */
-
-static gchar *
-pragha_ampache_plugin_unescape_response (const gchar *response)
-{
-	const gchar *cpointer = NULL;
-	gchar *rest = NULL;
-
-	if (g_ascii_strncasecmp(response, "<![CDATA[", 9) == 0) {
-		cpointer = response;
-		cpointer += 9;
-
-		rest = g_strndup(cpointer, (strlen(cpointer) - 3));
-	}
-	else {
-		rest = g_strdup(response);
-	}
-
-	return rest;
-}
 
 static void
 pragha_ampache_plugin_add_track_db (gpointer key,
@@ -339,35 +326,40 @@ pragha_ampache_plugin_set_password (PraghaPreferences *preferences, const gchar 
  */
 
 PraghaMusicobject *
-pragha_ampache_xml_get_media (XMLNode *xml)
+pragha_ampache_xml_get_media (xmlDocPtr doc, xmlNodePtr node)
 {
 	PraghaMusicobject *mobj = NULL;
-	XMLNode *xi = NULL;
 	gchar *url = NULL, *title =  NULL, *artist = NULL, *album = NULL;
 	gchar *lenghtc = NULL;
 	gint lenght = 0;
 
-	xi = xmlnode_get (xml, CCA{"song", "url", NULL }, NULL, NULL);
-	if (xi && string_is_not_empty(xi->content))
-		url = pragha_ampache_plugin_unescape_response (xi->content);
+	node = node->xmlChildrenNode;
+	while(node)
+	{
+		if (!xmlStrcmp (node->name, (const xmlChar *) "url"))
+		{
+			url = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
+		}
+		if (!xmlStrcmp (node->name, (const xmlChar *) "title"))
+		{
+			 title = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
+		}
+		if (!xmlStrcmp (node->name, (const xmlChar *) "artist"))
+		{
+			 artist = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
+		}
+		if (!xmlStrcmp (node->name, (const xmlChar *) "album"))
+		{
+			 album = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
+		}
+		if (!xmlStrcmp (node->name, (const xmlChar *) "time"))
+		{
+			lenghtc = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
+			lenght = atoi (lenghtc);
+			g_free (lenghtc);
+		}
 
-	xi = xmlnode_get (xml, CCA{"song", "title", NULL }, NULL, NULL);
-	if (xi && string_is_not_empty(xi->content))
-		title = pragha_ampache_plugin_unescape_response (xi->content);
-
-	xi = xmlnode_get (xml, CCA{"song", "artist", NULL }, NULL, NULL);
-	if (xi && string_is_not_empty(xi->content))
-		artist = pragha_ampache_plugin_unescape_response (xi->content);
-
-	xi = xmlnode_get (xml, CCA{"song", "album", NULL }, NULL, NULL);
-	if (xi && string_is_not_empty(xi->content))
-		album = pragha_ampache_plugin_unescape_response (xi->content);
-
-	xi = xmlnode_get (xml, CCA{"song", "time", NULL }, NULL, NULL);
-	if (xi && string_is_not_empty(xi->content)){
-		lenghtc = pragha_ampache_plugin_unescape_response (xi->content);
-		lenght = atoi (lenghtc);
-		g_free (lenghtc);
+		node = node->next;
 	}
 
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
@@ -388,15 +380,17 @@ pragha_ampache_xml_get_media (XMLNode *xml)
 }
 
 static void
-pragha_ampache_get_songs_done (SoupSession *session,
-                               SoupMessage *msg,
-                               gpointer     user_data)
+pragha_ampache_get_songs_done (GrlNetWc     *net,
+                               GAsyncResult *res,
+                               gpointer      user_data)
 {
 	PraghaDatabaseProvider *provider;
 	PraghaStatusbar *statusbar;
 	PraghaMusicobject *mobj;
-	XMLNode *xml = NULL, *xi;
-	gchar *summary = NULL;
+	GError *wc_error = NULL;
+	xmlDocPtr doc;
+	xmlNodePtr node;
+	gchar *content = NULL, *summary = NULL;
 
 	PraghaAmpachePlugin *plugin = user_data;
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
@@ -407,53 +401,77 @@ pragha_ampache_get_songs_done (SoupSession *session,
 
 	/* Check error */
 
-	if (SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
+	if (!grl_net_wc_request_finish (net,
+	                                res,
+	                                &content,
+	                                NULL,
+	                                &wc_error))
 	{
-		xml = tinycxml_parse ((gchar *)msg->response_body->data);
-
-		xi = xmlnode_get (xml, CCA{"root", "song", NULL }, NULL, NULL);
-		for (;xi;xi=xi->next) {
-			mobj = pragha_ampache_xml_get_media (xi);
-			if (G_LIKELY(mobj)) {
-				pragha_musicobject_set_provider (mobj, priv->server);
-				pragha_ampache_cache_insert_track (plugin, mobj);
-			}
-			priv->songs_cache++;
-
-			/* Have to give control to GTK periodically ... */
-			pragha_process_gtk_events ();
-		}
-		xmlnode_free (xml);
+		g_warning ("Failed to get songs: %s", wc_error->message);
 	}
-	else {
-		g_warning ("Ampache Server plugin %s: Error: %d %s",
-		           G_STRFUNC, msg->status_code, msg->reason_phrase);
+
+	if (content)
+	{
+		doc = xmlReadMemory (content, strlen(content), NULL, NULL,
+		                     XML_PARSE_RECOVER | XML_PARSE_NOBLANKS);
+
+		node = xmlDocGetRootElement (doc);
+		node = node->xmlChildrenNode;
+
+		while(node)
+		{
+			if (!xmlStrcmp (node->name, (const xmlChar *) "song"))
+			{
+				mobj = pragha_ampache_xml_get_media (doc, node);
+				if (G_LIKELY(mobj)) {
+					pragha_musicobject_set_provider (mobj, priv->server);
+					pragha_ampache_cache_insert_track (plugin, mobj);
+				}
+				priv->songs_cache++;
+
+				/* Have to give control to GTK periodically ... */
+				pragha_process_gtk_events ();
+
+			}
+			node = node->next;
+ 		}
 	}
 
 	/* Show status update to user. */
 
-	if (priv->pending_threads > 0) {
+	if (priv->pending_threads > 0)
+	{
+		if (priv->songs_count > 0 )
+		{
+			pragha_background_task_widget_set_job_progress (priv->task_widget,
+			                                                100*priv->songs_cache/priv->songs_count);
+		}
 		summary = g_strdup_printf(_("%i files analyzed of %i detected"),
 		                          priv->songs_cache, priv->songs_count);
+		pragha_background_task_widget_set_description(priv->task_widget, summary);
+		g_free (summary);
 	}
-	else {
-		summary = g_strdup_printf(_("Library scan complete"));
-	}
-
-	statusbar = pragha_statusbar_get ();
-	pragha_statusbar_set_misc_text (statusbar, summary);
-	g_object_unref (statusbar);
-	g_free(summary);
 
 	/* If last thread save on database. */
 
 	if (priv->pending_threads == 0) {
-		pragha_ampache_save_cache (plugin);
-		pragha_ampache_cache_clear (plugin);
+		statusbar = pragha_statusbar_get ();
+		pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
+		g_object_unref (statusbar);
 
-		provider = pragha_database_provider_get ();
-		pragha_provider_update_done (provider);
-		g_object_unref (provider);
+		if (!g_cancellable_is_cancelled (priv->cancellable)) {
+			pragha_ampache_save_cache (plugin);
+
+			provider = pragha_database_provider_get ();
+			pragha_provider_update_done (provider);
+			g_object_unref (provider);
+		}
+		else {
+			g_cancellable_reset (priv->cancellable);
+		}
+
+		pragha_ampache_cache_clear (plugin);
+		priv->songs_cache = 0;
 	}
 }
 
@@ -461,18 +479,23 @@ static void
 pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin)
 {
 	PraghaDatabaseProvider *provider;
-	SoupSession *session;
-	SoupMessage *msg;
+	PraghaStatusbar *statusbar;
 	gchar *url = NULL;
-	const guint limit = 100;
+	const guint limit = 75;
 	guint i = 0;
 
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 
-	CDEBUG(DBG_PLUGIN, "Amache server plugin %s", G_STRFUNC);
+	CDEBUG(DBG_PLUGIN, "Ampache server plugin %s", G_STRFUNC);
 
 	if (!priv->auth)
 		return;
+
+	/* Add the taks manager */
+
+	statusbar = pragha_statusbar_get ();
+	pragha_statusbar_add_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
+	g_object_unref (statusbar);
 
 	/* Add provider */
 
@@ -487,16 +510,16 @@ pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin)
 	/* Launch threads to get music */
 
 	priv->pending_threads = priv->songs_count/limit + 1;
-	session = soup_session_sync_new_with_options (SOUP_SESSION_MAX_CONNS, 2, NULL);
-
-	for (i = 0 ; i < priv->pending_threads; i++) {
+	for (i = 0 ; i < priv->pending_threads; i++)
+	{
 		url = g_strdup_printf("%s/server/xml.server.php?action=songs&offset=%i&limit=%i&auth=%s",
 		                      priv->server, i*limit, limit, priv->auth);
 
-		msg = soup_message_new ("GET", url);
-		soup_session_queue_message (session, msg,
-		                            pragha_ampache_get_songs_done, plugin);
-
+		grl_net_wc_request_async (priv->glrnet,
+		                          url,
+		                          priv->cancellable,
+		                          pragha_ampache_get_songs_done,
+		                          plugin);
 		g_free (url);
 	}
 }
@@ -662,36 +685,55 @@ pragha_ampache_plugin_remove_setting (PraghaAmpachePlugin *plugin)
 	                                              G_CALLBACK(pragha_ampache_preferences_dialog_response),
 	                                              plugin);
 }
+
 /*
  * Authentication.
  */
 
 static void
-pragha_ampache_get_auth_done (SoupSession *session,
-                              SoupMessage *msg,
-                              gpointer     user_data)
+pragha_ampache_get_auth_done (GrlNetWc     *net,
+                              GAsyncResult *res,
+                              gpointer      user_data)
 {
 	PraghaDatabase *database;
-	XMLNode *xml = NULL, *xi;
-	gchar *songs_count = NULL;
+	GError *wc_error = NULL;
+	gchar *content = NULL, *songs_count = NULL;
+	xmlDocPtr doc;
+	xmlNodePtr node;
 
 	PraghaAmpachePlugin *plugin = user_data;
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 
-	if (SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
+	if (!grl_net_wc_request_finish (net,
+	                                res,
+	                                &content,
+	                                NULL,
+	                                &wc_error))
 	{
-		xml = tinycxml_parse ((gchar *)msg->response_body->data);
+		g_warning ("Failed to connect: %s", wc_error->message);
+		return;
+	}
 
-		xi = xmlnode_get (xml, CCA{"root", "auth", NULL }, NULL, NULL);
-		if (xi && string_is_not_empty(xi->content)) {
-			priv->auth = pragha_ampache_plugin_unescape_response (xi->content);
-		}
+	if (content) {
+		doc = xmlReadMemory (content, strlen(content), NULL, NULL,
+		                     XML_PARSE_RECOVER | XML_PARSE_NOBLANKS);
 
-		xi = xmlnode_get (xml, CCA{"root", "songs", NULL }, NULL, NULL);
-		if (xi && string_is_not_empty(xi->content)) {
-			songs_count = pragha_ampache_plugin_unescape_response (xi->content);
-			priv->songs_count = atoi (songs_count);
-			g_free (songs_count);
+		node = xmlDocGetRootElement (doc);
+
+		node = node->xmlChildrenNode;
+		while(node)
+		{
+			if (!xmlStrcmp (node->name, (const xmlChar *) "auth"))
+			{
+				priv->auth = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
+			}
+			if (!xmlStrcmp (node->name, (const xmlChar *) "songs"))
+			{
+				songs_count = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
+				priv->songs_count = atoi (songs_count);
+				g_free (songs_count);
+			}
+			node = node->next;
 		}
 
 		if (priv->auth != NULL) {
@@ -704,19 +746,13 @@ pragha_ampache_get_auth_done (SoupSession *session,
 			g_warning ("Ampache auth failed");
 		}
 
-		xmlnode_free (xml);
-	}
-	else
-	{
-		g_warning ("AUTH ERROR: Unexpected status %d %s\n", msg->status_code, msg->reason_phrase);
+		xmlFreeDoc (doc);
 	}
 }
 
 static void
 pragha_ampache_plugin_authenticate (PraghaAmpachePlugin *plugin)
 {
-	SoupSession *session = NULL;
-	SoupMessage *msg = NULL;
 	GChecksum *hash = NULL;
 	const gchar *server = NULL, *username = NULL, *password = NULL;
 	gchar *url = NULL, *timestampc = NULL, *key = NULL, *passphraseh = NULL, *passphrasec = NULL;
@@ -759,10 +795,11 @@ pragha_ampache_plugin_authenticate (PraghaAmpachePlugin *plugin)
 	url = g_strdup_printf("%s/server/xml.server.php?action=handshake&auth=%s&timestamp=%s&version=350001&user=%s",
 	                      server, passphraseh, timestampc, username);
 
-	session = soup_session_sync_new ();
-	msg = soup_message_new ("GET", url);
-	soup_session_queue_message (session, msg,
-	                            pragha_ampache_get_auth_done, plugin);
+	grl_net_wc_request_async (priv->glrnet,
+	                          url,
+	                          priv->cancellable,
+	                          pragha_ampache_get_auth_done,
+	                          plugin);
 
 	g_checksum_free(hash);
 
@@ -851,19 +888,29 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
+	CDEBUG(DBG_PLUGIN, "Ampache Server plugin %s", G_STRFUNC);
+
+	/* New grilo network helper */
+
+	priv->glrnet = grl_net_wc_new ();
+	grl_net_wc_set_throttling (priv->glrnet, 1);
+
+	priv->cancellable = g_cancellable_new ();
+
+	/* New cache */
+
 	priv->tracks_table = g_hash_table_new_full (g_str_hash,
 	                                            g_str_equal,
 	                                            g_free,
 	                                            g_object_unref);
 
-	CDEBUG(DBG_PLUGIN, "Ampache Server plugin %s", G_STRFUNC);
+	/* New Task widget */
 
-	/* Backend signals */
-
-	backend = pragha_application_get_backend (priv->pragha);
-	g_signal_connect (backend, "prepare-source",
-	                  G_CALLBACK(pragha_ampache_plugin_prepare_source), plugin);
-
+	priv->task_widget = pragha_background_task_widget_new (_("Searching files to analyze"),
+	                                                       "network-server",
+	                                                       100,
+	                                                       priv->cancellable);
+	g_object_ref (G_OBJECT(priv->task_widget));
 
 	/* Attach main menu */
 
@@ -887,6 +934,12 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	item = g_menu_item_new (_("Refresh the Apache database"), "win.refresh-ampache");
 
 	pragha_menubar_append_action (priv->pragha, "pragha-plugins-placeholder", action, item);
+
+	/* Backend signals */
+
+	backend = pragha_application_get_backend (priv->pragha);
+	g_signal_connect (backend, "prepare-source",
+	                  G_CALLBACK(pragha_ampache_plugin_prepare_source), plugin);
 
 	/* Append setting */
 
