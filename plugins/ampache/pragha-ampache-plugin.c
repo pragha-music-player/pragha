@@ -380,10 +380,11 @@ pragha_ampache_xml_get_media (xmlDocPtr doc, xmlNodePtr node)
 }
 
 static void
-pragha_ampache_get_songs_done (GrlNetWc     *net,
+pragha_ampache_get_songs_done (GObject      *object,
                                GAsyncResult *res,
                                gpointer      user_data)
 {
+	PraghaDatabase *database;
 	PraghaDatabaseProvider *provider;
 	PraghaStatusbar *statusbar;
 	PraghaMusicobject *mobj;
@@ -401,7 +402,7 @@ pragha_ampache_get_songs_done (GrlNetWc     *net,
 
 	/* Check error */
 
-	if (!grl_net_wc_request_finish (net,
+	if (!grl_net_wc_request_finish (GRL_NET_WC (object),
 	                                res,
 	                                &content,
 	                                NULL,
@@ -431,17 +432,19 @@ pragha_ampache_get_songs_done (GrlNetWc     *net,
 
 				/* Have to give control to GTK periodically ... */
 				pragha_process_gtk_events ();
-
 			}
 			node = node->next;
  		}
+
+		xmlFreeDoc (doc);
+ 		g_free (content);
 	}
 
 	/* Show status update to user. */
 
 	if (priv->pending_threads > 0)
 	{
-		if (priv->songs_count > 0 )
+		if (priv->songs_count > 0)
 		{
 			pragha_background_task_widget_set_job_progress (priv->task_widget,
 			                                                100*priv->songs_cache/priv->songs_count);
@@ -454,19 +457,44 @@ pragha_ampache_get_songs_done (GrlNetWc     *net,
 
 	/* If last thread save on database. */
 
-	if (priv->pending_threads == 0) {
+	if (priv->pending_threads == 0)
+	{
 		statusbar = pragha_statusbar_get ();
 		pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
 		g_object_unref (statusbar);
 
-		if (!g_cancellable_is_cancelled (priv->cancellable)) {
+		if (!g_cancellable_is_cancelled (priv->cancellable))
+		{
+			/* Add provider */
+
+			database = pragha_database_get ();
+			provider = pragha_database_provider_get ();
+			if (pragha_database_find_provider (database, priv->server))
+			{
+				pragha_provider_forget_songs (provider, priv->server);
+			}
+			else
+			{
+				pragha_provider_add_new (provider,
+				                         priv->server,
+				                         "AMPACHE",
+				                         priv->server,
+				                         "folder-remote");
+			}
+			g_object_unref (provider);
+			g_object_unref (database);
+
+			/* Save cache */
+
 			pragha_ampache_save_cache (plugin);
 
-			provider = pragha_database_provider_get ();
+			/* Update done */
+
 			pragha_provider_update_done (provider);
 			g_object_unref (provider);
 		}
-		else {
+		else
+		{
 			g_cancellable_reset (priv->cancellable);
 		}
 
@@ -478,7 +506,6 @@ pragha_ampache_get_songs_done (GrlNetWc     *net,
 static void
 pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin)
 {
-	PraghaDatabaseProvider *provider;
 	PraghaStatusbar *statusbar;
 	gchar *url = NULL;
 	const guint limit = 75;
@@ -496,16 +523,6 @@ pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin)
 	statusbar = pragha_statusbar_get ();
 	pragha_statusbar_add_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
 	g_object_unref (statusbar);
-
-	/* Add provider */
-
-	provider = pragha_database_provider_get ();
-	pragha_provider_add_new (provider,
-	                         priv->server,
-	                         "AMPACHE",
-	                         priv->server,
-	                         "folder-remote");
-	g_object_unref (provider);
 
 	/* Launch threads to get music */
 
@@ -574,18 +591,12 @@ pragha_ampache_preferences_dialog_response (GtkDialog           *dialog,
 
 			if (changed)
 			{
-				/* Remove old and new provider if exist */
+				/* Remove old provider if exist */
 
 				database = pragha_database_get ();
 				if (pragha_database_find_provider (database, test_server)) {
 					provider = pragha_database_provider_get ();
 					pragha_provider_remove (provider, test_server);
-					pragha_provider_update_done (provider);
-					g_object_unref (provider);
-				}
-				if (pragha_database_find_provider (database, entry_server)) {
-					provider = pragha_database_provider_get ();
-					pragha_provider_remove (provider, entry_server);
 					pragha_provider_update_done (provider);
 					g_object_unref (provider);
 				}
@@ -691,11 +702,10 @@ pragha_ampache_plugin_remove_setting (PraghaAmpachePlugin *plugin)
  */
 
 static void
-pragha_ampache_get_auth_done (GrlNetWc     *net,
+pragha_ampache_get_auth_done (GObject      *object,
                               GAsyncResult *res,
                               gpointer      user_data)
 {
-	PraghaDatabase *database;
 	GError *wc_error = NULL;
 	gchar *content = NULL, *songs_count = NULL;
 	xmlDocPtr doc;
@@ -704,7 +714,7 @@ pragha_ampache_get_auth_done (GrlNetWc     *net,
 	PraghaAmpachePlugin *plugin = user_data;
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 
-	if (!grl_net_wc_request_finish (net,
+	if (!grl_net_wc_request_finish (GRL_NET_WC (object),
 	                                res,
 	                                &content,
 	                                NULL,
@@ -714,7 +724,8 @@ pragha_ampache_get_auth_done (GrlNetWc     *net,
 		return;
 	}
 
-	if (content) {
+	if (content)
+	{
 		doc = xmlReadMemory (content, strlen(content), NULL, NULL,
 		                     XML_PARSE_RECOVER | XML_PARSE_NOBLANKS);
 
@@ -737,16 +748,14 @@ pragha_ampache_get_auth_done (GrlNetWc     *net,
 		}
 
 		if (priv->auth != NULL) {
-			database = pragha_database_get ();
-			if (!pragha_database_find_provider (database, priv->server))
-				pragha_ampache_plugin_cache_music (plugin);
-			g_object_unref (database);
+			pragha_ampache_plugin_cache_music (plugin);
 		}
 		else {
 			g_warning ("Ampache auth failed");
 		}
 
 		xmlFreeDoc (doc);
+ 		g_free (content);
 	}
 }
 
