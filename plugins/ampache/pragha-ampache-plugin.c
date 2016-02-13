@@ -69,6 +69,8 @@ struct _PraghaAmpachePluginPrivate {
 	gint                        songs_count;
 	gboolean                    upgrade;
 
+	guint                       ping_timer_id;
+
 	gint                        pending_threads;
 	GHashTable                 *tracks_table;
 	gint                        songs_cache;
@@ -714,6 +716,60 @@ pragha_ampache_plugin_remove_setting (PraghaAmpachePlugin *plugin)
  */
 
 static void
+pragha_ampache_ping_server_done (GObject      *object,
+                                 GAsyncResult *res,
+                                 gpointer      user_data)
+{
+	GError *wc_error = NULL;
+	gchar *content = NULL;
+
+	PraghaAmpachePlugin *plugin = user_data;
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	if (!grl_net_wc_request_finish (GRL_NET_WC (object),
+	                                res,
+	                                &content,
+	                                NULL,
+	                                &wc_error))
+	{
+		if (!g_cancellable_is_cancelled (priv->cancellable))
+			g_warning ("Failed to ping server: %s", wc_error->message);
+		return;
+	}
+
+	if (content)
+	{
+		/* Just debug.. The documentation does not specify the result. */
+		CDEBUG(DBG_PLUGIN, "Ampache Server plugin %s", G_STRFUNC);
+	}
+}
+
+static gboolean
+pragha_ampache_plugin_ping_server (gpointer user_data)
+{
+	gchar *url = NULL;
+	const gchar *server = NULL;
+
+	PraghaAmpachePlugin *plugin = user_data;
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	server = gtk_entry_get_text (GTK_ENTRY(priv->server_entry));
+
+	url = g_strdup_printf ("%s/server/xml.server.php?action=ping&ssid=%s",
+	                      server, priv->auth);
+
+	grl_net_wc_request_async (priv->glrnet,
+	                          url,
+	                          priv->cancellable,
+	                          pragha_ampache_ping_server_done,
+	                          plugin);
+
+	g_free (url);
+
+	return TRUE;
+}
+
+static void
 pragha_ampache_get_auth_done (GObject      *object,
                               GAsyncResult *res,
                               gpointer      user_data)
@@ -763,9 +819,17 @@ pragha_ampache_get_auth_done (GObject      *object,
 		xmlFreeDoc (doc);
 	}
 
-	if (priv->auth != NULL && pragha_ampache_plugin_need_upgrade (plugin))
+	if (priv->auth != NULL)
+
 	{
-		pragha_ampache_plugin_cache_music (plugin);
+		priv->ping_timer_id = g_timeout_add_seconds (10*60,
+		                                             pragha_ampache_plugin_ping_server,
+		                                             plugin);
+
+		if (pragha_ampache_plugin_need_upgrade (plugin))
+		{
+			pragha_ampache_plugin_cache_music (plugin);
+		}
 	}
 }
 
@@ -844,6 +908,13 @@ pragha_ampache_plugin_deauthenticate (PraghaAmpachePlugin *plugin)
 	}
 	if (priv->songs_count > 0)
 		priv->songs_count = 0;
+	if (priv->songs_cache > 0)
+		priv->songs_cache = 0;
+
+	if (priv->ping_timer_id > 0) {
+		g_source_remove (priv->ping_timer_id);
+		priv->ping_timer_id = 0;
+	}
 
 	priv->upgrade = FALSE;
 }
