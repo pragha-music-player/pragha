@@ -408,7 +408,8 @@ pragha_ampache_get_songs_done (GObject      *object,
 	                                NULL,
 	                                &wc_error))
 	{
-		g_warning ("Failed to get songs: %s", wc_error->message);
+		if (!g_cancellable_is_cancelled (priv->cancellable))
+			g_warning ("Failed to get songs: %s", wc_error->message);
 	}
 
 	if (content)
@@ -437,7 +438,6 @@ pragha_ampache_get_songs_done (GObject      *object,
  		}
 
 		xmlFreeDoc (doc);
- 		g_free (content);
 	}
 
 	/* Show status update to user. */
@@ -508,7 +508,7 @@ pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin)
 {
 	PraghaStatusbar *statusbar;
 	gchar *url = NULL;
-	const guint limit = 75;
+	const guint limit = 50;
 	guint i = 0;
 
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
@@ -720,7 +720,8 @@ pragha_ampache_get_auth_done (GObject      *object,
 	                                NULL,
 	                                &wc_error))
 	{
-		g_warning ("Failed to connect: %s", wc_error->message);
+		if (!g_cancellable_is_cancelled (priv->cancellable))
+			g_warning ("Failed to connect: %s", wc_error->message);
 		return;
 	}
 
@@ -747,15 +748,11 @@ pragha_ampache_get_auth_done (GObject      *object,
 			node = node->next;
 		}
 
-		if (priv->auth != NULL) {
-			pragha_ampache_plugin_cache_music (plugin);
-		}
-		else {
-			g_warning ("Ampache auth failed");
-		}
-
 		xmlFreeDoc (doc);
- 		g_free (content);
+	}
+
+	if (priv->auth != NULL) {
+		pragha_ampache_plugin_cache_music (plugin);
 	}
 }
 
