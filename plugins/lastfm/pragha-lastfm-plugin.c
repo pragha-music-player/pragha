@@ -1813,7 +1813,6 @@ pragha_lastfm_plugin_append_setting (PraghaLastfmPlugin *plugin)
 	lastfm_pass = gtk_entry_new ();
 	gtk_entry_set_max_length (GTK_ENTRY(lastfm_pass), LASTFM_PASS_LEN);
 	gtk_entry_set_visibility (GTK_ENTRY(lastfm_pass), FALSE);
-	gtk_entry_set_invisible_char (GTK_ENTRY(lastfm_pass), '*');
 	gtk_entry_set_activates_default (GTK_ENTRY(lastfm_pass), TRUE);
 
 	pragha_hig_workarea_table_add_row (table, &row, lastfm_plabel, lastfm_pass);
