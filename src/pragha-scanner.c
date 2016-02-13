@@ -721,7 +721,7 @@ pragha_scanner_new()
 	/* Create background task widget */
 
 	task_widget = pragha_background_task_widget_new (_("Searching files to analyze"),
-	                                                 "folder-music",
+	                                                 "drive-harddisk",
 	                                                 100,
 	                                                 scanner->cancellable);
 	g_object_ref (G_OBJECT(task_widget));
