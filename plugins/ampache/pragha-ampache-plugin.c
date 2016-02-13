@@ -67,6 +67,7 @@ struct _PraghaAmpachePluginPrivate {
 
 	gchar                      *auth;
 	gint                        songs_count;
+	gboolean                    upgrade;
 
 	gint                        pending_threads;
 	GHashTable                 *tracks_table;
@@ -105,6 +106,11 @@ pragha_ampache_plugin_authenticate (PraghaAmpachePlugin *plugin);
 static void
 pragha_ampache_plugin_deauthenticate (PraghaAmpachePlugin *plugin);
 
+static void
+pragha_ampache_plugin_set_need_upgrade (PraghaAmpachePlugin *plugin, gboolean upgrade);
+static gboolean
+pragha_ampache_plugin_need_upgrade (PraghaAmpachePlugin *plugin);
+
 /*
  * Menu actions
  */
@@ -112,21 +118,8 @@ pragha_ampache_plugin_deauthenticate (PraghaAmpachePlugin *plugin);
 static void
 pragha_ampache_plugin_upgrade_database (PraghaAmpachePlugin *plugin)
 {
-	PraghaDatabaseProvider *provider;
-	PraghaDatabase *database;
-
-	PraghaAmpachePluginPrivate *priv = plugin->priv;
-
-	database = pragha_database_get ();
-	if (pragha_database_find_provider (database, priv->server)) {
-		provider = pragha_database_provider_get ();
-		pragha_provider_remove (provider, priv->server);
-		pragha_provider_update_done (provider);
-		g_object_unref (provider);
-	}
-	g_object_unref (database);
-
 	pragha_ampache_plugin_deauthenticate (plugin);
+	pragha_ampache_plugin_set_need_upgrade (plugin, TRUE);
 	pragha_ampache_plugin_authenticate (plugin);
 }
 
@@ -465,6 +458,10 @@ pragha_ampache_get_songs_done (GObject      *object,
 
 		if (!g_cancellable_is_cancelled (priv->cancellable))
 		{
+			/* Finalize upgrade process */
+
+			pragha_ampache_plugin_set_need_upgrade (plugin, FALSE);
+
 			/* Add provider */
 
 			database = pragha_database_get ();
@@ -554,7 +551,7 @@ pragha_ampache_preferences_dialog_response (GtkDialog           *dialog,
 	PraghaPreferences *preferences;
 	const gchar *entry_server = NULL, *entry_user = NULL, *entry_pass = NULL;
 	gchar *test_server = NULL, *test_user = NULL, *test_pass = NULL;
-	gboolean changed = FALSE;
+	gboolean changed = FALSE, changed_server = FALSE;
 
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 
@@ -579,6 +576,7 @@ pragha_ampache_preferences_dialog_response (GtkDialog           *dialog,
 			if (g_strcmp0 (test_server, entry_server)) {
 				pragha_ampache_plugin_set_server (preferences, entry_server);
 				changed = TRUE;
+				changed_server = TRUE;
 			}
 			if (g_strcmp0 (test_user, entry_user)) {
 				pragha_ampache_plugin_set_user (preferences, entry_user);
@@ -591,19 +589,33 @@ pragha_ampache_preferences_dialog_response (GtkDialog           *dialog,
 
 			if (changed)
 			{
-				/* Remove old provider if exist */
-
-				database = pragha_database_get ();
-				if (pragha_database_find_provider (database, test_server)) {
-					provider = pragha_database_provider_get ();
-					pragha_provider_remove (provider, test_server);
-					pragha_provider_update_done (provider);
-					g_object_unref (provider);
-				}
-				g_object_unref (database);
+				/* Deauthenticate connection */
 
 				pragha_ampache_plugin_deauthenticate (plugin);
-				pragha_ampache_plugin_authenticate (plugin);
+
+				/* Remove old provider if exist */
+
+				if (changed_server)
+				{
+					database = pragha_database_get ();
+					if (pragha_database_find_provider (database, test_server)) {
+						provider = pragha_database_provider_get ();
+						pragha_provider_remove (provider, test_server);
+						pragha_provider_update_done (provider);
+						g_object_unref (provider);
+					}
+					g_object_unref (database);
+				}
+
+				/* With all mandatory fields updates the collection.*/
+
+				if (string_is_not_empty(entry_server) &&
+				    string_is_not_empty(entry_user) &&
+				    string_is_not_empty(entry_pass))
+				{
+					pragha_ampache_plugin_set_need_upgrade (plugin, TRUE);
+					pragha_ampache_plugin_authenticate (plugin);
+				}
 			}
 			break;
 		default:
@@ -751,7 +763,8 @@ pragha_ampache_get_auth_done (GObject      *object,
 		xmlFreeDoc (doc);
 	}
 
-	if (priv->auth != NULL) {
+	if (priv->auth != NULL && pragha_ampache_plugin_need_upgrade (plugin))
+	{
 		pragha_ampache_plugin_cache_music (plugin);
 	}
 }
@@ -831,6 +844,24 @@ pragha_ampache_plugin_deauthenticate (PraghaAmpachePlugin *plugin)
 	}
 	if (priv->songs_count > 0)
 		priv->songs_count = 0;
+
+	priv->upgrade = FALSE;
+}
+
+static void
+pragha_ampache_plugin_set_need_upgrade (PraghaAmpachePlugin *plugin, gboolean upgrade)
+{
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	priv->upgrade = upgrade;
+}
+
+static gboolean
+pragha_ampache_plugin_need_upgrade (PraghaAmpachePlugin *plugin)
+{
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	return priv->upgrade;;
 }
 
 /*
