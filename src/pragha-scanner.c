@@ -246,12 +246,9 @@ pragha_scanner_worker_finished (gpointer data)
 
 	/* If not cancelled, update database and show a dialog */
 
-	if(!g_cancellable_is_cancelled (scanner->cancellable)) {
-		/* Hide the scanner and show the dialog */
-
-		statusbar = pragha_statusbar_get ();
-		pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(scanner->task_widget));
-		g_object_unref(G_OBJECT(statusbar));
+	if(!g_cancellable_is_cancelled (scanner->cancellable))
+	{
+		/* Show the dialog and remove the scanner widget */
 
 		msg_dialog = gtk_message_dialog_new(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(scanner->task_widget))),
 		                                    GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -269,6 +266,10 @@ pragha_scanner_worker_finished (gpointer data)
 		                 scanner);
 
 		gtk_widget_show_all(msg_dialog);
+
+		statusbar = pragha_statusbar_get ();
+		pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(scanner->task_widget));
+		g_object_unref(G_OBJECT(statusbar));
 
 		/* Save new database and update the library view */
 

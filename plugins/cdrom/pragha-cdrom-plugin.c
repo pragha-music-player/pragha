@@ -812,8 +812,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                  G_CALLBACK (pragha_gmenu_add_cdrom_action), plugin);
 
 	item = g_menu_item_new (_("Add Audio _CD"), "win.add-cdrom");
-
 	pragha_menubar_append_action (priv->pragha, "pragha-plugins-append-music", action, item);
+	g_object_unref (item);
 
 	/* Connect signals */
 

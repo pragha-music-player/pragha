@@ -287,12 +287,24 @@ pragha_toolbar_button_get_property (GObject     *object,
 }
 
 static void
+pragha_toolbar_button_finalize (GObject *object)
+{
+	PraghaToolbarButton *button = PRAGHA_TOOLBAR_BUTTON (object);
+	if (button->icon_name) {
+		g_free (button->icon_name);
+		button->icon_name = NULL;
+	}
+	(*G_OBJECT_CLASS (pragha_toolbar_button_parent_class)->finalize) (object);
+}
+
+static void
 pragha_toolbar_button_class_init (PraghaToolbarButtonClass *class)
 {
 	GObjectClass *gobject_class = G_OBJECT_CLASS (class);
 
   	gobject_class->set_property = pragha_toolbar_button_set_property;
 	gobject_class->get_property = pragha_toolbar_button_get_property;
+	gobject_class->finalize = pragha_toolbar_button_finalize;
 
 	g_object_class_install_property (gobject_class, PROP_ICON_NAME,
 	                                 g_param_spec_string ("icon-name",
@@ -431,12 +443,24 @@ pragha_toggle_button_get_property (GObject     *object,
 }
 
 static void
+pragha_toggle_button_finalize (GObject *object)
+{
+	PraghaToggleButton *button = PRAGHA_TOGGLE_BUTTON (object);
+	if (button->icon_name) {
+		g_free (button->icon_name);
+		button->icon_name = NULL;
+	}
+	(*G_OBJECT_CLASS (pragha_toggle_button_parent_class)->finalize) (object);
+}
+
+static void
 pragha_toggle_button_class_init (PraghaToggleButtonClass *class)
 {
 	GObjectClass *gobject_class = G_OBJECT_CLASS (class);
 
   	gobject_class->set_property = pragha_toggle_button_set_property;
 	gobject_class->get_property = pragha_toggle_button_get_property;
+	gobject_class->finalize = pragha_toggle_button_finalize;
 
 	g_object_class_install_property (gobject_class, PROP_ICON_NAME,
 	                                 g_param_spec_string ("icon-name",

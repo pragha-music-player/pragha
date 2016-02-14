@@ -625,6 +625,7 @@ pragha_ampache_preferences_dialog_response (GtkDialog           *dialog,
 	}
 
 	g_object_unref (preferences);
+
 	g_free (test_server);
 	g_free (test_user);
 	g_free (test_pass);
@@ -636,6 +637,7 @@ pragha_ampache_plugin_append_setting (PraghaAmpachePlugin *plugin)
 	PraghaPreferences *preferences;
 	PreferencesDialog *dialog;
 	GtkWidget *table, *label, *ampache_server, *ampache_uname, *ampache_pass;
+	gchar *server = NULL, *user = NULL, *pass = NULL;
 	guint row = 0;
 
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
@@ -648,8 +650,10 @@ pragha_ampache_plugin_append_setting (PraghaAmpachePlugin *plugin)
 
 	label = gtk_label_new (_("Server"));
 	ampache_server = gtk_entry_new ();
-	pragha_gtk_entry_set_text (GTK_ENTRY(ampache_server),
-		pragha_ampache_plugin_get_server (preferences));
+
+	server = pragha_ampache_plugin_get_server (preferences);
+	pragha_gtk_entry_set_text (GTK_ENTRY(ampache_server), server);
+
 	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(ampache_server), GTK_ENTRY_ICON_PRIMARY, "network-server");
 	gtk_entry_set_activates_default (GTK_ENTRY(ampache_server), TRUE);
 
@@ -658,8 +662,10 @@ pragha_ampache_plugin_append_setting (PraghaAmpachePlugin *plugin)
 
 	label = gtk_label_new (_("Username"));
 	ampache_uname = gtk_entry_new ();
-	pragha_gtk_entry_set_text (GTK_ENTRY(ampache_uname),
-		pragha_ampache_plugin_get_user (preferences));
+
+	user = pragha_ampache_plugin_get_user (preferences);
+	pragha_gtk_entry_set_text (GTK_ENTRY(ampache_uname), user);
+
 	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(ampache_uname), GTK_ENTRY_ICON_PRIMARY, "system-users");
 	gtk_entry_set_max_length (GTK_ENTRY(ampache_uname), LASTFM_UNAME_LEN);
 	gtk_entry_set_activates_default (GTK_ENTRY(ampache_uname), TRUE);
@@ -668,8 +674,10 @@ pragha_ampache_plugin_append_setting (PraghaAmpachePlugin *plugin)
 
 	label = gtk_label_new (_("Password"));
 	ampache_pass = gtk_entry_new ();
-	pragha_gtk_entry_set_text (GTK_ENTRY(ampache_pass),
-		pragha_ampache_plugin_get_password (preferences));
+
+	pass = pragha_ampache_plugin_get_password (preferences);
+	pragha_gtk_entry_set_text (GTK_ENTRY(ampache_pass), pass);
+
 	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(ampache_pass), GTK_ENTRY_ICON_PRIMARY, "changes-prevent");
 	gtk_entry_set_max_length (GTK_ENTRY(ampache_pass), LASTFM_PASS_LEN);
 	gtk_entry_set_visibility (GTK_ENTRY(ampache_pass), FALSE);
@@ -694,6 +702,10 @@ pragha_ampache_plugin_append_setting (PraghaAmpachePlugin *plugin)
 	                                           plugin);
 
 	g_object_unref (preferences);
+
+	g_free (server);
+	g_free (user);
+	g_free (pass);
 }
 
 static void
@@ -976,6 +988,8 @@ pragha_ampache_plugin_prepare_source (PraghaBackend       *backend,
 	ssid = g_strdup_printf ("ssid=%s&", priv->auth);
 	uri = g_regex_replace_literal (regex, filename, -1, 0, ssid, 0, NULL);
 	pragha_backend_set_playback_uri (backend, uri);
+
+	g_regex_unref(regex);
 	g_free (uri);
 	g_free (ssid);
 }
@@ -1040,8 +1054,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                  G_CALLBACK (pragha_ampache_plugin_upgrade_database_gmenu_action), plugin);
 
 	item = g_menu_item_new (_("Refresh the Apache database"), "win.refresh-ampache");
-
 	pragha_menubar_append_action (priv->pragha, "pragha-plugins-placeholder", action, item);
+	g_object_unref (item);
 
 	/* Backend signals */
 
@@ -1074,6 +1088,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	/* Cache */
 
 	g_hash_table_destroy (priv->tracks_table);
+	g_object_unref (priv->glrnet);
 
 	/* If user disable the plugin (Pragha not shutdown) */
 

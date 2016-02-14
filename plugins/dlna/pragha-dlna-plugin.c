@@ -102,6 +102,8 @@ pragha_dlna_plugin_append_track (PraghaDlnaPlugin  *plugin,
 		rygel_media_object_set_artist (RYGEL_MEDIA_OBJECT(item), pragha_musicobject_get_artist(mobj));
 
 		rygel_simple_container_add_child_item (priv->container, RYGEL_MEDIA_ITEM(item));
+
+		g_object_unref (item);
 	}
 
 	g_free(u_title);

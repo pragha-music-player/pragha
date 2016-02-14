@@ -1917,6 +1917,7 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 	GtkTreeModel *model, *filter_model;
 	GtkTreeIter iter;
 	GSList *provider_list, *l;
+	gchar *icon_name, *friendly_name = NULL;
 
 	clibrary->view_change = TRUE;
 
@@ -1974,14 +1975,18 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 		                       &iter,
 		                       NULL);
 
+		icon_name = pragha_provider_get_icon_name (provider, l->data);
+
 		pixbuf  = gtk_icon_theme_load_icon (gtk_icon_theme_get_default (),
-		                                    pragha_provider_get_icon_name (provider, l->data),
+		                                    icon_name,
 		                                    get_library_icon_size(), GTK_ICON_LOOKUP_FORCE_SIZE,
 		                                    NULL);
 
+		friendly_name = pragha_provider_get_friendly_name (provider, l->data);
+
 		gtk_tree_store_set (GTK_TREE_STORE(model), &iter,
 		                    L_PIXBUF, pixbuf ? pixbuf : clibrary->pixbuf_dir,
-		                    L_NODE_DATA, pragha_provider_get_friendly_name (provider, l->data),
+		                    L_NODE_DATA, friendly_name,
 		                    L_NODE_BOLD, PANGO_WEIGHT_BOLD,
 		                    L_NODE_TYPE, NODE_CATEGORY_PROVIDER,
 		                    L_DATABASE_ID, pragha_database_find_provider (clibrary->cdbase, l->data),
@@ -1989,8 +1994,18 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 		                    L_VISIBILE, TRUE,
 		                    -1);
 
-		if (pixbuf)
+		if (pixbuf) {
 			g_object_unref (pixbuf);
+			pixbuf = NULL;
+		}
+		if (icon_name) {
+			g_free (icon_name);
+			icon_name = NULL;
+		}
+		if (friendly_name) {
+			g_free (friendly_name);
+			friendly_name = NULL;
+		}
 
 		if (pragha_preferences_get_library_style(clibrary->preferences) == FOLDERS) {
 			pragha_library_view_append_provider_by_folder (clibrary, model, &iter, l->data);
@@ -2016,6 +2031,7 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 
 	clibrary->view_change = FALSE;
 
+	g_slist_free_full (provider_list, g_free);
 	g_object_unref (provider);
 }
 

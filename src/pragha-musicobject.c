@@ -596,6 +596,7 @@ pragha_musicobject_finalize (GObject *object)
 
 	g_free(priv->file);
 	g_free(priv->mime_type);
+	g_free(priv->provider);
 	g_free(priv->title);
 	g_free(priv->artist);
 	g_free(priv->album);

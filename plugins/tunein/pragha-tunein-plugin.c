@@ -289,8 +289,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                  G_CALLBACK (pragha_gmenu_tunein_plugin_get_radio_action), plugin);
 
 	item = g_menu_item_new (_("Search radio on TuneIn"), "win.search-tunein");
-
 	pragha_menubar_append_action (priv->pragha, "pragha-plugins-placeholder", action, item);
+	g_object_unref (item);
 }
 
 static void

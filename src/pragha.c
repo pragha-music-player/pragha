@@ -1025,6 +1025,10 @@ pragha_application_dispose (GObject *object)
 		g_object_unref (pragha->menu_ui_manager);
 		pragha->menu_ui_manager = NULL;
 	}
+	if (pragha->menu_ui) {
+		g_object_unref (pragha->menu_ui);
+		pragha->menu_ui = NULL;
+	}
 
 	/* Save Preferences and database. */
 

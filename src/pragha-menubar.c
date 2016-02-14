@@ -1230,21 +1230,28 @@ pragha_menubar_remove_action (PraghaApplication *pragha,
 	GtkBuilder *builder;
 	GActionMap *map;
 	GMenu *menu;
-	const char *action;
+	gchar *action;
+	gboolean found = FALSE;
 	gint i;
 
 	builder = pragha_application_get_menu_ui (pragha);
 	menu = G_MENU (gtk_builder_get_object (builder, placeholder));
 
-	for (i = 0; i < g_menu_model_get_n_items (G_MENU_MODEL(menu)); i++) {
-		if (g_menu_model_get_item_attribute (G_MENU_MODEL(menu), i, G_MENU_ATTRIBUTE_ACTION, "s", &action)) {
-			if (g_strcmp0 (action + strlen ("win."), action_name) == 0) {
+	for (i = 0; i < g_menu_model_get_n_items (G_MENU_MODEL(menu)); i++)
+	{
+		if (g_menu_model_get_item_attribute (G_MENU_MODEL(menu), i, G_MENU_ATTRIBUTE_ACTION, "s", &action))
+		{
+			if (g_strcmp0 (action + strlen ("win."), action_name) == 0)
+			{
 				g_menu_remove (G_MENU (menu), i);
 
 				map = G_ACTION_MAP (pragha_application_get_window(pragha));
 				g_action_map_remove_action (map, action_name);
-				break;
+				found = TRUE;
 			}
+			g_free (action);
+			if (found)
+				break;
 		}
 	}
 }
@@ -1289,16 +1296,19 @@ pragha_menubar_remove_by_id (PraghaApplication *pragha,
 {
 	GtkBuilder *builder;
 	GMenu *menu;
-	const char *id;
+	gchar *id = NULL;
 	gint i;
 
 	builder = pragha_application_get_menu_ui (pragha);
 	menu = G_MENU (gtk_builder_get_object (builder, placeholder));
 
-	for (i = 0; i < g_menu_model_get_n_items (G_MENU_MODEL(menu)); i++) {
-		if (g_menu_model_get_item_attribute (G_MENU_MODEL(menu), i, "pragha-merge-id", "s", &id)) {
+	for (i = 0; i < g_menu_model_get_n_items (G_MENU_MODEL(menu)); i++)
+	{
+		if (g_menu_model_get_item_attribute (G_MENU_MODEL(menu), i, "pragha-merge-id", "s", &id))
+		{
 			if (g_strcmp0 (id, item_id) == 0)
 				g_menu_remove (G_MENU (menu), i);
+			g_free (id);
 		}
 	}
 }
@@ -1334,6 +1344,7 @@ pragha_gear_menu_update_playlist_changes (PraghaDatabase *database, PraghaApplic
 
 		item = g_menu_item_new (name, action_name);
 		pragha_menubar_append_action (pragha, "playlist-submenu", action, item);
+		g_object_unref (item);
 
 		g_free(selection_name);
 		g_free(action_name);
@@ -1346,9 +1357,10 @@ pragha_gear_menu_update_playlist_changes (PraghaDatabase *database, PraghaApplic
 		                  G_CALLBACK (pragha_gmenu_selection_append), pragha);
 
 		action_name = g_strdup_printf ("win.%s", selection_name);
-		item = g_menu_item_new (name, action_name);
 
+		item = g_menu_item_new (name, action_name);
 		pragha_menubar_append_action (pragha, "selection-submenu", action, item);
+		g_object_unref (item);
 
 		g_free(selection_name);
 		g_free(action_name);

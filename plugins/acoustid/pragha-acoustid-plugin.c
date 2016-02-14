@@ -424,8 +424,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                  G_CALLBACK (pragha_gmenu_search_metadata_action), plugin);
 
 	item = g_menu_item_new (_("Search tags on AcoustID"), "win.search-metadata");
-
 	pragha_menubar_append_action (priv->pragha, "pragha-plugins-placeholder", action, item);
+	g_object_unref (item);
 
 	/* Connect playback signals */
 
