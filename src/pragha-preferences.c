@@ -490,40 +490,12 @@ pragha_preferences_need_restart (PraghaPreferences *preferences)
 }
 
 /**
- * pragha_preferences_get_library_list:
- *
- */
-GSList *
-pragha_preferences_get_library_list (PraghaPreferences *preferences)
-{
-	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
-
-	return pragha_preferences_get_filename_list (preferences,
-		                                         GROUP_LIBRARY,
-		                                         KEY_LIBRARY_DIR);
-}
-
-/**
- * pragha_preferences_set_library_list:
+ * pragha_preferences_local_provider_changed:
  *
  */
 void
-pragha_preferences_set_library_list (PraghaPreferences *preferences,
-                                     GSList *list)
+pragha_preferences_local_provider_changed (PraghaPreferences *preferences)
 {
-	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
-
-	if (list != NULL) {
-		pragha_preferences_set_filename_list (preferences,
-			                                  GROUP_LIBRARY,
-			                                  KEY_LIBRARY_DIR,
-			                                  list);
-	}
-	else {
-		pragha_preferences_remove_key (preferences,
-		                               GROUP_LIBRARY,
-		                               KEY_LIBRARY_DIR);
-	}
 	g_signal_emit (preferences, signals[SIGNAL_LIBRARY_CHANGED], 0);
 }
 

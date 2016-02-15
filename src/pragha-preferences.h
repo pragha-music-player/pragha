@@ -237,11 +237,8 @@ pragha_preferences_get_plugin_group_name (PraghaPreferences *preferences,
 void
 pragha_preferences_need_restart (PraghaPreferences *preferences);
 
-GSList *
-pragha_preferences_get_library_list (PraghaPreferences *preferences);
 void
-pragha_preferences_set_library_list (PraghaPreferences *preferences,
-                                     GSList *list);
+pragha_preferences_local_provider_changed (PraghaPreferences *preferences);
 
 const gchar *
 pragha_preferences_get_installed_version (PraghaPreferences *preferences);

@@ -486,7 +486,7 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 	g_object_unref (G_OBJECT (provider));
 
 	if (test_change)
-		pragha_preferences_set_library_list (dialog->preferences, library_dir);
+		pragha_preferences_local_provider_changed (dialog->preferences);
 
 	if (library_dir)
 		g_slist_free_full (library_dir, g_free);
