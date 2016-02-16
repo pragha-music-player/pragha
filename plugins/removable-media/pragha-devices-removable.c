@@ -393,10 +393,39 @@ static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
 	PraghaDeviceClient *device_client;
+	PraghaDatabaseProvider *provider;
+
 	PraghaRemovablePlugin *plugin = PRAGHA_REMOVABLE_PLUGIN (activatable);
 	PraghaRemovablePluginPrivate *priv = plugin->priv;
 
 	CDEBUG(DBG_PLUGIN, "Removable plugin %s", G_STRFUNC);
+
+	/* Remove provider if user disable the plugin or hide it */
+
+	provider = pragha_database_provider_get ();
+	if (!pragha_plugins_is_shutdown(pragha_application_get_plugins_engine(priv->pragha)))
+	{
+		if (priv->mount_path)
+		{
+			pragha_provider_remove (provider,
+			                        priv->mount_path);
+			pragha_provider_update_done (provider);
+		}
+	}
+	else
+	{
+		if (priv->mount_path)
+		{
+			pragha_provider_set_visible (provider, priv->mount_path, FALSE);
+		}
+	}
+	g_object_unref (provider);
+
+	/* Clean memory */
+
+	pragha_removable_clear_hook_device (plugin);
+
+	/* Disconnect signals */
 
 	device_client = pragha_device_client_get();
 	g_signal_handlers_disconnect_by_func (device_client,

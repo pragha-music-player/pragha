@@ -806,13 +806,25 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
 
-	/* Remove provider */
+	/* Remove provider if user disable the plugin or hide it */
 
 	provider = pragha_database_provider_get ();
-	pragha_provider_remove (provider,
-	                        priv->device_id);
 	if (!pragha_plugins_is_shutdown(pragha_application_get_plugins_engine(priv->pragha)))
-		pragha_provider_update_done (provider);
+	{
+		if (priv->device_id)
+		{
+			pragha_provider_remove (provider,
+			                        priv->device_id);
+			pragha_provider_update_done (provider);
+		}
+	}
+	else
+	{
+		if (priv->device_id)
+		{
+			pragha_provider_set_visible (provider, priv->device_id, FALSE);
+		}
+	}
 	g_object_unref (provider);
 
 	/* Remove cache and clear the rest */
