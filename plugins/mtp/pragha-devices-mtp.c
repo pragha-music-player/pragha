@@ -250,6 +250,8 @@ pragha_mtp_plugin_cache_storage_recursive (LIBMTP_mtpdevice_t *device,
 			if (file->filetype == LIBMTP_FILETYPE_FOLDER)
 			{
 				pragha_mtp_plugin_cache_storage_recursive (device, storageid, file->item_id, plugin);
+
+				pragha_process_gtk_events ();
 			}
 			else if (LIBMTP_FILETYPE_IS_AUDIO(file->filetype))
 			{
@@ -280,6 +282,8 @@ static void
 pragha_mtp_action_send_to_device (GtkAction *action, PraghaMtpPlugin *plugin)
 {
 	PraghaPlaylist *playlist;
+	PraghaDatabase *database;
+	PraghaDatabaseProvider *provider;
 	PraghaMusicobject *mobj = NULL;
 	LIBMTP_track_t *mtp_track;
 	LIBMTP_error_t *stack;
@@ -313,10 +317,21 @@ pragha_mtp_action_send_to_device (GtkAction *action, PraghaMtpPlugin *plugin)
 		LIBMTP_Dump_Errorstack(priv->mtp_device);
 		LIBMTP_Clear_Errorstack(priv->mtp_device);
 	}
-	else {
+	else
+	{
 		mobj = pragha_musicobject_new_from_mtp_track (mtp_track);
 		if (G_LIKELY(mobj))
-			pragha_mtp_cache_insert_track (plugin, mobj);
+		{
+			pragha_musicobject_set_provider (mobj, priv->device_id);
+
+			database = pragha_database_get ();
+			pragha_database_add_new_musicobject (database, mobj);
+			g_object_unref (database);
+
+			provider = pragha_database_provider_get ();
+			pragha_provider_update_done (provider);
+			g_object_unref (provider);
+		}
 
 		CDEBUG(DBG_INFO, "Added %s to MTP device", file);
 	}

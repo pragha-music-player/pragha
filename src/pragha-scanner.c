@@ -335,6 +335,11 @@ pragha_scanner_worker_finished (gpointer data)
 		g_object_unref(G_OBJECT(statusbar));
 	}
 
+	/* Reset background task widget */
+
+	pragha_background_task_widget_set_job_progress (scanner->task_widget, 0);
+	pragha_background_task_widget_set_description (scanner->task_widget, _("Searching files to analyze"));
+
 	/* Clean memory */
 
 	g_hash_table_remove_all(scanner->tracks_table);
