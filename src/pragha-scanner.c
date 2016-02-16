@@ -291,6 +291,11 @@ pragha_scanner_worker_finished (gpointer data)
 		                      pragha_scanner_add_track_db,
 		                      database);
 
+		/* Set local providers as visible */
+
+		for (list = scanner->folder_list; list != NULL; list = list->next)
+			pragha_provider_set_visible (provider, list->data, TRUE);
+
 		/* Import playlist detected. */
 
 		for (list = scanner->playlists ; list != NULL; list = list->next)

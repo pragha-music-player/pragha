@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2015 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2015-2016 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -479,6 +479,7 @@ pragha_ampache_get_songs_done (GObject      *object,
 				                         "AMPACHE",
 				                         priv->server,
 				                         "folder-remote");
+				pragha_provider_set_visible (provider, priv->server, TRUE);
 			}
 			g_object_unref (provider);
 			g_object_unref (database);

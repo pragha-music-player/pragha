@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2016 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -340,11 +340,10 @@ pragha_mtp_action_disconnect_device (GtkAction *action, PraghaMtpPlugin *plugin)
 	pragha_music_enum_map_remove (enum_map, "MTP");
 	g_object_unref (enum_map);
 
-	/* Remove provider */
+	/* Hide the provider but leave it as backup */
 
 	provider = pragha_database_provider_get ();
-	pragha_provider_remove (provider,
-	                        priv->device_id);
+	pragha_provider_set_visible (provider, priv->device_id, FALSE);
 	pragha_provider_update_done (provider);
 	g_object_unref (provider);
 
@@ -549,31 +548,39 @@ pragha_mtp_plugin_cache_tracks (PraghaMtpPlugin *plugin)
 {
 	PraghaDatabaseProvider *provider;
 	LIBMTP_devicestorage_t *storage;
+	GSList *provider_list = NULL;
 
 	PraghaMtpPluginPrivate *priv = plugin->priv;
 
-	/* Get music recursively */
-
-	for (storage = priv->mtp_device->storage; storage != 0; storage = storage->next) {
-		pragha_mtp_plugin_cache_storage_recursive (priv->mtp_device, storage->id, 0, plugin);
-	}
-
-	/* Add provider */
-
 	provider = pragha_database_provider_get ();
-	pragha_provider_add_new (provider,
-	                         priv->device_id,
-	                         "MTP",
-	                         priv->friend_name,
-	                         "multimedia-player");
+	provider_list = pragha_provider_get_list_by_type (provider, "MTP");
 
-	/* Save on database and clear cache */
+	if (pragha_string_list_is_not_present (provider_list, priv->device_id))
+	{
+		/* Get music recursively */
 
-	pragha_mtp_save_cache (plugin);
-	pragha_mtp_cache_clear (plugin);
+		for (storage = priv->mtp_device->storage; storage != 0; storage = storage->next) {
+			pragha_mtp_plugin_cache_storage_recursive (priv->mtp_device, storage->id, 0, plugin);
+		}
+
+		/* Add provider */
+
+		pragha_provider_add_new (provider,
+		                         priv->device_id,
+		                         "MTP",
+		                         priv->friend_name,
+		                         "multimedia-player");
+
+		/* Save on database and clear cache */
+
+		pragha_mtp_save_cache (plugin);
+		pragha_mtp_cache_clear (plugin);
+	}
+	g_slist_free_full (provider_list, g_free);
 
 	/* Update library view. */
 
+	pragha_provider_set_visible (provider, priv->device_id, TRUE);
 	pragha_provider_update_done (provider);
 	g_object_unref (provider);
 }
@@ -734,12 +741,12 @@ pragha_mtp_plugin_device_removed (PraghaDeviceClient *device_client,
 	busnum = g_udev_device_get_property_as_uint64(u_device, "BUSNUM");
 	devnum = g_udev_device_get_property_as_uint64(u_device, "DEVNUM");
 
-	if (busnum == priv->bus_hooked && devnum == priv->device_hooked) {
+	if (busnum == priv->bus_hooked && devnum == priv->device_hooked)
+	{
 		pragha_mtp_plugin_remove_menu_action (plugin);
 
 		provider = pragha_database_provider_get ();
-		pragha_provider_remove (provider,
-		                        priv->device_id);
+		pragha_provider_set_visible (provider, priv->device_id, FALSE);
 		pragha_provider_update_done (provider);
 		g_object_unref (provider);
 

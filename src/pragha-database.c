@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2015 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2016 matias <mati86dl@gmail.com>                   */
 /* Copyright (C) 2012-2013 Pavel Vasin                                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify	 */
@@ -1012,6 +1012,7 @@ pragha_database_init_schema (PraghaDatabase *database)
 		"CREATE TABLE IF NOT EXISTS PROVIDER "
 			"(id INTEGER PRIMARY KEY,"
 			"name VARCHAR(255),"
+			"visible BOOLEAN NOT NULL CHECK (visible IN (0,1)),"
 			"type INT,"
 			"friendly_name TEXT,"
 			"icon_name TEXT,"

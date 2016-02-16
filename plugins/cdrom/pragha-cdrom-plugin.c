@@ -409,6 +409,7 @@ add:
 			                         "CDROM",
 			                         title_disc ? title_disc : _("Audio CD"),
 			                         "media-optical");
+			pragha_provider_set_visible (provider, priv->disc_id, TRUE);
 
 			database = pragha_application_get_database (priv->pragha);
 			for (l = list; l != NULL; l = l->next) {

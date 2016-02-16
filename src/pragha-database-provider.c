@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2015 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2015-2016 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -51,16 +51,17 @@ pragha_provider_add_new (PraghaDatabaseProvider *provider,
 
 	PraghaDatabaseProviderPrivate *priv = provider->priv;
 
-	const gchar *sql = "INSERT INTO PROVIDER (name, type, friendly_name, icon_name) VALUES (?, ?, ?, ?)";
+	const gchar *sql = "INSERT INTO PROVIDER (name, visible, type, friendly_name, icon_name) VALUES (?, ?, ?, ?, ?)";
 
 	if ((provider_type_id = pragha_database_find_provider_type (priv->database, type)) == 0)
 		provider_type_id = pragha_database_add_new_provider_type (priv->database, type);
 
 	statement = pragha_database_create_statement (priv->database, sql);
 	pragha_prepared_statement_bind_string (statement, 1, name);
-	pragha_prepared_statement_bind_int    (statement, 2, provider_type_id);
-	pragha_prepared_statement_bind_string (statement, 3, friendly_name);
-	pragha_prepared_statement_bind_string (statement, 4, icon_name);
+	pragha_prepared_statement_bind_int    (statement, 2, 0);
+	pragha_prepared_statement_bind_int    (statement, 3, provider_type_id);
+	pragha_prepared_statement_bind_string (statement, 4, friendly_name);
+	pragha_prepared_statement_bind_string (statement, 5, icon_name);
 	pragha_prepared_statement_step (statement);
 	pragha_prepared_statement_free (statement);
 }
@@ -175,6 +176,29 @@ pragha_provider_get_list (PraghaDatabaseProvider *provider)
 }
 
 GSList *
+pragha_provider_get_visible_list (PraghaDatabaseProvider *provider, gboolean visibles)
+{
+	PraghaPreparedStatement *statement;
+	GSList *list = NULL;
+
+	PraghaDatabaseProviderPrivate *priv = provider->priv;
+
+	const gchar *sql = "SELECT name FROM PROVIDER WHERE visible = ?";
+
+	statement = pragha_database_create_statement (priv->database, sql);
+	pragha_prepared_statement_bind_int (statement, 1,
+	                                    visibles ? 1 : 0);
+	while (pragha_prepared_statement_step (statement)) {
+		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
+		list = g_slist_append (list, g_strdup(name));
+	}
+
+	pragha_prepared_statement_free (statement);
+
+	return list;
+}
+
+GSList *
 pragha_provider_get_handled_list (PraghaDatabaseProvider *provider)
 {
 	PraghaPreparedStatement *statement;
@@ -244,6 +268,23 @@ pragha_provider_get_handled_list_by_type (PraghaDatabaseProvider *provider,
 	pragha_prepared_statement_free (statement);
 
 	return list;
+}
+
+void
+pragha_provider_set_visible (PraghaDatabaseProvider *provider,
+                             const gchar            *name,
+                             gboolean                visible)
+{
+	PraghaPreparedStatement *statement;
+	PraghaDatabaseProviderPrivate *priv = provider->priv;
+
+	const gchar *sql = "UPDATE PROVIDER SET visible = ? WHERE name = ?";
+
+	statement = pragha_database_create_statement (priv->database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, visible ? 1 : 0);
+	pragha_prepared_statement_bind_string (statement, 2, name);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
 }
 
 gchar *

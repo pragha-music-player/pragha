@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2015 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2016 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -1968,7 +1968,7 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 	/* Add library header */
 
 	provider = pragha_database_provider_get ();
-	provider_list = pragha_provider_get_list (provider);
+	provider_list = pragha_provider_get_visible_list (provider, TRUE);
 
 	for (l = provider_list; l != NULL; l = l->next) {
 		gtk_tree_store_append (GTK_TREE_STORE(model),

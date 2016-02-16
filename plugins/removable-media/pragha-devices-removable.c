@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2016 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -121,14 +121,20 @@ pragha_block_device_add_to_library (PraghaRemovablePlugin *plugin, GMount *mount
 		                         name,
 		                         "media-removable");
 
+		scanner = pragha_application_get_scanner (priv->pragha);
+		pragha_scanner_update_library (scanner);
+
 		g_free (name);
+	}
+	else
+	{
+		/* Show old backup */
+		pragha_provider_set_visible (provider, mount_path, TRUE);
+		pragha_provider_update_done (provider);
 	}
 	g_slist_free_full (provider_list, g_free);
 
 	priv->mount_path = g_strdup(mount_path);
-
-	scanner = pragha_application_get_scanner (priv->pragha);
-	pragha_scanner_update_library (scanner);
 
 	g_object_unref (provider);
 	g_object_unref (mount_point);
@@ -139,7 +145,6 @@ static void
 pragha_removable_drop_device_from_library (PraghaRemovablePlugin *plugin)
 {
 	PraghaDatabaseProvider *provider;
-	PraghaScanner *scanner;
 	GSList *provider_list = NULL;
 
 	PraghaRemovablePluginPrivate *priv = plugin->priv;
@@ -149,11 +154,9 @@ pragha_removable_drop_device_from_library (PraghaRemovablePlugin *plugin)
 
 	if (pragha_string_list_is_present (provider_list, priv->mount_path))
 	{
-		pragha_provider_remove (provider,
-		                        priv->mount_path),
-
-		scanner = pragha_application_get_scanner (priv->pragha);
-		pragha_scanner_update_library (scanner);
+		/* Hide the provider but leave it as backup */
+		pragha_provider_set_visible (provider, priv->mount_path, FALSE);
+		pragha_provider_update_done (provider);
 	}
 
 	g_slist_free_full (provider_list, g_free);
@@ -237,7 +240,6 @@ pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, PraghaR
 		pragha_block_device_add_to_library (plugin, mount);
 		g_object_unref (mount);
 	}
-	g_object_unref (volume);
 }
 
 static void
