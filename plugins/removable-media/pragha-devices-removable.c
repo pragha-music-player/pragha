@@ -109,7 +109,7 @@ pragha_block_device_add_to_library (PraghaRemovablePlugin *plugin, GMount *mount
 	mount_path = g_file_get_path (mount_point);
 
 	provider = pragha_database_provider_get ();
-	provider_list = pragha_provider_get_list_by_type (provider, "local");
+	provider_list = pragha_provider_get_list (provider);
 
 	if (pragha_string_list_is_not_present (provider_list, mount_path))
 	{
@@ -130,6 +130,7 @@ pragha_block_device_add_to_library (PraghaRemovablePlugin *plugin, GMount *mount
 	{
 		/* Show old backup */
 		pragha_provider_set_visible (provider, mount_path, TRUE);
+		pragha_provider_set_ignore (provider, mount_path, FALSE);
 		pragha_provider_update_done (provider);
 	}
 	g_slist_free_full (provider_list, g_free);
@@ -150,12 +151,13 @@ pragha_removable_drop_device_from_library (PraghaRemovablePlugin *plugin)
 	PraghaRemovablePluginPrivate *priv = plugin->priv;
 
 	provider = pragha_database_provider_get ();
-	provider_list = pragha_provider_get_list_by_type (provider, "local");
+	provider_list = pragha_provider_get_list (provider);
 
 	if (pragha_string_list_is_present (provider_list, priv->mount_path))
 	{
 		/* Hide the provider but leave it as backup */
 		pragha_provider_set_visible (provider, priv->mount_path, FALSE);
+		pragha_provider_set_ignore (provider, priv->mount_path, TRUE);
 		pragha_provider_update_done (provider);
 	}
 
@@ -417,6 +419,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 		if (priv->mount_path)
 		{
 			pragha_provider_set_visible (provider, priv->mount_path, FALSE);
+			pragha_provider_set_ignore (provider, priv->mount_path, TRUE);
 		}
 	}
 	g_object_unref (provider);

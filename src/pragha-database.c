@@ -1013,6 +1013,7 @@ pragha_database_init_schema (PraghaDatabase *database)
 			"(id INTEGER PRIMARY KEY,"
 			"name VARCHAR(255),"
 			"visible BOOLEAN NOT NULL CHECK (visible IN (0,1)),"
+			"ignore BOOLEAN NOT NULL CHECK (ignore IN (0,1)),"
 			"type INT,"
 			"friendly_name TEXT,"
 			"icon_name TEXT,"

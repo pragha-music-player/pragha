@@ -51,17 +51,18 @@ pragha_provider_add_new (PraghaDatabaseProvider *provider,
 
 	PraghaDatabaseProviderPrivate *priv = provider->priv;
 
-	const gchar *sql = "INSERT INTO PROVIDER (name, visible, type, friendly_name, icon_name) VALUES (?, ?, ?, ?, ?)";
+	const gchar *sql = "INSERT INTO PROVIDER (name, type, friendly_name, icon_name, visible, ignore) VALUES (?, ?, ?, ?, ?, ?)";
 
 	if ((provider_type_id = pragha_database_find_provider_type (priv->database, type)) == 0)
 		provider_type_id = pragha_database_add_new_provider_type (priv->database, type);
 
 	statement = pragha_database_create_statement (priv->database, sql);
 	pragha_prepared_statement_bind_string (statement, 1, name);
-	pragha_prepared_statement_bind_int    (statement, 2, 0);
-	pragha_prepared_statement_bind_int    (statement, 3, provider_type_id);
-	pragha_prepared_statement_bind_string (statement, 4, friendly_name);
-	pragha_prepared_statement_bind_string (statement, 5, icon_name);
+	pragha_prepared_statement_bind_int    (statement, 2, provider_type_id);
+	pragha_prepared_statement_bind_string (statement, 3, friendly_name);
+	pragha_prepared_statement_bind_string (statement, 4, icon_name);
+	pragha_prepared_statement_bind_int    (statement, 5, 0);  // No visible by default.
+	pragha_prepared_statement_bind_int    (statement, 6, 0);  // No ignore by default.
 	pragha_prepared_statement_step (statement);
 	pragha_prepared_statement_free (statement);
 }
@@ -228,12 +229,13 @@ pragha_provider_get_list_by_type (PraghaDatabaseProvider *provider,
 
 	PraghaDatabaseProviderPrivate *priv = provider->priv;
 
-	const gchar *sql = "SELECT name FROM PROVIDER WHERE type = ?";
+	const gchar *sql = "SELECT name FROM PROVIDER WHERE type = ? AND ignore = ?";
 
 	statement = pragha_database_create_statement (priv->database, sql);
 
 	pragha_prepared_statement_bind_int (statement, 1,
 		pragha_database_find_provider_type (priv->database, provider_type));
+	pragha_prepared_statement_bind_int (statement, 2, 0);
 
 	while (pragha_prepared_statement_step (statement)) {
 		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
@@ -253,12 +255,13 @@ pragha_provider_get_handled_list_by_type (PraghaDatabaseProvider *provider,
 
 	PraghaDatabaseProviderPrivate *priv = provider->priv;
 
-	const gchar *sql = "SELECT name FROM PROVIDER WHERE id IN (SELECT provider FROM TRACK) AND type = ?";
+	const gchar *sql = "SELECT name FROM PROVIDER WHERE id IN (SELECT provider FROM TRACK) AND type = ? AND ignore = ?";
 
 	statement = pragha_database_create_statement (priv->database, sql);
 
 	pragha_prepared_statement_bind_int (statement, 1,
 		pragha_database_find_provider_type (priv->database, provider_type));
+	pragha_prepared_statement_bind_int (statement, 2, 0);
 
 	while (pragha_prepared_statement_step (statement)) {
 		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
@@ -282,6 +285,23 @@ pragha_provider_set_visible (PraghaDatabaseProvider *provider,
 
 	statement = pragha_database_create_statement (priv->database, sql);
 	pragha_prepared_statement_bind_int (statement, 1, visible ? 1 : 0);
+	pragha_prepared_statement_bind_string (statement, 2, name);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+}
+
+void
+pragha_provider_set_ignore (PraghaDatabaseProvider *provider,
+                            const gchar            *name,
+                            gboolean                ignore)
+{
+	PraghaPreparedStatement *statement;
+	PraghaDatabaseProviderPrivate *priv = provider->priv;
+
+	const gchar *sql = "UPDATE PROVIDER SET ignore = ? WHERE name = ?";
+
+	statement = pragha_database_create_statement (priv->database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, ignore ? 1 : 0);
 	pragha_prepared_statement_bind_string (statement, 2, name);
 	pragha_prepared_statement_step (statement);
 	pragha_prepared_statement_free (statement);

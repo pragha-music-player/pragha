@@ -93,6 +93,11 @@ pragha_provider_set_visible (PraghaDatabaseProvider *provider,
                              const gchar            *name,
                              gboolean                visible);
 
+void
+pragha_provider_set_ignore (PraghaDatabaseProvider *provider,
+                            const gchar            *name,
+                            gboolean                ignore);
+
 gchar *
 pragha_provider_get_friendly_name (PraghaDatabaseProvider *provider, const gchar *name);
 
