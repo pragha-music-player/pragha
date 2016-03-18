@@ -590,7 +590,7 @@ pragha_window_new (PraghaApplication *pragha)
 
 	menu_ui = pragha_application_get_menu_ui(pragha);
 	gtk_menu_button_set_menu_model (GTK_MENU_BUTTON(menu_button),
-		G_MENU_MODEL (gtk_builder_get_object (menu_ui, "menubar")));
+		G_MENU_MODEL (gtk_builder_get_object (menu_ui, "button-menu")));
 
 	g_object_bind_property (preferences, "show-menubar",
 	                        menu_button, "visible",

@@ -1,0 +1,157 @@
+<interface>
+  <!--
+    This program is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation; either version 2 of the License, or (at your option)
+    any later version.
+
+    This program is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+    more details.
+
+    You should have received a copy of the GNU General Public License along with
+    this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+    Place, Suite 330, Boston, MA  02111-1307  USA
+  -->
+
+  <menu id="button-menu">
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>_Add files</attribute>
+        <attribute name='action'>win.open</attribute>
+        <attribute name='accel'>&lt;Control&gt;O</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Add _location</attribute>
+        <attribute name='action'>win.location</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>_Add the library</attribute>
+        <attribute name='action'>win.library</attribute>
+      </item>
+      <section id="pragha-plugins-append-music"/>
+    </section>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>Edit track information</attribute>
+        <attribute name='action'>win.edit</attribute>
+        <attribute name='accel'>&lt;Control&gt;E</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>E_qualizer</attribute>
+        <attribute name='action'>win.equalizer</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>Remove selection from playlist</attribute>
+        <attribute name='action'>win.remove</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Crop playlist</attribute>
+        <attribute name='action'>win.crop</attribute>
+        <attribute name='accel'>&lt;Control&gt;C</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Clear playlist</attribute>
+        <attribute name='action'>win.clear</attribute>
+        <attribute name='accel'>&lt;Control&gt;L</attribute>
+      </item>
+      <submenu>
+        <attribute name='label' translatable='yes'>Save playlist</attribute>
+        <section>
+          <item>
+            <attribute name='label' translatable='yes'>New playlist</attribute>
+            <attribute name='action'>win.new_playlist</attribute>
+            <attribute name='accel'>&lt;Control&gt;S</attribute>
+          </item>
+          <item>
+            <attribute name='label' translatable='yes'>Export</attribute>
+            <attribute name='action'>win.export_playlist</attribute>
+          </item>
+        </section>
+        <section id="playlist-submenu"/>
+      </submenu>
+      <submenu>
+        <attribute name='label' translatable='yes'>Save selection</attribute>
+        <section>
+          <item>
+            <attribute name='label' translatable='yes'>New playlist</attribute>
+            <attribute name='action'>win.new_selection</attribute>
+            <attribute name='accel'>&lt;Shift&gt;&lt;Control&gt;S</attribute>
+          </item>
+          <item>
+            <attribute name='label' translatable='yes'>Export</attribute>
+            <attribute name='action'>win.export_selection</attribute>
+          </item>
+        </section>
+        <section id="selection-submenu"/>
+      </submenu>
+    </section>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>_Search in playlist</attribute>
+        <attribute name='action'>win.search</attribute>
+        <attribute name='accel'>&lt;Control&gt;F</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Jump to playing song</attribute>
+        <attribute name='action'>win.jump-song</attribute>
+        <attribute name='accel'>&lt;Control&gt;J</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>Show lateral _panel</attribute>
+        <attribute name='action'>win.sidebar1</attribute>
+        <attribute name='accel'>F9</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Show secondary lateral panel</attribute>
+        <attribute name='action'>win.sidebar2</attribute>
+        <attribute name='accel'>&lt;Control&gt;F9</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Show menubar</attribute>
+        <attribute name='action'>win.menubar</attribute>
+        <attribute name='accel'>&lt;Control&gt;M</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Show status bar</attribute>
+        <attribute name='action'>win.status-bar</attribute>
+      </item>
+    </section>
+    <section>
+      <section id="pragha-plugins-placeholder"/>
+    </section>
+    <section>
+      <section>
+        <item>
+          <attribute name='label' translatable='yes'>_Rescan library</attribute>
+          <attribute name='action'>win.lib-rescan</attribute>
+        </item>
+        <item>
+          <attribute name='label' translatable='yes'>_Update library</attribute>
+          <attribute name='action'>win.lib-update</attribute>
+        </item>
+      </section>
+    </section>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>_Preferences</attribute>
+        <attribute name='action'>win.preferences</attribute>
+        <attribute name='accel'>&lt;Control&gt;P</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>About</attribute>
+        <attribute name='action'>win.about</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>_Quit</attribute>
+        <attribute name='action'>win.quit</attribute>
+        <attribute name='accel'>&lt;Control&gt;Q</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

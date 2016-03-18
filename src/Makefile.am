@@ -93,6 +93,7 @@ pragha_SOURCES = \
 	pragha-window.h \
 	pragha.c \
 	pragha.h \
+	pragha-window-ui.h \
 	xml_helper.c \
 	xml_helper.h
 
@@ -156,3 +157,15 @@ pragha-res.o: $(top_srcdir)/win32/pragha.rc
 
 pragha_LDADD += pragha-res.o
 endif
+
+pragha-window-ui.h: pragha-window.ui Makefile
+	$(AM_V_GEN) exo-csource --strip-comments --strip-content --static --name=pragha_window_ui $< > $@
+
+EXTRA_DIST = \
+	pragha-window.ui
+
+DISTCLEANFILES = \
+	pragha-window-ui.h
+
+BUILT_SOURCES = \
+	pragha-window-ui.h

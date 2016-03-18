@@ -141,14 +141,14 @@ pragha_ampache_plugin_upgrade_database_gmenu_action (GSimpleAction *action,
 }
 
 static const GtkActionEntry main_menu_actions [] = {
-	{"Refresh the Apache database", NULL, N_("Refresh the Apache database"),
-	 "", "Refresh the Apache database", G_CALLBACK(pragha_ampache_plugin_upgrade_database_action)}};
+	{"Refresh the Ampache library", NULL, N_("Refresh the Ampache library"),
+	 "", "Refresh the Ampache library", G_CALLBACK(pragha_ampache_plugin_upgrade_database_action)}};
 
 static const gchar *main_menu_xml = "<ui>								\
 	<menubar name=\"Menubar\">											\
 		<menu action=\"ToolsMenu\">										\
 			<placeholder name=\"pragha-plugins-placeholder\">			\
-				<menuitem action=\"Refresh the Apache database\"/>		\
+				<menuitem action=\"Refresh the Apache library\"/>		\
 				<separator/>											\
 			</placeholder>												\
 		</menu>															\
@@ -1054,7 +1054,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	g_signal_connect (G_OBJECT (action), "activate",
 	                  G_CALLBACK (pragha_ampache_plugin_upgrade_database_gmenu_action), plugin);
 
-	item = g_menu_item_new (_("Refresh the Apache database"), "win.refresh-ampache");
+	item = g_menu_item_new (_("Refresh the Ampache library"), "win.refresh-ampache");
 	pragha_menubar_append_action (priv->pragha, "pragha-plugins-placeholder", action, item);
 	g_object_unref (item);
 
