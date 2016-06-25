@@ -2922,18 +2922,19 @@ dnd_current_playlist_reorder(GtkTreeModel *model,
 		l = l->next;
 	}
 
-	for (l=list; l != NULL; l = l->next) {
+	for (l = list; l != NULL; l = l->next) {
 		ref = l->data;
 		path = gtk_tree_row_reference_get_path(ref);
 		gtk_tree_model_get_iter(model, &iter, path);
 
-		if (pos == GTK_TREE_VIEW_DROP_BEFORE)
+		if (pos == GTK_TREE_VIEW_DROP_BEFORE) {
 			gtk_list_store_move_before(GTK_LIST_STORE(model), &iter, dest_iter);
-		else if (pos == GTK_TREE_VIEW_DROP_AFTER)
+		}
+		else if (pos == GTK_TREE_VIEW_DROP_AFTER) {
 			gtk_list_store_move_after(GTK_LIST_STORE(model), &iter, dest_iter);
-
-			gtk_tree_path_free(path);
-			gtk_tree_row_reference_free(ref);
+		}
+		gtk_tree_path_free(path);
+		gtk_tree_row_reference_free(ref);
 	}
 
 exit:

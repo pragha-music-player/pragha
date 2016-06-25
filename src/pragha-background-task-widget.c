@@ -310,7 +310,11 @@ pragha_background_task_widget_init (PraghaBackgroundTaskWidget *taskwidget)
 	taskwidget->cancell_button = gtk_button_new ();
 	image = gtk_image_new_from_icon_name ("process-stop", GTK_ICON_SIZE_MENU);
 	gtk_button_set_relief (GTK_BUTTON (taskwidget->cancell_button), GTK_RELIEF_NONE);
+#if GTK_CHECK_VERSION (3, 20, 0)
+	gtk_widget_set_focus_on_click (GTK_WIDGET (taskwidget->cancell_button), FALSE);
+#else
 	gtk_button_set_focus_on_click (GTK_BUTTON (taskwidget->cancell_button), FALSE);
+#endif
 	gtk_container_add (GTK_CONTAINER (taskwidget->cancell_button), image);
 
 	g_signal_connect (G_OBJECT (taskwidget->cancell_button), "clicked",
