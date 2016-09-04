@@ -110,7 +110,7 @@
       <item>
         <attribute name='label' translatable='yes'>Show secondary lateral panel</attribute>
         <attribute name='action'>win.sidebar2</attribute>
-        <attribute name='accel'>&lt;Control&gt;F9</attribute>
+        <attribute name='accel'>&lt;Shift&gt;F9</attribute>
       </item>
       <item>
         <attribute name='label' translatable='yes'>Show menubar</attribute>
