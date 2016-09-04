@@ -733,7 +733,7 @@ pragha_scanner_new()
 
 	task_widget = pragha_background_task_widget_new (_("Searching files to analyze"),
 	                                                 "drive-harddisk",
-	                                                 100,
+	                                                 0,
 	                                                 scanner->cancellable);
 	g_object_ref (G_OBJECT(task_widget));
 

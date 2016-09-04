@@ -155,9 +155,9 @@ pragha_background_task_bar_prepend_widget (PraghaBackgroundTaskBar *taskbar,
 
 	/* Show widgets */
 
-	gtk_widget_show_all (widget);
 	gtk_widget_show_all (GTK_WIDGET(taskbar));
-	gtk_widget_show_all (GTK_WIDGET(taskbar->popover));
+	gtk_widget_show (GTK_WIDGET(taskbar->popover));
+	gtk_widget_show (widget);
 
 	gtk_spinner_start (GTK_SPINNER(taskbar->spinner));
 }

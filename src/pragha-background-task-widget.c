@@ -35,6 +35,8 @@ struct _PraghaBackgroundTaskWidget {
 	GtkWidget     *icon;
 	GtkWidget     *progress;
 	GtkWidget     *cancell_button;
+
+	guint          pulse_timeout;
 };
 
 enum {
@@ -50,6 +52,13 @@ enum {
 static GParamSpec *properties[PROP_LAST] = { 0 };
 
 G_DEFINE_TYPE(PraghaBackgroundTaskWidget, pragha_background_task_widget, GTK_TYPE_LIST_BOX_ROW)
+
+gboolean
+pragha_background_task_widget_pulse_progress_bar (gpointer data)
+{
+	gtk_progress_bar_pulse (GTK_PROGRESS_BAR (data));
+	return TRUE;
+}
 
 void
 pragha_background_task_widget_set_description (PraghaBackgroundTaskWidget *taskwidget,
@@ -93,7 +102,20 @@ static void
 pragha_background_task_widget_set_job_count (PraghaBackgroundTaskWidget *taskwidget,
                                              gint                        job_count)
 {
-	taskwidget->job_count = job_count;
+	if (taskwidget->pulse_timeout) {
+		g_source_remove(taskwidget->pulse_timeout);
+		taskwidget->pulse_timeout = 0;
+	}
+
+	if (job_count > 0) {
+		taskwidget->job_count = job_count;
+	}
+	else {
+		taskwidget->pulse_timeout =
+			g_timeout_add (250,
+			               pragha_background_task_widget_pulse_progress_bar,
+			               taskwidget->progress);
+	}
 }
 
 static guint
@@ -107,17 +129,15 @@ pragha_background_task_widget_set_job_progress (PraghaBackgroundTaskWidget *task
                                                 gint                        job_progress)
 {
 	if (job_progress > 0) {
+		pragha_background_task_widget_set_job_count (taskwidget, 100);
 		gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR(taskwidget->progress), (gdouble)job_progress/100);
-	}
-	else {
-		gtk_progress_bar_pulse (GTK_PROGRESS_BAR(taskwidget->progress));
 	}
 }
 
 static guint
 pragha_background_task_widget_get_job_progress (PraghaBackgroundTaskWidget *taskwidget)
 {
-	return 48;
+	return 48; // FIXME????
 }
 
 static void
@@ -126,8 +146,15 @@ pragha_background_task_widget_set_cancellable (PraghaBackgroundTaskWidget *taskw
 {
 	if (taskwidget->cancellable) {
 		g_object_unref (taskwidget->cancellable);
+		taskwidget->cancellable = NULL;
 	}
-	taskwidget->cancellable = cancellable;
+
+	if (cancellable) {
+		taskwidget->cancellable = cancellable;
+	}
+	else {
+		gtk_widget_hide (taskwidget->cancell_button);
+	}
 }
 
 static GObject *
@@ -306,6 +333,7 @@ pragha_background_task_widget_init (PraghaBackgroundTaskWidget *taskwidget)
 	taskwidget->progress = gtk_progress_bar_new();
 	gtk_widget_set_size_request (taskwidget->progress, 300, -1);
 	gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR(taskwidget->progress), TRUE);
+	gtk_widget_set_valign (GTK_WIDGET(taskwidget->progress), GTK_ALIGN_CENTER);
 
 	taskwidget->cancell_button = gtk_button_new ();
 	image = gtk_image_new_from_icon_name ("process-stop", GTK_ICON_SIZE_MENU);

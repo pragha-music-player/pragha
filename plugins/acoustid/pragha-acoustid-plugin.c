@@ -366,7 +366,7 @@ pragha_acoustid_get_metadata_dialog (PraghaAcoustidPlugin *plugin)
 	statusbar = pragha_statusbar_get ();
 	priv->task_widget = pragha_background_task_widget_new (_("Searching tags on AcoustID"),
 	                                                      "edit-find",
-	                                                      -1,
+	                                                      0,
 	                                                      NULL);
 	g_object_ref (G_OBJECT(priv->task_widget));
 	pragha_statusbar_add_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
