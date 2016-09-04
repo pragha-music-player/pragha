@@ -266,7 +266,7 @@ static GtkToggleActionEntry toggles_entries[] = {
 	 "F9", "Lateral panel", NULL,
 	TRUE},
 	{"Lateral panel2", NULL, N_("Secondary lateral panel"),
-	 "<Control>F9", "Secondary lateral panel", NULL,
+	 "<Shift>F9", "Secondary lateral panel", NULL,
 	FALSE},
 	{"Playback controls below", NULL, N_("Playback controls below"),
 	 NULL, "Show playback controls below", G_CALLBACK(show_controls_below_action),
