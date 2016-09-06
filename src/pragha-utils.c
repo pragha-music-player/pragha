@@ -248,7 +248,7 @@ gchar* convert_length_str(gint length)
 		g_strlcat(str, tmp, 24);
 	}
 
-	if (length > 60) {
+	if (length >= 60) {
 		minutes = length/60;
 		length = length%60;
 		memset(tmp, '\0', 24);
