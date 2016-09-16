@@ -84,6 +84,14 @@ struct _PreferencesDialog {
 	GtkWidget *add_recursively_w;
 };
 
+enum library_columns {
+	COLUMN_NAME,
+	COLUMN_TYPE,
+	COLUMN_FRIENDLY,
+	COLUMN_ICON_NAME,
+	N_COLUMNS
+};
+
 /*
  * Utils.
  */
@@ -235,7 +243,9 @@ pragha_preferences_dialog_get_library_list (PreferencesDialog *dialog)
 
 	ret = gtk_tree_model_get_iter_first(model, &iter);
 	while (ret) {
-		gtk_tree_model_get (model, &iter, 0, &u_folder, -1);
+		gtk_tree_model_get (model, &iter,
+		                    COLUMN_FRIENDLY, &u_folder,
+		                    -1);
 		if (u_folder) {
 			folder = g_filename_from_utf8 (u_folder, -1, NULL, NULL, &error);
 			if (!folder) {
@@ -279,8 +289,10 @@ pragha_preferences_dialog_set_library_list (PreferencesDialog *dialog, GSList *l
 			continue;
 		}
 		gtk_list_store_append (GTK_LIST_STORE(model), &iter);
-		gtk_list_store_set (GTK_LIST_STORE(model),
-		                    &iter, 0, u_file, -1);
+		gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+		                    COLUMN_FRIENDLY, u_file,
+		                    COLUMN_ICON_NAME, "folder",
+		                    -1);
 		list = list->next;
 		g_free(u_file);
 	}
@@ -970,17 +982,30 @@ pref_create_library_page (PreferencesDialog *dialog)
 
 	hbox_library = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
-	library_store = gtk_list_store_new(1, G_TYPE_STRING);
+	library_store = gtk_list_store_new (N_COLUMNS,
+	                                    G_TYPE_STRING,
+	                                    G_TYPE_STRING,
+	                                    G_TYPE_STRING,
+	                                    G_TYPE_STRING);
 	library_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(library_store));
 
-	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes (_("Folders"),
-	                                                   renderer,
-	                                                   "text",
-	                                                   0,
-	                                                   NULL);
-
+	column = gtk_tree_view_column_new ();
+	gtk_tree_view_column_set_title (column, _("Folders"));
 	gtk_tree_view_column_set_resizable(column, GTK_TREE_VIEW_COLUMN_GROW_ONLY);
+
+	renderer = gtk_cell_renderer_pixbuf_new();
+	gtk_tree_view_column_pack_start (column, renderer, FALSE);
+	gtk_tree_view_column_set_attributes (column, renderer,
+	                                     "icon-name", COLUMN_ICON_NAME,
+	                                     NULL);
+	gtk_tree_view_append_column ((GTK_TREE_VIEW(library_view)), column);
+
+	renderer = gtk_cell_renderer_text_new();
+	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+	gtk_tree_view_column_pack_start (column, renderer, TRUE);
+	gtk_tree_view_column_set_attributes (column, renderer,
+	                                     "text", COLUMN_FRIENDLY,
+	                                     NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(library_view), column);
 
 	library_view_scroll = gtk_scrolled_window_new(NULL, NULL);
