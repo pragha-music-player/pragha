@@ -339,6 +339,7 @@ pragha_toolbar_button_new (const gchar *icon_name)
 	                        "image", image,
 	                        "icon-name", icon_name,
 	                        "icon-size", GTK_ICON_SIZE_LARGE_TOOLBAR,
+	                        "valign", GTK_ALIGN_CENTER,
 	                        NULL);
 
 	return button;
@@ -495,6 +496,7 @@ pragha_toggle_button_new (const gchar *icon_name)
 	                        "image", image,
 	                        "icon-name", icon_name,
 	                        "icon-size", GTK_ICON_SIZE_LARGE_TOOLBAR,
+	                        "valign", GTK_ALIGN_CENTER,
 	                        NULL);
 
 	return button;
