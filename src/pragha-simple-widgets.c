@@ -60,7 +60,9 @@ gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon_name)
 	g_free(markup);
 
 	gtk_style_context_add_class (gtk_widget_get_style_context (xfce_heading),
-	                             GTK_STYLE_CLASS_ENTRY);
+	                             "view");
+	gtk_style_context_add_class (gtk_widget_get_style_context (xfce_heading),
+	                             "XfceHeading");
 
 	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);

@@ -324,16 +324,22 @@ PraghaMusicobject *
 pragha_ampache_xml_get_media (xmlDocPtr doc, xmlNodePtr node)
 {
 	PraghaMusicobject *mobj = NULL;
-	gchar *url = NULL, *title =  NULL, *artist = NULL, *album = NULL;
+	GRegex *regex = NULL;
+	gchar *raw_url = NULL, *url = NULL, *title =  NULL, *artist = NULL, *album = NULL;
 	gchar *lenghtc = NULL;
 	gint lenght = 0;
+
+	regex = g_regex_new ("ssid=(.[^&]*)&",
+	                     G_REGEX_MULTILINE | G_REGEX_RAW, 0, NULL);
 
 	node = node->xmlChildrenNode;
 	while(node)
 	{
 		if (!xmlStrcmp (node->name, (const xmlChar *) "url"))
 		{
-			url = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
+			raw_url = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
+			url = g_regex_replace_literal (regex, raw_url, -1, 0, "", 0, NULL);
+			g_free (raw_url);
 		}
 		if (!xmlStrcmp (node->name, (const xmlChar *) "title"))
 		{
@@ -970,9 +976,8 @@ pragha_ampache_plugin_prepare_source (PraghaBackend       *backend,
                                       PraghaAmpachePlugin *plugin)
 {
 	PraghaMusicobject *mobj;
-	GRegex *regex;
 	const gchar *filename = NULL;
-	gchar *uri = NULL, *ssid = NULL;
+	gchar *uri = NULL;
 
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 
@@ -981,18 +986,9 @@ pragha_ampache_plugin_prepare_source (PraghaBackend       *backend,
 		return;
 
 	filename =  pragha_musicobject_get_file (mobj);
-
-	regex = g_regex_new ("ssid=(.[^&]*)&",
-	                     G_REGEX_MULTILINE | G_REGEX_RAW, 0, NULL);
-
-	/* FIXME: Any expert on regex here to improve it? */
-	ssid = g_strdup_printf ("ssid=%s&", priv->auth);
-	uri = g_regex_replace_literal (regex, filename, -1, 0, ssid, 0, NULL);
+	uri = g_strdup_printf ("%s&ssid=%s", filename, priv->auth);
 	pragha_backend_set_playback_uri (backend, uri);
-
-	g_regex_unref(regex);
 	g_free (uri);
-	g_free (ssid);
 }
 
 /*
