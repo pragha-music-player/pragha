@@ -189,6 +189,10 @@ set_watch_cursor (GtkWidget *widget)
 
 		gdk_window_set_cursor (gtk_widget_get_window (toplevel), cursor);
 		g_object_unref (cursor);
+
+		gdk_flush();
+
+		pragha_process_gtk_events ();
 	}
 }
 
