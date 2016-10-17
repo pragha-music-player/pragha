@@ -237,14 +237,14 @@ gchar* convert_length_str(gint length)
 	str = g_new0(char, 128);
 	memset(tmp, '\0', 24);
 
-	if (length > 86400) {
+	if (length >= 86400) {
 		days = length/86400;
 		length = length%86400;
 		g_sprintf(tmp, "%d %s, ", days, ngettext("day", "days", days));
 		g_strlcat(str, tmp, 24);
 	}
 
-	if (length > 3600) {
+	if (length >= 3600) {
 		hours = length/3600;
 		length = length%3600;
 		memset(tmp, '\0', 24);
@@ -260,7 +260,7 @@ gchar* convert_length_str(gint length)
 		g_strlcat(str, tmp, 24);
 	}
 	else
-		g_strlcat(str, "00:", 4);
+		g_strlcat(str, "00:", 24);
 
 	seconds = length;
 	memset(tmp, '\0', 24);
