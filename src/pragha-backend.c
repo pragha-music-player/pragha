@@ -120,6 +120,18 @@ emit_tick_cb (gpointer user_data)
 static void
 pragha_backend_source_notify_cb (GObject *obj, GParamSpec *pspec, PraghaBackend *backend)
 {
+	GstElement* element;
+
+	g_object_get (obj, "source", &element, NULL);
+	if (!element)
+		return;
+
+	if (g_object_class_find_property(G_OBJECT_GET_CLASS(element), "user-agent")) {
+		g_object_set (element, "user-agent", PACKAGE_NAME"/"PACKAGE_VERSION, NULL);
+		g_object_set(element, "ssl-use-system-ca-file", FALSE, NULL);
+		g_object_set(element, "ssl-strict", TRUE, NULL);
+	}
+
 	g_signal_emit (backend, signals[SIGNAL_SET_DEVICE], 0, obj);
 }
 
