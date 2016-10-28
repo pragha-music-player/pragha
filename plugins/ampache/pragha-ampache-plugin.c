@@ -329,16 +329,18 @@ pragha_ampache_xml_get_media (xmlDocPtr doc, xmlNodePtr node)
 	gchar *lenghtc = NULL;
 	gint lenght = 0;
 
-	regex = g_regex_new ("ssid=(.[^&]*)&",
-	                     G_REGEX_MULTILINE | G_REGEX_RAW, 0, NULL);
-
 	node = node->xmlChildrenNode;
 	while(node)
 	{
 		if (!xmlStrcmp (node->name, (const xmlChar *) "url"))
 		{
 			raw_url = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
+
+			regex = g_regex_new ("ssid=(.[^&]*)&",
+			                     G_REGEX_MULTILINE | G_REGEX_RAW, 0, NULL);
 			url = g_regex_replace_literal (regex, raw_url, -1, 0, "", 0, NULL);
+			g_regex_unref(regex);
+
 			g_free (raw_url);
 		}
 		if (!xmlStrcmp (node->name, (const xmlChar *) "title"))
