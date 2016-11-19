@@ -330,7 +330,7 @@ pragha_playlist_edit_tags (GtkAction *action, PraghaPlaylist *playlist)
 		pragha_tags_dialog_set_musicobject(PRAGHA_TAGS_DIALOG(dialog), mobj);
 	}
 	g_object_set_data (G_OBJECT (dialog), "reference-list", rlist);
- 
+
 	g_signal_connect (G_OBJECT (dialog), "response",
 	                  G_CALLBACK (pragha_edit_tags_playlist_dialog_response), playlist);
 
@@ -366,7 +366,7 @@ pragha_playlist_get_prev_track (PraghaPlaylist *playlist)
 
 	if (seq_first && repeat)
 		path = get_nth_track (playlist, (playlist->no_tracks - 1));
-	
+
 	if (!path)
 		return NULL;
 
@@ -1193,7 +1193,7 @@ modify_current_playlist_columns(PraghaPlaylist* cplaylist,
 	}
 
 	/* Add to preferences */
- 
+
 	else if (!pref_present && state) {
 		 cplaylist->columns =
 			g_slist_append(cplaylist->columns,
@@ -1597,7 +1597,7 @@ pragha_playlist_remove_selection (PraghaPlaylist *playlist)
 			i->data = ref;
 			gtk_tree_path_free(path);
 		}
-		
+
 		/* Now build iterators from the references and delete
 		   them from the store */
 
@@ -1786,7 +1786,7 @@ current_playlist_key_press (GtkWidget *win, GdkEventKey *event, PraghaPlaylist *
 	gint n_select = 0;
 	gboolean is_queue = FALSE;
 
-	/* Special case some shortcuts 
+	/* Special case some shortcuts
 	if (event->state != 0) {
 		if ((event->state & GDK_CONTROL_MASK)
 		    && event->keyval == GDK_KEY_a) {
@@ -2255,7 +2255,7 @@ pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list)
 	GList *l;
 
 	prev_tracks = pragha_playlist_get_no_tracks(cplaylist);
-	
+
 	/* TODO: pragha_playlist_set_changing() should be set cursor automatically. */
 	set_watch_cursor (GTK_WIDGET(cplaylist));
 	pragha_playlist_set_changing(cplaylist, TRUE);
@@ -2744,7 +2744,7 @@ current_playlist_button_release_cb(GtkWidget *widget,
 {
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
-	
+
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
 
 	if((event->state & GDK_CONTROL_MASK) || (event->state & GDK_SHIFT_MASK) || (cplaylist->dragging == TRUE) || (event->button!=1)){
@@ -2791,23 +2791,23 @@ gboolean header_right_click_cb(GtkWidget *widget,
 /*******/
 
 static gboolean
-dnd_current_playlist_begin(GtkWidget *widget,
-			   GdkDragContext *context,
-			   PraghaPlaylist *cplaylist)
+pragha_playlist_drag_begin (GtkWidget      *widget,
+                            GdkDragContext *context,
+							PraghaPlaylist *playlist)
 {
-	cplaylist->dragging = TRUE;
+	playlist->dragging = TRUE;
 	return FALSE;
 }
 
 /* Callback for DnD signal 'drag-data-get' */
 
 static void
-drag_current_playlist_get_data (GtkWidget *widget,
-				GdkDragContext *context,
-				GtkSelectionData *selection_data,
-				guint target_type,
-				guint time,
-				PraghaPlaylist *cplaylist)
+pragha_playlist_drag_data_get (GtkWidget        *widget,
+                               GdkDragContext   *context,
+                               GtkSelectionData *selection_data,
+                               guint             target_type,
+                               guint             time,
+                               PraghaPlaylist   *playlist)
 {
 	g_assert (selection_data != NULL);
 
@@ -2820,21 +2820,21 @@ drag_current_playlist_get_data (GtkWidget *widget,
 	guint uri_i = 0;
 	gchar **uri_list;
 
-        switch (target_type){
+	switch (target_type){
 		case TARGET_URI_LIST:
 			CDEBUG(DBG_VERBOSE, "DnD: TARGET_URI_LIST");
 
-			selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
+			selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(playlist->view));
 			list = gtk_tree_selection_get_selected_rows(selection, &model);
 			uri_list = g_new(gchar* , gtk_tree_selection_count_selected_rows(selection) + 1);
 
-			for (i=list; i != NULL; i = i->next){
+			for (i = list; i != NULL; i = i->next)
+			{
 				path = i->data;
 				gtk_tree_model_get_iter(model, &iter, path);
 				gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
-				if (G_LIKELY(mobj &&
-				    pragha_musicobject_is_local_file(mobj)))
+				if (G_LIKELY(mobj && pragha_musicobject_is_local_file(mobj)))
 					uri_list[uri_i++] = g_filename_to_uri(pragha_musicobject_get_file(mobj), NULL, NULL);
 
 				gtk_tree_path_free(path);
@@ -2842,6 +2842,7 @@ drag_current_playlist_get_data (GtkWidget *widget,
 			uri_list[uri_i++] = NULL;
 
 			gtk_selection_data_set_uris(selection_data,  uri_list);
+
 			g_strfreev(uri_list);
 			g_list_free(list);
 			break;
@@ -2852,29 +2853,31 @@ drag_current_playlist_get_data (GtkWidget *widget,
 }
 
 static gboolean
-dnd_current_playlist_drop(GtkWidget *widget,
-			  GdkDragContext *context,
-			  gint x,
-			  gint y,
-			  guint time,
-			  PraghaPlaylist *cplaylist)
+pragha_playlist_drag_drop (GtkWidget      *widget,
+                           GdkDragContext *context,
+                           gint            x,
+                           gint            y,
+                           guint           time,
+                           PraghaPlaylist *playlist)
 {
 	GList *p;
 
 	if (gdk_drag_context_list_targets (context) == NULL)
 		return FALSE;
 
-	for (p = gdk_drag_context_list_targets (context); p != NULL; p = p->next) {
+	for (p = gdk_drag_context_list_targets (context) ; p != NULL ; p = p->next)
+	{
 		gchar *possible_type;
-
 		possible_type = gdk_atom_name (GDK_POINTER_TO_ATOM (p->data));
-		if (!strcmp (possible_type, "REF_LIBRARY")) {
+
+		if (!strcmp (possible_type, "REF_LIBRARY"))
+		{
 			CDEBUG(DBG_VERBOSE, "DnD: library_tree");
 
-			gtk_drag_get_data(widget,
-					  context,
-					  GDK_POINTER_TO_ATOM (p->data),
-					  time);
+			gtk_drag_get_data (widget,
+			                   context,
+			                   GDK_POINTER_TO_ATOM (p->data),
+			                   time);
 
 			g_free (possible_type);
 
@@ -2889,10 +2892,10 @@ dnd_current_playlist_drop(GtkWidget *widget,
 /* Reorder playlist with DnD. */
 
 void
-dnd_current_playlist_reorder(GtkTreeModel *model,
-			     GtkTreeIter *dest_iter,
-			     GtkTreeViewDropPosition pos,
-			     PraghaPlaylist *cplaylist)
+pragha_playlist_drag_data_received_reorder (GtkTreeModel            *model,
+                                            GtkTreeIter             *dest_iter,
+                                            GtkTreeViewDropPosition  pos,
+                                            PraghaPlaylist          *playlist)
 {
 	GtkTreeRowReference *ref;
 	GtkTreePath *path = NULL;
@@ -2902,25 +2905,26 @@ dnd_current_playlist_reorder(GtkTreeModel *model,
 
 	CDEBUG(DBG_VERBOSE, "Dnd: Reorder");
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
-	list = gtk_tree_selection_get_selected_rows(selection, NULL);
+	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(playlist->view));
+	list = gtk_tree_selection_get_selected_rows (selection, NULL);
 
 	/* Clear sort */
-	clear_sort_current_playlist(NULL, cplaylist);
+	clear_sort_current_playlist (NULL, playlist);
 
 	/* No selections */
 	if (!list)
 		goto exit;
 
 	/* Store references to the selected paths */
-	l = list;
-	while(l) {
+
+	for (l = list; l != NULL; l = l->next) {
 		path = l->data;
 		ref = gtk_tree_row_reference_new(model, path);
 		l->data = ref;
 		gtk_tree_path_free(path);
-		l = l->next;
 	}
+
+	/* Move to new position */
 
 	for (l = list; l != NULL; l = l->next) {
 		ref = l->data;
@@ -2944,14 +2948,14 @@ exit:
 /* Callback for DnD signal 'drag-data-received' */
 
 static void
-dnd_current_playlist_received(GtkWidget *playlist_view,
-			     GdkDragContext *context,
-			     gint x,
-			     gint y,
-			     GtkSelectionData *data,
-			     PraghaDndTarget info,
-			     guint time,
-			     PraghaPlaylist *cplaylist)
+pragha_playlist_drag_data_received (GtkWidget        *playlist_view,
+                                    GdkDragContext   *context,
+                                    gint              x,
+                                    gint              y,
+                                    GtkSelectionData *data,
+                                    PraghaDndTarget   info,
+                                    guint             time,
+                                    PraghaPlaylist   *playlist)
 {
 	GtkTreeModel *model;
 	GtkTreePath *dest_path = NULL;
@@ -2964,14 +2968,14 @@ dnd_current_playlist_received(GtkWidget *playlist_view,
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(playlist_view));
 
-	is_row = gtk_tree_view_get_dest_row_at_pos(GTK_TREE_VIEW(playlist_view),
-						x, y,
-						&dest_path,
-						&pos);
+	is_row = gtk_tree_view_get_dest_row_at_pos (GTK_TREE_VIEW(playlist_view),
+	                                            x, y,
+	                                            &dest_path,
+	                                            &pos);
 
 	gtk_tree_view_get_visible_rect(GTK_TREE_VIEW(playlist_view), &vrect);
 	gtk_tree_view_get_cell_area(GTK_TREE_VIEW(playlist_view), dest_path, NULL, &crect);
-	
+
 	row_align = (gdouble)crect.y / (gdouble)vrect.height;
 
 	switch(pos) {
@@ -2991,7 +2995,7 @@ dnd_current_playlist_received(GtkWidget *playlist_view,
 	/* Reorder within current playlist */
 
 	if (gtk_drag_get_source_widget(context) == playlist_view) {
-		dnd_current_playlist_reorder(model, &dest_iter, pos, cplaylist);
+		pragha_playlist_drag_data_received_reorder (model, &dest_iter, pos, playlist);
 		goto exit;
 	}
 
@@ -2999,7 +3003,7 @@ dnd_current_playlist_received(GtkWidget *playlist_view,
 
 	switch(info) {
 	case TARGET_REF_LIBRARY:
-		list = pragha_dnd_library_get_mobj_list (data, cplaylist->cdbase);
+		list = pragha_dnd_library_get_mobj_list (data, playlist->cdbase);
 		break;
 	case TARGET_URI_LIST:
 		list = pragha_dnd_uri_list_get_mobj_list (data);
@@ -3015,17 +3019,17 @@ dnd_current_playlist_received(GtkWidget *playlist_view,
 	/* Insert mobj list to current playlist. */
 
 	if (is_row) {
-		pragha_playlist_insert_mobj_list(cplaylist, list, pos, &dest_iter);
+		pragha_playlist_insert_mobj_list (playlist, list, pos, &dest_iter);
 		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(playlist_view), dest_path, NULL, TRUE, row_align, 0.0);
 	}
 	else
-		pragha_playlist_append_mobj_list(cplaylist, list);
+		pragha_playlist_append_mobj_list (playlist, list);
 
 	g_list_free(list);
 
 exit:
 	gtk_tree_path_free(dest_path);
-	gtk_drag_finish(context, TRUE, FALSE, time);
+	gtk_drag_finish (context, TRUE, TRUE, time);
 }
 
 /* Get a list of all music objects on current playlist */
@@ -3508,37 +3512,30 @@ static const GtkTargetEntry pentries[] = {
 };
 
 static void
-init_playlist_dnd(PraghaPlaylist *cplaylist)
+pragha_playlist_init_dnd (PraghaPlaylist *playlist)
 {
 	/* Source/Dest: Current Playlist */
 
-	gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(cplaylist->view),
-					       GDK_BUTTON1_MASK,
-					       pentries,
-					       G_N_ELEMENTS(pentries),
-					       GDK_ACTION_COPY | GDK_ACTION_MOVE);
+	gtk_tree_view_enable_model_drag_source (GTK_TREE_VIEW(playlist->view),
+	                                        GDK_BUTTON1_MASK,
+	                                        pentries, G_N_ELEMENTS(pentries),
+	                                        GDK_ACTION_COPY | GDK_ACTION_MOVE);
 
-	gtk_tree_view_enable_model_drag_dest(GTK_TREE_VIEW(cplaylist->view),
-					     pentries,
-					     G_N_ELEMENTS(pentries),
-					     GDK_ACTION_COPY | GDK_ACTION_MOVE);
+	gtk_tree_view_enable_model_drag_dest (GTK_TREE_VIEW(playlist->view),
+	                                      pentries, G_N_ELEMENTS(pentries),
+	                                      GDK_ACTION_COPY | GDK_ACTION_MOVE);
 
-	g_signal_connect(G_OBJECT(GTK_WIDGET(cplaylist->view)),
-			 "drag-begin",
-			 G_CALLBACK(dnd_current_playlist_begin),
-			 cplaylist);
-	 g_signal_connect (G_OBJECT(cplaylist->view),
-			 "drag-data-get",
-			 G_CALLBACK (drag_current_playlist_get_data),
-			 cplaylist);
-	g_signal_connect(G_OBJECT(cplaylist->view),
-			 "drag-drop",
-			 G_CALLBACK(dnd_current_playlist_drop),
-			 cplaylist);
-	g_signal_connect(G_OBJECT(cplaylist->view),
-			 "drag-data-received",
-			 G_CALLBACK(dnd_current_playlist_received),
-			 cplaylist);
+	g_signal_connect (G_OBJECT(playlist->view), "drag-begin",
+	                  G_CALLBACK(pragha_playlist_drag_begin), playlist);
+
+	g_signal_connect (G_OBJECT(playlist->view), "drag-data-get",
+	                  G_CALLBACK (pragha_playlist_drag_data_get), playlist);
+
+	g_signal_connect (G_OBJECT(playlist->view), "drag-drop",
+	                  G_CALLBACK(pragha_playlist_drag_drop),  playlist);
+
+	g_signal_connect (G_OBJECT(playlist->view), "drag-data-received",
+	                  G_CALLBACK(pragha_playlist_drag_data_received), playlist);
 }
 
 static void
@@ -4446,7 +4443,7 @@ pragha_playlist_init (PraghaPlaylist *playlist)
 
 	/* Init drag and drop */
 
-	init_playlist_dnd (playlist);
+	pragha_playlist_init_dnd (playlist);
 
 	/* Create menus */
 
