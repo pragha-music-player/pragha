@@ -2959,9 +2959,9 @@ pragha_playlist_drag_data_received (GtkWidget        *playlist_view,
 {
 	GtkTreeModel *model;
 	GtkTreePath *dest_path = NULL;
-	GtkTreeIter dest_iter;
+	GtkTreeIter iter, dest_iter;
 	GtkTreeViewDropPosition pos = 0;
-	gboolean is_row;
+	gboolean is_row, row_valid;
 	GdkRectangle vrect, crect;
 	gdouble row_align;
 	GList *list = NULL;
@@ -2978,19 +2978,30 @@ pragha_playlist_drag_data_received (GtkWidget        *playlist_view,
 
 	row_align = (gdouble)crect.y / (gdouble)vrect.height;
 
-	switch(pos) {
-		case GTK_TREE_VIEW_DROP_INTO_OR_BEFORE:
-			pos = GTK_TREE_VIEW_DROP_BEFORE;
-			break;
-		case GTK_TREE_VIEW_DROP_INTO_OR_AFTER:
-			pos = GTK_TREE_VIEW_DROP_AFTER;
-			break;
-		default:
-			break;
-	}
-
-	if (is_row)
+	if (is_row) {
+		/* Set dest_iter to the dropped child */
 		gtk_tree_model_get_iter (model, &dest_iter, dest_path);
+
+		switch(pos) {
+			case GTK_TREE_VIEW_DROP_INTO_OR_BEFORE:
+				pos = GTK_TREE_VIEW_DROP_BEFORE;
+				break;
+			case GTK_TREE_VIEW_DROP_INTO_OR_AFTER:
+				pos = GTK_TREE_VIEW_DROP_AFTER;
+				break;
+			default:
+				break;
+		}
+	}
+	else {
+		/* Set dest_iter to the last child */
+		row_valid = gtk_tree_model_get_iter_first(model, &iter);
+		while (row_valid) {
+			dest_iter = iter;
+			row_valid = gtk_tree_model_iter_next(model, &iter);
+		}
+		pos = GTK_TREE_VIEW_DROP_AFTER;
+	}
 
 	/* Reorder within current playlist */
 
