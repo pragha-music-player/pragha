@@ -3029,7 +3029,7 @@ pragha_playlist_drag_data_received (GtkWidget        *playlist_view,
 
 exit:
 	gtk_tree_path_free(dest_path);
-	gtk_drag_finish (context, TRUE, TRUE, time);
+	gtk_drag_finish (context, TRUE, FALSE, time);
 }
 
 /* Get a list of all music objects on current playlist */
