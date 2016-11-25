@@ -1,18 +1,18 @@
 /*************************************************************************/
-/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2014 matias <mati86dl@gmail.com>                   */
-/*                                                                       */
-/* This program is free software: you can redistribute it and/or modify  */
-/* it under the terms of the GNU General Public License as published by  */
-/* the Free Software Foundation, either version 3 of the License, or     */
-/* (at your option) any later version.                                   */
-/*                                                                       */
-/* This program is distributed in the hope that it will be useful,       */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
-/* GNU General Public License for more details.                          */
-/*                                                                       */
-/* You should have received a copy of the GNU General Public License     */
+/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
+/* Copyright (C) 2009-2014 matias <mati86dl@gmail.com>			 */
+/*									 */
+/* This program is free software: you can redistribute it and/or modify	 */
+/* it under the terms of the GNU General Public License as published by	 */
+/* the Free Software Foundation, either version 3 of the License, or	 */
+/* (at your option) any later version.					 */
+/*									 */
+/* This program is distributed in the hope that it will be useful,	 */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the	 */
+/* GNU General Public License for more details.				 */
+/*									 */
+/* You should have received a copy of the GNU General Public License	 */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
@@ -43,7 +43,7 @@ struct _PraghaToolbar {
 #if GTK_CHECK_VERSION (3, 12, 0)
 	GtkHeaderBar   __parent__;
 #else
-	GtkToolbar      __parent__;
+	GtkToolbar	__parent__;
 #endif
 	PraghaAlbumArt *albumart;
 
@@ -148,17 +148,17 @@ pragha_toolbar_set_title (PraghaToolbar *toolbar, PraghaMusicobject *mobj)
 
 	if(string_is_not_empty(artist) && string_is_not_empty(album))
 		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s <small><span weight=\"light\">in</span></small> %s"),
-		                               str_title,
-		                               artist,
-		                               album);
+					       str_title,
+					       artist,
+					       album);
 	else if(string_is_not_empty(artist))
 		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"),
-		                                str_title,
-		                                artist);
+						str_title,
+						artist);
 	else if(string_is_not_empty(album))
 		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">in</span></small> %s"),
-		                                str_title,
-		                                album);
+						str_title,
+						album);
 	else
 		str = g_markup_printf_escaped("%s", str_title);
 
@@ -181,9 +181,9 @@ pragha_toolbar_unset_song_info(PraghaToolbar *toolbar)
 }
 
 static void
-pragha_toolbar_timer_label_event_change_mode (GtkWidget      *widget,
-                                              GdkEventButton *event,
-                                              PraghaToolbar  *toolbar)
+pragha_toolbar_timer_label_event_change_mode (GtkWidget	     *widget,
+					      GdkEventButton *event,
+					      PraghaToolbar  *toolbar)
 {
 	pragha_toolbar_set_remaning_mode (toolbar,
 		!pragha_toolbar_get_remaning_mode (toolbar));
@@ -255,9 +255,9 @@ unfull_button_handler (GtkButton *button, PraghaToolbar *toolbar)
 }
 
 static gboolean
-pragha_toolbar_album_art_activated (GtkWidget      *event_box,
-                                    GdkEventButton *event,
-                                    PraghaToolbar  *toolbar)
+pragha_toolbar_album_art_activated (GtkWidget	   *event_box,
+				    GdkEventButton *event,
+				    PraghaToolbar  *toolbar)
 {
 	if (event->type == GDK_2BUTTON_PRESS || event->type == GDK_3BUTTON_PRESS)
 #if GTK_CHECK_VERSION (3, 12, 0)
@@ -269,9 +269,9 @@ pragha_toolbar_album_art_activated (GtkWidget      *event_box,
 }
 
 static gboolean
-pragha_toolbar_song_label_event_edit (GtkWidget      *event_box,
-                                      GdkEventButton *event,
-                                      PraghaToolbar  *toolbar)
+pragha_toolbar_song_label_event_edit (GtkWidget	     *event_box,
+				      GdkEventButton *event,
+				      PraghaToolbar  *toolbar)
 {
 	if (event->type == GDK_2BUTTON_PRESS || event->type == GDK_3BUTTON_PRESS)
 #if GTK_CHECK_VERSION (3, 12, 0)
@@ -284,8 +284,8 @@ pragha_toolbar_song_label_event_edit (GtkWidget      *event_box,
 
 static void
 pragha_toolbar_progress_bar_event_seek (GtkWidget *widget,
-                                        GdkEventButton *event,
-                                        PraghaToolbar *toolbar)
+					GdkEventButton *event,
+					PraghaToolbar *toolbar)
 {
 	GtkAllocation allocation;
 	gdouble fraction = 0;
@@ -347,7 +347,7 @@ pragha_toolbar_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpo
 	gtk_widget_set_sensitive (GTK_WIDGET(toolbar->prev_button), playing);
 
 	pragha_toolbar_button_set_icon_name (toolbar->play_button,
-	                                     (state == ST_PLAYING) ? "media-playback-pause" : "media-playback-start");
+					     (state == ST_PLAYING) ? "media-playback-pause" : "media-playback-start");
 	gtk_widget_set_sensitive (GTK_WIDGET(toolbar->stop_button), playing);
 	gtk_widget_set_sensitive (GTK_WIDGET(toolbar->next_button), playing);
 
@@ -477,23 +477,23 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	 */
 	box = pragha_container_new ();
 
- 	/*
- 	 * Main box: [Album][Song info]
- 	 */
+	/*
+	 * Main box: [Album][Song info]
+	 */
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-	gtk_box_pack_start (GTK_BOX(box), hbox, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX(box), hbox, TRUE, TRUE, 5);
 
 	album_art_frame = gtk_event_box_new ();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(album_art_frame), FALSE);
 	g_signal_connect(G_OBJECT (album_art_frame), "button_press_event",
-	                 G_CALLBACK (pragha_toolbar_album_art_activated), toolbar);
+			 G_CALLBACK (pragha_toolbar_album_art_activated), toolbar);
 	gtk_box_pack_start (GTK_BOX(hbox), album_art_frame, FALSE, FALSE, 2);
 
 	albumart = pragha_album_art_new ();
 	g_object_bind_property (preferences, "album-art-size",
-	                        albumart, "size", binding_flags);
+				albumart, "size", binding_flags);
 	g_object_bind_property (preferences, "show-album-art",
-	                        albumart, "visible", binding_flags);
+				albumart, "visible", binding_flags);
 	gtk_container_add(GTK_CONTAINER(album_art_frame), GTK_WIDGET(albumart));
 	toolbar->albumart = albumart;
 
@@ -502,12 +502,12 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	 */
 	vbox_aling = gtk_alignment_new(0.5, 0.5, 1, 0);
 
- 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 	gtk_container_add(GTK_CONTAINER(vbox_aling), GTK_WIDGET(vbox));
 
- 	/*
- 	 * Top box: [Title][extentions]
- 	 */
+	/*
+	 * Top box: [Title][extentions]
+	 */
 	top_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), top_hbox, TRUE, TRUE, 0);
 
@@ -517,7 +517,7 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(title_event_box), FALSE);
 
 	g_signal_connect (G_OBJECT(title_event_box), "button-press-event",
-	                  G_CALLBACK(pragha_toolbar_song_label_event_edit), toolbar);
+			  G_CALLBACK(pragha_toolbar_song_label_event_edit), toolbar);
 
 	title = gtk_label_new(NULL);
 	gtk_label_set_ellipsize (GTK_LABEL(title), PANGO_ELLIPSIZE_END);
@@ -533,11 +533,11 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	/* Pack top widgets:  */
 
 	gtk_box_pack_start (GTK_BOX(top_hbox),
-	                    GTK_WIDGET(title_event_box),
-	                    TRUE, TRUE, 0);
+			    GTK_WIDGET(title_event_box),
+			    TRUE, TRUE, 5);
 	gtk_box_pack_start (GTK_BOX(top_hbox),
-	                    GTK_WIDGET(extention_box),
-	                    FALSE, FALSE, 0);
+			    GTK_WIDGET(extention_box),
+			    FALSE, FALSE, 90);
 
 	/*
 	 * Botton box: [Time][ProgressBar][Length]
@@ -560,7 +560,7 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(progress_bar_event_box), FALSE);
 
 	g_signal_connect (G_OBJECT(progress_bar_event_box), "button-press-event",
-	                  G_CALLBACK(pragha_toolbar_progress_bar_event_seek), toolbar);
+			  G_CALLBACK(pragha_toolbar_progress_bar_event_seek), toolbar);
 
 #if GTK_CHECK_VERSION (3, 14, 0)
 	progress_bar = gtk_progress_bar_new ();
@@ -570,14 +570,14 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 #endif
 
 	gtk_container_add (GTK_CONTAINER(progress_bar_event_box),
-	                   GTK_WIDGET(progress_bar));
+			   GTK_WIDGET(progress_bar));
 
 	/* Length and remaining time widget. */
 
 	length_event_box = gtk_event_box_new();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(length_event_box), FALSE);
 	g_signal_connect (G_OBJECT(length_event_box), "button-press-event",
-	                  G_CALLBACK(pragha_toolbar_timer_label_event_change_mode), toolbar);
+			  G_CALLBACK(pragha_toolbar_timer_label_event_change_mode), toolbar);
 
 	length_align = gtk_alignment_new(0, 0.5, 0, 0);
 	gtk_container_add(GTK_CONTAINER(length_event_box), length_align);
@@ -590,14 +590,14 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	/* Pack widgets. */
 
 	gtk_box_pack_start (GTK_BOX(botton_hbox),
-	                    GTK_WIDGET(time_align),
-	                    FALSE, FALSE, 3);
+			    GTK_WIDGET(time_align),
+			    FALSE, FALSE, 5);
 	gtk_box_pack_start (GTK_BOX(botton_hbox),
-	                    GTK_WIDGET(progress_bar_event_box),
-	                    TRUE, TRUE, 0);
+			    GTK_WIDGET(progress_bar_event_box),
+			    TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX(botton_hbox),
-	                    GTK_WIDGET(length_event_box),
-	                    FALSE, FALSE, 3);
+			    GTK_WIDGET(length_event_box),
+			    FALSE, FALSE, 5);
 
 	/* Save references. */
 
@@ -605,7 +605,7 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	toolbar->now_playing_label  = title;
 	toolbar->track_time_label   = time_label;
 	toolbar->track_length_label = length_label;
-	toolbar->extention_box      = extention_box;
+	toolbar->extention_box	    = extention_box;
 
 	gtk_box_pack_start(GTK_BOX(hbox), vbox_aling, TRUE, TRUE, 2);
 
@@ -720,11 +720,11 @@ pragha_toolbar_class_init (PraghaToolbarClass *klass)
 	 * Properties:
 	 */
 	properties[PROP_VOLUME] = g_param_spec_double ("volume", "Volume", "Volume showed on toolbar",
-	                                               0.0, 1.0, 0.5,
-	                                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+						       0.0, 1.0, 0.5,
+						       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 	properties[PROP_REMANING_MODE] = g_param_spec_boolean ("timer-remaining-mode", "TimerRemainingMode", "Show Remaining Time",
-	                                                       FALSE,
-	                                                       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+							       FALSE,
+							       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (gobject_class, PROP_LAST, properties);
 
@@ -732,61 +732,61 @@ pragha_toolbar_class_init (PraghaToolbarClass *klass)
 	 * Signals:
 	 */
 	signals[PREV_ACTIVATED] = g_signal_new ("prev",
-	                                        G_TYPE_FROM_CLASS (gobject_class),
-	                                        G_SIGNAL_RUN_LAST,
-	                                        G_STRUCT_OFFSET (PraghaToolbarClass, prev),
-	                                        NULL, NULL,
-	                                        g_cclosure_marshal_VOID__VOID,
-	                                        G_TYPE_NONE, 0);
+						G_TYPE_FROM_CLASS (gobject_class),
+						G_SIGNAL_RUN_LAST,
+						G_STRUCT_OFFSET (PraghaToolbarClass, prev),
+						NULL, NULL,
+						g_cclosure_marshal_VOID__VOID,
+						G_TYPE_NONE, 0);
 	signals[PLAY_ACTIVATED] = g_signal_new ("play",
-	                                        G_TYPE_FROM_CLASS (gobject_class),
-	                                        G_SIGNAL_RUN_LAST,
-	                                        G_STRUCT_OFFSET (PraghaToolbarClass, play),
-	                                        NULL, NULL,
-	                                        g_cclosure_marshal_VOID__VOID,
-	                                        G_TYPE_NONE, 0);
+						G_TYPE_FROM_CLASS (gobject_class),
+						G_SIGNAL_RUN_LAST,
+						G_STRUCT_OFFSET (PraghaToolbarClass, play),
+						NULL, NULL,
+						g_cclosure_marshal_VOID__VOID,
+						G_TYPE_NONE, 0);
 	signals[STOP_ACTIVATED] = g_signal_new ("stop",
-	                                        G_TYPE_FROM_CLASS (gobject_class),
-	                                        G_SIGNAL_RUN_LAST,
-	                                        G_STRUCT_OFFSET (PraghaToolbarClass, stop),
-	                                        NULL, NULL,
-	                                        g_cclosure_marshal_VOID__VOID,
-	                                        G_TYPE_NONE, 0);
+						G_TYPE_FROM_CLASS (gobject_class),
+						G_SIGNAL_RUN_LAST,
+						G_STRUCT_OFFSET (PraghaToolbarClass, stop),
+						NULL, NULL,
+						g_cclosure_marshal_VOID__VOID,
+						G_TYPE_NONE, 0);
 	signals[NEXT_ACTIVATED] = g_signal_new ("next",
-	                                        G_TYPE_FROM_CLASS (gobject_class),
-	                                        G_SIGNAL_RUN_LAST,
-	                                        G_STRUCT_OFFSET (PraghaToolbarClass, next),
-	                                        NULL, NULL,
-	                                        g_cclosure_marshal_VOID__VOID,
-	                                        G_TYPE_NONE, 0);
+						G_TYPE_FROM_CLASS (gobject_class),
+						G_SIGNAL_RUN_LAST,
+						G_STRUCT_OFFSET (PraghaToolbarClass, next),
+						NULL, NULL,
+						g_cclosure_marshal_VOID__VOID,
+						G_TYPE_NONE, 0);
 	signals[ALBUM_ART_ACTIVATED] = g_signal_new ("album-art-activated",
-	                                             G_TYPE_FROM_CLASS (gobject_class),
-	                                             G_SIGNAL_RUN_LAST,
-	                                             G_STRUCT_OFFSET (PraghaToolbarClass, album_art_activated),
-	                                             NULL, NULL,
-	                                             g_cclosure_marshal_VOID__VOID,
-	                                             G_TYPE_NONE, 0);
+						     G_TYPE_FROM_CLASS (gobject_class),
+						     G_SIGNAL_RUN_LAST,
+						     G_STRUCT_OFFSET (PraghaToolbarClass, album_art_activated),
+						     NULL, NULL,
+						     g_cclosure_marshal_VOID__VOID,
+						     G_TYPE_NONE, 0);
 	signals[TRACK_INFO_ACTIVATED] = g_signal_new ("track-info-activated",
-	                                              G_TYPE_FROM_CLASS (gobject_class),
-	                                              G_SIGNAL_RUN_LAST,
-	                                              G_STRUCT_OFFSET (PraghaToolbarClass, track_info_activated),
-	                                              NULL, NULL,
-	                                              g_cclosure_marshal_VOID__VOID,
-	                                              G_TYPE_NONE, 0);
+						      G_TYPE_FROM_CLASS (gobject_class),
+						      G_SIGNAL_RUN_LAST,
+						      G_STRUCT_OFFSET (PraghaToolbarClass, track_info_activated),
+						      NULL, NULL,
+						      g_cclosure_marshal_VOID__VOID,
+						      G_TYPE_NONE, 0);
 	signals[TRACK_PROGRESS_ACTIVATED] = g_signal_new ("track-progress-activated",
-	                                                  G_TYPE_FROM_CLASS (gobject_class),
-	                                                  G_SIGNAL_RUN_LAST,
-	                                                  G_STRUCT_OFFSET (PraghaToolbarClass, track_progress_activated),
-	                                                  NULL, NULL,
-	                                                  g_cclosure_marshal_VOID__DOUBLE,
-	                                                  G_TYPE_NONE, 1, G_TYPE_DOUBLE);
+							  G_TYPE_FROM_CLASS (gobject_class),
+							  G_SIGNAL_RUN_LAST,
+							  G_STRUCT_OFFSET (PraghaToolbarClass, track_progress_activated),
+							  NULL, NULL,
+							  g_cclosure_marshal_VOID__DOUBLE,
+							  G_TYPE_NONE, 1, G_TYPE_DOUBLE);
 	signals[UNFULL_ACTIVATED] = g_signal_new ("unfull-activated",
-	                                          G_TYPE_FROM_CLASS (gobject_class),
-	                                          G_SIGNAL_RUN_LAST,
-	                                          G_STRUCT_OFFSET (PraghaToolbarClass, unfull),
-	                                          NULL, NULL,
-	                                          g_cclosure_marshal_VOID__VOID,
-	                                          G_TYPE_NONE, 0);
+						  G_TYPE_FROM_CLASS (gobject_class),
+						  G_SIGNAL_RUN_LAST,
+						  G_STRUCT_OFFSET (PraghaToolbarClass, unfull),
+						  NULL, NULL,
+						  g_cclosure_marshal_VOID__VOID,
+						  G_TYPE_NONE, 0);
 }
 
 static void
@@ -859,7 +859,7 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	repeat_button = pragha_toggle_button_new ("media-playlist-repeat");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(repeat_button), _("Repeat playback list at the end"));
 
-	vol_button = gtk_volume_button_new();
+	vol_button = gtk_volume_button_new ();
 	g_object_set(vol_button, "use-symbolic", FALSE, NULL);
 	gtk_button_set_relief(GTK_BUTTON(vol_button), GTK_RELIEF_NONE);
 	g_object_set(G_OBJECT(vol_button), "size", GTK_ICON_SIZE_LARGE_TOOLBAR, NULL);
@@ -884,37 +884,37 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	/* Connect signals */
 
 	g_signal_connect(G_OBJECT(prev_button), "clicked",
-	                 G_CALLBACK(prev_button_handler), toolbar);
+			 G_CALLBACK(prev_button_handler), toolbar);
 	g_signal_connect(G_OBJECT(play_button), "clicked",
-	                 G_CALLBACK(play_button_handler), toolbar);
+			 G_CALLBACK(play_button_handler), toolbar);
 	g_signal_connect(G_OBJECT(stop_button), "clicked",
-	                 G_CALLBACK(stop_button_handler), toolbar);
+			 G_CALLBACK(stop_button_handler), toolbar);
 	g_signal_connect(G_OBJECT(next_button), "clicked",
-	                 G_CALLBACK(next_button_handler), toolbar);
+			 G_CALLBACK(next_button_handler), toolbar);
 	g_signal_connect(G_OBJECT(unfull_button), "clicked",
-	                 G_CALLBACK(unfull_button_handler), toolbar);
+			 G_CALLBACK(unfull_button_handler), toolbar);
 
 	/*g_signal_connect(G_OBJECT (prev_button), "key-press-event",
-	                 G_CALLBACK(panel_button_key_press), toolbar);
+			 G_CALLBACK(panel_button_key_press), toolbar);
 	g_signal_connect(G_OBJECT (play_button), "key-press-event",
-	                 G_CALLBACK(panel_button_key_press), toolbar);
+			 G_CALLBACK(panel_button_key_press), toolbar);
 	g_signal_connect(G_OBJECT (stop_button), "key-press-event",
-	                 G_CALLBACK(panel_button_key_press), toolbar);
+			 G_CALLBACK(panel_button_key_press), toolbar);
 	g_signal_connect(G_OBJECT (next_button), "key-press-event",
-	                 G_CALLBACK(panel_button_key_press), toolbar);
+			 G_CALLBACK(panel_button_key_press), toolbar);
 	g_signal_connect(G_OBJECT (next_button), "key-press-event",
-	                 G_CALLBACK(panel_button_key_press), toolbar);
+			 G_CALLBACK(panel_button_key_press), toolbar);
 	g_signal_connect(G_OBJECT (unfull_button), "key-press-event",
-	                 G_CALLBACK(panel_button_key_press), toolbar);
+			 G_CALLBACK(panel_button_key_press), toolbar);
 	g_signal_connect(G_OBJECT (shuffle_button), "key-press-event",
-	                 G_CALLBACK(panel_button_key_press), toolbar);
+			 G_CALLBACK(panel_button_key_press), toolbar);
 	g_signal_connect(G_OBJECT (repeat_button), "key-press-event",
-	                 G_CALLBACK(panel_button_key_press), toolbar);
+			 G_CALLBACK(panel_button_key_press), toolbar);
 	g_signal_connect(G_OBJECT (vol_button), "key-press-event",
-	                 G_CALLBACK(panel_button_key_press), toolbar);*/
+			 G_CALLBACK(panel_button_key_press), toolbar);*/
 
 	g_signal_connect (G_OBJECT (vol_button), "value-changed",
-	                  G_CALLBACK (vol_button_value_changed), toolbar);
+			  G_CALLBACK (vol_button_value_changed), toolbar);
 
 	g_object_bind_property(preferences, "shuffle", shuffle_button, "active", binding_flags);
 	g_object_bind_property(preferences, "repeat", repeat_button, "active", binding_flags);

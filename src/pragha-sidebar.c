@@ -1,24 +1,24 @@
 /*************************************************************************/
-/* Copyright (C) 2013 matias <mati86dl@gmail.com>                        */
-/*                                                                       */
-/* This program is free software: you can redistribute it and/or modify  */
-/* it under the terms of the GNU General Public License as published by  */
-/* the Free Software Foundation, either version 3 of the License, or     */
-/* (at your option) any later version.                                   */
-/*                                                                       */
-/* This program is distributed in the hope that it will be useful,       */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
-/* GNU General Public License for more details.                          */
-/*                                                                       */
-/* You should have received a copy of the GNU General Public License     */
+/* Copyright (C) 2013 matias <mati86dl@gmail.com>			 */
+/*									 */
+/* This program is free software: you can redistribute it and/or modify	 */
+/* it under the terms of the GNU General Public License as published by	 */
+/* the Free Software Foundation, either version 3 of the License, or	 */
+/* (at your option) any later version.					 */
+/*									 */
+/* This program is distributed in the hope that it will be useful,	 */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the	 */
+/* GNU General Public License for more details.				 */
+/*									 */
+/* You should have received a copy of the GNU General Public License	 */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
 #include "pragha-sidebar.h"
 
 struct _PraghaSidebar {
-	GtkBox     __parent__;
+	GtkBox	   __parent__;
 
 	GtkWidget *container;
 	GtkWidget *header;
@@ -26,7 +26,7 @@ struct _PraghaSidebar {
 	GtkWidget *close_button;
 	GtkWidget *title_box;
 
-	GtkMenu   *popup_menu;
+	GtkMenu	  *popup_menu;
 };
 
 G_DEFINE_TYPE(PraghaSidebar, pragha_sidebar, GTK_TYPE_BOX)
@@ -43,17 +43,17 @@ static int signals[LAST_SIGNAL] = { 0 };
 
 void
 pragha_sidebar_attach_plugin (PraghaSidebar *sidebar,
-                              GtkWidget     *widget,
-                              GtkWidget     *title,
-                              GtkMenu       *popup_menu)
+			      GtkWidget	    *widget,
+			      GtkWidget	    *title,
+			      GtkMenu	    *popup_menu)
 {
 	if (!widget || !title)
 		return;
 
 	gtk_notebook_insert_page (GTK_NOTEBOOK(sidebar->container),
-	                          widget,
-	                          NULL,
-	                          0);
+				  widget,
+				  NULL,
+				  0);
 
 	gtk_container_add (GTK_CONTAINER(sidebar->title_box), title);
 
@@ -68,7 +68,7 @@ pragha_sidebar_attach_plugin (PraghaSidebar *sidebar,
 
 void
 pragha_sidebar_remove_plugin (PraghaSidebar *sidebar,
-                              GtkWidget     *widget)
+			      GtkWidget	    *widget)
 {
 	GList *list;
 	GtkWidget *children;
@@ -94,17 +94,17 @@ pragha_sidebar_remove_plugin (PraghaSidebar *sidebar,
 gint
 pragha_sidebar_get_n_panes (PraghaSidebar *sidebar)
 {
-	return 	gtk_notebook_get_n_pages (GTK_NOTEBOOK(sidebar->container));
+	return	gtk_notebook_get_n_pages (GTK_NOTEBOOK(sidebar->container));
 }
 
 void
 pragha_sidebar_style_position (PraghaSidebar *sidebar, GtkPositionType position)
 {
 	GtkWidget *parent;
-	parent  = gtk_widget_get_parent (GTK_WIDGET(sidebar->close_button));
+	parent	= gtk_widget_get_parent (GTK_WIDGET(sidebar->close_button));
 	gtk_box_reorder_child (GTK_BOX(parent),
-	                       GTK_WIDGET(sidebar->close_button),
-	                       (position == GTK_POS_RIGHT) ? 0 : 1);
+			       GTK_WIDGET(sidebar->close_button),
+			       (position == GTK_POS_RIGHT) ? 0 : 1);
 }
 
 /*
@@ -113,10 +113,10 @@ pragha_sidebar_style_position (PraghaSidebar *sidebar, GtkPositionType position)
 
 static void
 pragha_sidebar_menu_position (GtkMenu  *menu,
-                              gint     *x,
-                              gint     *y,
-                              gboolean *push_in,
-                              gpointer  user_data)
+			      gint     *x,
+			      gint     *y,
+			      gboolean *push_in,
+			      gpointer	user_data)
 {
 	GtkWidget *widget;
 	GtkAllocation allocation;
@@ -153,8 +153,8 @@ pragha_sidebar_close_button_cb (GtkWidget *widget, PraghaSidebar *sidebar)
 
 static gboolean
 pragha_sidebar_right_click_cb(GtkWidget *widget,
-                              GdkEventButton *event,
-                              PraghaSidebar *sidebar)
+			      GdkEventButton *event,
+			      PraghaSidebar *sidebar)
 {
 	gboolean ret = FALSE;
 
@@ -167,18 +167,18 @@ pragha_sidebar_right_click_cb(GtkWidget *widget,
 	switch(event->button) {
 		case 3:
 			gtk_menu_popup(GTK_MENU(sidebar->popup_menu),
-			               NULL, NULL, NULL, NULL,
-			               event->button, event->time);
+				       NULL, NULL, NULL, NULL,
+				       event->button, event->time);
 			ret = TRUE;
 			break;
 		case 1:
 			if (widget == sidebar->menu_button) {
 				gtk_menu_popup(GTK_MENU(sidebar->popup_menu),
-				                NULL, NULL,
-				                (GtkMenuPositionFunc) pragha_sidebar_menu_position,
-				                widget,
-				                0,
-				                gtk_get_current_event_time());
+						NULL, NULL,
+						(GtkMenuPositionFunc) pragha_sidebar_menu_position,
+						widget,
+						0,
+						gtk_get_current_event_time());
 				ret = TRUE;
 			}
 			break;
@@ -199,17 +199,17 @@ pragha_sidebar_set_tiny_button (GtkWidget *button)
 	GtkCssProvider *provider;
 	provider = gtk_css_provider_new ();
 	gtk_css_provider_load_from_data (provider,
-	                                 "#s-tiny-button {\n"
-	                                 " -GtkButton-default-border : 0px;\n"
-	                                 " -GtkButton-default-outside-border : 0px;\n"
-	                                 " -GtkButton-inner-border: 0px;\n"
-	                                 " -GtkWidget-focus-line-width: 0px;\n"
-	                                 " -GtkWidget-focus-padding: 0px;\n"
-	                                 " padding: 1px;}",
-	                                 -1, NULL);
+					 "#s-tiny-button {\n"
+					 " -GtkButton-default-border : 0px;\n"
+					 " -GtkButton-default-outside-border : 0px;\n"
+					 " -GtkButton-inner-border: 0px;\n"
+					 " -GtkWidget-focus-line-width: 0px;\n"
+					 " -GtkWidget-focus-padding: 0px;\n"
+					 " padding: 1px;}",
+					 -1, NULL);
 	gtk_style_context_add_provider (gtk_widget_get_style_context (button),
-	                                GTK_STYLE_PROVIDER (provider),
-	                                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+					GTK_STYLE_PROVIDER (provider),
+					GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 	gtk_widget_set_name (button, "s-tiny-button");
 	g_object_unref (provider);
 }
@@ -231,20 +231,20 @@ praga_sidebar_menu_button_new (PraghaSidebar *sidebar)
 #endif
 
 	gtk_box_pack_start (GTK_BOX(hbox),
-	                    sidebar->title_box,
-	                    TRUE, TRUE, 0);
+			    sidebar->title_box,
+			    TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX(hbox),
-	                    arrow,
-	                    FALSE, FALSE, 0);
+			    arrow,
+			    FALSE, FALSE, 0);
 
 	gtk_widget_set_valign (GTK_WIDGET(sidebar->title_box), GTK_ALIGN_CENTER);
 
 	gtk_container_add (GTK_CONTAINER(button), hbox);
 
 	g_signal_connect(G_OBJECT(button),
-	                 "button-press-event",
-	                 G_CALLBACK(pragha_sidebar_right_click_cb),
-	                 sidebar);
+			 "button-press-event",
+			 G_CALLBACK(pragha_sidebar_right_click_cb),
+			 sidebar);
 
 	return button;
 }
@@ -255,7 +255,7 @@ pragha_sidebar_close_button_new(PraghaSidebar *sidebar)
 	GtkWidget *button;
 	GIcon *icon = NULL;
 
- 	const gchar *fallback_icons[] = {
+	const gchar *fallback_icons[] = {
 		"view-left-close",
 		"tab-close",
 		"window-close",
@@ -273,9 +273,9 @@ pragha_sidebar_close_button_new(PraghaSidebar *sidebar)
 	g_object_unref (icon);
 
 	g_signal_connect(G_OBJECT (button),
-	                 "clicked",
-	                 G_CALLBACK(pragha_sidebar_close_button_cb),
-	                 sidebar);
+			 "clicked",
+			 G_CALLBACK(pragha_sidebar_close_button_cb),
+			 sidebar);
 
 	return button;
 }
@@ -288,15 +288,15 @@ pragha_sidebar_header_new(PraghaSidebar *sidebar)
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
 	gtk_box_pack_start(GTK_BOX(hbox),
-	                   sidebar->menu_button,
-	                   TRUE,
-	                   TRUE,
-	                   0);
+			   sidebar->menu_button,
+			   TRUE,
+			   TRUE,
+			   0);
 	gtk_box_pack_start(GTK_BOX(hbox),
-	                   sidebar->close_button,
-	                   FALSE,
-	                   FALSE,
-	                   0);
+			   sidebar->close_button,
+			   FALSE,
+			   FALSE,
+			   0);
 	return hbox;
 }
 
@@ -325,9 +325,9 @@ static void
 pragha_sidebar_init (PraghaSidebar *sidebar)
 {
 	gtk_orientable_set_orientation (GTK_ORIENTABLE (sidebar),
-	                                GTK_ORIENTATION_VERTICAL);
-
-	gtk_box_set_spacing (GTK_BOX(sidebar), 2);
+					GTK_ORIENTATION_VERTICAL);
+	gtk_box_set_spacing (GTK_BOX(sidebar), 3);
+	gtk_container_set_border_width (GTK_CONTAINER (sidebar), 3);
 
 	sidebar->title_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 	sidebar->menu_button = praga_sidebar_menu_button_new (sidebar);
@@ -339,9 +339,9 @@ pragha_sidebar_init (PraghaSidebar *sidebar)
 	sidebar->popup_menu = NULL;
 
 	gtk_box_pack_start (GTK_BOX(sidebar), sidebar->header,
-	                    FALSE, FALSE, 0);
+			    FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(sidebar), sidebar->container,
-	                    TRUE, TRUE, 0);
+			    TRUE, TRUE, 0);
 
 	gtk_widget_show_all (GTK_WIDGET(sidebar->header));
 	gtk_widget_show_all (GTK_WIDGET(sidebar->container));
@@ -357,12 +357,12 @@ pragha_sidebar_class_init (PraghaSidebarClass *klass)
 
 	signals[SIGNAL_CHILDREN_CHANGED] =
 		g_signal_new ("children-changed",
-		              G_TYPE_FROM_CLASS (gobject_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (PraghaSidebarClass, children_changed),
-		              NULL, NULL,
-		              g_cclosure_marshal_VOID__VOID,
-		              G_TYPE_NONE, 0);
+			      G_TYPE_FROM_CLASS (gobject_class),
+			      G_SIGNAL_RUN_LAST,
+			      G_STRUCT_OFFSET (PraghaSidebarClass, children_changed),
+			      NULL, NULL,
+			      g_cclosure_marshal_VOID__VOID,
+			      G_TYPE_NONE, 0);
 }
 
 PraghaSidebar *

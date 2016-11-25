@@ -1,17 +1,17 @@
 /*************************************************************************/
-/* Copyright (C) 2012-2013 matias <mati86dl@gmail.com>                   */
-/*                                                                       */
-/* This program is free software: you can redistribute it and/or modify  */
-/* it under the terms of the GNU General Public License as published by  */
-/* the Free Software Foundation, either version 3 of the License, or     */
-/* (at your option) any later version.                                   */
-/*                                                                       */
-/* This program is distributed in the hope that it will be useful,       */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
-/* GNU General Public License for more details.                          */
-/*                                                                       */
-/* You should have received a copy of the GNU General Public License     */
+/* Copyright (C) 2012-2013 matias <mati86dl@gmail.com>			 */
+/*									 */
+/* This program is free software: you can redistribute it and/or modify	 */
+/* it under the terms of the GNU General Public License as published by	 */
+/* the Free Software Foundation, either version 3 of the License, or	 */
+/* (at your option) any later version.					 */
+/*									 */
+/* This program is distributed in the hope that it will be useful,	 */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the	 */
+/* GNU General Public License for more details.				 */
+/*									 */
+/* You should have received a copy of the GNU General Public License	 */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
@@ -39,15 +39,15 @@ G_DEFINE_TYPE(PraghaPreferences, pragha_preferences, G_TYPE_OBJECT)
 struct _PraghaPreferencesPrivate
 {
 	GKeyFile  *rc_keyfile;
-	gchar     *rc_filepath;
+	gchar	  *rc_filepath;
 
 	/* Useful to pragha. */
-	gchar     *installed_version;
+	gchar	  *installed_version;
 	/* Search preferences. */
 	gboolean   instant_search;
 	gboolean   approximate_search;
 	/* LibraryPane preferences */
-	gint       library_style;
+	gint	   library_style;
 	gboolean   sort_by_year;
 	gboolean   fuse_folders;
 	/* Playlist preferences. */
@@ -56,18 +56,18 @@ struct _PraghaPreferencesPrivate
 	gboolean   use_hint;
 	gboolean   restore_playlist;
 	/* Audio preferences. */
-	gchar     *audio_sink;
-	gchar     *audio_device;
+	gchar	  *audio_sink;
+	gchar	  *audio_device;
 	gboolean   software_mixer;
-	gdouble    software_volume;
+	gdouble	   software_volume;
 	/* Window preferences. */
 	gboolean   lateral_panel;
-	gint       sidebar_size;
+	gint	   sidebar_size;
 	gboolean   secondary_lateral_panel;
-	gint       secondary_sidebar_size;
+	gint	   secondary_sidebar_size;
 	gboolean   show_album_art;
-	gint       album_art_size;
-	gchar     *album_art_pattern;
+	gint	   album_art_size;
+	gchar	  *album_art_pattern;
 	GtkIconSize toolbar_size;
 	gboolean   show_status_bar;
 	gboolean   show_status_icon;
@@ -75,9 +75,9 @@ struct _PraghaPreferencesPrivate
 	gboolean   system_titlebar;
 	gboolean   controls_below;
 	gboolean   remember_state;
-	gchar     *start_mode;
+	gchar	  *start_mode;
 	/* Misc preferences. */
-	gchar     *last_folder;
+	gchar	  *last_folder;
 	gboolean   add_recursively;
 	gboolean   timer_remaining_mode;
 	gboolean   hide_instead_close;
@@ -136,29 +136,29 @@ static int signals[LAST_SIGNAL] = { 0 };
 
 gboolean
 pragha_preferences_get_boolean (PraghaPreferences *preferences,
-                                const gchar       *group_name,
-                                const gchar       *key)
+				const gchar	  *group_name,
+				const gchar	  *key)
 {
 	g_return_val_if_fail (PRAGHA_IS_PREFERENCES(preferences), FALSE);
 
 	return g_key_file_get_boolean (preferences->priv->rc_keyfile,
-	                               group_name,
-	                               key,
-	                               NULL);
+				       group_name,
+				       key,
+				       NULL);
 }
 
 void
 pragha_preferences_set_boolean (PraghaPreferences *preferences,
-                                const gchar       *group_name,
-                                const gchar       *key,
-                                gboolean           sbool)
+				const gchar	  *group_name,
+				const gchar	  *key,
+				gboolean	   sbool)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
 	g_key_file_set_boolean (preferences->priv->rc_keyfile,
-	                        group_name,
-	                        key,
-	                        sbool);
+				group_name,
+				key,
+				sbool);
 }
 
 /**
@@ -167,16 +167,16 @@ pragha_preferences_set_boolean (PraghaPreferences *preferences,
  */
 gdouble *
 pragha_preferences_get_double_list (PraghaPreferences *preferences,
-                                    const gchar *group_name,
-                                    const gchar *key)
+				    const gchar *group_name,
+				    const gchar *key)
 {
 	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
 
 	return g_key_file_get_double_list(preferences->priv->rc_keyfile,
-	                                  group_name,
-	                                  key,
-	                                  NULL,
-	                                  NULL);
+					  group_name,
+					  key,
+					  NULL,
+					  NULL);
 }
 
 /**
@@ -185,18 +185,18 @@ pragha_preferences_get_double_list (PraghaPreferences *preferences,
  */
 void
 pragha_preferences_set_double_list (PraghaPreferences *preferences,
-                                    const gchar *group_name,
-                                    const gchar *key,
-                                    gdouble list[],
-                                    gsize length)
+				    const gchar *group_name,
+				    const gchar *key,
+				    gdouble list[],
+				    gsize length)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
 	g_key_file_set_double_list(preferences->priv->rc_keyfile,
-	                           group_name,
-	                           key,
-	                           list,
-	                           length);
+				   group_name,
+				   key,
+				   list,
+				   length);
 }
 
 /**
@@ -205,17 +205,17 @@ pragha_preferences_set_double_list (PraghaPreferences *preferences,
  */
 gint *
 pragha_preferences_get_integer_list (PraghaPreferences *preferences,
-                                     const gchar *group_name,
-                                     const gchar *key,
-                                     gsize *length)
+				     const gchar *group_name,
+				     const gchar *key,
+				     gsize *length)
 {
 	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
 
 	return g_key_file_get_integer_list(preferences->priv->rc_keyfile,
-	                                   group_name,
-	                                   key,
-	                                   length,
-	                                   NULL);
+					   group_name,
+					   key,
+					   length,
+					   NULL);
 }
 
 /**
@@ -224,18 +224,18 @@ pragha_preferences_get_integer_list (PraghaPreferences *preferences,
  */
 void
 pragha_preferences_set_integer_list (PraghaPreferences *preferences,
-                                     const gchar *group_name,
-                                     const gchar *key,
-                                     gint list[],
-                                     gsize length)
+				     const gchar *group_name,
+				     const gchar *key,
+				     gint list[],
+				     gsize length)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
 	g_key_file_set_integer_list(preferences->priv->rc_keyfile,
-	                            group_name,
-	                            key,
-	                            list,
-	                            length);
+				    group_name,
+				    key,
+				    list,
+				    length);
 }
 
 /**
@@ -244,15 +244,15 @@ pragha_preferences_set_integer_list (PraghaPreferences *preferences,
  */
 gchar *
 pragha_preferences_get_string (PraghaPreferences *preferences,
-                               const gchar *group_name,
-                               const gchar *key)
+			       const gchar *group_name,
+			       const gchar *key)
 {
 	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
 
 	return g_key_file_get_string(preferences->priv->rc_keyfile,
-	                             group_name,
-	                             key,
-	                             NULL);
+				     group_name,
+				     key,
+				     NULL);
 }
 
 /**
@@ -261,16 +261,16 @@ pragha_preferences_get_string (PraghaPreferences *preferences,
  */
 void
 pragha_preferences_set_string (PraghaPreferences *preferences,
-                               const gchar *group_name,
-                               const gchar *key,
-                               const gchar *string)
+			       const gchar *group_name,
+			       const gchar *key,
+			       const gchar *string)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
 	g_key_file_set_string(preferences->priv->rc_keyfile,
-	                      group_name,
-	                      key,
-	                      string);
+			      group_name,
+			      key,
+			      string);
 }
 
 /**
@@ -279,17 +279,17 @@ pragha_preferences_set_string (PraghaPreferences *preferences,
  */
 gchar **
 pragha_preferences_get_string_list (PraghaPreferences *preferences,
-                                    const gchar *group_name,
-                                    const gchar *key,
-                                    gsize *length)
+				    const gchar *group_name,
+				    const gchar *key,
+				    gsize *length)
 {
 	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
 
 	return g_key_file_get_string_list(preferences->priv->rc_keyfile,
-	                                  group_name,
-	                                  key,
-	                                  length,
-	                                  NULL);
+					  group_name,
+					  key,
+					  length,
+					  NULL);
 }
 
 /**
@@ -298,18 +298,18 @@ pragha_preferences_get_string_list (PraghaPreferences *preferences,
  */
 void
 pragha_preferences_set_string_list (PraghaPreferences *preferences,
-                                     const gchar *group_name,
-                                     const gchar *key,
-                                     const gchar * const list[],
-                                     gsize length)
+				     const gchar *group_name,
+				     const gchar *key,
+				     const gchar * const list[],
+				     gsize length)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
 	g_key_file_set_string_list(preferences->priv->rc_keyfile,
-	                           group_name,
-	                           key,
-	                           list,
-	                           length);
+				   group_name,
+				   key,
+				   list,
+				   length);
 }
 
 /**
@@ -318,8 +318,8 @@ pragha_preferences_set_string_list (PraghaPreferences *preferences,
  */
 GSList *
 pragha_preferences_get_filename_list (PraghaPreferences *preferences,
-                                      const gchar *group_name,
-                                      const gchar *key)
+				      const gchar *group_name,
+				      const gchar *key)
 {
 	gchar **clist;
 	GSList *slist = NULL;
@@ -331,10 +331,10 @@ pragha_preferences_get_filename_list (PraghaPreferences *preferences,
 
 
 	clist = g_key_file_get_string_list(preferences->priv->rc_keyfile,
-	                                   group_name,
-	                                   key,
-	                                   &length,
-	                                   NULL);
+					   group_name,
+					   key,
+					   &length,
+					   NULL);
 
 	if (clist) {
 		for (i = 0 ; i < length ; i++) {
@@ -360,9 +360,9 @@ pragha_preferences_get_filename_list (PraghaPreferences *preferences,
  */
 void
 pragha_preferences_set_filename_list (PraghaPreferences *preferences,
-                                      const gchar *group_name,
-                                      const gchar *key,
-                                      GSList *list)
+				      const gchar *group_name,
+				      const gchar *key,
+				      GSList *list)
 {
 	gchar **clist;
 	gchar *filename = NULL;
@@ -386,10 +386,10 @@ pragha_preferences_set_filename_list (PraghaPreferences *preferences,
 	}
 
 	g_key_file_set_string_list(preferences->priv->rc_keyfile,
-	                           group_name,
-	                           key,
-	                           (const gchar **)clist,
-	                           cnt);
+				   group_name,
+				   key,
+				   (const gchar **)clist,
+				   cnt);
 
 	for(i = 0; i < cnt; i++) {
 		g_free(clist[i]);
@@ -404,20 +404,20 @@ pragha_preferences_set_filename_list (PraghaPreferences *preferences,
  */
 void
 pragha_preferences_remove_key (PraghaPreferences *preferences,
-                               const gchar *group_name,
-                               const gchar *key)
+			       const gchar *group_name,
+			       const gchar *key)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
 	if (g_key_file_has_group(preferences->priv->rc_keyfile, group_name) &&
 	    g_key_file_has_key(preferences->priv->rc_keyfile,
-	                       group_name,
-	                       key,
-	                       NULL))
+			       group_name,
+			       key,
+			       NULL))
 		g_key_file_remove_key(preferences->priv->rc_keyfile,
-		                      group_name,
-		                      key,
-		                      NULL);
+				      group_name,
+				      key,
+				      NULL);
 }
 
 /**
@@ -426,7 +426,7 @@ pragha_preferences_remove_key (PraghaPreferences *preferences,
  */
 gboolean
 pragha_preferences_has_group (PraghaPreferences *preferences,
-                              const gchar       *group_name)
+			      const gchar	*group_name)
 {
 	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), FALSE);
 
@@ -440,13 +440,13 @@ pragha_preferences_has_group (PraghaPreferences *preferences,
  */
 void
 pragha_preferences_remove_group (PraghaPreferences *preferences,
-                                 const gchar       *group_name)
+				 const gchar	   *group_name)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
 	g_key_file_remove_group (preferences->priv->rc_keyfile,
-	                         group_name,
-	                         NULL);
+				 group_name,
+				 NULL);
 }
 
 /**
@@ -455,7 +455,7 @@ pragha_preferences_remove_group (PraghaPreferences *preferences,
  */
 void
 pragha_preferences_plugin_changed (PraghaPreferences *preferences,
-                                   const gchar       *key)
+				   const gchar	     *key)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -468,7 +468,7 @@ pragha_preferences_plugin_changed (PraghaPreferences *preferences,
  */
 gchar *
 pragha_preferences_get_plugin_group_name (PraghaPreferences *preferences,
-                                          const gchar       *plugin_name)
+					  const gchar	    *plugin_name)
 {
 	gchar *group_name = NULL, *name_upper = NULL;
 	
@@ -501,8 +501,8 @@ pragha_preferences_get_library_list (PraghaPreferences *preferences)
 	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
 
 	return pragha_preferences_get_filename_list (preferences,
-		                                         GROUP_LIBRARY,
-		                                         KEY_LIBRARY_DIR);
+							 GROUP_LIBRARY,
+							 KEY_LIBRARY_DIR);
 }
 
 /**
@@ -511,20 +511,20 @@ pragha_preferences_get_library_list (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_library_list (PraghaPreferences *preferences,
-                                     GSList *list)
+				     GSList *list)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
 	if (list != NULL) {
 		pragha_preferences_set_filename_list (preferences,
-			                                  GROUP_LIBRARY,
-			                                  KEY_LIBRARY_DIR,
-			                                  list);
+							  GROUP_LIBRARY,
+							  KEY_LIBRARY_DIR,
+							  list);
 	}
 	else {
 		pragha_preferences_remove_key (preferences,
-		                               GROUP_LIBRARY,
-		                               KEY_LIBRARY_DIR);
+					       GROUP_LIBRARY,
+					       KEY_LIBRARY_DIR);
 	}
 	g_signal_emit (preferences, signals[SIGNAL_LIBRARY_CHANGED], 0);
 }
@@ -547,7 +547,7 @@ pragha_preferences_get_installed_version (PraghaPreferences *preferences)
  */
 static void
 pragha_preferences_set_installed_version (PraghaPreferences *preferences,
-                                          const gchar *installed_version)
+					  const gchar *installed_version)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -573,7 +573,7 @@ pragha_preferences_get_instant_search (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_instant_search (PraghaPreferences *preferences,
-                                       gboolean instant_search)
+				       gboolean instant_search)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -601,7 +601,7 @@ pragha_preferences_get_approximate_search (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_approximate_search (PraghaPreferences *preferences,
-                                           gboolean approximate_search)
+					   gboolean approximate_search)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -628,7 +628,7 @@ pragha_preferences_get_library_style (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_library_style (PraghaPreferences *preferences,
-                                      gint library_style)
+				      gint library_style)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -655,7 +655,7 @@ pragha_preferences_get_sort_by_year (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_sort_by_year (PraghaPreferences *preferences,
-                                     gboolean sort_by_year)
+				     gboolean sort_by_year)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -682,7 +682,7 @@ pragha_preferences_get_fuse_folders (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_fuse_folders (PraghaPreferences *preferences,
-                                     gboolean fuse_folders)
+				     gboolean fuse_folders)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -709,7 +709,7 @@ pragha_preferences_get_shuffle (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_shuffle (PraghaPreferences *preferences,
-                                gboolean shuffle)
+				gboolean shuffle)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -736,7 +736,7 @@ pragha_preferences_get_repeat (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_repeat (PraghaPreferences *preferences,
-                               gboolean repeat)
+			       gboolean repeat)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -763,7 +763,7 @@ pragha_preferences_get_use_hint (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_use_hint (PraghaPreferences *preferences,
-                                 gboolean use_hint)
+				 gboolean use_hint)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -790,7 +790,7 @@ pragha_preferences_get_restore_playlist (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_restore_playlist (PraghaPreferences *preferences,
-                                         gboolean restore_playlist)
+					 gboolean restore_playlist)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -817,7 +817,7 @@ pragha_preferences_get_audio_sink (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_audio_sink (PraghaPreferences *preferences,
-                                   const gchar *audio_sink)
+				   const gchar *audio_sink)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -845,7 +845,7 @@ pragha_preferences_get_audio_device (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_audio_device (PraghaPreferences *preferences,
-                                     const gchar *audio_device)
+				     const gchar *audio_device)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -873,7 +873,7 @@ pragha_preferences_get_software_mixer (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_software_mixer (PraghaPreferences *preferences,
-                                       gboolean software_mixer)
+				       gboolean software_mixer)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -900,7 +900,7 @@ pragha_preferences_get_software_volume (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_software_volume (PraghaPreferences *preferences,
-                                        gdouble software_volume)
+					gdouble software_volume)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -927,7 +927,7 @@ pragha_preferences_get_lateral_panel (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_lateral_panel (PraghaPreferences *preferences,
-                                      gboolean lateral_panel)
+				      gboolean lateral_panel)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -954,7 +954,7 @@ pragha_preferences_get_sidebar_size (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_sidebar_size (PraghaPreferences *preferences,
-                                     gint sidebar_size)
+				     gint sidebar_size)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -981,7 +981,7 @@ pragha_preferences_get_secondary_lateral_panel (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_secondary_lateral_panel (PraghaPreferences *preferences,
-                                                gboolean secondary_lateral_panel)
+						gboolean secondary_lateral_panel)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -1008,7 +1008,7 @@ pragha_preferences_get_secondary_sidebar_size (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_secondary_sidebar_size (PraghaPreferences *preferences,
-                                               gint secondary_sidebar_size)
+					       gint secondary_sidebar_size)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -1035,7 +1035,7 @@ pragha_preferences_get_show_album_art (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_show_album_art (PraghaPreferences *preferences,
-                                       gboolean show_album_art)
+				       gboolean show_album_art)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -1062,7 +1062,7 @@ pragha_preferences_get_album_art_size (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_album_art_size (PraghaPreferences *preferences,
-                                       gint album_art_size)
+				       gint album_art_size)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -1089,7 +1089,7 @@ pragha_preferences_get_album_art_pattern (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_album_art_pattern (PraghaPreferences *preferences,
-                                          const gchar *album_art_pattern)
+					  const gchar *album_art_pattern)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -1117,7 +1117,7 @@ pragha_preferences_get_toolbar_size (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_toolbar_size (PraghaPreferences *preferences,
-                                     GtkIconSize        toolbar_size)
+				     GtkIconSize	toolbar_size)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -1144,7 +1144,7 @@ pragha_preferences_get_show_status_bar (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_show_status_bar (PraghaPreferences *preferences,
-                                        gboolean show_status_bar)
+					gboolean show_status_bar)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -1171,7 +1171,7 @@ pragha_preferences_get_show_status_icon (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_show_status_icon (PraghaPreferences *preferences,
-                                         gboolean show_status_icon)
+					 gboolean show_status_icon)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -1198,7 +1198,7 @@ pragha_preferences_get_show_menubar (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_show_menubar (PraghaPreferences *preferences,
-                                     gboolean           show_menubar)
+				     gboolean		show_menubar)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -1225,7 +1225,7 @@ pragha_preferences_get_system_titlebar (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_system_titlebar (PraghaPreferences *preferences,
-                                        gboolean           system_titlebar)
+					gboolean	   system_titlebar)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -1252,7 +1252,7 @@ pragha_preferences_get_controls_below (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_controls_below (PraghaPreferences *preferences,
-                                       gboolean controls_below)
+				       gboolean controls_below)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -1279,7 +1279,7 @@ pragha_preferences_get_remember_state (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_remember_state (PraghaPreferences *preferences,
-                                       gboolean remember_state)
+				       gboolean remember_state)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -1306,7 +1306,7 @@ pragha_preferences_get_start_mode (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_start_mode (PraghaPreferences *preferences,
-                                   const gchar *start_mode)
+				   const gchar *start_mode)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -1334,7 +1334,7 @@ pragha_preferences_get_last_folder (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_last_folder (PraghaPreferences *preferences,
-                                    const gchar *last_folder)
+				    const gchar *last_folder)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -1362,7 +1362,7 @@ pragha_preferences_get_add_recursively (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_add_recursively(PraghaPreferences *preferences,
-                                       gboolean add_recursively)
+				       gboolean add_recursively)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -1389,7 +1389,7 @@ pragha_preferences_get_timer_remaining_mode (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_timer_remaining_mode(PraghaPreferences *preferences,
-                                            gboolean timer_remaining_mode)
+					    gboolean timer_remaining_mode)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -1416,7 +1416,7 @@ pragha_preferences_get_hide_instead_close (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_hide_instead_close (PraghaPreferences *preferences,
-                                           gboolean hide_instead_close)
+					   gboolean hide_instead_close)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -1443,7 +1443,7 @@ pragha_preferences_get_lock_library (PraghaPreferences *preferences)
  */
 void
 pragha_preferences_set_lock_library (PraghaPreferences *preferences,
-                                     gboolean           lock_library)
+				     gboolean		lock_library)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
@@ -1459,7 +1459,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gboolean approximate_search, instant_search;
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
 	gboolean lateral_panel, secondary_lateral_panel, show_album_art, show_status_bar, \
-		show_status_icon, show_menubar, system_titlebar, controls_below, remember_state;
+	  show_status_icon, show_menubar, system_titlebar, controls_below, remember_state;
 	gchar *album_art_pattern;
 	gchar *start_mode, *last_folder, *last_folder_converted = NULL;
 	gboolean add_recursively, timer_remaining_mode, hide_instead_close;
@@ -1503,9 +1503,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	/* Open the preferences key file */
 
 	if (!g_key_file_load_from_file(priv->rc_keyfile,
-	                               priv->rc_filepath,
-	                               G_KEY_FILE_NONE,
-	                               &error)) {
+				       priv->rc_filepath,
+				       G_KEY_FILE_NONE,
+				       &error)) {
 		g_critical("Unable to load config file (Possible first start), err: %s", error->message);
 		g_error_free(error);
 		return;
@@ -1514,9 +1514,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	/* Installed version used as flag to detect the first run. */
 
 	installed_version = g_key_file_get_string(priv->rc_keyfile,
-	                                          GROUP_GENERAL,
-	                                          KEY_INSTALLED_VERSION,
-	                                          &error);
+						  GROUP_GENERAL,
+						  KEY_INSTALLED_VERSION,
+						  &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1529,9 +1529,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	/* Open last preferences */
 
 	approximate_search = g_key_file_get_boolean(priv->rc_keyfile,
-	                                            GROUP_GENERAL,
-	                                            KEY_APPROXIMATE_SEARCH,
-	                                            &error);
+						    GROUP_GENERAL,
+						    KEY_APPROXIMATE_SEARCH,
+						    &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1541,9 +1541,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	instant_search = g_key_file_get_boolean(priv->rc_keyfile,
-	                                        GROUP_GENERAL,
-	                                        KEY_INSTANT_SEARCH,
-	                                        &error);
+						GROUP_GENERAL,
+						KEY_INSTANT_SEARCH,
+						&error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1553,9 +1553,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	shuffle = g_key_file_get_boolean(priv->rc_keyfile,
-	                                 GROUP_PLAYLIST,
-	                                 KEY_SHUFFLE,
-	                                 &error);
+					 GROUP_PLAYLIST,
+					 KEY_SHUFFLE,
+					 &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1565,9 +1565,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	repeat = g_key_file_get_boolean(priv->rc_keyfile,
-	                                GROUP_PLAYLIST,
-	                                KEY_REPEAT,
-	                                &error);
+					GROUP_PLAYLIST,
+					KEY_REPEAT,
+					&error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1577,9 +1577,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	use_hint = g_key_file_get_boolean(priv->rc_keyfile,
-	                                  GROUP_GENERAL,
-	                                  KEY_USE_HINT,
-	                                  &error);
+					  GROUP_GENERAL,
+					  KEY_USE_HINT,
+					  &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1589,9 +1589,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	library_style = g_key_file_get_integer(priv->rc_keyfile,
-	                                       GROUP_LIBRARY,
-	                                       KEY_LIBRARY_VIEW_ORDER,
-	                                       &error);
+					       GROUP_LIBRARY,
+					       KEY_LIBRARY_VIEW_ORDER,
+					       &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1601,9 +1601,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	sort_by_year = g_key_file_get_boolean(priv->rc_keyfile,
-	                                      GROUP_LIBRARY,
-	                                      KEY_SORT_BY_YEAR,
-	                                      &error);
+					      GROUP_LIBRARY,
+					      KEY_SORT_BY_YEAR,
+					      &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1613,9 +1613,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	fuse_folders = g_key_file_get_boolean(priv->rc_keyfile,
-	                                      GROUP_LIBRARY,
-	                                      KEY_FUSE_FOLDERS,
-	                                      &error);
+					      GROUP_LIBRARY,
+					      KEY_FUSE_FOLDERS,
+					      &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1625,9 +1625,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	restore_playlist = g_key_file_get_boolean(priv->rc_keyfile,
-	                                          GROUP_PLAYLIST,
-	                                          KEY_SAVE_PLAYLIST,
-	                                          &error);
+						  GROUP_PLAYLIST,
+						  KEY_SAVE_PLAYLIST,
+						  &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1637,9 +1637,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	audio_sink = g_key_file_get_string(priv->rc_keyfile,
-	                                   GROUP_AUDIO,
-	                                   KEY_AUDIO_SINK,
-	                                   &error);
+					   GROUP_AUDIO,
+					   KEY_AUDIO_SINK,
+					   &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1649,9 +1649,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	audio_device = g_key_file_get_string(priv->rc_keyfile,
-	                                     GROUP_AUDIO,
-	                                     KEY_AUDIO_DEVICE,
-	                                     &error);
+					     GROUP_AUDIO,
+					     KEY_AUDIO_DEVICE,
+					     &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1661,9 +1661,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	software_mixer = g_key_file_get_boolean(priv->rc_keyfile,
-	                                        GROUP_AUDIO,
-	                                        KEY_SOFTWARE_MIXER,
-	                                        &error);
+						GROUP_AUDIO,
+						KEY_SOFTWARE_MIXER,
+						&error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1673,9 +1673,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	software_volume = g_key_file_get_double(priv->rc_keyfile,
-	                                        GROUP_AUDIO,
-	                                        KEY_SOFTWARE_VOLUME,
-	                                        &error);
+						GROUP_AUDIO,
+						KEY_SOFTWARE_VOLUME,
+						&error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1685,9 +1685,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	lateral_panel = g_key_file_get_boolean(priv->rc_keyfile,
-	                                       GROUP_WINDOW,
-	                                       KEY_SIDEBAR,
-	                                       &error);
+					       GROUP_WINDOW,
+					       KEY_SIDEBAR,
+					       &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1697,9 +1697,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	sidebar_size = g_key_file_get_integer(priv->rc_keyfile,
-	                                      GROUP_WINDOW,
-	                                      KEY_SIDEBAR_SIZE,
-	                                      &error);
+					      GROUP_WINDOW,
+					      KEY_SIDEBAR_SIZE,
+					      &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1709,9 +1709,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	secondary_lateral_panel = g_key_file_get_boolean(priv->rc_keyfile,
-	                                                 GROUP_WINDOW,
-	                                                 KEY_SECONDARY_SIDEBAR,
-	                                                 &error);
+							 GROUP_WINDOW,
+							 KEY_SECONDARY_SIDEBAR,
+							 &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1721,9 +1721,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	secondary_sidebar_size = g_key_file_get_integer(priv->rc_keyfile,
-	                                                GROUP_WINDOW,
-	                                                KEY_SECONDARY_SIDEBAR_SIZE,
-	                                                &error);
+							GROUP_WINDOW,
+							KEY_SECONDARY_SIDEBAR_SIZE,
+							&error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1733,9 +1733,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	show_album_art = g_key_file_get_boolean(priv->rc_keyfile,
-	                                        GROUP_WINDOW,
-	                                        KEY_SHOW_ALBUM_ART,
-	                                        &error);
+						GROUP_WINDOW,
+						KEY_SHOW_ALBUM_ART,
+						&error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1745,9 +1745,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	album_art_size = g_key_file_get_integer(priv->rc_keyfile,
-	                                        GROUP_WINDOW,
-	                                        KEY_ALBUM_ART_SIZE,
-	                                        &error);
+						GROUP_WINDOW,
+						KEY_ALBUM_ART_SIZE,
+						&error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1757,9 +1757,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	album_art_pattern = g_key_file_get_string(priv->rc_keyfile,
-	                                         GROUP_GENERAL,
-	                                         KEY_ALBUM_ART_PATTERN,
-	                                         &error);
+						 GROUP_GENERAL,
+						 KEY_ALBUM_ART_PATTERN,
+						 &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1769,9 +1769,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	toolbar_size = g_key_file_get_integer(priv->rc_keyfile,
-	                                      GROUP_WINDOW,
-	                                      KEY_TOOLBAR_SIZE,
-	                                      &error);
+					      GROUP_WINDOW,
+					      KEY_TOOLBAR_SIZE,
+					      &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1781,9 +1781,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	show_status_bar = g_key_file_get_boolean(priv->rc_keyfile,
-	                                         GROUP_WINDOW,
-	                                         KEY_STATUS_BAR,
-	                                         &error);
+						 GROUP_WINDOW,
+						 KEY_STATUS_BAR,
+						 &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1793,9 +1793,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	show_status_icon = g_key_file_get_boolean(priv->rc_keyfile,
-	                                          GROUP_GENERAL,
-	                                          KEY_SHOW_ICON_TRAY,
-	                                          &error);
+						  GROUP_GENERAL,
+						  KEY_SHOW_ICON_TRAY,
+						  &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1805,9 +1805,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	show_menubar = g_key_file_get_boolean(priv->rc_keyfile,
-	                                      GROUP_WINDOW,
-	                                      KEY_SHOW_MENUBAR,
-	                                      &error);
+					      GROUP_WINDOW,
+					      KEY_SHOW_MENUBAR,
+					      &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1817,9 +1817,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	system_titlebar = g_key_file_get_boolean(priv->rc_keyfile,
-	                                         GROUP_WINDOW,
-	                                         KEY_SYSTEM_TITLEBAR,
-	                                         &error);
+						 GROUP_WINDOW,
+						 KEY_SYSTEM_TITLEBAR,
+						 &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1829,9 +1829,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	controls_below = g_key_file_get_boolean(priv->rc_keyfile,
-	                                        GROUP_WINDOW,
-	                                        KEY_CONTROLS_BELOW,
-	                                        &error);
+						GROUP_WINDOW,
+						KEY_CONTROLS_BELOW,
+						&error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1841,9 +1841,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	remember_state = g_key_file_get_boolean(priv->rc_keyfile,
-	                                        GROUP_WINDOW,
-	                                        KEY_REMEMBER_STATE,
-	                                        &error);
+						GROUP_WINDOW,
+						KEY_REMEMBER_STATE,
+						&error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1853,9 +1853,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	start_mode = g_key_file_get_string(priv->rc_keyfile,
-	                                   GROUP_WINDOW,
-	                                   KEY_START_MODE,
-	                                   &error);
+					   GROUP_WINDOW,
+					   KEY_START_MODE,
+					   &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1865,9 +1865,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	last_folder = g_key_file_get_string(priv->rc_keyfile,
-	                                    GROUP_GENERAL,
-	                                    KEY_LAST_FOLDER,
-	                                    &error);
+					    GROUP_GENERAL,
+					    KEY_LAST_FOLDER,
+					    &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1885,9 +1885,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	add_recursively = g_key_file_get_boolean(priv->rc_keyfile,
-	                                         GROUP_GENERAL,
-	                                         KEY_ADD_RECURSIVELY_FILES,
-	                                         &error);
+						 GROUP_GENERAL,
+						 KEY_ADD_RECURSIVELY_FILES,
+						 &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1897,9 +1897,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	timer_remaining_mode = g_key_file_get_boolean(priv->rc_keyfile,
-	                                              GROUP_GENERAL,
-	                                              KEY_TIMER_REMAINING_MODE,
-	                                              &error);
+						      GROUP_GENERAL,
+						      KEY_TIMER_REMAINING_MODE,
+						      &error);
 	if (error) {
 		g_error_free(error);
 		error = NULL;
@@ -1909,9 +1909,9 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 
 	hide_instead_close = g_key_file_get_boolean(priv->rc_keyfile,
-	                                            GROUP_GENERAL,
-	                                            KEY_CLOSE_TO_TRAY,
-	                                            &error);
+						    GROUP_GENERAL,
+						    KEY_CLOSE_TO_TRAY,
+						    &error);
 
 	if (error) {
 		g_error_free(error);
@@ -1943,130 +1943,130 @@ pragha_preferences_finalize (GObject *object)
 	/* Store new preferences */
 
 	g_key_file_set_string(priv->rc_keyfile,
-	                      GROUP_GENERAL,
-	                      KEY_INSTALLED_VERSION,
-	                      PACKAGE_VERSION);
+			      GROUP_GENERAL,
+			      KEY_INSTALLED_VERSION,
+			      PACKAGE_VERSION);
 
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_GENERAL,
-	                       KEY_INSTANT_SEARCH,
-	                       priv->instant_search);
+			       GROUP_GENERAL,
+			       KEY_INSTANT_SEARCH,
+			       priv->instant_search);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_GENERAL,
-	                       KEY_APPROXIMATE_SEARCH,
-	                       priv->approximate_search);
+			       GROUP_GENERAL,
+			       KEY_APPROXIMATE_SEARCH,
+			       priv->approximate_search);
 
 	g_key_file_set_integer(priv->rc_keyfile,
-	                       GROUP_LIBRARY,
-	                       KEY_LIBRARY_VIEW_ORDER,
-	                       priv->library_style);
+			       GROUP_LIBRARY,
+			       KEY_LIBRARY_VIEW_ORDER,
+			       priv->library_style);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_LIBRARY,
-	                       KEY_SORT_BY_YEAR,
-	                       priv->sort_by_year);
+			       GROUP_LIBRARY,
+			       KEY_SORT_BY_YEAR,
+			       priv->sort_by_year);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_LIBRARY,
-	                       KEY_FUSE_FOLDERS,
-	                       priv->fuse_folders);
+			       GROUP_LIBRARY,
+			       KEY_FUSE_FOLDERS,
+			       priv->fuse_folders);
 
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_PLAYLIST,
-	                       KEY_SHUFFLE,
-	                       priv->shuffle);
+			       GROUP_PLAYLIST,
+			       KEY_SHUFFLE,
+			       priv->shuffle);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_PLAYLIST,
-	                       KEY_REPEAT,
-	                       priv->repeat);
+			       GROUP_PLAYLIST,
+			       KEY_REPEAT,
+			       priv->repeat);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_GENERAL,
-	                       KEY_USE_HINT,
-	                       priv->use_hint);
+			       GROUP_GENERAL,
+			       KEY_USE_HINT,
+			       priv->use_hint);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_PLAYLIST,
-	                       KEY_SAVE_PLAYLIST,
-	                       priv->restore_playlist);
+			       GROUP_PLAYLIST,
+			       KEY_SAVE_PLAYLIST,
+			       priv->restore_playlist);
 	g_key_file_set_string(priv->rc_keyfile,
-	                      GROUP_AUDIO,
-	                      KEY_AUDIO_SINK,
-	                      priv->audio_sink);
+			      GROUP_AUDIO,
+			      KEY_AUDIO_SINK,
+			      priv->audio_sink);
 	g_key_file_set_string(priv->rc_keyfile,
-	                      GROUP_AUDIO,
-	                      KEY_AUDIO_DEVICE,
-	                      priv->audio_device);
+			      GROUP_AUDIO,
+			      KEY_AUDIO_DEVICE,
+			      priv->audio_device);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_AUDIO,
-	                       KEY_SOFTWARE_MIXER,
-	                       priv->software_mixer);
+			       GROUP_AUDIO,
+			       KEY_SOFTWARE_MIXER,
+			       priv->software_mixer);
 	g_key_file_set_double(priv->rc_keyfile,
-	                      GROUP_AUDIO,
-	                      KEY_SOFTWARE_VOLUME,
-	                      priv->software_volume);
+			      GROUP_AUDIO,
+			      KEY_SOFTWARE_VOLUME,
+			      priv->software_volume);
 
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_WINDOW,
-	                       KEY_SIDEBAR,
-	                       priv->lateral_panel);
+			       GROUP_WINDOW,
+			       KEY_SIDEBAR,
+			       priv->lateral_panel);
 	g_key_file_set_integer(priv->rc_keyfile,
-	                       GROUP_WINDOW,
-	                       KEY_SIDEBAR_SIZE,
-	                       priv->sidebar_size);
+			       GROUP_WINDOW,
+			       KEY_SIDEBAR_SIZE,
+			       priv->sidebar_size);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_WINDOW,
-	                       KEY_SECONDARY_SIDEBAR,
-	                       priv->secondary_lateral_panel);
+			       GROUP_WINDOW,
+			       KEY_SECONDARY_SIDEBAR,
+			       priv->secondary_lateral_panel);
 	g_key_file_set_integer(priv->rc_keyfile,
-	                       GROUP_WINDOW,
-	                       KEY_SECONDARY_SIDEBAR_SIZE,
-	                       priv->secondary_sidebar_size);
+			       GROUP_WINDOW,
+			       KEY_SECONDARY_SIDEBAR_SIZE,
+			       priv->secondary_sidebar_size);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_WINDOW,
-	                       KEY_SHOW_ALBUM_ART,
-	                       priv->show_album_art);
+			       GROUP_WINDOW,
+			       KEY_SHOW_ALBUM_ART,
+			       priv->show_album_art);
 	g_key_file_set_integer(priv->rc_keyfile,
-	                       GROUP_WINDOW,
-	                       KEY_ALBUM_ART_SIZE,
-	                       priv->album_art_size);
+			       GROUP_WINDOW,
+			       KEY_ALBUM_ART_SIZE,
+			       priv->album_art_size);
 	if (string_is_not_empty(priv->album_art_pattern))
 		g_key_file_set_string(priv->rc_keyfile,
-		                      GROUP_GENERAL,
-		                      KEY_ALBUM_ART_PATTERN,
-		                      priv->album_art_pattern);
+				      GROUP_GENERAL,
+				      KEY_ALBUM_ART_PATTERN,
+				      priv->album_art_pattern);
 	else
 		pragha_preferences_remove_key(preferences,
-		                              GROUP_GENERAL,
-		                              KEY_ALBUM_ART_PATTERN);
+					      GROUP_GENERAL,
+					      KEY_ALBUM_ART_PATTERN);
 	g_key_file_set_integer(priv->rc_keyfile,
-	                       GROUP_WINDOW,
-	                       KEY_TOOLBAR_SIZE,
-	                       priv->toolbar_size);
+			       GROUP_WINDOW,
+			       KEY_TOOLBAR_SIZE,
+			       priv->toolbar_size);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_WINDOW,
-	                       KEY_STATUS_BAR,
-	                       priv->show_status_bar);
+			       GROUP_WINDOW,
+			       KEY_STATUS_BAR,
+			       priv->show_status_bar);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_GENERAL,
-	                       KEY_SHOW_ICON_TRAY,
-	                       priv->show_status_icon);
+			       GROUP_GENERAL,
+			       KEY_SHOW_ICON_TRAY,
+			       priv->show_status_icon);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_WINDOW,
-	                       KEY_SHOW_MENUBAR,
-	                       priv->show_menubar);
+			       GROUP_WINDOW,
+			       KEY_SHOW_MENUBAR,
+			       priv->show_menubar);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_WINDOW,
-	                       KEY_SYSTEM_TITLEBAR,
-	                       priv->system_titlebar);
+			       GROUP_WINDOW,
+			       KEY_SYSTEM_TITLEBAR,
+			       priv->system_titlebar);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_WINDOW,
-	                       KEY_CONTROLS_BELOW,
-	                       priv->controls_below);
+			       GROUP_WINDOW,
+			       KEY_CONTROLS_BELOW,
+			       priv->controls_below);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_WINDOW,
-	                       KEY_REMEMBER_STATE,
-	                       priv->remember_state);
+			       GROUP_WINDOW,
+			       KEY_REMEMBER_STATE,
+			       priv->remember_state);
 	g_key_file_set_string(priv->rc_keyfile,
-	                      GROUP_WINDOW,
-	                      KEY_START_MODE,
-	                      priv->start_mode);
+			      GROUP_WINDOW,
+			      KEY_START_MODE,
+			      priv->start_mode);
 
 	gchar *last_folder_converted = g_filename_to_utf8(priv->last_folder, -1, NULL, NULL, &error);
 	if (error) {
@@ -2076,28 +2076,28 @@ pragha_preferences_finalize (GObject *object)
 	}
 	if (string_is_not_empty(last_folder_converted))
 		g_key_file_set_string(priv->rc_keyfile,
-		                      GROUP_GENERAL,
-		                      KEY_LAST_FOLDER,
-		                      last_folder_converted);
+				      GROUP_GENERAL,
+				      KEY_LAST_FOLDER,
+				      last_folder_converted);
 	else
 		pragha_preferences_remove_key(preferences,
-		                              GROUP_GENERAL,
-		                              KEY_LAST_FOLDER);
+					      GROUP_GENERAL,
+					      KEY_LAST_FOLDER);
 	g_free(last_folder_converted);
 
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_GENERAL,
-	                       KEY_ADD_RECURSIVELY_FILES,
-	                       priv->add_recursively);
+			       GROUP_GENERAL,
+			       KEY_ADD_RECURSIVELY_FILES,
+			       priv->add_recursively);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_GENERAL,
-	                       KEY_TIMER_REMAINING_MODE,
-	                       priv->timer_remaining_mode);
+			       GROUP_GENERAL,
+			       KEY_TIMER_REMAINING_MODE,
+			       priv->timer_remaining_mode);
 
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_GENERAL,
-	                       KEY_CLOSE_TO_TRAY,
-	                       priv->hide_instead_close);
+			       GROUP_GENERAL,
+			       KEY_CLOSE_TO_TRAY,
+			       priv->hide_instead_close);
 
 	/* Save to key file */
 
@@ -2120,9 +2120,9 @@ pragha_preferences_finalize (GObject *object)
 
 static void
 pragha_preferences_get_property (GObject *object,
-                                 guint prop_id,
-                                 GValue *value,
-                                 GParamSpec *pspec)
+				 guint prop_id,
+				 GValue *value,
+				 GParamSpec *pspec)
 {
 	PraghaPreferences *preferences = PRAGHA_PREFERENCES(object);
 
@@ -2233,9 +2233,9 @@ pragha_preferences_get_property (GObject *object,
 
 static void
 pragha_preferences_set_property (GObject *object,
-                                 guint prop_id,
-                                 const GValue *value,
-                                 GParamSpec *pspec)
+				 guint prop_id,
+				 const GValue *value,
+				 GParamSpec *pspec)
 {
 	PraghaPreferences *preferences = PRAGHA_PREFERENCES(object);
 
@@ -2375,10 +2375,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_INSTANT_SEARCH] =
 		g_param_spec_boolean("instant-search",
-		                     "InstantSearch",
-		                     "Instant Search Preference",
-		                      TRUE,
-		                      PRAGHA_PREF_PARAMS);
+				     "InstantSearch",
+				     "Instant Search Preference",
+				      TRUE,
+				      PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:approximate_searches:
@@ -2386,10 +2386,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_APPROXIMATE_SEARCH] =
 		g_param_spec_boolean("approximate-searches",
-		                     "ApproximateSearches",
-		                     "Approximate Searches Preference",
-		                      FALSE,
-		                      PRAGHA_PREF_PARAMS);
+				     "ApproximateSearches",
+				     "Approximate Searches Preference",
+				      FALSE,
+				      PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:library_style:
@@ -2397,12 +2397,12 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_LIBRARY_STYLE] =
 		g_param_spec_int ("library-style",
-		                  "LibraryStyle",
-		                  "Library Style Preferences",
-		                  0,
-		                  LAST_LIBRARY_STYLE,
-		                  FOLDERS,
-		                  PRAGHA_PREF_PARAMS);
+				  "LibraryStyle",
+				  "Library Style Preferences",
+				  0,
+				  LAST_LIBRARY_STYLE,
+				  FOLDERS,
+				  PRAGHA_PREF_PARAMS);
 
 	/**
 	 * PraghaPreferences:sort_by_year:
@@ -2410,10 +2410,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	 */
 	gParamSpecs[PROP_LIBRARY_SORT_BY_YEAR] =
 		g_param_spec_boolean("sort-by-year",
-		                     "SortByYear",
-		                     "Sort By Year Preference",
-		                     TRUE,
-		                     PRAGHA_PREF_PARAMS);
+				     "SortByYear",
+				     "Sort By Year Preference",
+				     TRUE,
+				     PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:fuse_folders:
@@ -2421,10 +2421,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_LIBRARY_FUSE_FOLDERS] =
 		g_param_spec_boolean("fuse-folders",
-		                     "FuseFolders",
-		                     "Fuse Folders Preference",
-		                     TRUE,
-		                     PRAGHA_PREF_PARAMS);
+				     "FuseFolders",
+				     "Fuse Folders Preference",
+				     TRUE,
+				     PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:shuffle:
@@ -2432,10 +2432,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_SHUFFLE] =
 		g_param_spec_boolean("shuffle",
-		                     "Shuffle",
-		                     "Shuffle Preference",
-		                     FALSE,
-		                     PRAGHA_PREF_PARAMS);
+				     "Shuffle",
+				     "Shuffle Preference",
+				     FALSE,
+				     PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:repeat:
@@ -2443,10 +2443,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_REPEAT] =
 		g_param_spec_boolean("repeat",
-		                     "Repeat",
-		                     "Repeat Preference",
-		                     FALSE,
-		                     PRAGHA_PREF_PARAMS);
+				     "Repeat",
+				     "Repeat Preference",
+				     FALSE,
+				     PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:use_hint:
@@ -2454,10 +2454,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_USE_HINT] =
 		g_param_spec_boolean("use-hint",
-		                     "UseHint",
-		                     "Use hint Preference",
-		                     FALSE,
-		                     PRAGHA_PREF_PARAMS);
+				     "UseHint",
+				     "Use hint Preference",
+				     FALSE,
+				     PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:restore_playlist:
@@ -2465,10 +2465,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_RESTORE_PLAYLIST] =
 		g_param_spec_boolean("restore-playlist",
-		                     "RestorePlaylist",
-		                     "Restore Playlist Preference",
-		                     TRUE,
-		                     PRAGHA_PREF_PARAMS);
+				     "RestorePlaylist",
+				     "Restore Playlist Preference",
+				     TRUE,
+				     PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:audio_sink:
@@ -2476,10 +2476,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_AUDIO_SINK] =
 		g_param_spec_string("audio-sink",
-		                    "AudioSink",
-		                    "Audio Sink",
-		                    DEFAULT_SINK,
-		                    PRAGHA_PREF_PARAMS);
+				    "AudioSink",
+				    "Audio Sink",
+				    DEFAULT_SINK,
+				    PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:audio_device:
@@ -2487,10 +2487,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	 */
 	gParamSpecs[PROP_AUDIO_DEVICE] =
 		g_param_spec_string("audio-device",
-		                    "AudioDevice",
-		                    "Audio Device",
-		                    ALSA_DEFAULT_DEVICE,
-		                    PRAGHA_PREF_PARAMS);
+				    "AudioDevice",
+				    "Audio Device",
+				    ALSA_DEFAULT_DEVICE,
+				    PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:software_mixer:
@@ -2498,10 +2498,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_SOFTWARE_MIXER] =
 		g_param_spec_boolean("software-mixer",
-		                     "SoftwareMixer",
-		                     "Use Software Mixer",
-		                     FALSE,
-		                     PRAGHA_PREF_PARAMS);
+				     "SoftwareMixer",
+				     "Use Software Mixer",
+				     FALSE,
+				     PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:software_volume:
@@ -2509,12 +2509,12 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_SOFTWARE_VOLUME] =
 		g_param_spec_double ("software-volume",
-		                     "SoftwareVolume",
-		                     "Software Volume Preferences",
-		                     -1.0,
-		                      1.0,
-		                     -1.0,
-		                     PRAGHA_PREF_PARAMS);
+				     "SoftwareVolume",
+				     "Software Volume Preferences",
+				     -1.0,
+				      1.0,
+				     -1.0,
+				     PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:lateral_panel:
@@ -2522,10 +2522,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_LATERAL_PANEL] =
 		g_param_spec_boolean("lateral-panel",
-		                     "LateralPanel",
-		                     "Show Lateral Panel Preference",
-		                     TRUE,
-		                     PRAGHA_PREF_PARAMS);
+				     "LateralPanel",
+				     "Show Lateral Panel Preference",
+				     TRUE,
+				     PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:sidebar_size:
@@ -2533,12 +2533,12 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_SIDEBAR_SIZE] =
 		g_param_spec_int ("sidebar-size",
-		                  "SidebarSize",
-		                  "Sidebar Size Preferences",
-		                  0,
-		                  G_MAXINT,
-		                  DEFAULT_SIDEBAR_SIZE,
-		                  PRAGHA_PREF_PARAMS);
+				  "SidebarSize",
+				  "Sidebar Size Preferences",
+				  0,
+				  G_MAXINT,
+				  DEFAULT_SIDEBAR_SIZE,
+				  PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:secondary_lateral_panel:
@@ -2546,10 +2546,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_SECONDARY_LATERAL_PANEL] =
 		g_param_spec_boolean("secondary-lateral-panel",
-		                     "SecondaryLateralPanel",
-		                     "Show Secondary Lateral Panel Preference",
-		                     FALSE,
-		                     PRAGHA_PREF_PARAMS);
+				     "SecondaryLateralPanel",
+				     "Show Secondary Lateral Panel Preference",
+				     FALSE,
+				     PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:secondary_sidebar_size:
@@ -2557,12 +2557,12 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_SECONDARY_SIDEBAR_SIZE] =
 		g_param_spec_int ("secondary-sidebar-size",
-		                  "SecondarySidebarSize",
-		                  "Secondary Sidebar Size Preferences",
-		                  0,
-		                  G_MAXINT,
-		                  DEFAULT_SIDEBAR_SIZE*4,
-		                  PRAGHA_PREF_PARAMS);
+				  "SecondarySidebarSize",
+				  "Secondary Sidebar Size Preferences",
+				  0,
+				  G_MAXINT,
+				  DEFAULT_SIDEBAR_SIZE*4,
+				  PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:show_album_art:
@@ -2570,10 +2570,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_SHOW_ALBUM_ART] =
 		g_param_spec_boolean("show-album-art",
-		                     "ShowAlbumArt",
-		                     "show Album Art Preference",
-		                      TRUE,
-		                      PRAGHA_PREF_PARAMS);
+				     "ShowAlbumArt",
+				     "show Album Art Preference",
+				      TRUE,
+				      PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:album_art_size:
@@ -2581,12 +2581,12 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_ALBUM_ART_SIZE] =
 		g_param_spec_int ("album-art-size",
-		                  "AlbumArtSize",
-		                  "Album Art Size Preferences",
-		                  24,
-		                  128,
-		                  DEFAULT_ALBUM_ART_SIZE,
-		                  PRAGHA_PREF_PARAMS);
+				  "AlbumArtSize",
+				  "Album Art Size Preferences",
+				  24,
+				  128,
+				  DEFAULT_ALBUM_ART_SIZE,
+				  PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:album_art_pattern:
@@ -2594,10 +2594,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_ALBUM_ART_PATTERN] =
 		g_param_spec_string("album-art-pattern",
-		                    "AlbumArtPattern",
-		                    "Album Art Pattern Preferences",
-		                    "",
-		                    PRAGHA_PREF_PARAMS);
+				    "AlbumArtPattern",
+				    "Album Art Pattern Preferences",
+				    "",
+				    PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:toolbar_size:
@@ -2605,11 +2605,11 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_TOOLBAR_SIZE] =
 		g_param_spec_enum ("toolbar-size",
-		                   "ToolbarSize",
-		                   "Toolbar Size Preferences",
-		                   GTK_TYPE_ICON_SIZE,
-		                   GTK_ICON_SIZE_LARGE_TOOLBAR,
-		                   PRAGHA_PREF_PARAMS);
+				   "ToolbarSize",
+				   "Toolbar Size Preferences",
+				   GTK_TYPE_ICON_SIZE,
+				   GTK_ICON_SIZE_LARGE_TOOLBAR,
+				   PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:show_status_bar:
@@ -2617,10 +2617,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_SHOW_STATUS_BAR] =
 		g_param_spec_boolean("show-status-bar",
-		                     "ShowStatusBar",
-		                     "Show Status Bar Preference",
-		                      TRUE,
-		                      PRAGHA_PREF_PARAMS);
+				     "ShowStatusBar",
+				     "Show Status Bar Preference",
+				      TRUE,
+				      PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:show_status_icon:
@@ -2628,10 +2628,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_SHOW_STATUS_ICON] =
 		g_param_spec_boolean("show-status-icon",
-		                     "ShowStatusIcon",
-		                     "Show Status Icon Preference",
-		                      TRUE,
-		                      PRAGHA_PREF_PARAMS);
+				     "ShowStatusIcon",
+				     "Show Status Icon Preference",
+				      TRUE,
+				      PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:show_menubar:
@@ -2639,10 +2639,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_SHOW_MENUBAR] =
 		g_param_spec_boolean("show-menubar",
-		                     "ShowMenubar",
-		                     "Show Menubar Preference",
-		                      TRUE,
-		                      PRAGHA_PREF_PARAMS);
+				     "ShowMenubar",
+				     "Show Menubar Preference",
+				      TRUE,
+				      PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:system_titlebar:
@@ -2650,10 +2650,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_SYSTEM_TITLEBAR] =
 		g_param_spec_boolean("system-titlebar",
-		                     "SystemTitlebar",
-		                     "System Titlebar Preference",
-		                      TRUE,
-		                      PRAGHA_PREF_PARAMS);
+				     "SystemTitlebar",
+				     "System Titlebar Preference",
+				      TRUE,
+				      PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:controls_below:
@@ -2661,10 +2661,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_CONTROLS_BELOW] =
 		g_param_spec_boolean("controls-below",
-		                     "ControlsBelow",
-		                     "Controls Below Preference",
-		                      FALSE,
-		                      PRAGHA_PREF_PARAMS);
+				     "ControlsBelow",
+				     "Controls Below Preference",
+				      FALSE,
+				      PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:remember_state:
@@ -2672,10 +2672,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_REMEMBER_STATE] =
 		g_param_spec_boolean("remember-state",
-		                     "RememberState",
-		                     "Remember State Preference",
-		                      TRUE,
-		                      PRAGHA_PREF_PARAMS);
+				     "RememberState",
+				     "Remember State Preference",
+				      TRUE,
+				      PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:start_mode:
@@ -2683,10 +2683,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_START_MODE] =
 		g_param_spec_string("start-mode",
-		                    "StartMode",
-		                    "Start Mode Preference",
-		                    NORMAL_STATE,
-		                    PRAGHA_PREF_PARAMS);
+				    "StartMode",
+				    "Start Mode Preference",
+				    NORMAL_STATE,
+				    PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:last_folder:
@@ -2694,10 +2694,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_LAST_FOLDER] =
 		g_param_spec_string("last-folder",
-		                    "LastFolder",
-		                    "Last folder used in file chooser",
-		                    g_get_home_dir(),
-		                    PRAGHA_PREF_PARAMS);
+				    "LastFolder",
+				    "Last folder used in file chooser",
+				    g_get_home_dir(),
+				    PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:add_recursively:
@@ -2705,10 +2705,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_ADD_RECURSIVELY] =
 		g_param_spec_boolean("add-recursively",
-		                     "AddRecursively",
-		                     "Add Recursively Preference",
-		                     FALSE,
-		                     PRAGHA_PREF_PARAMS);
+				     "AddRecursively",
+				     "Add Recursively Preference",
+				     FALSE,
+				     PRAGHA_PREF_PARAMS);
 
 	/**
 	 * PraghaPreferences:timer_remaining_mode:
@@ -2716,10 +2716,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	 */
 	gParamSpecs[PROP_TIMER_REMAINING_MODE] =
 		g_param_spec_boolean("timer-remaining-mode",
-		                     "TimerRemainingMode",
-		                     "Timer Remaining Mode Preference",
-		                      FALSE,
-		                      PRAGHA_PREF_PARAMS);
+				     "TimerRemainingMode",
+				     "Timer Remaining Mode Preference",
+				      FALSE,
+				      PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:hide_instead_close:
@@ -2727,10 +2727,10 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_HIDE_INSTEAD_CLOSE] =
 		g_param_spec_boolean("hide-instead-close",
-		                     "HideInsteadClose",
-		                     "Hide Instead Close Preference",
-		                      TRUE,
-		                      PRAGHA_PREF_PARAMS);
+				     "HideInsteadClose",
+				     "Hide Instead Close Preference",
+				      TRUE,
+				      PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:lock_library:
@@ -2738,47 +2738,47 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	  */
 	gParamSpecs[PROP_LOCK_LIBRARY] =
 		g_param_spec_boolean("lock-library",
-		                     "LockLibrary",
-		                     "Lock Library Changes",
-		                      FALSE,
-		                      PRAGHA_PREF_PARAMS);
+				     "LockLibrary",
+				     "Lock Library Changes",
+				      FALSE,
+				      PRAGHA_PREF_PARAMS);
 
 	g_object_class_install_properties(object_class, LAST_PROP, gParamSpecs);
 
 	signals[SIGNAL_PLUGINS_CHANGED] =
 		g_signal_new ("PluginsChanged",
-		              G_TYPE_FROM_CLASS (object_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (PraghaPreferencesClass, plugins_change),
-		              NULL, NULL,
-		              g_cclosure_marshal_VOID__STRING,
-		              G_TYPE_NONE, 1, G_TYPE_STRING);
+			      G_TYPE_FROM_CLASS (object_class),
+			      G_SIGNAL_RUN_LAST,
+			      G_STRUCT_OFFSET (PraghaPreferencesClass, plugins_change),
+			      NULL, NULL,
+			      g_cclosure_marshal_VOID__STRING,
+			      G_TYPE_NONE, 1, G_TYPE_STRING);
 
 	signals[SIGNAL_LIBRARY_CHANGED] =
 		g_signal_new ("LibraryChanged",
-		              G_TYPE_FROM_CLASS (object_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (PraghaPreferencesClass, library_change),
-		              NULL, NULL,
-		              g_cclosure_marshal_VOID__VOID,
-		              G_TYPE_NONE, 0);
+			      G_TYPE_FROM_CLASS (object_class),
+			      G_SIGNAL_RUN_LAST,
+			      G_STRUCT_OFFSET (PraghaPreferencesClass, library_change),
+			      NULL, NULL,
+			      g_cclosure_marshal_VOID__VOID,
+			      G_TYPE_NONE, 0);
 
 	signals[SIGNAL_NEED_RESTART] =
 		g_signal_new ("NeedRestart",
-		              G_TYPE_FROM_CLASS (object_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (PraghaPreferencesClass, need_restart),
-		              NULL, NULL,
-		              g_cclosure_marshal_VOID__VOID,
-		              G_TYPE_NONE, 0);
+			      G_TYPE_FROM_CLASS (object_class),
+			      G_SIGNAL_RUN_LAST,
+			      G_STRUCT_OFFSET (PraghaPreferencesClass, need_restart),
+			      NULL, NULL,
+			      g_cclosure_marshal_VOID__VOID,
+			      G_TYPE_NONE, 0);
 }
 
 static void
 pragha_preferences_init (PraghaPreferences *preferences)
 {
 	preferences->priv = G_TYPE_INSTANCE_GET_PRIVATE(preferences,
-	                                                PRAGHA_TYPE_PREFERENCES,
-	                                                PraghaPreferencesPrivate);
+							PRAGHA_TYPE_PREFERENCES,
+							PraghaPreferencesPrivate);
 }
 
 /**
@@ -2802,7 +2802,7 @@ pragha_preferences_get (void)
 
 		preferences = g_object_new(PRAGHA_TYPE_PREFERENCES, NULL);
 		g_object_add_weak_pointer(G_OBJECT (preferences),
-		                          (gpointer) &preferences);
+					  (gpointer) &preferences);
 	}
 	else {
 		g_object_ref (G_OBJECT (preferences));

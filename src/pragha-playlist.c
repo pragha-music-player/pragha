@@ -1,17 +1,17 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
 /* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>			 */
-/* 									 */
+/*									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
 /* the Free Software Foundation, either version 3 of the License, or	 */
 /* (at your option) any later version.					 */
-/* 									 */
+/*									 */
 /* This program is distributed in the hope that it will be useful,	 */
 /* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	 */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the	 */
 /* GNU General Public License for more details.				 */
-/* 									 */
+/*									 */
 /* You should have received a copy of the GNU General Public License	 */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
@@ -60,40 +60,40 @@ struct _PraghaPlaylist {
 
 	/* Global database and preferences instances */
 
-	PraghaDatabase      *cdbase;
+	PraghaDatabase	    *cdbase;
 	PraghaPreferences   *preferences;
 
 	/* List view. */
 
-	GtkWidget           *view;
-	GtkTreeModel        *model;
-	GSList              *columns;
-	GSList              *column_widths;
+	GtkWidget	    *view;
+	GtkTreeModel	    *model;
+	GSList		    *columns;
+	GSList		    *column_widths;
 
 	/* Playback control. */
 
-	GRand               *rand;
-	GList               *rand_track_refs;
-	GSList              *queue_track_refs;
+	GRand		    *rand;
+	GList		    *rand_track_refs;
+	GSList		    *queue_track_refs;
 	GtkTreeRowReference *curr_rand_ref;
 	GtkTreeRowReference *curr_seq_ref;
-	gint                 unplayed_tracks;
+	gint		     unplayed_tracks;
 
 	/* Useful flags */
 
-	gboolean             changing;
-	gboolean             dragging;
-	gint                 no_tracks;
-	GError              *track_error;
+	gboolean	     changing;
+	gboolean	     dragging;
+	gint		     no_tracks;
+	GError		    *track_error;
 
 	/* Pixbuf used on library tree. */
 
-	GdkPixbuf           *paused_pixbuf;
-	GdkPixbuf           *playing_pixbuf;
+	GdkPixbuf	    *paused_pixbuf;
+	GdkPixbuf	    *playing_pixbuf;
 
 	/* Menu */
-	GtkWidget           *header_context_menu;
-	GtkUIManager        *playlist_context_menu;
+	GtkWidget	    *header_context_menu;
+	GtkUIManager	    *playlist_context_menu;
 };
 
 enum
@@ -110,45 +110,45 @@ G_DEFINE_TYPE(PraghaPlaylist, pragha_playlist, GTK_TYPE_SCROLLED_WINDOW)
 
 /* Columns in current playlist view */
 
-#define P_TRACK_NO_STR      "#"
-#define P_TITLE_STR         N_("Title")
-#define P_ARTIST_STR        N_("Artist")
-#define P_ALBUM_STR         N_("Album")
-#define P_GENRE_STR         N_("Genre")
-#define P_BITRATE_STR       N_("Bitrate")
-#define P_YEAR_STR          N_("Year")
-#define P_COMMENT_STR       N_("Comment")
-#define P_LENGTH_STR        N_("Length")
-#define P_FILENAME_STR      N_("Filename")
-#define P_MIMETYPE_STR      N_("Mimetype")
+#define P_TRACK_NO_STR	    "#"
+#define P_TITLE_STR	    N_("Title")
+#define P_ARTIST_STR	    N_("Artist")
+#define P_ALBUM_STR	    N_("Album")
+#define P_GENRE_STR	    N_("Genre")
+#define P_BITRATE_STR	    N_("Bitrate")
+#define P_YEAR_STR	    N_("Year")
+#define P_COMMENT_STR	    N_("Comment")
+#define P_LENGTH_STR	    N_("Length")
+#define P_FILENAME_STR	    N_("Filename")
+#define P_MIMETYPE_STR	    N_("Mimetype")
 
 /*
  * Prototypes
  */
 
-static void         pragha_playlist_queue_handler      (PraghaPlaylist *playlist);
-static void         pragha_playlist_dequeue_handler    (PraghaPlaylist *playlist);
+static void	    pragha_playlist_queue_handler      (PraghaPlaylist *playlist);
+static void	    pragha_playlist_dequeue_handler    (PraghaPlaylist *playlist);
 
-static GtkTreePath* get_first_random_track             (PraghaPlaylist *playlist);
-static GtkTreePath* get_prev_random_track              (PraghaPlaylist *playlist);
-static GtkTreePath* get_prev_sequential_track          (PraghaPlaylist *playlist);
-static GtkTreePath* get_next_queue_track               (PraghaPlaylist *cplaylist);
+static GtkTreePath* get_first_random_track	       (PraghaPlaylist *playlist);
+static GtkTreePath* get_prev_random_track	       (PraghaPlaylist *playlist);
+static GtkTreePath* get_prev_sequential_track	       (PraghaPlaylist *playlist);
+static GtkTreePath* get_next_queue_track	       (PraghaPlaylist *cplaylist);
 static GtkTreePath* get_next_unplayed_random_track     (PraghaPlaylist *playlist);
-static GtkTreePath* get_next_sequential_track          (PraghaPlaylist *playlist);
-static GtkTreePath* get_next_random_ref_track          (PraghaPlaylist *playlist);
-static GtkTreePath* get_next_any_random_track          (PraghaPlaylist *playlist);
-static GtkTreePath* get_nth_track                      (PraghaPlaylist *playlist, gint n);
-static GtkTreePath* get_selected_track                 (PraghaPlaylist *playlist);
-static GtkTreePath* get_current_track                  (PraghaPlaylist *playlist);
+static GtkTreePath* get_next_sequential_track	       (PraghaPlaylist *playlist);
+static GtkTreePath* get_next_random_ref_track	       (PraghaPlaylist *playlist);
+static GtkTreePath* get_next_any_random_track	       (PraghaPlaylist *playlist);
+static GtkTreePath* get_nth_track		       (PraghaPlaylist *playlist, gint n);
+static GtkTreePath* get_selected_track		       (PraghaPlaylist *playlist);
+static GtkTreePath* get_current_track		       (PraghaPlaylist *playlist);
 
-static void         pragha_playlist_update_playback_sequence (PraghaPlaylist *playlist, PraghaUpdateAction update_action, GtkTreePath *path);
+static void	    pragha_playlist_update_playback_sequence (PraghaPlaylist *playlist, PraghaUpdateAction update_action, GtkTreePath *path);
 
-static void         pragha_playlist_set_first_rand_ref (PraghaPlaylist *cplaylist, GtkTreePath *path);
+static void	    pragha_playlist_set_first_rand_ref (PraghaPlaylist *cplaylist, GtkTreePath *path);
 
-static void         pragha_playlist_select_path        (PraghaPlaylist *playlist, GtkTreePath *path, gboolean center);
+static void	    pragha_playlist_select_path	       (PraghaPlaylist *playlist, GtkTreePath *path, gboolean center);
 
-static void         pragha_playlist_change_ref_list_tags (PraghaPlaylist *playlist, GList *rlist, gint changed, PraghaMusicobject *mobj);
-static void         pragha_playlist_update_track_state    (PraghaPlaylist *playlist, GtkTreePath *path, PraghaBackendState state);
+static void	    pragha_playlist_change_ref_list_tags (PraghaPlaylist *playlist, GList *rlist, gint changed, PraghaMusicobject *mobj);
+static void	    pragha_playlist_update_track_state	  (PraghaPlaylist *playlist, GtkTreePath *path, PraghaBackendState state);
 
 static void playlist_track_column_change_cb    (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
 static void playlist_title_column_change_cb    (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
@@ -172,37 +172,37 @@ static gint compare_length   (GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *
 /*
  * playlist_context_menu calbacks
  */
-static void queue_current_playlist        (GtkAction *action, PraghaPlaylist *playlist);
-static void dequeue_current_playlist      (GtkAction *action, PraghaPlaylist *playlist);
-static void remove_from_playlist          (GtkAction *action, PraghaPlaylist *playlist);
-static void crop_current_playlist         (GtkAction *action, PraghaPlaylist *playlist);
+static void queue_current_playlist	  (GtkAction *action, PraghaPlaylist *playlist);
+static void dequeue_current_playlist	  (GtkAction *action, PraghaPlaylist *playlist);
+static void remove_from_playlist	  (GtkAction *action, PraghaPlaylist *playlist);
+static void crop_current_playlist	  (GtkAction *action, PraghaPlaylist *playlist);
 static void current_playlist_clear_action (GtkAction *action, PraghaPlaylist *playlist);
-static void pragha_playlist_copy_tags     (GtkAction *action, PraghaPlaylist *playlist);
-static void pragha_playlist_edit_tags     (GtkAction *action, PraghaPlaylist *playlist);
+static void pragha_playlist_copy_tags	  (GtkAction *action, PraghaPlaylist *playlist);
+static void pragha_playlist_edit_tags	  (GtkAction *action, PraghaPlaylist *playlist);
 
 static const gchar *playlist_context_menu_xml = "<ui>				\
-	<popup name=\"SelectionPopup\">		   				\
+	<popup name=\"SelectionPopup\">						\
 	<menuitem action=\"Queue track\"/>					\
 	<menuitem action=\"Dequeue track\"/>					\
-	<separator/>				    				\
+	<separator/>								\
 	<menuitem action=\"Remove from playlist\"/>				\
 	<menuitem action=\"Crop playlist\"/>					\
 	<menuitem action=\"Clear playlist\"/>					\
-	<separator/>				    				\
+	<separator/>								\
 	<menuitem action=\"Save playlist\"/>					\
 	<menuitem action=\"Save selection\"/>					\
 	<menu action=\"SendToMenu\">						\
 		<placeholder name=\"pragha-sendto-placeholder\"/>		\
 	</menu>									\
-	<separator/>				    				\
+	<separator/>								\
 	<menu action=\"ToolsMenu\">						\
 		<placeholder name=\"pragha-plugins-placeholder\"/>		\
 	</menu>									\
-	<separator/>				    				\
+	<separator/>								\
 	<menuitem action=\"Copy tag to selection\"/>				\
-	<separator/>				    				\
+	<separator/>								\
 	<menuitem action=\"Edit tags\"/>					\
-	</popup>				    				\
+	</popup>								\
 	</ui>";
 
 static GtkActionEntry playlist_context_aentries[] = {
@@ -267,9 +267,9 @@ pragha_playlist_copy_tags (GtkAction *action, PraghaPlaylist *playlist)
 	gint changed = 0;
 	GList *rlist;
 
-	mobj    = g_object_get_data (G_OBJECT(action), "mobj");
+	mobj	= g_object_get_data (G_OBJECT(action), "mobj");
 	changed = GPOINTER_TO_INT(g_object_get_data (G_OBJECT(action), "change"));
-	rlist   = pragha_playlist_get_selection_ref_list (playlist);
+	rlist	= pragha_playlist_get_selection_ref_list (playlist);
 
 	pragha_playlist_change_ref_list_tags (playlist, rlist, changed, mobj);
 
@@ -277,9 +277,9 @@ pragha_playlist_copy_tags (GtkAction *action, PraghaPlaylist *playlist)
 }
 
 static void
-pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
-                                           gint            response_id,
-                                           PraghaPlaylist *playlist)
+pragha_edit_tags_playlist_dialog_response (GtkWidget	  *dialog,
+					   gint		   response_id,
+					   PraghaPlaylist *playlist)
 {
 	GtkWidget *toplevel;
 	PraghaMusicobject *nmobj = NULL;
@@ -332,7 +332,7 @@ pragha_playlist_edit_tags (GtkAction *action, PraghaPlaylist *playlist)
 	g_object_set_data (G_OBJECT (dialog), "reference-list", rlist);
  
 	g_signal_connect (G_OBJECT (dialog), "response",
-	                  G_CALLBACK (pragha_edit_tags_playlist_dialog_response), playlist);
+			  G_CALLBACK (pragha_edit_tags_playlist_dialog_response), playlist);
 
 	gtk_widget_show (dialog);
 }
@@ -564,10 +564,10 @@ pragha_playlist_update_track_state (PraghaPlaylist *playlist, GtkTreePath *path,
 
 		if(playlist->track_error->code == GST_RESOURCE_ERROR_NOT_FOUND)
 			pixbuf = gtk_icon_theme_load_icon (icon_theme, "list-remove",
-			                                   icon_size, GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
+							   icon_size, GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
 		else
 			pixbuf = gtk_icon_theme_load_icon (icon_theme, "dialog-warning",
-			                                   icon_size, GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
+							   icon_size, GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
 	}
 	else {
 		switch (state) {
@@ -630,8 +630,8 @@ pragha_playlist_set_track_error (PraghaPlaylist *playlist, GError *error)
 
 static void
 pragha_playlist_menu_action_set_sensitive (PraghaPlaylist *playlist,
-                                           const gchar *action,
-                                           gboolean sentitive)
+					   const gchar *action,
+					   gboolean sentitive)
 {
 	GtkWidget *item_widget;
 
@@ -642,8 +642,8 @@ pragha_playlist_menu_action_set_sensitive (PraghaPlaylist *playlist,
 
 static void
 pragha_playlist_menu_action_set_visible (PraghaPlaylist *playlist,
-                                         const gchar *action,
-                                         gboolean visible)
+					 const gchar *action,
+					 gboolean visible)
 {
 	GtkWidget *item_widget;
 
@@ -783,7 +783,7 @@ static void delete_rand_track_refs(GtkTreePath *path, PraghaPlaylist *cplaylist)
 
 static void
 pragha_playlist_set_dirty_track (PraghaPlaylist *playlist,
-                                 GtkTreePath    *path)
+				 GtkTreePath	*path)
 {
 	GtkTreeIter iter;
 
@@ -859,7 +859,7 @@ trim_down_rand_track_refs (PraghaPlaylist *playlist)
 
 static GtkTreeRowReference *
 get_rand_ref_next (PraghaPlaylist      *playlist,
-                   GtkTreeRowReference *ref)
+		   GtkTreeRowReference *ref)
 {
 	GtkTreeRowReference *ret_ref = NULL;
 	GList *list;
@@ -882,7 +882,7 @@ get_rand_ref_next (PraghaPlaylist      *playlist,
 
 static GtkTreeRowReference *
 get_rand_ref_prev (PraghaPlaylist      *playlist,
-                   GtkTreeRowReference *ref)
+		   GtkTreeRowReference *ref)
 {
 	GtkTreeRowReference *ret_ref = NULL;
 	GList *list;
@@ -947,8 +947,8 @@ get_first_random_track (PraghaPlaylist *playlist)
 
 	do {
 		rnd = g_rand_int_range (playlist->rand,
-		                        0,
-		                        playlist->no_tracks);
+					0,
+					playlist->no_tracks);
 		path = get_nth_track (playlist, rnd);
 
 	} while (playlist->no_tracks > 1 && (path == NULL));
@@ -973,8 +973,8 @@ get_next_unplayed_random_track (PraghaPlaylist *playlist)
 
 	while (played && playlist->unplayed_tracks) {
 		rnd = g_rand_int_range (playlist->rand,
-		                        0,
-		                        playlist->no_tracks);
+					0,
+					playlist->no_tracks);
 		path = get_nth_track (playlist, rnd);
 		if (!path) {
 			g_printerr("No track at position : %d\n", rnd);
@@ -1004,11 +1004,11 @@ get_next_any_random_track (PraghaPlaylist *playlist)
 	rpath = gtk_tree_row_reference_get_path (playlist->curr_rand_ref);
 	do {
 		rnd = g_rand_int_range (playlist->rand,
-		                        0,
-		                        playlist->no_tracks);
+					0,
+					playlist->no_tracks);
 		path = get_nth_track (playlist, rnd);
 	} while (!gtk_tree_path_compare(rpath, path) &&
-	         (playlist->no_tracks > 1));
+		 (playlist->no_tracks > 1));
 
 	gtk_tree_path_free(rpath);
 
@@ -1223,7 +1223,7 @@ pragha_playlist_select_path (PraghaPlaylist *playlist, GtkTreePath *path, gboole
 	gtk_tree_selection_select_path (GTK_TREE_SELECTION (selection), path);
 
 	gtk_tree_view_set_cursor (GTK_TREE_VIEW(playlist->view),
-	                          path, NULL, FALSE);
+				  path, NULL, FALSE);
 
 	gtk_tree_view_get_visible_rect (GTK_TREE_VIEW(playlist->view), &vrect);
 	gtk_tree_view_get_cell_area (GTK_TREE_VIEW(playlist->view), path, NULL, &crect);
@@ -1233,17 +1233,17 @@ pragha_playlist_select_path (PraghaPlaylist *playlist, GtkTreePath *path, gboole
 	if (pragha_preferences_get_shuffle(playlist->preferences) || center) {
 		if ((cy < vrect.y) || (cy + crect.height > vrect.y + vrect.height)) {
 			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(playlist->view),
-			                              path, NULL, TRUE, 0.5, 0.0);
+						      path, NULL, TRUE, 0.5, 0.0);
 		}
 	}
 	else {
 		if (cy < vrect.y) {
 			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(playlist->view),
-			                              path, NULL, TRUE, 0.0, 0.0);
+						      path, NULL, TRUE, 0.0, 0.0);
 		}
 		else if (cy + crect.height > vrect.y + vrect.height) {
 			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(playlist->view),
-			                              path, NULL, TRUE, 1.0, 0.0);
+						      path, NULL, TRUE, 1.0, 0.0);
 		}
 	}
 }
@@ -1355,7 +1355,7 @@ void update_current_playlist_view_track(PraghaPlaylist *cplaylist, PraghaBackend
 
 PraghaMusicobject *
 current_playlist_mobj_at_path(GtkTreePath *path,
-                              PraghaPlaylist *cplaylist)
+			      PraghaPlaylist *cplaylist)
 {
 	GtkTreeModel *model = cplaylist->model;
 	GtkTreeIter iter;
@@ -1371,7 +1371,7 @@ current_playlist_mobj_at_path(GtkTreePath *path,
 
 GtkTreePath*
 current_playlist_path_at_mobj (PraghaMusicobject *mobj,
-                               PraghaPlaylist *cplaylist)
+			       PraghaPlaylist *cplaylist)
 {
 	GtkTreeModel *model = cplaylist->model;
 	GtkTreeIter iter;
@@ -1393,8 +1393,8 @@ current_playlist_path_at_mobj (PraghaMusicobject *mobj,
 /* Reset random rand_refs and appends given ref */
 
 static void
-reset_rand_track_refs (PraghaPlaylist      *playlist,
-                       GtkTreeRowReference *ref)
+reset_rand_track_refs (PraghaPlaylist	   *playlist,
+		       GtkTreeRowReference *ref)
 {
 	GtkTreePath *path;
 
@@ -1415,7 +1415,7 @@ reset_rand_track_refs (PraghaPlaylist      *playlist,
 
 static void
 pragha_playlist_set_first_rand_ref (PraghaPlaylist *playlist,
-                                    GtkTreePath    *path)
+				    GtkTreePath	   *path)
 {
 	GtkTreeRowReference *ref;
 
@@ -2078,23 +2078,23 @@ insert_current_playlist(PraghaPlaylist *cplaylist,
 		gtk_list_store_insert_before(GTK_LIST_STORE(model), &iter, pos);
 
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter,
-	                   P_MOBJ_PTR, mobj,
-	                   P_QUEUE, NULL,
-	                   P_BUBBLE, FALSE,
-	                   P_STATUS_PIXBUF, NULL,
-	                   P_TRACK_NO, ch_track_no,
-	                   P_TITLE, string_is_not_empty(title) ? title : ch_filename,
-	                   P_ARTIST, artist,
-	                   P_ALBUM, album,
-	                   P_GENRE, genre,
-	                   P_BITRATE, ch_bitrate,
-	                   P_YEAR, ch_year,
-	                   P_COMMENT, comment,
-	                   P_LENGTH, ch_length,
-	                   P_FILENAME, ch_filename,
-	                   P_MIMETYPE, mimetype,
-	                   P_PLAYED, FALSE,
-	                   -1);
+			   P_MOBJ_PTR, mobj,
+			   P_QUEUE, NULL,
+			   P_BUBBLE, FALSE,
+			   P_STATUS_PIXBUF, NULL,
+			   P_TRACK_NO, ch_track_no,
+			   P_TITLE, string_is_not_empty(title) ? title : ch_filename,
+			   P_ARTIST, artist,
+			   P_ALBUM, album,
+			   P_GENRE, genre,
+			   P_BITRATE, ch_bitrate,
+			   P_YEAR, ch_year,
+			   P_COMMENT, comment,
+			   P_LENGTH, ch_length,
+			   P_FILENAME, ch_filename,
+			   P_MIMETYPE, mimetype,
+			   P_PLAYED, FALSE,
+			   -1);
 
 	/* Increment global count of tracks */
 
@@ -2151,23 +2151,23 @@ append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj, G
 
 	gtk_list_store_append(GTK_LIST_STORE(model), &iter);
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter,
-	                   P_MOBJ_PTR, mobj,
-	                   P_QUEUE, NULL,
-	                   P_BUBBLE, FALSE,
-	                   P_STATUS_PIXBUF, NULL,
-	                   P_TRACK_NO, ch_track_no,
-	                   P_TITLE, string_is_not_empty(title) ? title : ch_filename,
-	                   P_ARTIST, artist,
-	                   P_ALBUM, album,
-	                   P_GENRE, genre,
-	                   P_BITRATE, ch_bitrate,
-	                   P_YEAR, ch_year,
-	                   P_COMMENT, comment,
-	                   P_LENGTH, ch_length,
-	                   P_FILENAME, ch_filename,
-	                   P_MIMETYPE, mimetype,
-	                   P_PLAYED, FALSE,
-	                   -1);
+			   P_MOBJ_PTR, mobj,
+			   P_QUEUE, NULL,
+			   P_BUBBLE, FALSE,
+			   P_STATUS_PIXBUF, NULL,
+			   P_TRACK_NO, ch_track_no,
+			   P_TITLE, string_is_not_empty(title) ? title : ch_filename,
+			   P_ARTIST, artist,
+			   P_ALBUM, album,
+			   P_GENRE, genre,
+			   P_BITRATE, ch_bitrate,
+			   P_YEAR, ch_year,
+			   P_COMMENT, comment,
+			   P_LENGTH, ch_length,
+			   P_FILENAME, ch_filename,
+			   P_MIMETYPE, mimetype,
+			   P_PLAYED, FALSE,
+			   -1);
 
 	/* Increment global count of tracks */
 
@@ -2274,7 +2274,7 @@ pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list)
 	g_signal_emit (cplaylist, signals[PLAYLIST_CHANGED], 0);
 
 	if(gtk_tree_sortable_get_sort_column_id(GTK_TREE_SORTABLE(cplaylist->model),
-	                                        &column, &order))
+						&column, &order))
 		select_numered_path_of_current_playlist(cplaylist, prev_tracks, TRUE);
 }
 
@@ -2292,7 +2292,7 @@ pragha_mobj_list_already_has_title_of_artist(GList *list,
 		mobj = i->data;
 		if((0 == g_ascii_strcasecmp(pragha_musicobject_get_title(mobj), title)) &&
 		   (0 == g_ascii_strcasecmp(pragha_musicobject_get_artist(mobj), artist)))
-		   	return TRUE;
+			return TRUE;
 	}
 	return FALSE;
 }
@@ -2315,7 +2315,7 @@ pragha_playlist_already_has_title_of_artist(PraghaPlaylist *cplaylist,
 
 		if((0 == g_ascii_strcasecmp(pragha_musicobject_get_title(mobj), title)) &&
 		   (0 == g_ascii_strcasecmp(pragha_musicobject_get_artist(mobj), artist)))
-		   	return TRUE;
+			return TRUE;
 
 		ret = gtk_tree_model_iter_next(model, &iter);
 	}
@@ -2442,9 +2442,9 @@ void export_selected_playlist(GtkAction *action, PraghaPlaylist *cplaylist)
 
 static void
 pragha_playlist_row_activated_cb (GtkTreeView *current_playlist,
-                                  GtkTreePath *path,
-                                  GtkTreeViewColumn *column,
-                                  PraghaPlaylist *playlist)
+				  GtkTreePath *path,
+				  GtkTreeViewColumn *column,
+				  PraghaPlaylist *playlist)
 {
 	PraghaMusicobject *mobj = NULL;
 	gboolean shuffle = FALSE;
@@ -2475,8 +2475,8 @@ pragha_playlist_row_activated_cb (GtkTreeView *current_playlist,
 
 static void
 pragha_playlist_personalize_copy_tag_to_seleccion (PraghaPlaylist *playlist,
-                                                   GtkTreeViewColumn *column,
-                                                   GtkTreeIter *iter)
+						   GtkTreeViewColumn *column,
+						   GtkTreeIter *iter)
 {
 	GList *list = NULL;
 	gint icolumn = 0;
@@ -2496,43 +2496,43 @@ pragha_playlist_personalize_copy_tag_to_seleccion (PraghaPlaylist *playlist,
 		case 1: {
 			change = TAG_TNO_CHANGED;
 			label = g_strdup_printf(_("Copy \"%i\" to selected track numbers"),
-			                        pragha_musicobject_get_track_no(mobj));
+						pragha_musicobject_get_track_no(mobj));
 			break;
 			}
 		case 2: {
 			change = TAG_TITLE_CHANGED;
 			label = g_strdup_printf(_("Copy \"%s\" to selected titles"),
-			                        pragha_musicobject_get_title(mobj));
+						pragha_musicobject_get_title(mobj));
 			break;
 			}
 		case 3: {
 			change = TAG_ARTIST_CHANGED;
 			label = g_strdup_printf(_("Copy \"%s\" to selected artists"),
-			                        pragha_musicobject_get_artist(mobj));
+						pragha_musicobject_get_artist(mobj));
 			break;
 			}
 		case 4: {
 			change = TAG_ALBUM_CHANGED;
 			label = g_strdup_printf(_("Copy \"%s\" to selected albums"),
-			                        pragha_musicobject_get_album(mobj));
+						pragha_musicobject_get_album(mobj));
 			break;
 		}
 		case 5: {
 			change = TAG_GENRE_CHANGED;
 			label = g_strdup_printf(_("Copy \"%s\" to selected genres"),
-			                        pragha_musicobject_get_genre(mobj));
+						pragha_musicobject_get_genre(mobj));
 			break;
 		}
 		case 7: {
 			change = TAG_YEAR_CHANGED;
 			label = g_strdup_printf(_("Copy \"%i\" to selected years"),
-			                        pragha_musicobject_get_year(mobj));
+						pragha_musicobject_get_year(mobj));
 			break;
 		}
 		case 8: {
 			change = TAG_COMMENT_CHANGED;
 			label = g_strdup_printf(_("Copy \"%s\" to selected comments"),
-			                        pragha_musicobject_get_comment(mobj));
+						pragha_musicobject_get_comment(mobj));
 			break;
 		}
 		default: {
@@ -2542,7 +2542,7 @@ pragha_playlist_personalize_copy_tag_to_seleccion (PraghaPlaylist *playlist,
 
 	if (change) {
 		action = gtk_ui_manager_get_action (playlist->playlist_context_menu,
-		                                    "/SelectionPopup/Copy tag to selection");
+						    "/SelectionPopup/Copy tag to selection");
 
 		g_object_set_data(G_OBJECT(action), "mobj", mobj);
 		g_object_set_data(G_OBJECT(action), "change", GINT_TO_POINTER(change));
@@ -2567,20 +2567,20 @@ to change selection itself or if we handle it ourselves */
 
 static gboolean
 pragha_playlist_selection_func_true(GtkTreeSelection *selection,
-                                    GtkTreeModel *model,
-                                    GtkTreePath *path,
-                                    gboolean path_currently_selected,
-                                    gpointer data)
+				    GtkTreeModel *model,
+				    GtkTreePath *path,
+				    gboolean path_currently_selected,
+				    gpointer data)
 {
 	return TRUE;
 }
 
 static gboolean
 pragha_playlist_selection_func_false(GtkTreeSelection *selection,
-                                     GtkTreeModel *model,
-                                     GtkTreePath *path,
-                                     gboolean path_currently_selected,
-                                     gpointer data)
+				     GtkTreeModel *model,
+				     GtkTreePath *path,
+				     gboolean path_currently_selected,
+				     gpointer data)
 {
 	return FALSE;
 }
@@ -2589,15 +2589,15 @@ pragha_playlist_selection_func_false(GtkTreeSelection *selection,
 
 static gboolean
 pragha_playlist_first_button_press_cb (PraghaPlaylist *playlist,
-                                       GdkEventButton *event)
+				       GdkEventButton *event)
 {
 	GtkTreePath *path = NULL;
 	GtkTreeSelection *selection;
 	gboolean ret = FALSE;
 
 	ret = gtk_tree_view_get_path_at_pos (GTK_TREE_VIEW(playlist->view),
-	                                     (gint) event->x,(gint) event->y,
-	                                     &path, NULL, NULL, NULL);
+					     (gint) event->x,(gint) event->y,
+					     &path, NULL, NULL, NULL);
 
 	if (ret) {
 		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(playlist->view));
@@ -2618,7 +2618,7 @@ pragha_playlist_first_button_press_cb (PraghaPlaylist *playlist,
 
 static gboolean
 pragha_playlist_second_button_press_cb (PraghaPlaylist *playlist,
-                                        GdkEventButton *event)
+					GdkEventButton *event)
 {
 	GtkWidget *popup_menu;
 	GtkTreeSelection *selection;
@@ -2631,9 +2631,9 @@ pragha_playlist_second_button_press_cb (PraghaPlaylist *playlist,
 	popup_menu = gtk_ui_manager_get_widget (playlist->playlist_context_menu, "/SelectionPopup");
 
 	ret = gtk_tree_view_get_path_at_pos (GTK_TREE_VIEW(playlist->view),
-	                                     (gint) event->x,(gint) event->y,
-	                                     &path, &column,
-	                                     NULL, NULL);
+					     (gint) event->x,(gint) event->y,
+					     &path, &column,
+					     NULL, NULL);
 
 	if (ret) {
 		/* Click on a song.. */
@@ -2717,8 +2717,8 @@ pragha_playlist_second_button_press_cb (PraghaPlaylist *playlist,
 
 static gboolean
 pragha_playlist_button_press_cb (GtkWidget *widget,
-                                 GdkEventButton *event,
-                                 PraghaPlaylist *playlist)
+				 GdkEventButton *event,
+				 PraghaPlaylist *playlist)
 {
 	gboolean ret = FALSE;
 
@@ -2820,7 +2820,7 @@ drag_current_playlist_get_data (GtkWidget *widget,
 	guint uri_i = 0;
 	gchar **uri_list;
 
-        switch (target_type){
+	switch (target_type){
 		case TARGET_URI_LIST:
 			CDEBUG(DBG_VERBOSE, "DnD: TARGET_URI_LIST");
 
@@ -3228,8 +3228,8 @@ pragha_playlist_init_playlist_state (PraghaPlaylist *cplaylist)
 	init_playlist_current_playlist(cplaylist);
 
 	ref = pragha_preferences_get_string(cplaylist->preferences,
-	                                    GROUP_PLAYLIST,
-	                                    KEY_CURRENT_REF);
+					    GROUP_PLAYLIST,
+					    KEY_CURRENT_REF);
 
 	if (!ref)
 		return;
@@ -3377,8 +3377,8 @@ create_header_context_menu(PraghaPlaylist* cplaylist)
 	separator = gtk_separator_menu_item_new ();
 
 	action_clear_sort = gtk_image_menu_item_new_with_label(_("Clear sort"));
-        gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(action_clear_sort),
-                gtk_image_new_from_icon_name("view-refresh", GTK_ICON_SIZE_MENU));
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(action_clear_sort),
+		gtk_image_new_from_icon_name("view-refresh", GTK_ICON_SIZE_MENU));
 
 	/* Add the items to the menu */
 
@@ -3469,9 +3469,9 @@ pragha_playlist_context_menu_new (PraghaPlaylist *playlist)
 		g_critical("Unable to create current playlist context menu, err : %s", error->message);
 	}
 	gtk_action_group_add_actions(context_actions,
-	                             playlist_context_aentries,
-	                             G_N_ELEMENTS(playlist_context_aentries),
-	                             (gpointer) playlist);
+				     playlist_context_aentries,
+				     G_N_ELEMENTS(playlist_context_aentries),
+				     (gpointer) playlist);
 
 	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
 
@@ -3586,6 +3586,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  NULL);
 
 	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_min_width (column, 40);
 	gtk_tree_view_column_set_sort_column_id(column, P_TRACK_NO);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
@@ -3606,6 +3607,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  P_TITLE,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_min_width (column, 40);
 	gtk_tree_view_column_set_sort_column_id(column, P_TITLE);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
@@ -3626,6 +3628,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  P_ARTIST,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_min_width (column, 40);
 	gtk_tree_view_column_set_sort_column_id(column, P_ARTIST);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
@@ -3646,6 +3649,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  P_ALBUM,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_min_width (column, 40);
 	gtk_tree_view_column_set_sort_column_id(column, P_ALBUM);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
@@ -3666,6 +3670,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  P_GENRE,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_min_width (column, 40);
 	gtk_tree_view_column_set_sort_column_id(column, P_GENRE);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
@@ -3686,6 +3691,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  P_BITRATE,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_min_width (column, 40);
 	gtk_tree_view_column_set_sort_column_id(column, P_BITRATE);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
@@ -3706,6 +3712,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  P_YEAR,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_min_width (column, 40);
 	gtk_tree_view_column_set_sort_column_id(column, P_YEAR);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
@@ -3726,6 +3733,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  P_COMMENT,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_min_width (column, 40);
 	gtk_tree_view_column_set_sort_column_id(column, P_COMMENT);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
@@ -3746,6 +3754,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  P_LENGTH,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_min_width (column, 40);
 	gtk_tree_view_column_set_sort_column_id(column, P_LENGTH);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	gtk_tree_view_column_set_widget(column, label_length);
@@ -3765,6 +3774,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  P_FILENAME,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_min_width (column, 40);
 	gtk_tree_view_column_set_sort_column_id(column, P_FILENAME);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
@@ -3785,6 +3795,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 							  P_MIMETYPE,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_min_width (column, 40);
 	gtk_tree_view_column_set_sort_column_id(column, P_MIMETYPE);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
@@ -4257,8 +4268,8 @@ pragha_playlist_get_context_menu(PraghaPlaylist* cplaylist)
 
 gint
 pragha_playlist_append_plugin_action (PraghaPlaylist *cplaylist,
-                                      GtkActionGroup *action_group,
-                                      const gchar *menu_xml)
+				      GtkActionGroup *action_group,
+				      const gchar *menu_xml)
 {
 	GtkUIManager *ui_manager;
 	GError *error = NULL;
@@ -4268,9 +4279,9 @@ pragha_playlist_append_plugin_action (PraghaPlaylist *cplaylist,
 	gtk_ui_manager_insert_action_group (ui_manager, action_group, -1);
 
 	merge_id = gtk_ui_manager_add_ui_from_string (ui_manager,
-	                                              menu_xml,
-	                                              -1,
-	                                              &error);
+						      menu_xml,
+						      -1,
+						      &error);
 
 	if (error) {
 		g_warning ("Adding plugin to playlist menu: %s", error->message);
@@ -4282,8 +4293,8 @@ pragha_playlist_append_plugin_action (PraghaPlaylist *cplaylist,
 
 void
 pragha_playlist_remove_plugin_action (PraghaPlaylist *cplaylist,
-                                      GtkActionGroup *action_group,
-                                      gint merge_id)
+				      GtkActionGroup *action_group,
+				      gint merge_id)
 {
 	gtk_ui_manager_remove_ui (cplaylist->playlist_context_menu, merge_id);
 	gtk_ui_manager_remove_action_group (cplaylist->playlist_context_menu, action_group);
@@ -4319,10 +4330,10 @@ pragha_playlist_save_preferences(PraghaPlaylist* cplaylist)
 		}
 
 		pragha_preferences_set_string_list (cplaylist->preferences,
-		                                    GROUP_PLAYLIST,
-		                                    KEY_PLAYLIST_COLUMNS,
-		                                    (const gchar **)columns,
-		                                    cnt);
+						    GROUP_PLAYLIST,
+						    KEY_PLAYLIST_COLUMNS,
+						    (const gchar **)columns,
+						    cnt);
 		g_free(columns);
 	}
 
@@ -4341,10 +4352,10 @@ pragha_playlist_save_preferences(PraghaPlaylist* cplaylist)
 					gtk_tree_view_column_get_width(col);
 		}
 		pragha_preferences_set_integer_list (cplaylist->preferences,
-		                                     GROUP_PLAYLIST,
-		                                     KEY_PLAYLIST_COLUMN_WIDTHS,
-		                                     col_widths,
-		                                     i);
+						     GROUP_PLAYLIST,
+						     KEY_PLAYLIST_COLUMN_WIDTHS,
+						     col_widths,
+						     i);
 		g_list_free(cols);
 		g_free(col_widths);
 	}
@@ -4358,15 +4369,15 @@ pragha_playlist_init_pixbuf(PraghaPlaylist* cplaylist)
 
 	cplaylist->playing_pixbuf =
 		gtk_icon_theme_load_icon (icontheme, "media-playback-start",
-		                          icon_size, GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
+					  icon_size, GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
 	cplaylist->paused_pixbuf =
 		gtk_icon_theme_load_icon (icontheme, "media-playback-pause",
-		                          icon_size, GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
+					  icon_size, GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
 }
 
 static void
 pragha_playlist_update_menu_playlist_changes (PraghaDatabase *database,
-                                              PraghaPlaylist *playlist)
+					      PraghaPlaylist *playlist)
 {
 	update_playlist_changes_on_menu (playlist);
 }
@@ -4385,9 +4396,9 @@ pragha_playlist_init (PraghaPlaylist *playlist)
 	/* Setup the scrolled window */
 
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(playlist),
-	                                GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+					GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(playlist),
-	                                     GTK_SHADOW_IN);
+					     GTK_SHADOW_IN);
 	gtk_scrolled_window_set_hadjustment (GTK_SCROLLED_WINDOW(playlist), NULL);
 	gtk_scrolled_window_set_vadjustment (GTK_SCROLLED_WINDOW(playlist), NULL);
 
@@ -4425,18 +4436,18 @@ pragha_playlist_init (PraghaPlaylist *playlist)
 	/* Conect signals */
 
 	g_signal_connect (playlist->preferences, "notify::shuffle",
-	                  G_CALLBACK (shuffle_changed_cb), playlist);
+			  G_CALLBACK (shuffle_changed_cb), playlist);
 
 	g_signal_connect (G_OBJECT(playlist->view), "row-activated",
-	                  G_CALLBACK(pragha_playlist_row_activated_cb), playlist);
+			  G_CALLBACK(pragha_playlist_row_activated_cb), playlist);
 
 	g_signal_connect (G_OBJECT(playlist->view), "button-press-event",
-	                  G_CALLBACK(pragha_playlist_button_press_cb), playlist);
+			  G_CALLBACK(pragha_playlist_button_press_cb), playlist);
 	g_signal_connect (G_OBJECT(playlist->view), "button-release-event",
-	                  G_CALLBACK(current_playlist_button_release_cb), playlist);
+			  G_CALLBACK(current_playlist_button_release_cb), playlist);
 
 	g_signal_connect (G_OBJECT(playlist->cdbase), "PlaylistsChanged",
-	                  G_CALLBACK(pragha_playlist_update_menu_playlist_changes), playlist);
+			  G_CALLBACK(pragha_playlist_update_menu_playlist_changes), playlist);
 
 	pragha_playlist_update_menu_playlist_changes (playlist->cdbase, playlist);
 
@@ -4526,30 +4537,30 @@ pragha_playlist_class_init (PraghaPlaylistClass *klass)
 	 */
 	signals[PLAYLIST_SET_TRACK] =
 		g_signal_new ("playlist-set-track",
-		              G_TYPE_FROM_CLASS (gobject_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (PraghaPlaylistClass, playlist_set_track),
-		              NULL, NULL,
-		              g_cclosure_marshal_VOID__POINTER,
-		              G_TYPE_NONE, 1, G_TYPE_POINTER);
+			      G_TYPE_FROM_CLASS (gobject_class),
+			      G_SIGNAL_RUN_LAST,
+			      G_STRUCT_OFFSET (PraghaPlaylistClass, playlist_set_track),
+			      NULL, NULL,
+			      g_cclosure_marshal_VOID__POINTER,
+			      G_TYPE_NONE, 1, G_TYPE_POINTER);
 
 	signals[PLAYLIST_CHANGE_TAGS] =
 		g_signal_new ("playlist-change-tags",
-		              G_TYPE_FROM_CLASS (gobject_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (PraghaPlaylistClass, playlist_change_tags),
-		              NULL, NULL,
-		              g_cclosure_marshal_VOID__UINT_POINTER,
-		              G_TYPE_NONE, 2, G_TYPE_UINT, G_TYPE_POINTER);
+			      G_TYPE_FROM_CLASS (gobject_class),
+			      G_SIGNAL_RUN_LAST,
+			      G_STRUCT_OFFSET (PraghaPlaylistClass, playlist_change_tags),
+			      NULL, NULL,
+			      g_cclosure_marshal_VOID__UINT_POINTER,
+			      G_TYPE_NONE, 2, G_TYPE_UINT, G_TYPE_POINTER);
 
 	signals[PLAYLIST_CHANGED] =
 		g_signal_new ("playlist-changed",
-		              G_TYPE_FROM_CLASS (gobject_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (PraghaPlaylistClass, playlist_changed),
-		              NULL, NULL,
-		              g_cclosure_marshal_VOID__VOID,
-		              G_TYPE_NONE, 0);
+			      G_TYPE_FROM_CLASS (gobject_class),
+			      G_SIGNAL_RUN_LAST,
+			      G_STRUCT_OFFSET (PraghaPlaylistClass, playlist_changed),
+			      NULL, NULL,
+			      g_cclosure_marshal_VOID__VOID,
+			      G_TYPE_NONE, 0);
 }
 
 PraghaPlaylist *
