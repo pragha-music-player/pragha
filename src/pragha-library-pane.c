@@ -1975,14 +1975,14 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 		                       &iter,
 		                       NULL);
 
-		icon_name = pragha_provider_get_icon_name (provider, l->data);
+		icon_name = pragha_database_provider_get_icon_name (provider, l->data);
 
 		pixbuf  = gtk_icon_theme_load_icon (gtk_icon_theme_get_default (),
 		                                    icon_name,
 		                                    get_library_icon_size(), GTK_ICON_LOOKUP_FORCE_SIZE,
 		                                    NULL);
 
-		friendly_name = pragha_provider_get_friendly_name (provider, l->data);
+		friendly_name = pragha_database_provider_get_friendly_name (provider, l->data);
 
 		gtk_tree_store_set (GTK_TREE_STORE(model), &iter,
 		                    L_PIXBUF, pixbuf ? pixbuf : clibrary->pixbuf_dir,

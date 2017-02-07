@@ -88,6 +88,9 @@ GSList *
 pragha_provider_get_handled_list_by_type (PraghaDatabaseProvider *provider,
                                           const gchar            *provider_type);
 
+GSList *
+pragha_database_provider_get_list (PraghaDatabaseProvider *database_provider);
+
 void
 pragha_provider_set_visible (PraghaDatabaseProvider *provider,
                              const gchar            *name,
@@ -99,10 +102,10 @@ pragha_provider_set_ignore (PraghaDatabaseProvider *provider,
                             gboolean                ignore);
 
 gchar *
-pragha_provider_get_friendly_name (PraghaDatabaseProvider *provider, const gchar *name);
+pragha_database_provider_get_friendly_name (PraghaDatabaseProvider *provider, const gchar *name);
 
 gchar *
-pragha_provider_get_icon_name (PraghaDatabaseProvider *provider, const gchar *name);
+pragha_database_provider_get_icon_name (PraghaDatabaseProvider *provider, const gchar *name);
 
 void
 pragha_provider_want_upgrade (PraghaDatabaseProvider *provider, gint provider_id);

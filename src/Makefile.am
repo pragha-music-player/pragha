@@ -63,6 +63,8 @@ pragha_SOURCES = \
 	pragha-prepared-statement.c \
 	pragha-prepared-statement.h \
 	pragha-prepared-statement-private.h \
+	pragha-provider.c \
+	pragha-provider.h \
 	pragha-scanner.c \
 	pragha-scanner.h \
 	pragha-search-entry.c \

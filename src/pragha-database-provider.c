@@ -17,6 +17,7 @@
 
 #include "pragha-database.h"
 #include "pragha-prepared-statement-private.h"
+#include "pragha-provider.h"
 
 #include "pragha-database-provider.h"
 
@@ -36,6 +37,11 @@ enum {
 };
 
 static int signals[LAST_SIGNAL] = { 0 };
+
+gchar *
+pragha_database_provider_get_kind_from_id (PraghaDatabaseProvider *database_provider,
+                                           gint                    kind_id);
+
 
 /* Provider */
 
@@ -273,6 +279,39 @@ pragha_provider_get_handled_list_by_type (PraghaDatabaseProvider *provider,
 	return list;
 }
 
+GSList *
+pragha_database_provider_get_list (PraghaDatabaseProvider *database_provider)
+{
+	PraghaPreparedStatement *statement;
+	PraghaProvider *provider;
+	GSList *list = NULL;
+
+	PraghaDatabaseProviderPrivate *priv = database_provider->priv;
+
+	const gchar *sql = "SELECT name, type, friendly_name, icon_name, visible, ignore FROM PROVIDER";
+
+	statement = pragha_database_create_statement (priv->database, sql);
+	while (pragha_prepared_statement_step (statement)) {
+		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
+		gchar *kind = pragha_database_provider_get_kind_from_id (database_provider,
+			pragha_prepared_statement_get_int (statement, 1));
+		const gchar *friendly_name = pragha_prepared_statement_get_string (statement, 2);
+		const gchar *icon_name = pragha_prepared_statement_get_string (statement, 3);
+		gint visible = pragha_prepared_statement_get_int (statement, 4);
+		gint ignore = pragha_prepared_statement_get_int (statement, 5);
+
+		provider = pragha_provider_new (name, kind, friendly_name, icon_name,
+		                                visible,
+		                                ignore);
+		list = g_slist_append (list, provider);
+		g_free(kind);
+	}
+	pragha_prepared_statement_free (statement);
+
+	return list;
+}
+
+
 void
 pragha_provider_set_visible (PraghaDatabaseProvider *provider,
                              const gchar            *name,
@@ -308,7 +347,7 @@ pragha_provider_set_ignore (PraghaDatabaseProvider *provider,
 }
 
 gchar *
-pragha_provider_get_friendly_name (PraghaDatabaseProvider *provider, const gchar *name)
+pragha_database_provider_get_friendly_name (PraghaDatabaseProvider *provider, const gchar *name)
 {
 	PraghaPreparedStatement *statement;
 	PraghaDatabaseProviderPrivate *priv = provider->priv;
@@ -326,7 +365,7 @@ pragha_provider_get_friendly_name (PraghaDatabaseProvider *provider, const gchar
 }
 
 gchar *
-pragha_provider_get_icon_name (PraghaDatabaseProvider *provider, const gchar *name)
+pragha_database_provider_get_icon_name (PraghaDatabaseProvider *provider, const gchar *name)
 {
 	PraghaPreparedStatement *statement;
 	PraghaDatabaseProviderPrivate *priv = provider->priv;
@@ -341,6 +380,27 @@ pragha_provider_get_icon_name (PraghaDatabaseProvider *provider, const gchar *na
 	pragha_prepared_statement_free (statement);
 
 	return icon_name;
+}
+
+gchar *
+pragha_database_provider_get_kind_from_id (PraghaDatabaseProvider *database_provider,
+                                           gint                    kind_id)
+{
+	PraghaPreparedStatement *statement;
+	gchar *kind = NULL;
+
+	PraghaDatabaseProviderPrivate *priv = database_provider->priv;
+
+	const gchar *sql = "SELECT name FROM PROVIDER_TYPE WHERE id = ?";
+	statement = pragha_database_create_statement (priv->database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, kind_id);
+
+	pragha_prepared_statement_step (statement);
+	kind = g_strdup(pragha_prepared_statement_get_string (statement, 0));
+
+	pragha_prepared_statement_free (statement);
+
+	return kind;
 }
 
 /*
@@ -370,7 +430,6 @@ pragha_provider_want_remove (PraghaDatabaseProvider *provider, gint provider_id)
 
 	g_signal_emit (provider, signals[SIGNAL_WANT_UPDATE], 0, provider_id);
 }
-
 
 void
 pragha_provider_update_done (PraghaDatabaseProvider *provider)
