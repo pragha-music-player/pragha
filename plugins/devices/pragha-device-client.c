@@ -24,6 +24,7 @@
 #else
 #include <glib/gi18n.h>
 #endif
+#include <stdlib.h>
 
 #include "pragha-device-client.h"
 
@@ -87,6 +88,21 @@ pragha_gudev_dialog_new (GtkWidget *parent, const gchar *title, const gchar *ico
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), PRAGHA_DEVICE_RESPONSE_NONE);
 
 	return dialog;
+}
+
+gint
+pragha_gudev_get_property_as_int (GUdevDevice *device,
+                                  const gchar *property,
+                                  gint         base)
+{
+	const char *strvalue;
+
+	strvalue = g_udev_device_get_property (device, property);
+	if (strvalue == NULL) {
+		return 0;
+	}
+
+	return strtol (strvalue, NULL, base);
 }
 
 /* Identify devices.*/
