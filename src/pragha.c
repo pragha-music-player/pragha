@@ -220,7 +220,7 @@ pragha_application_open_files (PraghaApplication *pragha)
 
 	media_filter = gtk_file_filter_new();
 	gtk_file_filter_set_name(GTK_FILE_FILTER(media_filter), _("Supported media"));
-	
+
 	while (mime_wav[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
 		                              mime_wav[i++]);
@@ -649,7 +649,7 @@ pragha_art_cache_changed_handler (PraghaArtCache *cache, PraghaApplication *prag
 
 		artist = pragha_musicobject_get_artist (mobj);
 		album = pragha_musicobject_get_album (mobj);
-	
+
 		album_art_path = pragha_art_cache_get_uri (cache, artist, album);
 
 		if (album_art_path) {
@@ -675,7 +675,7 @@ pragha_application_provider_want_update (PraghaDatabaseProvider *provider,
 	PraghaDatabase *database;
 	PraghaScanner *scanner;
 	PraghaPreparedStatement *statement;
-	const gchar *sql, *provider_type;
+	const gchar *sql, *provider_type = NULL;
 
 	sql = "SELECT name FROM provider_type WHERE id IN (SELECT type FROM provider WHERE id = ?)";
 
@@ -701,7 +701,7 @@ pragha_application_provider_want_upgrade (PraghaDatabaseProvider *provider,
 	PraghaDatabase *database;
 	PraghaScanner *scanner;
 	PraghaPreparedStatement *statement;
-	const gchar *sql, *provider_type;
+	const gchar *sql, *provider_type = NULL;
 
 	sql = "SELECT name FROM provider_type WHERE id IN (SELECT type FROM provider WHERE id = ?)";
 
@@ -1143,7 +1143,7 @@ pragha_application_startup (GApplication *application)
 	g_signal_connect (playlist, "playlist-changed",
 	                  G_CALLBACK(pragha_playlist_update_statusbar_playtime), pragha);
 	pragha_playlist_update_statusbar_playtime (playlist, pragha);
-		
+
 	g_signal_connect (pragha->library, "library-append-playlist",
 	                  G_CALLBACK(pragha_library_pane_append_tracks), pragha);
 	g_signal_connect (pragha->library, "library-replace-playlist",
