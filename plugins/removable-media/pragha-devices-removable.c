@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2016 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2017 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -78,7 +78,7 @@ pragha_removable_clear_hook_device (PraghaRemovablePlugin *plugin)
 	PraghaRemovablePluginPrivate *priv = plugin->priv;
 
 	priv->bus_hooked = 0;
-	priv->device_hooked = 0;	
+	priv->device_hooked = 0;
 
 	if (priv->u_device) {
 		g_object_unref (priv->u_device);
@@ -211,7 +211,7 @@ pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, PraghaR
 	GMount    *mount;
 	GError    *error = NULL;
 	gchar     *name = NULL, *primary = NULL;
-  
+
 	g_return_if_fail (G_IS_VOLUME (volume));
 	g_return_if_fail (G_IS_ASYNC_RESULT (result));
 
@@ -409,7 +409,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	/* Remove provider if user disable the plugin or hide it */
 
 	provider = pragha_database_provider_get ();
-	if (!pragha_plugins_is_shutdown(pragha_application_get_plugins_engine(priv->pragha)))
+	if (!pragha_plugins_engine_is_shutdown(pragha_application_get_plugins_engine(priv->pragha)))
 	{
 		if (priv->mount_path)
 		{

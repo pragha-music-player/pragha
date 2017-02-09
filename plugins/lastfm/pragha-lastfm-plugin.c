@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2017 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -906,7 +906,7 @@ lastfm_import_xspf_response (GtkDialog          *dialog,
 
 	GFile *file;
 	gsize size;
-	
+
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	if (response != GTK_RESPONSE_ACCEPT)
@@ -1932,7 +1932,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	preferences = pragha_application_get_preferences (priv->pragha);
 	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "lastfm");
-	if (!pragha_plugins_is_shutdown(pragha_application_get_plugins_engine(priv->pragha))) {
+	if (!pragha_plugins_engine_is_shutdown(pragha_application_get_plugins_engine(priv->pragha))) {
 		pragha_preferences_remove_group (preferences, plugin_group);
 	}
 	g_free (plugin_group);

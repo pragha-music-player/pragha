@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2016 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2017 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -636,7 +636,7 @@ pragha_mtp_plugin_cache_tracks (PraghaMtpPlugin *plugin)
 	PraghaMtpPluginPrivate *priv = plugin->priv;
 
 	provider = pragha_database_provider_get ();
-	provider_list = pragha_provider_get_list_by_type (provider, "MTP");
+	provider_list = pragha_database_provider_get_list_by_type (provider, "MTP");
 
 	if (pragha_string_list_is_not_present (provider_list, priv->device_id))
 	{
@@ -947,7 +947,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	/* Remove provider if user disable the plugin or hide it */
 
 	provider = pragha_database_provider_get ();
-	if (!pragha_plugins_is_shutdown(pragha_application_get_plugins_engine(priv->pragha)))
+	if (!pragha_plugins_engine_is_shutdown(pragha_application_get_plugins_engine(priv->pragha)))
 	{
 		if (priv->device_id)
 		{

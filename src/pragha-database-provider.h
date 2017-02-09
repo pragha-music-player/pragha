@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2015-2016 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2015-2017 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -81,8 +81,8 @@ GSList *
 pragha_provider_get_handled_list (PraghaDatabaseProvider *provider);
 
 GSList *
-pragha_provider_get_list_by_type (PraghaDatabaseProvider *provider,
-                                  const gchar            *provider_type);
+pragha_database_provider_get_list_by_type (PraghaDatabaseProvider *provider,
+                                          const gchar            *provider_type);
 
 GSList *
 pragha_provider_get_handled_list_by_type (PraghaDatabaseProvider *provider,
