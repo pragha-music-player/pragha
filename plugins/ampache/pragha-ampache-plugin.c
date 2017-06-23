@@ -782,7 +782,7 @@ pragha_ampache_plugin_ping_server (gpointer user_data)
 
 	server = gtk_entry_get_text (GTK_ENTRY(priv->server_entry));
 
-	url = g_strdup_printf ("%s/server/xml.server.php?action=ping&ssid=%s",
+	url = g_strdup_printf ("%s/server/xml.server.php?action=ping&auth=%s",
 	                      server, priv->auth);
 
 	grl_net_wc_request_async (priv->glrnet,
