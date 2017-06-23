@@ -43,7 +43,10 @@ if HAVE_RYGEL
 SUBDIRS += dlna
 endif
 
-if HAVE_GRILO
+if HAVE_GRILO3
+SUBDIRS += dlna-renderer
+endif
+if HAVE_GRILO2
 SUBDIRS += dlna-renderer
 endif
 

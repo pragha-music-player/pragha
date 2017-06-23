@@ -167,15 +167,34 @@ AM_CONDITIONAL([HAVE_RYGEL], 0)
 fi
 
 dnl Check grilo
-GRILO_FOUND="no"
+GRILO3_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
-XDT_CHECK_OPTIONAL_PACKAGE([GRILO],
-                           [grilo-0.2], [0.2.10],
+XDT_CHECK_OPTIONAL_PACKAGE([GRILO3],
+                           [grilo-0.3], [0.3.0],
+                           [grilo-0.3],
+                           [grilo-0.3 library], [yes])
+else
+AM_CONDITIONAL([HAVE_GRILO3], 0)
+fi
+
+GRILO2_FOUND="no"
+if test x"$LIBPEAS_FOUND" = x"yes"; then
+XDT_CHECK_OPTIONAL_PACKAGE([GRILO2],
+                           [grilo-0.2], [0.2.11],
                            [grilo-0.2],
                            [grilo-0.2 library], [yes])
 else
-AM_CONDITIONAL([HAVE_GRILO], 0)
+AM_CONDITIONAL([HAVE_GRILO2], 0)
 fi
+
+GRILO_FOUND="no"
+if test x"$GRILO3_FOUND" = x"yes"; then
+GRILO_FOUND="yes"
+fi
+if test x"$GRILO2_FOUND" = x"yes"; then
+GRILO_FOUND="yes"
+fi
+
 
 dnl Check libclastfm
 LIBCLASTFM_FOUND="no"
@@ -292,7 +311,7 @@ echo "   * Search lyrics, artists info and albums art.....(Need libglyr >= 1.0.1
 echo "   * Search metadata on AcoustID.....................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
 echo "   * Search radios on TuneIn.........................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
 echo "   * Share music library on DLNA............(Need rygel-server-2.2 >= 0.20).: $RYGEL_FOUND"
-echo "   * Play songs on DLNA Servers..................(Need grilo-0.2 >= 0.2.10).: $GRILO_FOUND"
+echo "   * Play songs on DLNA Servers......................(Need grilo >= 0.2.11).: $GRILO_FOUND"
 echo "   * Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
 echo "   * EXPERIMENTAL management of removable devices..........(Need gudev-1.0).: $GUDEV_FOUND"
 echo "   * EXPERIMENTAL management of mtp devices....:(Need gudev-1.0 and libmtp).: $LIBMTP_FOUND"
