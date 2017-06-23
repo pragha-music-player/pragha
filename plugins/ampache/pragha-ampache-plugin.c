@@ -35,7 +35,7 @@
 #include <libpeas/peas.h>
 #include <libpeas-gtk/peas-gtk.h>
 
-#include <grilo-0.2/net/grl-net.h>
+#include <grilo-0.3/net/grl-net.h>
 #include <libxml/parser.h>
 #include <libxml/xmlmemory.h>
 
@@ -1091,7 +1091,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	/* If user disable the plugin (Pragha not shutdown) */
 
-	if (!pragha_plugins_is_shutdown(pragha_application_get_plugins_engine(priv->pragha)))
+	if (!pragha_plugins_engine_is_shutdown(pragha_application_get_plugins_engine(priv->pragha)))
 	{
 		/* Remove provider from gui. */
 

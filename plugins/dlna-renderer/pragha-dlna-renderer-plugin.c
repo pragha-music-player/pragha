@@ -154,10 +154,10 @@ pragha_dlna_renderer_append_source (GList     *list,
 
 		media = GRL_MEDIA (media_iter->data);
 
-		if (GRL_IS_MEDIA_BOX (media)) {
+		if (grl_media_is_container (media)) {
 			list = pragha_dlna_renderer_append_source (list, source, media);
 		}
-		else if (GRL_IS_MEDIA_AUDIO (media)) {
+		else if (grl_media_is_audio (media)) {
 			list = pragha_dlna_renderer_append_media (list, media);
 		}
 		pragha_process_gtk_events ();
@@ -236,7 +236,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	grl_init (NULL, NULL);
 
 	registry = grl_registry_get_default ();
-	if (!grl_registry_load_plugin_by_id (registry, "grl-dleyna", &error)) {
+	if (!grl_registry_activate_plugin_by_id (registry, "grl-dleyna", &error)) {
 		g_print ("Failed to load plugins: %s\n\n", error->message);
  	}
 

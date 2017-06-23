@@ -129,7 +129,7 @@ pragha_backend_source_notify_cb (GObject *obj, GParamSpec *pspec, PraghaBackend 
 	if (g_object_class_find_property(G_OBJECT_GET_CLASS(element), "user-agent")) {
 		g_object_set (element, "user-agent", PACKAGE_NAME"/"PACKAGE_VERSION, NULL);
 		g_object_set(element, "ssl-use-system-ca-file", FALSE, NULL);
-		g_object_set(element, "ssl-strict", TRUE, NULL);
+		g_object_set(element, "ssl-strict", FALSE, NULL);
 	}
 
 	g_signal_emit (backend, signals[SIGNAL_SET_DEVICE], 0, obj);

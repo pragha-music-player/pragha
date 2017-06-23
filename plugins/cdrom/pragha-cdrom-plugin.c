@@ -903,7 +903,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	/* If plugin is disables by user remove the rest of preferences */
 
-	if (!pragha_plugins_is_shutdown(pragha_application_get_plugins_engine(priv->pragha)))
+	if (!pragha_plugins_engine_is_shutdown(pragha_application_get_plugins_engine(priv->pragha)))
 	{
 		/* Remove setting widgets */
 

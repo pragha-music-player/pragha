@@ -172,9 +172,9 @@ dnl Check grilo
 GRILO_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
 XDT_CHECK_OPTIONAL_PACKAGE([GRILO],
-                           [grilo-0.2], [0.2.12],
-                           [grilo-0.2],
-                           [grilo-0.2 library], [yes])
+                           [grilo-0.3], [0.3.0],
+                           [grilo-0.3],
+                           [grilo-0.3 library], [yes])
 else
 AM_CONDITIONAL([HAVE_GRILO], 0)
 fi
@@ -183,9 +183,9 @@ dnl Check grilo-net
 GRILO_NET_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
 XDT_CHECK_OPTIONAL_PACKAGE([GRILO_NET],
-                           [grilo-net-0.2], [0.2.5],
-                           [grilo-net-0.2],
-                           [grilo-net-0.2 library], [yes])
+                           [grilo-net-0.3], [0.3.0],
+                           [grilo-net-0.3],
+                           [grilo-net-0.3 library], [yes])
 else
 AM_CONDITIONAL([HAVE_GRILO_NET], 0)
 fi
