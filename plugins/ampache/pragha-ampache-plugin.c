@@ -35,7 +35,13 @@
 #include <libpeas/peas.h>
 #include <libpeas-gtk/peas-gtk.h>
 
+#ifdef HAVE_GRILO_NET3
 #include <grilo-0.3/net/grl-net.h>
+#endif
+#ifdef HAVE_GRILO_NET2
+#include <grilo-0.2/net/grl-net.h>
+#endif
+
 #include <libxml/parser.h>
 #include <libxml/xmlmemory.h>
 

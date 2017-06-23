@@ -145,7 +145,12 @@ pragha_dlna_renderer_append_source (GList     *list,
 	caps = grl_source_get_caps (source, GRL_OP_BROWSE);
 	options = grl_operation_options_new (caps);
 
+#ifdef HAVE_GRILO3
 	grl_operation_options_set_resolution_flags (options, GRL_RESOLVE_IDLE_RELAY);
+#endif
+#ifdef HAVE_GRILO2
+	grl_operation_options_set_flags (options, GRL_RESOLVE_IDLE_RELAY);
+#endif
 
 	medias = grl_source_browse_sync (source, container, keys, options, NULL);
 	for (media_iter = medias; media_iter; media_iter = g_list_next (media_iter)) {
@@ -154,10 +159,20 @@ pragha_dlna_renderer_append_source (GList     *list,
 
 		media = GRL_MEDIA (media_iter->data);
 
+#ifdef HAVE_GRILO3
 		if (grl_media_is_container (media)) {
+#endif
+#ifdef HAVE_GRILO2
+		if (GRL_IS_MEDIA_BOX (media)) {
+#endif
 			list = pragha_dlna_renderer_append_source (list, source, media);
 		}
+#ifdef HAVE_GRILO3
 		else if (grl_media_is_audio (media)) {
+#endif
+#ifdef HAVE_GRILO2
+		else if (GRL_IS_MEDIA_AUDIO (media)) {
+#endif
 			list = pragha_dlna_renderer_append_media (list, media);
 		}
 		pragha_process_gtk_events ();
@@ -236,7 +251,12 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	grl_init (NULL, NULL);
 
 	registry = grl_registry_get_default ();
+#ifdef HAVE_GRILO3
 	if (!grl_registry_activate_plugin_by_id (registry, "grl-dleyna", &error)) {
+#endif
+#ifdef HAVE_GRILO2
+	if (!grl_registry_load_plugin_by_id (registry, "grl-dleyna", &error)) {
+#endif
 		g_print ("Failed to load plugins: %s\n\n", error->message);
  	}
 

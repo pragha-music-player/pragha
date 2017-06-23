@@ -38,6 +38,15 @@ libpampache_la_LIBADD =						\
 	$(LIBPEAS_LIBS)							\
 	$(LIBPEAS_GTK_LIBS)
 
+if HAVE_GRILO3
+libpampache_la_CFLAGS += $(GRILO_NET3_CFLAGS)
+libpampache_la_LIBADD += $(GRILO_NET3_LIBS)
+endif
+if HAVE_GRILO2
+libpampache_la_CFLAGS += $(GRILO_NET2_CFLAGS)
+libpampache_la_LIBADD += $(GRILO_NET2_LIBS)
+endif
+
 if HAVE_GSTREAMER_AUDIO
 libpampache_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
 libpampache_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
