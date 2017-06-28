@@ -154,7 +154,7 @@ static const gchar *main_menu_xml = "<ui>								\
 	<menubar name=\"Menubar\">											\
 		<menu action=\"ToolsMenu\">										\
 			<placeholder name=\"pragha-plugins-placeholder\">			\
-				<menuitem action=\"Refresh the Apache library\"/>		\
+				<menuitem action=\"Refresh the Ampache library\"/>		\
 				<separator/>											\
 			</placeholder>												\
 		</menu>															\
@@ -331,9 +331,10 @@ pragha_ampache_xml_get_media (xmlDocPtr doc, xmlNodePtr node)
 {
 	PraghaMusicobject *mobj = NULL;
 	GRegex *regex = NULL;
-	gchar *raw_url = NULL, *url = NULL, *title =  NULL, *artist = NULL, *album = NULL;
-	gchar *lenghtc = NULL;
-	gint lenght = 0;
+	gchar *raw_url = NULL, *url = NULL, *title =  NULL, *artist = NULL, \
+		*album = NULL, *genre = NULL, *comment = NULL;
+	gchar *tracknoc = NULL, *yearc = NULL, *lenghtc = NULL;
+	gint trackno = 0, year = 0, lenght = 0;
 
 	node = node->xmlChildrenNode;
 	while(node)
@@ -349,6 +350,12 @@ pragha_ampache_xml_get_media (xmlDocPtr doc, xmlNodePtr node)
 
 			g_free (raw_url);
 		}
+		if (!xmlStrcmp (node->name, (const xmlChar *) "track"))
+		{
+			tracknoc = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
+			trackno = atoi (tracknoc);
+			g_free (tracknoc);
+		}
 		if (!xmlStrcmp (node->name, (const xmlChar *) "title"))
 		{
 			 title = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
@@ -360,6 +367,20 @@ pragha_ampache_xml_get_media (xmlDocPtr doc, xmlNodePtr node)
 		if (!xmlStrcmp (node->name, (const xmlChar *) "album"))
 		{
 			 album = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
+		}
+		if (!xmlStrcmp (node->name, (const xmlChar *) "year"))
+		{
+			yearc = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
+			year = atoi (yearc);
+			g_free (yearc);
+		}
+		if (!xmlStrcmp (node->name, (const xmlChar *) "genre"))
+		{
+			 genre = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
+		}
+		if (!xmlStrcmp (node->name, (const xmlChar *) "comment"))
+		{
+			 comment = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
 		}
 		if (!xmlStrcmp (node->name, (const xmlChar *) "time"))
 		{
@@ -374,9 +395,13 @@ pragha_ampache_xml_get_media (xmlDocPtr doc, xmlNodePtr node)
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 	                     "file", url,
 	                     "source", FILE_HTTP,
-	                     "title", title,
-	                     "artist", artist,
-	                     "album", album,
+	                     "track-no", trackno,
+	                     "title", title != NULL ? title : "",
+	                     "artist", artist != NULL ? artist : "",
+	                     "album", album != NULL ? artist : "",
+	                     "year", year,
+	                     "genre", genre != NULL ? genre : "",
+	                     "comment", comment != NULL ? comment : "",
 	                     "length", lenght,
 	                     NULL);
 
@@ -384,6 +409,8 @@ pragha_ampache_xml_get_media (xmlDocPtr doc, xmlNodePtr node)
 	g_free (title);
 	g_free (artist);
 	g_free (album);
+	g_free (genre);
+	g_free (comment);
 
 	return mobj;
 }
@@ -522,7 +549,7 @@ pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin)
 {
 	PraghaStatusbar *statusbar;
 	gchar *url = NULL;
-	const guint limit = 50;
+	const guint limit = 250;
 	guint i = 0;
 
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
