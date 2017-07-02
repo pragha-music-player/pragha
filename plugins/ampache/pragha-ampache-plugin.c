@@ -398,7 +398,7 @@ pragha_ampache_xml_get_media (xmlDocPtr doc, xmlNodePtr node)
 	                     "track-no", trackno,
 	                     "title", title != NULL ? title : "",
 	                     "artist", artist != NULL ? artist : "",
-	                     "album", album != NULL ? artist : "",
+	                     "album", album != NULL ? album : "",
 	                     "year", year,
 	                     "genre", genre != NULL ? genre : "",
 	                     "comment", comment != NULL ? comment : "",
