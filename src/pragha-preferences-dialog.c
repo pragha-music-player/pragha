@@ -650,7 +650,7 @@ pragha_preferences_dialog_delete (GtkWidget *widget, GdkEvent *event, Preference
 static void
 library_add_cb_response (GtkDialog *add_dialog, gint response, PreferencesDialog *dialog)
 {
-	gchar *u_folder, *folder;
+	gchar *u_folder, *folder, *basename, *markup;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	GError *error = NULL;
@@ -671,13 +671,24 @@ library_add_cb_response (GtkDialog *add_dialog, gint response, PreferencesDialog
 			break;
 		}
 
+		basename = g_filename_display_basename (u_folder);
+		markup = g_markup_printf_escaped("%s (%s)", basename, u_folder);
+
 		gtk_list_store_append (GTK_LIST_STORE(model), &iter);
 		gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-		                    COLUMN_FRIENDLY, u_folder,
-		                    COLUMN_ICON_NAME, "folder",
+		                    COLUMN_NAME, u_folder,
+		                    COLUMN_KIND, "local",
+		                    COLUMN_FRIENDLY, basename,
+		                    COLUMN_ICON_NAME, "drive-harddisk",
+		                    COLUMN_VISIBLE, TRUE,
+		                    COLUMN_IGNORED, FALSE,
+		                    COLUMN_MARKUP, markup,
 		                    -1);
+
 		g_free(u_folder);
 		g_free(folder);
+		g_free (basename);
+		g_free(markup);
 
 		break;
 	default:
