@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2015 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2016 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -42,6 +42,7 @@
 #include "pragha-utils.h"
 #include "pragha-music-enum.h"
 #include "pragha-playlists-mgmt.h"
+#include "pragha-database-provider.h"
 
 #ifdef G_OS_WIN32
 #include "../win32/win32dep.h"
@@ -61,11 +62,12 @@ struct _PraghaApplication {
 
 	/* Main stuff */
 
-	PraghaBackend     *backend;
-	PraghaPreferences *preferences;
-	PraghaDatabase    *cdbase;
-	PraghaArtCache    *art_cache;
-	PraghaMusicEnum   *enum_map;
+	PraghaBackend          *backend;
+	PraghaPreferences      *preferences;
+	PraghaDatabase         *cdbase;
+	PraghaDatabaseProvider *provider;
+	PraghaArtCache         *art_cache;
+	PraghaMusicEnum        *enum_map;
 
 	PraghaScanner     *scanner;
 
@@ -218,7 +220,7 @@ pragha_application_open_files (PraghaApplication *pragha)
 
 	media_filter = gtk_file_filter_new();
 	gtk_file_filter_set_name(GTK_FILE_FILTER(media_filter), _("Supported media"));
-	
+
 	while (mime_wav[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
 		                              mime_wav[i++]);
@@ -647,7 +649,7 @@ pragha_art_cache_changed_handler (PraghaArtCache *cache, PraghaApplication *prag
 
 		artist = pragha_musicobject_get_artist (mobj);
 		album = pragha_musicobject_get_album (mobj);
-	
+
 		album_art_path = pragha_art_cache_get_uri (cache, artist, album);
 
 		if (album_art_path) {
@@ -663,6 +665,58 @@ pragha_libary_list_changed_cb (PraghaPreferences *preferences, PraghaApplication
 {
 	GtkWidget *infobar = create_info_bar_update_music (pragha);
 	pragha_window_add_widget_to_infobox (pragha, infobar);
+}
+
+static void
+pragha_application_provider_want_update (PraghaDatabaseProvider *provider,
+                                         gint                    provider_id,
+                                         PraghaApplication      *pragha)
+{
+	PraghaDatabase *database;
+	PraghaScanner *scanner;
+	PraghaPreparedStatement *statement;
+	const gchar *sql, *provider_type = NULL;
+
+	sql = "SELECT name FROM provider_type WHERE id IN (SELECT type FROM provider WHERE id = ?)";
+
+	database = pragha_application_get_database (pragha);
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, provider_id);
+	if (pragha_prepared_statement_step (statement))
+		provider_type = pragha_prepared_statement_get_string (statement, 0);
+
+	if (g_ascii_strcasecmp (provider_type, "local") == 0)
+	{
+		scanner = pragha_application_get_scanner (pragha);
+		pragha_scanner_update_library (scanner);
+	}
+	pragha_prepared_statement_free (statement);
+}
+
+static void
+pragha_application_provider_want_upgrade (PraghaDatabaseProvider *provider,
+                                          gint                    provider_id,
+                                          PraghaApplication      *pragha)
+{
+	PraghaDatabase *database;
+	PraghaScanner *scanner;
+	PraghaPreparedStatement *statement;
+	const gchar *sql, *provider_type = NULL;
+
+	sql = "SELECT name FROM provider_type WHERE id IN (SELECT type FROM provider WHERE id = ?)";
+
+	database = pragha_application_get_database (pragha);
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, provider_id);
+	if (pragha_prepared_statement_step (statement))
+		provider_type = pragha_prepared_statement_get_string (statement, 0);
+
+	if (g_ascii_strcasecmp (provider_type, "local") == 0)
+	{
+		scanner = pragha_application_get_scanner (pragha);
+		pragha_scanner_scan_library (scanner);
+	}
+	pragha_prepared_statement_free (statement);
 }
 
 static void
@@ -971,12 +1025,20 @@ pragha_application_dispose (GObject *object)
 		g_object_unref (pragha->menu_ui_manager);
 		pragha->menu_ui_manager = NULL;
 	}
+	if (pragha->menu_ui) {
+		g_object_unref (pragha->menu_ui);
+		pragha->menu_ui = NULL;
+	}
 
 	/* Save Preferences and database. */
 
 	if (pragha->preferences) {
 		g_object_unref (pragha->preferences);
 		pragha->preferences = NULL;
+	}
+	if (pragha->provider) {
+		g_object_unref (pragha->provider);
+		pragha->provider = NULL;
 	}
 	if (pragha->cdbase) {
 		g_object_unref (pragha->cdbase);
@@ -1014,6 +1076,12 @@ pragha_application_startup (GApplication *application)
 	if (string_is_not_empty (version) && (g_ascii_strcasecmp (version, "1.3.1") < 0)) {
 		pragha_database_compatibilize_version (pragha->cdbase);
 	}
+
+	pragha->provider = pragha_database_provider_get ();
+	g_signal_connect (pragha->provider, "want-upgrade",
+	                  G_CALLBACK(pragha_application_provider_want_upgrade), pragha);
+	g_signal_connect (pragha->provider, "want-update",
+	                  G_CALLBACK(pragha_application_provider_want_update), pragha);
 
 	pragha->enum_map = pragha_music_enum_get ();
 	g_signal_connect (pragha->enum_map, "enum-removed",
@@ -1075,7 +1143,7 @@ pragha_application_startup (GApplication *application)
 	g_signal_connect (playlist, "playlist-changed",
 	                  G_CALLBACK(pragha_playlist_update_statusbar_playtime), pragha);
 	pragha_playlist_update_statusbar_playtime (playlist, pragha);
-		
+
 	g_signal_connect (pragha->library, "library-append-playlist",
 	                  G_CALLBACK(pragha_library_pane_append_tracks), pragha);
 	g_signal_connect (pragha->library, "library-replace-playlist",
@@ -1284,6 +1352,7 @@ pragha_application_new ()
 	return g_object_new (PRAGHA_TYPE_APPLICATION,
 	                     "application-id", "org.pragha",
 	                     "flags", G_APPLICATION_HANDLES_COMMAND_LINE | G_APPLICATION_HANDLES_OPEN,
+	                     "register-session", TRUE,
 	                     NULL);
 }
 

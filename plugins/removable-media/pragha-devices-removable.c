@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2017 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -39,6 +39,7 @@
 #include "plugins/devices/pragha-devices-plugin.h"
 #include "plugins/devices/pragha-device-client.h"
 
+#include "src/pragha-database-provider.h"
 #include "src/pragha-playback.h"
 #include "src/pragha-utils.h"
 #include "src/pragha.h"
@@ -77,7 +78,7 @@ pragha_removable_clear_hook_device (PraghaRemovablePlugin *plugin)
 	PraghaRemovablePluginPrivate *priv = plugin->priv;
 
 	priv->bus_hooked = 0;
-	priv->device_hooked = 0;	
+	priv->device_hooked = 0;
 
 	if (priv->u_device) {
 		g_object_unref (priv->u_device);
@@ -96,63 +97,74 @@ pragha_removable_clear_hook_device (PraghaRemovablePlugin *plugin)
 static void
 pragha_block_device_add_to_library (PraghaRemovablePlugin *plugin, GMount *mount)
 {
-	PraghaPreferences *preferences;
+	PraghaDatabaseProvider *provider;
 	PraghaScanner *scanner;
-	GSList *library_dir = NULL;
+	GSList *provider_list = NULL;
 	GFile       *mount_point;
-	gchar       *mount_path;
+	gchar       *mount_path, *name;
 
 	PraghaRemovablePluginPrivate *priv = plugin->priv;
 
 	mount_point = g_mount_get_root (mount);
 	mount_path = g_file_get_path (mount_point);
 
-	preferences = pragha_application_get_preferences (priv->pragha);
+	provider = pragha_database_provider_get ();
+	provider_list = pragha_provider_get_list (provider);
 
-	library_dir = pragha_preferences_get_library_list (preferences);
-	if (!is_present_str_list (mount_path, library_dir)) {
-		library_dir = g_slist_append (library_dir, g_strdup(mount_path));
+	if (pragha_string_list_is_not_present (provider_list, mount_path))
+	{
+		name = g_mount_get_name (mount);
 
-		pragha_preferences_set_filename_list (preferences,
-		                                      GROUP_LIBRARY,
-		                                      KEY_LIBRARY_DIR,
-		                                      library_dir);
+		pragha_provider_add_new (provider,
+		                         mount_path,
+		                         "local",
+		                         name,
+		                         "media-removable");
+
+		scanner = pragha_application_get_scanner (priv->pragha);
+		pragha_scanner_update_library (scanner);
+
+		g_free (name);
 	}
+	else
+	{
+		/* Show old backup */
+		pragha_provider_set_visible (provider, mount_path, TRUE);
+		pragha_provider_set_ignore (provider, mount_path, FALSE);
+		pragha_provider_update_done (provider);
+	}
+	g_slist_free_full (provider_list, g_free);
+
 	priv->mount_path = g_strdup(mount_path);
 
-	scanner = pragha_application_get_scanner (priv->pragha);
-	pragha_scanner_update_library (scanner);
-
+	g_object_unref (provider);
 	g_object_unref (mount_point);
-	free_str_list(library_dir);
 	g_free (mount_path);
 }
 
 static void
 pragha_removable_drop_device_from_library (PraghaRemovablePlugin *plugin)
 {
-	PraghaPreferences *preferences;
-	PraghaScanner *scanner;
-	GSList *library_dir = NULL;
+	PraghaDatabaseProvider *provider;
+	GSList *provider_list = NULL;
 
 	PraghaRemovablePluginPrivate *priv = plugin->priv;
 
-	preferences = pragha_application_get_preferences (priv->pragha);
+	provider = pragha_database_provider_get ();
+	provider_list = pragha_provider_get_list (provider);
 
-	library_dir = pragha_preferences_get_library_list (preferences);
-	if (is_present_str_list (priv->mount_path, library_dir)) {
-		library_dir = delete_from_str_list (priv->mount_path, library_dir);
-
-		pragha_preferences_set_filename_list (preferences,
-		                                      GROUP_LIBRARY,
-		                                      KEY_LIBRARY_DIR,
-		                                      library_dir);
-
-		scanner = pragha_application_get_scanner (priv->pragha);
-		pragha_scanner_update_library (scanner);
+	if (pragha_string_list_is_present (provider_list, priv->mount_path))
+	{
+		/* Hide the provider but leave it as backup */
+		pragha_provider_set_visible (provider, priv->mount_path, FALSE);
+		pragha_provider_set_ignore (provider, priv->mount_path, TRUE);
+		pragha_provider_update_done (provider);
 	}
-	free_str_list(library_dir);
+
+	g_slist_free_full (provider_list, g_free);
+	g_object_unref (provider);
 }
+
 
 /*
  * Some functions to mount block removable.
@@ -199,9 +211,11 @@ pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, PraghaR
 	GMount    *mount;
 	GError    *error = NULL;
 	gchar     *name = NULL, *primary = NULL;
-  
+
 	g_return_if_fail (G_IS_VOLUME (volume));
 	g_return_if_fail (G_IS_ASYNC_RESULT (result));
+
+	PraghaRemovablePluginPrivate *priv = plugin->priv;
 
 	/* finish mounting the volume */
 	if (!g_volume_mount_finish (volume, result, &error)) {
@@ -211,7 +225,8 @@ pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, PraghaR
 			primary = g_strdup_printf (_("Unable to access \"%s\""), name);
 			g_free (name);
 
-			dialog = pragha_gudev_dialog_new (NULL, _("Removable Device"), "media-removable",
+			dialog = pragha_gudev_dialog_new (pragha_application_get_window (priv->pragha),
+			                                  _("Removable Device"), "media-removable",
 			                                  primary, error->message,
 			                                  NULL, PRAGHA_DEVICE_RESPONSE_NONE);
 			g_signal_connect (dialog, "response",
@@ -230,7 +245,6 @@ pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, PraghaR
 		pragha_block_device_add_to_library (plugin, mount);
 		g_object_unref (mount);
 	}
-	g_object_unref (volume);
 }
 
 static void
@@ -297,7 +311,8 @@ pragha_block_device_detected (gpointer data)
 	primary = g_strdup_printf (_("Want to manage \"%s\" volume?"), name);
 	g_free (name);
 
-	dialog = pragha_gudev_dialog_new (NULL, _("Removable Device"), "media-removable",
+	dialog = pragha_gudev_dialog_new (pragha_application_get_window (priv->pragha),
+	                                  _("Removable Device"), "media-removable",
 	                                  primary, NULL,
 	                                  _("_Update library"), PRAGHA_DEVICE_RESPONSE_BROWSE);
 
@@ -384,10 +399,40 @@ static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
 	PraghaDeviceClient *device_client;
+	PraghaDatabaseProvider *provider;
+
 	PraghaRemovablePlugin *plugin = PRAGHA_REMOVABLE_PLUGIN (activatable);
 	PraghaRemovablePluginPrivate *priv = plugin->priv;
 
 	CDEBUG(DBG_PLUGIN, "Removable plugin %s", G_STRFUNC);
+
+	/* Remove provider if user disable the plugin or hide it */
+
+	provider = pragha_database_provider_get ();
+	if (!pragha_plugins_engine_is_shutdown(pragha_application_get_plugins_engine(priv->pragha)))
+	{
+		if (priv->mount_path)
+		{
+			pragha_provider_remove (provider,
+			                        priv->mount_path);
+			pragha_provider_update_done (provider);
+		}
+	}
+	else
+	{
+		if (priv->mount_path)
+		{
+			pragha_provider_set_visible (provider, priv->mount_path, FALSE);
+			pragha_provider_set_ignore (provider, priv->mount_path, TRUE);
+		}
+	}
+	g_object_unref (provider);
+
+	/* Clean memory */
+
+	pragha_removable_clear_hook_device (plugin);
+
+	/* Disconnect signals */
 
 	device_client = pragha_device_client_get();
 	g_signal_handlers_disconnect_by_func (device_client,

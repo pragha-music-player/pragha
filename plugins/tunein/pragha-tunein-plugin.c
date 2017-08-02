@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2014 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2014-2016 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -42,6 +42,7 @@
 #include "src/pragha-hig.h"
 #include "src/pragha-utils.h"
 #include "src/pragha-window.h"
+#include "src/pragha-background-task-widget.h"
 #include "src/xml_helper.h"
 
 #include "plugins/pragha-plugin-macros.h"
@@ -54,10 +55,12 @@
 #define PRAGHA_TUNEIN_PLUGIN_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), PRAGHA_TYPE_TUNEIN_PLUGIN, PraghaTuneinPluginClass))
 
 struct _PraghaTuneinPluginPrivate {
-	PraghaApplication *pragha;
+	PraghaApplication          *pragha;
 
-	GtkActionGroup    *action_group_main_menu;
-	guint              merge_id_main_menu;
+	PraghaBackgroundTaskWidget *task_widget;
+	GtkWidget                  *name_entry;
+	GtkActionGroup             *action_group_main_menu;
+	guint                       merge_id_main_menu;
 };
 typedef struct _PraghaTuneinPluginPrivate PraghaTuneinPluginPrivate;
 
@@ -125,8 +128,8 @@ pragha_tunein_plugin_get_radio_done (SoupSession *session,
                                      SoupMessage *msg,
                                      gpointer     user_data)
 {
-	GtkWidget *window;
 	PraghaPlaylist *playlist;
+	PraghaStatusbar *statusbar;
 	PraghaDatabase *cdbase;
 	PraghaMusicobject *mobj = NULL;
 	XMLNode *xml = NULL, *xi;
@@ -136,17 +139,25 @@ pragha_tunein_plugin_get_radio_done (SoupSession *session,
 	PraghaTuneinPlugin *plugin = user_data;
 	PraghaTuneinPluginPrivate *priv = plugin->priv;
 
-	window = pragha_application_get_window (priv->pragha);
-	remove_watch_cursor (window);
+	statusbar = pragha_statusbar_get ();
+	pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
+	g_object_unref (statusbar);
 
-	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
+	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code)) {
+		statusbar = pragha_statusbar_get ();
+		pragha_statusbar_set_misc_text (statusbar, _("There was an error when searching radio on TuneIn"));
+		g_object_unref (statusbar);
 		return;
+	}
 
 	xml = tinycxml_parse ((gchar *)msg->response_body->data);
 	xi = xmlnode_get (xml, CCA{"opml", "body", "outline", NULL }, NULL, NULL);
 
 	type = tunein_helper_get_atribute (xi, "type");
 	if (g_ascii_strcasecmp(type, "audio") != 0) {
+		statusbar = pragha_statusbar_get ();
+		pragha_statusbar_set_misc_text (statusbar, _("There was an error when searching radio on TuneIn"));
+		g_object_unref (statusbar);
 		xmlnode_free(xml);
 		return;
 	}
@@ -155,6 +166,9 @@ pragha_tunein_plugin_get_radio_done (SoupSession *session,
 	url = tunein_helper_get_atribute (xi, "URL");
 
 	if (string_is_empty(name) || string_is_empty(url)) {
+		statusbar = pragha_statusbar_get ();
+		pragha_statusbar_set_misc_text (statusbar, _("There was an error when searching radio on TuneIn"));
+		g_object_unref (statusbar);
 		xmlnode_free(xml);
 		return;
 	}
@@ -180,20 +194,26 @@ pragha_tunein_plugin_get_radio_done (SoupSession *session,
 static void
 pragha_tunein_plugin_get_radio (PraghaTuneinPlugin *plugin, const gchar *field)
 {
-	GtkWidget *window;
+	PraghaStatusbar *statusbar;
 	SoupSession *session;
 	SoupMessage *msg;
 	gchar *escaped_field = NULL, *query = NULL;
 
 	PraghaTuneinPluginPrivate *priv = plugin->priv;
 
-	window = pragha_application_get_window (priv->pragha);
-	set_watch_cursor (window);
+	statusbar = pragha_statusbar_get ();
+	priv->task_widget = pragha_background_task_widget_new (_("Searching radio on TuneIn"),
+	                                                       "edit-find",
+	                                                       0,
+	                                                       NULL);
+	g_object_ref (G_OBJECT(priv->task_widget));
+	pragha_statusbar_add_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
+	g_object_unref(G_OBJECT(statusbar));
 
 	escaped_field = g_uri_escape_string (field, NULL, TRUE);
 	query = g_strdup_printf ("%s%s", "http://opml.radiotime.com/Search.aspx?query=", escaped_field);
 
-	session = soup_session_sync_new ();
+	session = soup_session_new ();
 
 	msg = soup_message_new ("GET", query);
 	soup_session_queue_message (session, msg,
@@ -206,12 +226,32 @@ pragha_tunein_plugin_get_radio (PraghaTuneinPlugin *plugin, const gchar *field)
 /*
  * TuneIn dialog
  */
+
+static void
+pragha_tunein_dialog_response (GtkWidget          *dialog,
+                               gint                response_id,
+                               PraghaTuneinPlugin *plugin)
+{
+	PraghaTuneinPluginPrivate *priv = plugin->priv;
+
+	switch (response_id) {
+		case GTK_RESPONSE_ACCEPT:
+			pragha_tunein_plugin_get_radio (plugin, gtk_entry_get_text(GTK_ENTRY(priv->name_entry)));
+			break;
+		case GTK_RESPONSE_CANCEL:
+		default:
+			break;
+	}
+
+	priv->name_entry = NULL;
+	gtk_widget_destroy (dialog);
+}
+
 static void
 pragha_tunein_get_radio_dialog (PraghaTuneinPlugin *plugin)
 {
 	GtkWidget *dialog, *parent;
 	GtkWidget *table, *entry;
-	gint result;
 	guint row = 0;
 
 	PraghaTuneinPluginPrivate *priv = plugin->priv;
@@ -233,24 +273,15 @@ pragha_tunein_get_radio_dialog (PraghaTuneinPlugin *plugin)
 	entry = gtk_entry_new ();
 	gtk_entry_set_max_length (GTK_ENTRY(entry), 255);
 	gtk_entry_set_activates_default (GTK_ENTRY(entry), TRUE);
+	priv->name_entry = entry;
 
 	pragha_hig_workarea_table_add_wide_control (table, &row, entry);
 
 	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), table);
 
-	gtk_widget_show_all(dialog);
-
-	result = gtk_dialog_run(GTK_DIALOG(dialog));
-	switch(result) {
-	case GTK_RESPONSE_ACCEPT:
-		pragha_tunein_plugin_get_radio(plugin, gtk_entry_get_text(GTK_ENTRY(entry)));
-		break;
-	case GTK_RESPONSE_CANCEL:
-		break;
-	default:
-		break;
-	}
-	gtk_widget_destroy (dialog);
+	g_signal_connect (G_OBJECT (dialog), "response",
+	                  G_CALLBACK (pragha_tunein_dialog_response), plugin);
+	gtk_widget_show_all (dialog);
 }
 
 /*
@@ -289,8 +320,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                  G_CALLBACK (pragha_gmenu_tunein_plugin_get_radio_action), plugin);
 
 	item = g_menu_item_new (_("Search radio on TuneIn"), "win.search-tunein");
-
 	pragha_menubar_append_action (priv->pragha, "pragha-plugins-placeholder", action, item);
+	g_object_unref (item);
 }
 
 static void

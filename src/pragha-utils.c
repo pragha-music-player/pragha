@@ -189,6 +189,10 @@ set_watch_cursor (GtkWidget *widget)
 
 		gdk_window_set_cursor (gtk_widget_get_window (toplevel), cursor);
 		g_object_unref (cursor);
+
+		gdk_flush();
+
+		pragha_process_gtk_events ();
 	}
 }
 
@@ -233,14 +237,14 @@ gchar* convert_length_str(gint length)
 	str = g_new0(char, 128);
 	memset(tmp, '\0', 24);
 
-	if (length > 86400) {
+	if (length >= 86400) {
 		days = length/86400;
 		length = length%86400;
 		g_sprintf(tmp, "%d %s, ", days, ngettext("day", "days", days));
 		g_strlcat(str, tmp, 24);
 	}
 
-	if (length > 3600) {
+	if (length >= 3600) {
 		hours = length/3600;
 		length = length%3600;
 		memset(tmp, '\0', 24);
@@ -248,7 +252,7 @@ gchar* convert_length_str(gint length)
 		g_strlcat(str, tmp, 24);
 	}
 
-	if (length > 60) {
+	if (length >= 60) {
 		minutes = length/60;
 		length = length%60;
 		memset(tmp, '\0', 24);
@@ -256,7 +260,7 @@ gchar* convert_length_str(gint length)
 		g_strlcat(str, tmp, 24);
 	}
 	else
-		g_strlcat(str, "00:", 4);
+		g_strlcat(str, "00:", 24);
 
 	seconds = length;
 	memset(tmp, '\0', 24);
@@ -267,6 +271,62 @@ gchar* convert_length_str(gint length)
 }
 
 /* Check if str is present in list ( containing gchar* elements in 'data' ) */
+
+gboolean
+pragha_string_list_is_present (GSList *list, const gchar *str)
+{
+	GSList *i;
+	gchar *lstr;
+	gboolean ret = FALSE;
+
+	if (!str || !list)
+		return FALSE;
+
+	for (i = list; i != NULL; i = i->next) {
+		lstr = i->data;
+		if (!g_ascii_strcasecmp(str, lstr)) {
+			ret = TRUE;
+			break;
+		}
+	}
+	return ret;
+}
+
+gboolean
+pragha_string_list_is_not_present (GSList *list, const gchar *str)
+{
+	return !pragha_string_list_is_present (list, str);
+}
+
+GSList *
+pragha_string_list_get_added (GSList *list, GSList *new_list)
+{
+	GSList *i, *ret_list = NULL;
+	gchar *lstr;
+
+	for (i = new_list; i != NULL; i = i->next) {
+		lstr = i->data;
+		if (pragha_string_list_is_not_present(list, lstr)) {
+			ret_list = g_slist_append(ret_list, g_strdup(lstr));
+		}
+	}
+	return ret_list;
+}
+
+GSList *
+pragha_string_list_get_removed (GSList *list, GSList *new_list)
+{
+	GSList *i, *ret_list = NULL;
+	gchar *lstr;
+
+	for (i = list; i != NULL; i = i->next) {
+		lstr = i->data;
+		if (pragha_string_list_is_not_present(new_list, lstr)) {
+			ret_list = g_slist_append(ret_list, g_strdup(lstr));
+		}
+	}
+	return ret_list;
+}
 
 gboolean is_present_str_list(const gchar *str, GSList *list)
 {

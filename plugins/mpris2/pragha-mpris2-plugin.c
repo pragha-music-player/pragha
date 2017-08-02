@@ -451,7 +451,7 @@ mpris_Player_OpenUri (GDBusMethodInvocation *invocation,
 		//       If there is such a convention on other players
 		path = g_filename_from_uri(uri, NULL, NULL);
 		if(path && is_playable_file(path)) {
-			mobj = new_musicobject_from_file(path);
+			mobj = new_musicobject_from_file(path, NULL);
 			if(mobj) {
 				playlist = pragha_application_get_playlist (plugin->priv->pragha);
 

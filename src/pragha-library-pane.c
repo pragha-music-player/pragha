@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2016 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -34,7 +34,7 @@
 #include <stdlib.h>
 
 #include "pragha-playback.h"
-#include "pragha-menubar.h"
+
 #include "pragha-utils.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-search-entry.h"
@@ -42,6 +42,8 @@
 #include "pragha-tags-dialog.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
+#include "pragha-database.h"
+#include "pragha-database-provider.h"
 #include "pragha-dnd.h"
 
 #ifdef G_OS_WIN32
@@ -99,7 +101,9 @@ G_DEFINE_TYPE(PraghaLibraryPane, pragha_library_pane, GTK_TYPE_BOX)
 /* Node types in library view */
 
 typedef enum {
-	NODE_CATEGORY,
+	NODE_CATEGORY_PLAYLIST,
+	NODE_CATEGORY_RADIO,
+	NODE_CATEGORY_PROVIDER,
 	NODE_FOLDER,
 	NODE_GENRE,
 	NODE_ARTIST,
@@ -117,7 +121,7 @@ enum library_columns {
 	L_NODE_DATA,
 	L_NODE_BOLD,
 	L_NODE_TYPE,
-	L_LOCATION_ID,
+	L_DATABASE_ID,
 	L_MACH,
 	L_VISIBILE,
 	N_L_COLUMNS
@@ -159,6 +163,12 @@ static void pragha_library_pane_export_playlist_action             (GtkAction *a
 static void pragha_library_pane_edit_tags_action                   (GtkAction *action, PraghaLibraryPane *library);
 static void pragha_library_pane_delete_from_hdd_action             (GtkAction *action, PraghaLibraryPane *library);
 static void pragha_library_pane_delete_from_db_action              (GtkAction *action, PraghaLibraryPane *library);
+static void pragha_library_pane_upgrade_library_action             (GtkAction *action, PraghaLibraryPane *library);
+static void pragha_library_pane_update_library_action              (GtkAction *action, PraghaLibraryPane *library);
+static void pragha_library_pane_remove_library_action             (GtkAction *action, PraghaLibraryPane *library);
+
+static gint
+get_library_icon_size (void);
 
 /*
  * Menus definitions
@@ -208,6 +218,11 @@ GtkActionEntry library_pane_context_aentries[] = {
 };
 
 gchar *library_tree_context_menu_xml = "<ui>		\
+	<popup name=\"CategoriesPopup\">			\
+	<menuitem action=\"Add to current playlist\"/>		\
+	<menuitem action=\"Replace current playlist\"/>		\
+	<menuitem action=\"Replace and play\"/>			\
+	</popup>						\
 	<popup name=\"PlaylistPopup\">				\
 	<menuitem action=\"Add to current playlist\"/>		\
 	<menuitem action=\"Replace current playlist\"/>		\
@@ -216,6 +231,23 @@ gchar *library_tree_context_menu_xml = "<ui>		\
 	<menuitem action=\"Rename\"/>				\
 	<menuitem action=\"Delete\"/>				\
 	<menuitem action=\"Export\"/>				\
+	</popup>						\
+	<popup name=\"RadioPopup\">				\
+	<menuitem action=\"Add to current playlist\"/>		\
+	<menuitem action=\"Replace current playlist\"/>		\
+	<menuitem action=\"Replace and play\"/>			\
+	<separator/>						\
+	<menuitem action=\"Rename\"/>				\
+	<menuitem action=\"Delete\"/>				\
+	</popup>						\
+	<popup name=\"ProviderPopup\">				\
+	<menuitem action=\"Add to current playlist\"/>		\
+	<menuitem action=\"Replace current playlist\"/>		\
+	<menuitem action=\"Replace and play\"/>			\
+	<separator/>						\
+	<menuitem action=\"Rescan library\"/>			\
+	<menuitem action=\"Update library\"/>			\
+	<menuitem action=\"Remove library\"/>			\
 	</popup>						\
 	<popup name=\"LibraryPopup\">				\
 	<menuitem action=\"Add to current playlist\"/>		\
@@ -226,14 +258,6 @@ gchar *library_tree_context_menu_xml = "<ui>		\
 	<separator/>						\
 	<menuitem action=\"Move to trash\"/>			\
 	<menuitem action=\"Delete from library\"/>		\
-	</popup>						\
-	<popup name=\"CategoriesPopup\">			\
-	<menuitem action=\"Add to current playlist\"/>		\
-	<menuitem action=\"Replace current playlist\"/>		\
-	<menuitem action=\"Replace and play\"/>			\
-	<separator/>						\
-	<menuitem action=\"Rescan library\"/>			\
-	<menuitem action=\"Update library\"/>			\
 	</popup>						\
 	</ui>";
 
@@ -256,11 +280,14 @@ GtkActionEntry library_tree_context_aentries[] = {
 	{"Move to trash", "user-trash", N_("Move to _trash"),
 	 "", "Move to trash", G_CALLBACK(pragha_library_pane_delete_from_hdd_action)},
 	{"Delete from library", "list-remove", N_("Delete from library"),
-	 "", "Delete from library", G_CALLBACK(pragha_library_pane_delete_from_db_action)}/*,
+	 "", "Delete from library", G_CALLBACK(pragha_library_pane_delete_from_db_action)},
 	{"Rescan library", GTK_STOCK_EXECUTE, N_("_Rescan library"),
-	 "", "Rescan library", G_CALLBACK(rescan_library_action)},
+	 "", "Rescan library", G_CALLBACK(pragha_library_pane_upgrade_library_action)},
 	{"Update library", GTK_STOCK_EXECUTE, N_("_Update library"),
-	 "", "Update library", G_CALLBACK(update_library_action)}*/
+	 "", "Update library", G_CALLBACK(pragha_library_pane_update_library_action)},
+	{"Remove library", GTK_STOCK_EXECUTE, N_("_Remove library"),
+	 "", "Remove library", G_CALLBACK(pragha_library_pane_remove_library_action)}
+
 };
 
 /*
@@ -335,7 +362,7 @@ library_store_prepend_node(GtkTreeModel *model,
 	                    L_NODE_DATA, node_data,
 	                    L_NODE_BOLD, PANGO_WEIGHT_NORMAL,
 	                    L_NODE_TYPE, node_type,
-	                    L_LOCATION_ID, location_id,
+	                    L_DATABASE_ID, location_id,
 	                    L_MACH, FALSE,
 	                    L_VISIBILE, TRUE,
 	                    -1);
@@ -375,7 +402,7 @@ add_child_node_folder(GtkTreeModel *model,
 	                    L_NODE_DATA, node_data,
 	                    L_NODE_BOLD, PANGO_WEIGHT_NORMAL,
 	                    L_NODE_TYPE, NODE_FOLDER,
-	                    L_LOCATION_ID, 0,
+	                    L_DATABASE_ID, 0,
 	                    L_MACH, FALSE,
 	                    L_VISIBILE, TRUE,
 	                    -1);
@@ -419,7 +446,7 @@ add_child_node_file(GtkTreeModel *model,
 	                    L_NODE_DATA, node_data,
 	                    L_NODE_BOLD, PANGO_WEIGHT_NORMAL,
 	                    L_NODE_TYPE, NODE_BASENAME,
-	                    L_LOCATION_ID, location_id,
+	                    L_DATABASE_ID, location_id,
 	                    L_MACH, FALSE,
 	                    L_VISIBILE, TRUE,
 	                    -1);
@@ -522,7 +549,9 @@ add_child_node_by_tags (GtkTreeModel *model,
 				node_pixbuf = clibrary->pixbuf_genre;
 				node_data = string_is_not_empty(genre) ? (gchar *)genre : _("Unknown Genre");
 				break;
-			case NODE_CATEGORY:
+			case NODE_CATEGORY_PLAYLIST:
+			case NODE_CATEGORY_RADIO:
+			case NODE_CATEGORY_PROVIDER:
 			case NODE_FOLDER:
 			case NODE_PLAYLIST:
 			case NODE_RADIO:
@@ -582,7 +611,9 @@ append_pragha_uri_string_list(GtkTreeIter *r_iter,
 	gtk_tree_model_get(model, r_iter, L_NODE_TYPE, &node_type, -1);
 
 	switch (node_type) {
-		case NODE_CATEGORY:
+		case NODE_CATEGORY_PLAYLIST:
+		case NODE_CATEGORY_RADIO:
+		case NODE_CATEGORY_PROVIDER:
 		case NODE_FOLDER:
 		case NODE_GENRE:
 		case NODE_ARTIST:
@@ -597,7 +628,7 @@ append_pragha_uri_string_list(GtkTreeIter *r_iter,
 	 		break;
 		case NODE_TRACK:
 		case NODE_BASENAME:
-			gtk_tree_model_get(model, r_iter, L_LOCATION_ID, &location_id, -1);
+			gtk_tree_model_get(model, r_iter, L_DATABASE_ID, &location_id, -1);
 			uri = g_strdup_printf("Location:/%d", location_id);
 			break;
 		case NODE_PLAYLIST:
@@ -638,7 +669,9 @@ append_uri_string_list(GtkTreeIter *r_iter,
 	gtk_tree_model_get(model, r_iter, L_NODE_TYPE, &node_type, -1);
 
 	switch (node_type) {
-		case NODE_CATEGORY:
+		case NODE_CATEGORY_PLAYLIST:
+		case NODE_CATEGORY_RADIO:
+		case NODE_CATEGORY_PROVIDER:
 		case NODE_FOLDER:
 		case NODE_GENRE:
 		case NODE_ARTIST:
@@ -653,7 +686,7 @@ append_uri_string_list(GtkTreeIter *r_iter,
 			break;
 		case NODE_TRACK:
 		case NODE_BASENAME:
-			gtk_tree_model_get(model, r_iter, L_LOCATION_ID, &location_id, -1);
+			gtk_tree_model_get(model, r_iter, L_DATABASE_ID, &location_id, -1);
 			filename = pragha_database_get_filename_from_location_id(clibrary->cdbase, location_id);
 			break;
 		case NODE_PLAYLIST:
@@ -699,7 +732,7 @@ static void get_location_ids(GtkTreePath *path,
 
 	gtk_tree_model_get(model, &r_iter, L_NODE_TYPE, &node_type, -1);
 	if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
-		gtk_tree_model_get(model, &r_iter, L_LOCATION_ID, &location_id, -1);
+		gtk_tree_model_get(model, &r_iter, L_DATABASE_ID, &location_id, -1);
 		g_array_append_val(loc_arr, location_id);
 	}
 
@@ -709,7 +742,7 @@ static void get_location_ids(GtkTreePath *path,
 		gtk_tree_model_get(model, &t_iter, L_NODE_TYPE, &node_type, -1);
 		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
 			gtk_tree_model_get(model, &t_iter,
-					   L_LOCATION_ID, &location_id, -1);
+					   L_DATABASE_ID, &location_id, -1);
 			g_array_append_val(loc_arr, location_id);
 		}
 		else {
@@ -742,11 +775,13 @@ append_library_row_to_mobj_list(PraghaDatabase *cdbase,
 	gtk_tree_model_get_iter(row_model, &r_iter, path);
 
 	gtk_tree_model_get(row_model, &r_iter, L_NODE_TYPE, &node_type, -1);
-	gtk_tree_model_get(row_model, &r_iter, L_LOCATION_ID, &location_id, -1);
+	gtk_tree_model_get(row_model, &r_iter, L_DATABASE_ID, &location_id, -1);
 	gtk_tree_model_get(row_model, &r_iter, L_NODE_DATA, &data, -1);
 
 	switch (node_type) {
-		case NODE_CATEGORY:
+		case NODE_CATEGORY_PLAYLIST:
+		case NODE_CATEGORY_RADIO:
+		case NODE_CATEGORY_PROVIDER:
 		case NODE_FOLDER:
 		case NODE_GENRE:
 		case NODE_ARTIST:
@@ -794,7 +829,7 @@ delete_row_from_db(PraghaDatabase *cdbase,
 	gtk_tree_model_get_iter(model, &r_iter, path);
 	gtk_tree_model_get(model, &r_iter, L_NODE_TYPE, &node_type, -1);
 	if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
-		gtk_tree_model_get(model, &r_iter, L_LOCATION_ID, &location_id, -1);
+		gtk_tree_model_get(model, &r_iter, L_DATABASE_ID, &location_id, -1);
 		pragha_database_forget_location(cdbase, location_id);
 	}
 
@@ -805,7 +840,7 @@ delete_row_from_db(PraghaDatabase *cdbase,
 		gtk_tree_model_get(model, &t_iter, L_NODE_TYPE, &node_type, -1);
 		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
 			gtk_tree_model_get(model, &t_iter,
-					   L_LOCATION_ID, &location_id, -1);
+					   L_DATABASE_ID, &location_id, -1);
 			pragha_database_forget_location(cdbase, location_id);
 		}
 		else {
@@ -914,7 +949,9 @@ library_tree_row_activated_cb (GtkTreeView *library_tree,
 	gtk_tree_model_get (filter_model, &iter, L_NODE_TYPE, &node_type, -1);
 
 	switch(node_type) {
-	case NODE_CATEGORY:
+	case NODE_CATEGORY_PLAYLIST:
+	case NODE_CATEGORY_RADIO:
+	case NODE_CATEGORY_PROVIDER:
 	case NODE_ARTIST:
 	case NODE_ALBUM:
 	case NODE_GENRE:
@@ -984,7 +1021,7 @@ library_tree_button_press_cb (GtkWidget *widget,
                               GdkEventButton *event,
                               PraghaLibraryPane *library)
 {
-	GtkWidget *popup_menu, *item_widget;
+	GtkWidget *popup_menu;
 	GtkTreeModel *model;
 	GtkTreePath *path;
 	GtkTreeIter iter;
@@ -996,27 +1033,36 @@ library_tree_button_press_cb (GtkWidget *widget,
 	model = gtk_tree_view_get_model (GTK_TREE_VIEW(library->library_tree));
 	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(library->library_tree));
 
-	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), (gint) event->x,(gint) event->y, &path, NULL, NULL, NULL)){
+	if (gtk_tree_view_get_path_at_pos (GTK_TREE_VIEW(widget),
+	                                   (gint) event->x,
+	                                   (gint) event->y,
+	                                   &path,
+	                                   NULL, NULL, NULL))
+	{
 		switch(event->button) {
 		case 1:
-			if (gtk_tree_selection_path_is_selected(selection, path)
-			    && !(event->state & GDK_CONTROL_MASK)
-			    && !(event->state & GDK_SHIFT_MASK)) {
+			if (gtk_tree_selection_path_is_selected(selection, path) &&
+			    !(event->state & GDK_CONTROL_MASK) &&
+			    !(event->state & GDK_SHIFT_MASK))
+			{
 				gtk_tree_selection_set_select_function(selection, &pragha_library_pane_selection_func_false, NULL, NULL);
 			}
-			else {
+			else
+			{
 				gtk_tree_selection_set_select_function(selection, &pragha_library_pane_selection_func_true, NULL, NULL);
 			}
 			break;
 		case 2:
-			if (!gtk_tree_selection_path_is_selected(selection, path)) {
+			if (!gtk_tree_selection_path_is_selected(selection, path))
+			{
 				gtk_tree_selection_unselect_all(selection);
 				gtk_tree_selection_select_path(selection, path);
 			}
 			g_signal_emit (library, signals[LIBRARY_APPEND_PLAYLIST], 0);
 			break;
 		case 3:
-			if (!(gtk_tree_selection_path_is_selected(selection, path))){
+			if (!gtk_tree_selection_path_is_selected(selection, path))
+			{
 				gtk_tree_selection_unselect_all(selection);
 				gtk_tree_selection_select_path(selection, path);
 			}
@@ -1025,42 +1071,48 @@ library_tree_button_press_cb (GtkWidget *widget,
 			gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 
 			n_select = gtk_tree_selection_count_selected_rows(selection);
-
-			if (node_type == NODE_PLAYLIST || node_type == NODE_RADIO) {
-				popup_menu = gtk_ui_manager_get_widget(library->library_tree_context_menu,
-									"/PlaylistPopup");
-
-				item_widget = gtk_ui_manager_get_widget(library->library_tree_context_menu,
-									"/PlaylistPopup/Rename");
-				gtk_widget_set_sensitive (GTK_WIDGET(item_widget),
-							  n_select == 1 && gtk_tree_path_get_depth(path) > 1);
-
-				item_widget = gtk_ui_manager_get_widget(library->library_tree_context_menu,
-									"/PlaylistPopup/Delete");
-				gtk_widget_set_sensitive (GTK_WIDGET(item_widget),
-							  gtk_tree_path_get_depth(path) > 1);
-
-				item_widget = gtk_ui_manager_get_widget(library->library_tree_context_menu,
-									"/PlaylistPopup/Export");
-				gtk_widget_set_sensitive (GTK_WIDGET(item_widget),
-							  n_select == 1 &&
-							  gtk_tree_path_get_depth(path) > 1 &&
-							  node_type == NODE_PLAYLIST);
+			if (n_select > 1)
+			{
+				popup_menu = gtk_ui_manager_get_widget (library->library_tree_context_menu,
+				                                        "/CategoriesPopup");
 			}
-			else {
-				if (gtk_tree_path_get_depth(path) > 1)
-					popup_menu = gtk_ui_manager_get_widget(library->library_tree_context_menu,
-									       "/LibraryPopup");
-				else
-					popup_menu = gtk_ui_manager_get_widget(library->library_tree_context_menu,
-									       "/CategoriesPopup");
+			else if (node_type == NODE_CATEGORY_PLAYLIST)
+			{
+				popup_menu = gtk_ui_manager_get_widget (library->library_tree_context_menu,
+				                                        "/CategoriesPopup");
+			}
+			else if (node_type == NODE_CATEGORY_RADIO)
+			{
+				popup_menu = gtk_ui_manager_get_widget (library->library_tree_context_menu,
+				                                        "/CategoriesPopup");
+			}
+			else if (node_type == NODE_CATEGORY_PROVIDER)
+			{
+				popup_menu = gtk_ui_manager_get_widget (library->library_tree_context_menu,
+				                                        "/ProviderPopup");
+			}
+			else if (node_type == NODE_PLAYLIST)
+			{
+				popup_menu = gtk_ui_manager_get_widget (library->library_tree_context_menu,
+				                                        "/PlaylistPopup");
+			}
+			else if (node_type == NODE_RADIO)
+			{
+				popup_menu = gtk_ui_manager_get_widget (library->library_tree_context_menu,
+				                                        "/RadioPopup");
+			}
+			else
+			{
+				popup_menu = gtk_ui_manager_get_widget (library->library_tree_context_menu,
+				                                        "/LibraryPopup");
 			}
 
-			gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
-				       event->button, event->time);
-	
+			gtk_menu_popup (GTK_MENU(popup_menu),
+			                NULL, NULL, NULL, NULL,
+			                event->button, event->time);
+
 			/* If more than one track is selected, don't propagate event */
-	
+
 			if (n_select > 1)
 				many_selected = TRUE;
 			else
@@ -1734,67 +1786,56 @@ library_view_append_radios(GtkTreeModel *model,
 	pragha_prepared_statement_free (statement);
 }
 
-void
-library_view_complete_folder_view(GtkTreeModel *model,
-                                  GtkTreeIter *p_iter,
-                                  PraghaLibraryPane *clibrary)
+static void
+pragha_library_view_append_provider_by_folder (PraghaLibraryPane *clibrary,
+                                               GtkTreeModel      *model,
+                                               GtkTreeIter       *p_iter,
+                                               const gchar       *provider)
 
 {
 	PraghaPreparedStatement *statement;
-	const gchar *sql = NULL, *filepath = NULL;
-	gchar *mask = NULL;
-	GtkTreeIter iter, *f_iter;
-	GSList *list = NULL, *library_dir = NULL;
+	const gchar *sql = NULL, *filepath = NULL, *filename = NULL;
+	gint provider_id = 0;
 
-	library_dir = pragha_preferences_get_library_list (clibrary->preferences);
-	for(list = library_dir ; list != NULL ; list=list->next) {
-		/*If no need to fuse folders, add headers and set p_iter */
-		if(!pragha_preferences_get_fuse_folders(clibrary->preferences)) {
-			gtk_tree_store_append(GTK_TREE_STORE(model),
-					      &iter,
-					      p_iter);
-			gtk_tree_store_set (GTK_TREE_STORE(model), &iter,
-			                    L_PIXBUF, clibrary->pixbuf_dir,
-			                    L_NODE_DATA, list->data,
-			                    L_NODE_BOLD, PANGO_WEIGHT_NORMAL,
-			                    L_NODE_TYPE, NODE_FOLDER,
-			                    L_LOCATION_ID, 0,
-			                    L_MACH, FALSE,
-			                    L_VISIBILE, TRUE,
-			                    -1);
-			f_iter = &iter;
+	sql = "SELECT name, id FROM LOCATION WHERE id IN (SELECT location FROM TRACK WHERE PROVIDER = ?) ORDER BY name DESC";
+
+	statement = pragha_database_create_statement (clibrary->cdbase, sql);
+
+	provider_id = pragha_database_find_provider (clibrary->cdbase, provider);
+	pragha_prepared_statement_bind_int (statement, 1, provider_id);
+
+	while (pragha_prepared_statement_step (statement)) {
+		filepath = pragha_prepared_statement_get_string(statement, 0);
+
+		/* FIXME: Handle uris like cdda:// */
+		filename = g_strrstr (filepath, "://");
+		if (filename) {
+			filename += strlen("://");
 		}
 		else {
-			f_iter = p_iter;
+			filename = filepath + strlen(provider) + 1;
 		}
 
-		sql = "SELECT name, id FROM LOCATION WHERE name LIKE ? ORDER BY name DESC";
-		statement = pragha_database_create_statement (clibrary->cdbase, sql);
-		mask = g_strconcat (list->data, "%", NULL);
-		pragha_prepared_statement_bind_string (statement, 1, mask);
-		while (pragha_prepared_statement_step (statement)) {
-			filepath = pragha_prepared_statement_get_string(statement, 0) + strlen(list->data) + 1;
-			add_folder_file(model,
-			                filepath,
-			                pragha_prepared_statement_get_int(statement, 1),
-			                f_iter,
-			                clibrary);
-
-			pragha_process_gtk_events ();
-		}
-		pragha_prepared_statement_free (statement);
-		g_free(mask);
+		add_folder_file(model,
+		                filename,
+		                pragha_prepared_statement_get_int(statement, 1),
+		                p_iter,
+		                clibrary);
+		pragha_process_gtk_events ();
 	}
-	free_str_list(library_dir);
+
+	pragha_prepared_statement_free (statement);
 }
 
-void
-library_view_complete_tags_view(GtkTreeModel *model,
-                                GtkTreeIter *p_iter,
-                                PraghaLibraryPane *clibrary)
+static void
+pragha_library_view_append_provider_by_tags (PraghaLibraryPane *clibrary,
+                                             GtkTreeModel      *model,
+                                             GtkTreeIter       *p_iter,
+                                             const gchar       *provider)
 {
 	PraghaPreparedStatement *statement;
 	gchar *order_str = NULL, *sql = NULL;
+	gint provider_id = 0;
 
 	/* Get order needed to sqlite query. */
 	switch(pragha_preferences_get_library_style(clibrary->preferences)) {
@@ -1840,10 +1881,13 @@ library_view_complete_tags_view(GtkTreeModel *model,
 	/* Common query for all tag based library views */
 	sql = g_strdup_printf("SELECT TRACK.title, ARTIST.name, YEAR.year, ALBUM.name, GENRE.name, LOCATION.name, LOCATION.id "
 	                        "FROM TRACK, ARTIST, YEAR, ALBUM, GENRE, LOCATION "
-	                        "WHERE ARTIST.id = TRACK.artist AND TRACK.year = YEAR.id AND ALBUM.id = TRACK.album AND GENRE.id = TRACK.genre AND LOCATION.id = TRACK.location "
+	                        "WHERE PROVIDER = ? AND ARTIST.id = TRACK.artist AND TRACK.year = YEAR.id AND ALBUM.id = TRACK.album AND GENRE.id = TRACK.genre AND LOCATION.id = TRACK.location "
 	                        "ORDER BY %s;", order_str);
 
 	statement = pragha_database_create_statement (clibrary->cdbase, sql);
+	provider_id = pragha_database_find_provider (clibrary->cdbase, provider);
+	pragha_prepared_statement_bind_int (statement, 1, provider_id);
+
 	while (pragha_prepared_statement_step (statement)) {
 		add_child_node_by_tags(model,
 		                       p_iter,
@@ -1868,8 +1912,12 @@ library_view_complete_tags_view(GtkTreeModel *model,
 void
 library_pane_view_reload(PraghaLibraryPane *clibrary)
 {
+	PraghaDatabaseProvider *provider;
+	GdkPixbuf *pixbuf = NULL;
 	GtkTreeModel *model, *filter_model;
 	GtkTreeIter iter;
+	GSList *provider_list, *l;
+	gchar *icon_name, *friendly_name = NULL;
 
 	clibrary->view_change = TRUE;
 
@@ -1894,7 +1942,7 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 			   L_PIXBUF, clibrary->pixbuf_dir,
 			   L_NODE_DATA, _("Playlists"),
 			   L_NODE_BOLD, PANGO_WEIGHT_BOLD,
-			   L_NODE_TYPE, NODE_CATEGORY,
+			   L_NODE_TYPE, NODE_CATEGORY_PLAYLIST,
 			   L_MACH, FALSE,
 			   L_VISIBILE, TRUE,
 			   -1);
@@ -1910,7 +1958,7 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 			   L_PIXBUF, clibrary->pixbuf_dir,
 			   L_NODE_DATA, _("Radios"),
 			   L_NODE_BOLD, PANGO_WEIGHT_BOLD,
-			   L_NODE_TYPE, NODE_CATEGORY,
+			   L_NODE_TYPE, NODE_CATEGORY_RADIO,
 			   L_MACH, FALSE,
 			   L_VISIBILE, TRUE,
 			   -1);
@@ -1919,23 +1967,52 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 
 	/* Add library header */
 
-	gtk_tree_store_append(GTK_TREE_STORE(model),
-			      &iter,
-			      NULL);
-	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-			   L_PIXBUF, clibrary->pixbuf_dir,
-			   L_NODE_DATA, _("Library"),
-			   L_NODE_BOLD, PANGO_WEIGHT_BOLD,
-			   L_NODE_TYPE, NODE_CATEGORY,
-			   L_MACH, FALSE,
-			   L_VISIBILE, TRUE,
-			   -1);
+	provider = pragha_database_provider_get ();
+	provider_list = pragha_provider_get_visible_list (provider, TRUE);
 
-	if (pragha_preferences_get_library_style(clibrary->preferences) == FOLDERS) {
-		library_view_complete_folder_view(model, &iter, clibrary);
-	}
-	else {
-		library_view_complete_tags_view(model, &iter, clibrary);
+	for (l = provider_list; l != NULL; l = l->next) {
+		gtk_tree_store_append (GTK_TREE_STORE(model),
+		                       &iter,
+		                       NULL);
+
+		icon_name = pragha_database_provider_get_icon_name (provider, l->data);
+
+		pixbuf  = gtk_icon_theme_load_icon (gtk_icon_theme_get_default (),
+		                                    icon_name,
+		                                    get_library_icon_size(), GTK_ICON_LOOKUP_FORCE_SIZE,
+		                                    NULL);
+
+		friendly_name = pragha_database_provider_get_friendly_name (provider, l->data);
+
+		gtk_tree_store_set (GTK_TREE_STORE(model), &iter,
+		                    L_PIXBUF, pixbuf ? pixbuf : clibrary->pixbuf_dir,
+		                    L_NODE_DATA, friendly_name,
+		                    L_NODE_BOLD, PANGO_WEIGHT_BOLD,
+		                    L_NODE_TYPE, NODE_CATEGORY_PROVIDER,
+		                    L_DATABASE_ID, pragha_database_find_provider (clibrary->cdbase, l->data),
+		                    L_MACH, FALSE,
+		                    L_VISIBILE, TRUE,
+		                    -1);
+
+		if (pixbuf) {
+			g_object_unref (pixbuf);
+			pixbuf = NULL;
+		}
+		if (icon_name) {
+			g_free (icon_name);
+			icon_name = NULL;
+		}
+		if (friendly_name) {
+			g_free (friendly_name);
+			friendly_name = NULL;
+		}
+
+		if (pragha_preferences_get_library_style(clibrary->preferences) == FOLDERS) {
+			pragha_library_view_append_provider_by_folder (clibrary, model, &iter, l->data);
+		}
+		else {
+			pragha_library_view_append_provider_by_tags (clibrary, model, &iter, l->data);
+		}
 	}
 
 	/* Sensitive, set model and filter */
@@ -1953,6 +2030,9 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 	remove_watch_cursor (GTK_WIDGET(clibrary));
 
 	clibrary->view_change = FALSE;
+
+	g_slist_free_full (provider_list, g_free);
+	g_object_unref (provider);
 }
 
 static void
@@ -2008,7 +2088,7 @@ update_library_playlist_changes (PraghaDatabase *database,
 }
 
 static void
-update_library_tracks_changes(PraghaDatabase *database, PraghaLibraryPane *library)
+update_library_tracks_changes(PraghaDatabaseProvider *provider, PraghaLibraryPane *library)
 {
 	/*
 	 * Rework to olny update library tree!!!.
@@ -2403,7 +2483,7 @@ pragha_library_pane_edit_tags_action (GtkAction *action, PraghaLibraryPane *libr
 
 		if (node_type == NODE_TRACK || node_type == NODE_BASENAME) {
 			gtk_tree_model_get(model, &iter,
-					   L_LOCATION_ID, &location_id, -1);
+					   L_DATABASE_ID, &location_id, -1);
 
 			omobj = new_musicobject_from_db(library->cdbase, location_id);
 		}
@@ -2461,6 +2541,7 @@ exit:
 static void
 pragha_library_pane_delete_from_hdd_action (GtkAction *action, PraghaLibraryPane *library)
 {
+	PraghaDatabaseProvider *provider;
 	GtkWidget *dialog;
 	GtkWidget *toggle_unlink;
 	GtkTreeModel *model;
@@ -2506,7 +2587,10 @@ pragha_library_pane_delete_from_hdd_action (GtkAction *action, PraghaLibraryPane
 			g_array_free(loc_arr, TRUE);
 
 			pragha_database_flush_stale_entries (library->cdbase);
-			pragha_database_change_tracks_done(library->cdbase);
+
+			provider = pragha_database_provider_get ();
+			pragha_provider_update_done (provider);
+			g_object_unref (provider);
 		}
 
 		g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
@@ -2516,6 +2600,7 @@ pragha_library_pane_delete_from_hdd_action (GtkAction *action, PraghaLibraryPane
 static void
 pragha_library_pane_delete_from_db_action (GtkAction *action, PraghaLibraryPane *library)
 {
+	PraghaDatabaseProvider *provider;
 	GtkWidget *dialog;
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
@@ -2553,10 +2638,112 @@ pragha_library_pane_delete_from_db_action (GtkAction *action, PraghaLibraryPane 
 			pragha_database_commit_transaction (library->cdbase);
 
 			pragha_database_flush_stale_entries (library->cdbase);
-			pragha_database_change_tracks_done(library->cdbase);
+
+			provider = pragha_database_provider_get ();
+			pragha_provider_update_done (provider);
+			g_object_unref (provider);
 		}
 
 		g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
+	}
+}
+
+static void
+pragha_library_pane_upgrade_library_action (GtkAction         *action,
+                                            PraghaLibraryPane *library)
+{
+	PraghaDatabaseProvider *provider;
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	GList *list;
+	LibraryNodeType node_type = 0;
+	gint provider_id = 0;
+
+	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(library->library_tree));
+	list = gtk_tree_selection_get_selected_rows (selection, &model);
+
+	if (list != NULL)
+	{
+		path = list->data;
+		gtk_tree_model_get_iter (model, &iter, path);
+		gtk_tree_model_get (model, &iter, L_NODE_TYPE, &node_type, -1);
+		if (node_type == NODE_CATEGORY_PROVIDER)
+			gtk_tree_model_get (model, &iter, L_DATABASE_ID, &provider_id, -1);
+	}
+
+	if (provider_id > 0)
+	{
+		provider = pragha_database_provider_get ();
+		pragha_provider_want_upgrade (provider, provider_id);
+		g_object_unref (provider);
+	}
+}
+
+static void
+pragha_library_pane_update_library_action (GtkAction         *action,
+                                           PraghaLibraryPane *library)
+{
+	PraghaDatabaseProvider *provider;
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	GList *list;
+	LibraryNodeType node_type = 0;
+	gint provider_id = 0;
+
+	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(library->library_tree));
+	list = gtk_tree_selection_get_selected_rows (selection, &model);
+
+	if (list != NULL)
+	{
+		path = list->data;
+		gtk_tree_model_get_iter (model, &iter, path);
+		gtk_tree_model_get (model, &iter, L_NODE_TYPE, &node_type, -1);
+		if (node_type == NODE_CATEGORY_PROVIDER)
+			gtk_tree_model_get (model, &iter, L_DATABASE_ID, &provider_id, -1);
+	}
+
+	if (provider_id > 0)
+	{
+		provider = pragha_database_provider_get ();
+		pragha_provider_want_update (provider, provider_id);
+		g_object_unref (provider);
+	}
+}
+
+static void
+pragha_library_pane_remove_library_action (GtkAction         *action,
+                                           PraghaLibraryPane *library)
+{
+	PraghaDatabaseProvider *provider;
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	GList *list;
+	LibraryNodeType node_type = 0;
+	gint provider_id = 0;
+
+	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(library->library_tree));
+	list = gtk_tree_selection_get_selected_rows (selection, &model);
+
+	if (list != NULL)
+	{
+		path = list->data;
+		gtk_tree_model_get_iter (model, &iter, path);
+		gtk_tree_model_get (model, &iter, L_NODE_TYPE, &node_type, -1);
+		if (node_type == NODE_CATEGORY_PROVIDER)
+			gtk_tree_model_get (model, &iter, L_DATABASE_ID, &provider_id, -1);
+	}
+
+	if (provider_id > 0)
+	{
+		provider = pragha_database_provider_get ();
+		pragha_provider_want_remove (provider, provider_id);
+		g_object_unref (provider);
 	}
 }
 
@@ -2657,12 +2844,19 @@ pragha_library_pane_tree_new(PraghaLibraryPane *clibrary)
 
 	library_filter_tree = gtk_tree_model_filter_new(GTK_TREE_MODEL(clibrary->library_store), NULL);
 	gtk_tree_model_filter_set_visible_column(GTK_TREE_MODEL_FILTER(library_filter_tree),
-						 L_VISIBILE);
+	                                         L_VISIBILE);
+
 	/* Create the tree view */
 
 	library_tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(library_filter_tree));
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(library_tree), FALSE);
 	gtk_tree_view_set_show_expanders(GTK_TREE_VIEW(library_tree), TRUE);
+	gtk_tree_view_set_fixed_height_mode (GTK_TREE_VIEW(library_tree), TRUE);
+
+	/* Set sidebar style */
+
+	gtk_style_context_add_class (gtk_widget_get_style_context (GTK_WIDGET(library_tree)),
+	                             GTK_STYLE_CLASS_SIDEBAR);
 
 	/* Selection mode is multiple */
 
@@ -2672,6 +2866,7 @@ pragha_library_pane_tree_new(PraghaLibraryPane *clibrary)
 	/* Create column and cell renderers */
 
 	column = gtk_tree_view_column_new();
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
 
 	renderer = gtk_cell_renderer_pixbuf_new();
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
@@ -2723,7 +2918,6 @@ pragha_library_pane_create_widget (PraghaLibraryPane *library)
 	                                GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(library_tree_scroll),
 	                                     GTK_SHADOW_IN);
-	gtk_container_set_border_width (GTK_CONTAINER(library_tree_scroll), 2);
 
 	/* Package all */
 
@@ -2856,7 +3050,10 @@ pragha_library_pane_get_pane_context_menu(PraghaLibraryPane *clibrary)
 static void
 pragha_library_pane_init (PraghaLibraryPane *library)
 {
+	PraghaDatabaseProvider *provider;
+
 	gtk_orientable_set_orientation (GTK_ORIENTABLE (library), GTK_ORIENTATION_VERTICAL);
+	g_object_set (G_OBJECT(library), "spacing", 2, NULL);
 
 	/* Get usefuls instances */
 
@@ -2877,9 +3074,6 @@ pragha_library_pane_init (PraghaLibraryPane *library)
 	/* Create main widget */
 
 	pragha_library_pane_create_widget (library);
-
-	gtk_style_context_add_class (gtk_widget_get_style_context (GTK_WIDGET(library)),
-	                             GTK_STYLE_CLASS_SIDEBAR);
 
 	/* Create context menus */
 
@@ -2915,11 +3109,14 @@ pragha_library_pane_init (PraghaLibraryPane *library)
 
 	g_signal_connect (library->cdbase, "PlaylistsChanged",
 	                  G_CALLBACK (update_library_playlist_changes), library);
-	g_signal_connect (library->cdbase, "TracksChanged",
-	                  G_CALLBACK (update_library_tracks_changes), library);
 
 	g_signal_connect (library->preferences, "notify::library-style",
 	                  G_CALLBACK (library_pane_change_style), library);
+
+	provider = pragha_database_provider_get ();
+	g_signal_connect (provider, "update-done",
+	                  G_CALLBACK (update_library_tracks_changes), library);
+	g_object_unref (provider);
 
 	gtk_widget_show_all (GTK_WIDGET(library));
 }

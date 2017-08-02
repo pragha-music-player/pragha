@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2017 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -447,24 +447,27 @@ prepend_song_with_artist_and_title_to_mobj_list (PraghaLastfmPlugin *plugin,
 	playlist = pragha_application_get_playlist (priv->pragha);
 
 	if (pragha_mobj_list_already_has_title_of_artist (list, title, artist) ||
-	   pragha_playlist_already_has_title_of_artist (playlist, title, artist))
+	    pragha_playlist_already_has_title_of_artist (playlist, title, artist))
 		return list;
 
 	cdbase = pragha_application_get_database (priv->pragha);
 
-	const gchar *sql = "SELECT TRACK.title, ARTIST.name, LOCATION.id "
-				"FROM TRACK, ARTIST, LOCATION "
-				"WHERE ARTIST.id = TRACK.artist AND LOCATION.id = TRACK.location "
-				"AND TRACK.title = ? COLLATE NOCASE "
-				"AND ARTIST.name = ? COLLATE NOCASE "
-				"ORDER BY RANDOM() LIMIT 1;";
+	const gchar *sql =
+		"SELECT LOCATION.id "
+		"FROM TRACK, ARTIST, PROVIDER, LOCATION "
+		"WHERE ARTIST.id = TRACK.artist "
+		"AND LOCATION.id = TRACK.location "
+		"AND TRACK.provider = PROVIDER.id AND PROVIDER.visible <> 0 "
+		"AND TRACK.title = ? COLLATE NOCASE "
+		"AND ARTIST.name = ? COLLATE NOCASE "
+		"ORDER BY RANDOM() LIMIT 1;";
 
 	PraghaPreparedStatement *statement = pragha_database_create_statement (cdbase, sql);
 	pragha_prepared_statement_bind_string (statement, 1, title);
 	pragha_prepared_statement_bind_string (statement, 2, artist);
 
 	if (pragha_prepared_statement_step (statement)) {
-		location_id = pragha_prepared_statement_get_int (statement, 2);
+		location_id = pragha_prepared_statement_get_int (statement, 0);
 		mobj = new_musicobject_from_db (cdbase, location_id);
 		list = g_list_prepend (list, mobj);
 	}
@@ -473,6 +476,7 @@ prepend_song_with_artist_and_title_to_mobj_list (PraghaLastfmPlugin *plugin,
 
 	return list;
 }
+
 
 /* Set correction basedm on lastfm now playing segestion.. */
 
@@ -902,7 +906,7 @@ lastfm_import_xspf_response (GtkDialog          *dialog,
 
 	GFile *file;
 	gsize size;
-	
+
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	if (response != GTK_RESPONSE_ACCEPT)
@@ -1813,7 +1817,6 @@ pragha_lastfm_plugin_append_setting (PraghaLastfmPlugin *plugin)
 	lastfm_pass = gtk_entry_new ();
 	gtk_entry_set_max_length (GTK_ENTRY(lastfm_pass), LASTFM_PASS_LEN);
 	gtk_entry_set_visibility (GTK_ENTRY(lastfm_pass), FALSE);
-	gtk_entry_set_invisible_char (GTK_ENTRY(lastfm_pass), '*');
 	gtk_entry_set_activates_default (GTK_ENTRY(lastfm_pass), TRUE);
 
 	pragha_hig_workarea_table_add_row (table, &row, lastfm_plabel, lastfm_pass);
@@ -1929,7 +1932,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	preferences = pragha_application_get_preferences (priv->pragha);
 	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "lastfm");
-	if (!pragha_plugins_is_shutdown(pragha_application_get_plugins_engine(priv->pragha))) {
+	if (!pragha_plugins_engine_is_shutdown(pragha_application_get_plugins_engine(priv->pragha))) {
 		pragha_preferences_remove_group (preferences, plugin_group);
 	}
 	g_free (plugin_group);

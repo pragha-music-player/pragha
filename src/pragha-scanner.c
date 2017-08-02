@@ -1,17 +1,17 @@
 /*************************************************************************/
-/* Copyright (C) 2013 matias <mati86dl@gmail.com>			 */
-/* 									 */
-/* This program is free software: you can redistribute it and/or modify	 */
-/* it under the terms of the GNU General Public License as published by	 */
-/* the Free Software Foundation, either version 3 of the License, or	 */
-/* (at your option) any later version.					 */
-/* 									 */
-/* This program is distributed in the hope that it will be useful,	 */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	 */
-/* GNU General Public License for more details.				 */
-/* 									 */
-/* You should have received a copy of the GNU General Public License	 */
+/* Copyright (C) 2013-2017 matias <mati86dl@gmail.com>                   */
+/*                                                                       */
+/* This program is free software: you can redistribute it and/or modify  */
+/* it under the terms of the GNU General Public License as published by  */
+/* the Free Software Foundation, either version 3 of the License, or     */
+/* (at your option) any later version.                                   */
+/*                                                                       */
+/* This program is distributed in the hope that it will be useful,       */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
+/* GNU General Public License for more details.                          */
+/*                                                                       */
+/* You should have received a copy of the GNU General Public License     */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
@@ -35,17 +35,21 @@
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-simple-async.h"
+#include "pragha-database-provider.h"
+
 #include "pragha-statusbar.h"
+#include "pragha-background-task-widget.h"
 
 struct _PraghaScanner {
 	/* Widgets */
-	GtkWidget         *hbox;
-	GtkWidget         *progress_bar;
+	PraghaBackgroundTaskWidget *task_widget;
+
 	/* Cache */
 	GHashTable        *tracks_table;
 	GSList            *folder_list;
 	GSList            *folder_scanned;
 	GSList            *playlists;
+	gchar             *curr_provider;
 
 	GTimeVal          last_update;
 	/* Threads */
@@ -88,15 +92,15 @@ pragha_scanner_update_progress(gpointer user_data)
 
 	if(no_files > 0) {
 		fraction = (gdouble)files_scanned / (gdouble)no_files;
-		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(scanner->progress_bar), fraction);
+		pragha_background_task_widget_set_job_progress (scanner->task_widget, fraction*100);
 
 		data = g_strdup_printf(_("%i files analyzed of %i detected"), files_scanned, no_files);
-		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(scanner->progress_bar), data);
+		pragha_background_task_widget_set_description (scanner->task_widget, data);
 		g_free(data);
 	}
 	else {
-		gtk_progress_bar_pulse(GTK_PROGRESS_BAR(scanner->progress_bar));
-		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(scanner->progress_bar), _("Searching files to analyze"));
+		pragha_background_task_widget_set_job_progress (scanner->task_widget, 0);
+		pragha_background_task_widget_set_description (scanner->task_widget, _("Searching files to analyze"));
 	}
 
 	return TRUE;
@@ -222,10 +226,12 @@ pragha_scanner_finished_dialog_delete (GtkDialog *dialog, GdkEvent  *event, gpoi
 static gboolean
 pragha_scanner_worker_finished (gpointer data)
 {
-	GtkWidget *msg_dialog;
-	gchar *last_scan_time = NULL;
+	PraghaStatusbar *statusbar;
 	PraghaPreferences *preferences;
 	PraghaDatabase *database;
+	PraghaDatabaseProvider *provider;
+	GtkWidget *msg_dialog;
+	gchar *last_scan_time = NULL;
 	GSList *list;
 
 	PraghaScanner *scanner = data;
@@ -235,14 +241,16 @@ pragha_scanner_worker_finished (gpointer data)
 	g_source_remove(scanner->update_timeout);
 
 	/* Ensure that the other thread has finished */
+
 	g_thread_join (scanner->no_files_thread);
 
 	/* If not cancelled, update database and show a dialog */
-	if(!g_cancellable_is_cancelled (scanner->cancellable)) {
-		/* Hide the scanner and show the dialog */
 
-		gtk_widget_hide(scanner->hbox);
-		msg_dialog = gtk_message_dialog_new(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(scanner->hbox))),
+	if(!g_cancellable_is_cancelled (scanner->cancellable))
+	{
+		/* Show the dialog and remove the scanner widget */
+
+		msg_dialog = gtk_message_dialog_new(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(scanner->task_widget))),
 		                                    GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 		                                    GTK_MESSAGE_INFO,
 		                                    GTK_BUTTONS_OK,
@@ -259,20 +267,34 @@ pragha_scanner_worker_finished (gpointer data)
 
 		gtk_widget_show_all(msg_dialog);
 
+		statusbar = pragha_statusbar_get ();
+		pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(scanner->task_widget));
+		g_object_unref(G_OBJECT(statusbar));
+
 		/* Save new database and update the library view */
 
 		set_watch_cursor(msg_dialog);
-		set_watch_cursor(scanner->hbox);
 
 		database = pragha_database_get();
+		provider = pragha_database_provider_get ();
 
 		pragha_database_begin_transaction (database);
 
-		pragha_database_flush (database);
+		/* Remove songs of local providers */
+
+		for (list = scanner->folder_list; list != NULL; list = list->next)
+			pragha_provider_forget_songs (provider, list->data);
+
+		/* Append new songs */
+
 		g_hash_table_foreach (scanner->tracks_table,
 		                      pragha_scanner_add_track_db,
 		                      database);
 
+		/* Set local providers as visible */
+
+		for (list = scanner->folder_list; list != NULL; list = list->next)
+			pragha_provider_set_visible (provider, list->data, TRUE);
 
 		/* Import playlist detected. */
 
@@ -281,10 +303,11 @@ pragha_scanner_worker_finished (gpointer data)
 
 		pragha_database_commit_transaction (database);
 
-		pragha_database_change_tracks_done (database);
+		pragha_provider_update_done (provider);
+
+		g_object_unref (provider);
 		g_object_unref(database);
 
-		remove_watch_cursor(scanner->hbox);
 		remove_watch_cursor(msg_dialog);
 
 		/* Save finished time and folders scanned. */
@@ -298,11 +321,6 @@ pragha_scanner_worker_finished (gpointer data)
 			                     last_scan_time);
 		g_free(last_scan_time);
 
-		pragha_preferences_set_filename_list(preferences,
-			                             GROUP_LIBRARY,
-			                             KEY_LIBRARY_SCANNED,
-			                             scanner->folder_list);
-
 		pragha_preferences_set_lock_library (preferences, FALSE);
 
 		g_object_unref(G_OBJECT(preferences));
@@ -312,11 +330,15 @@ pragha_scanner_worker_finished (gpointer data)
 		pragha_preferences_set_lock_library (preferences, FALSE);
 		g_object_unref(G_OBJECT(preferences));
 
-		gtk_widget_hide(scanner->hbox);
+		statusbar = pragha_statusbar_get ();
+		pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(scanner->task_widget));
+		g_object_unref(G_OBJECT(statusbar));
 	}
 
-	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(scanner->progress_bar), NULL);
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(scanner->progress_bar), 0.0);
+	/* Reset background task widget */
+
+	pragha_background_task_widget_set_job_progress (scanner->task_widget, 0);
+	pragha_background_task_widget_set_description (scanner->task_widget, _("Searching files to analyze"));
 
 	/* Clean memory */
 
@@ -373,7 +395,7 @@ pragha_scanner_scan_handler(PraghaScanner *scanner, const gchar *dir_name)
 			file_type = pragha_file_get_media_type (ab_file);
 			switch (file_type) {
 				case MEDIA_TYPE_AUDIO:
-					mobj = new_musicobject_from_file(ab_file);
+					mobj = new_musicobject_from_file(ab_file, scanner->curr_provider);
 					if (G_LIKELY(mobj))
 						 g_hash_table_insert(scanner->tracks_table,
 							                 g_strdup(pragha_musicobject_get_file(mobj)),
@@ -411,6 +433,10 @@ pragha_scanner_scan_worker(gpointer data)
 	for(list = scanner->folder_list ; list != NULL; list = list->next) {
 		if(g_cancellable_is_cancelled (scanner->cancellable))
 			break;
+
+		if (scanner->curr_provider)
+			g_free (scanner->curr_provider);
+		scanner->curr_provider = g_strdup (list->data);
 
 		pragha_scanner_scan_handler(scanner, list->data);
 	}
@@ -453,7 +479,7 @@ pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 			mobj = g_hash_table_lookup(scanner->tracks_table,
 			                           ab_file);
 			if(!mobj) {
-				mobj = new_musicobject_from_file(ab_file);
+				mobj = new_musicobject_from_file(ab_file, scanner->curr_provider);
 				if (G_LIKELY(mobj))
 					 g_hash_table_insert(scanner->tracks_table,
 					                     g_strdup(pragha_musicobject_get_file(mobj)),
@@ -463,7 +489,7 @@ pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 			else {
 				if ((g_stat(ab_file, &sbuf) == 0) &&
 				    (sbuf.st_mtime > scanner->last_update.tv_sec)) {
-					mobj = new_musicobject_from_file(ab_file);
+					mobj = new_musicobject_from_file(ab_file, scanner->curr_provider);
 					if (G_LIKELY(mobj)) {
 						g_hash_table_replace(scanner->tracks_table,
 						                     g_strdup(pragha_musicobject_get_file(mobj)),
@@ -512,8 +538,12 @@ pragha_scanner_update_worker(gpointer data)
 		if(g_cancellable_is_cancelled (scanner->cancellable))
 			break;
 
-		if(is_present_str_list(list->data, scanner->folder_scanned))
+		if(is_present_str_list(list->data, scanner->folder_scanned)) {
+			if (scanner->curr_provider)
+				g_free (scanner->curr_provider);
+			scanner->curr_provider = g_strdup (list->data);
 			pragha_scanner_update_handler(scanner, list->data);
+		}
 	}
 
 	/* Then add news folder in library */
@@ -521,8 +551,12 @@ pragha_scanner_update_worker(gpointer data)
 		if(g_cancellable_is_cancelled (scanner->cancellable))
 			break;
 
-		if(!is_present_str_list(list->data, scanner->folder_scanned))
+		if(!is_present_str_list(list->data, scanner->folder_scanned)) {
+			if (scanner->curr_provider)
+				g_free (scanner->curr_provider);
+			scanner->curr_provider = g_strdup (list->data);
 			pragha_scanner_scan_handler(scanner, list->data);
+		}
 	}
 
 	return scanner;
@@ -531,11 +565,13 @@ pragha_scanner_update_worker(gpointer data)
 void
 pragha_scanner_update_library(PraghaScanner *scanner)
 {
+	PraghaStatusbar *statusbar;
 	PraghaPreferences *preferences;
 	PraghaDatabase *database;
+	PraghaDatabaseProvider *provider;
 	PraghaPreparedStatement *statement;
 	PraghaMusicobject *mobj = NULL;
-	gchar *mask = NULL, *last_scan_time = NULL;
+	gchar *last_scan_time = NULL;
 	const gchar *sql = NULL;
 	guint location_id;
 	GSList *list;
@@ -557,34 +593,37 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 			g_warning("Unable to convert last rescan time");
 		g_free(last_scan_time);
 	}
-
-	scanner->folder_list =
-		pragha_preferences_get_filename_list(preferences,
-		                                     GROUP_LIBRARY,
-		                                     KEY_LIBRARY_DIR);
-	scanner->folder_scanned =
-		pragha_preferences_get_filename_list(preferences,
-		                                     GROUP_LIBRARY,
-		                                     KEY_LIBRARY_SCANNED);
 	g_object_unref(G_OBJECT(preferences));
+
+	provider = pragha_database_provider_get ();
+	scanner->folder_list = pragha_database_provider_get_list_by_type (provider, "local");
+	scanner->folder_scanned = pragha_provider_get_handled_list_by_type (provider, "local");
+	g_object_unref (provider);
 
 	/* Update the gui */
 
-	scanner->update_timeout = g_timeout_add_seconds(1, (GSourceFunc)pragha_scanner_update_progress, scanner);
-
+	scanner->update_timeout =
+		g_timeout_add_seconds(1, (GSourceFunc)pragha_scanner_update_progress, scanner);
 
 	pragha_preferences_set_show_status_bar (preferences, TRUE);
-	gtk_widget_show_all(scanner->hbox);
+
+	statusbar = pragha_statusbar_get ();
+	pragha_statusbar_add_task_widget (statusbar, GTK_WIDGET(scanner->task_widget));
+	g_object_unref(G_OBJECT(statusbar));
 
 	/* Append the files from database that no changed. */
 
 	database = pragha_database_get();
-	for(list = scanner->folder_scanned ; list != NULL; list = list->next) {
-		if(is_present_str_list(list->data, scanner->folder_list)) {
-			sql = "SELECT id FROM LOCATION WHERE name LIKE ?";
+	for (list = scanner->folder_scanned; list != NULL; list = list->next)
+	{
+		if (pragha_string_list_is_present (scanner->folder_list, list->data))
+		{
+			sql = "SELECT location FROM TRACK WHERE provider = ?";
 			statement = pragha_database_create_statement (database, sql);
-			mask = g_strconcat (list->data, "%", NULL);
-			pragha_prepared_statement_bind_string (statement, 1, mask);
+
+			pragha_prepared_statement_bind_int (statement, 1,
+				pragha_database_find_provider (database, list->data));
+
 			while (pragha_prepared_statement_step (statement)) {
 				location_id = pragha_prepared_statement_get_int (statement, 0);
 				mobj = new_musicobject_from_db(database, location_id);
@@ -597,7 +636,6 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 				pragha_process_gtk_events ();
 			}
 			pragha_prepared_statement_free (statement);
-			g_free(mask);
 		}
 	}
 	g_object_unref(database);
@@ -614,7 +652,9 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 void
 pragha_scanner_scan_library(PraghaScanner *scanner)
 {
+	PraghaStatusbar *statusbar;
 	PraghaPreferences *preferences;
+	PraghaDatabaseProvider *provider;
 	gchar *last_scan_time = NULL;
 
 	if(scanner->update_timeout)
@@ -633,23 +673,22 @@ pragha_scanner_scan_library(PraghaScanner *scanner)
 			g_warning("Unable to convert last rescan time");
 		g_free(last_scan_time);
 	}
-
-	scanner->folder_list =
-		pragha_preferences_get_filename_list(preferences,
-		                                     GROUP_LIBRARY,
-		                                     KEY_LIBRARY_DIR);
-	scanner->folder_scanned =
-		pragha_preferences_get_filename_list(preferences,
-		                                     GROUP_LIBRARY,
-		                                     KEY_LIBRARY_SCANNED);
 	g_object_unref(G_OBJECT(preferences));
+
+	provider = pragha_database_provider_get ();
+	scanner->folder_list = pragha_database_provider_get_list_by_type (provider, "local");
+	scanner->folder_scanned = pragha_provider_get_handled_list_by_type (provider, "local");
+	g_object_unref (provider);
 
 	/* Update the gui */
 
 	scanner->update_timeout = g_timeout_add_seconds(1, (GSourceFunc)pragha_scanner_update_progress, scanner);
 
 	pragha_preferences_set_show_status_bar (preferences, TRUE);
-	gtk_widget_show_all(scanner->hbox);
+
+	statusbar = pragha_statusbar_get ();
+	pragha_statusbar_add_task_widget (statusbar, GTK_WIDGET(scanner->task_widget));
+	g_object_unref(G_OBJECT(statusbar));
 
 	/* Launch threads */
 
@@ -679,48 +718,28 @@ pragha_scanner_free(PraghaScanner *scanner)
 	g_slice_free (PraghaScanner, scanner);
 }
 
-static void
-scanner_cancel_click_handler(GtkButton *button,
-                             PraghaScanner *scanner)
-{
-	g_cancellable_cancel (scanner->cancellable);
-}
-
 PraghaScanner *
 pragha_scanner_new()
 {
 	PraghaScanner *scanner;
-	PraghaStatusbar *statusbar;
-	GtkWidget *hbox, *progress_bar, *button, *image;
+	PraghaBackgroundTaskWidget *task_widget;
 
 	scanner = g_slice_new0(PraghaScanner);
 
-	/* Create widgets */
-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	scanner->cancellable = g_cancellable_new ();
+	g_object_ref (G_OBJECT(scanner->cancellable));
 
-	progress_bar = gtk_progress_bar_new();
-	gtk_widget_set_size_request(progress_bar, PROGRESS_BAR_WIDTH, -1);
+	/* Create background task widget */
 
-	gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR(progress_bar), TRUE);
-
-	button = gtk_button_new ();
-	image = gtk_image_new_from_icon_name ("process-stop", GTK_ICON_SIZE_MENU);
-	gtk_button_set_relief (GTK_BUTTON (button), GTK_RELIEF_NONE);
-	gtk_button_set_focus_on_click (GTK_BUTTON (button), FALSE);
-	gtk_container_add (GTK_CONTAINER (button), image);
-
-	g_signal_connect(G_OBJECT (button),
-			 "clicked",
-			 G_CALLBACK(scanner_cancel_click_handler),
-			 scanner);
-
-	gtk_box_pack_start (GTK_BOX (hbox), progress_bar, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+	task_widget = pragha_background_task_widget_new (_("Searching files to analyze"),
+	                                                 "drive-harddisk",
+	                                                 0,
+	                                                 scanner->cancellable);
+	g_object_ref (G_OBJECT(task_widget));
 
 	/* Init the rest and save references */
 
-	scanner->progress_bar = progress_bar;
-	scanner->hbox = hbox;
+	scanner->task_widget = task_widget;
 	scanner->tracks_table = g_hash_table_new_full (g_str_hash,
 	                                               g_str_equal,
 	                                               g_free,
@@ -729,14 +748,7 @@ pragha_scanner_new()
 	g_mutex_init (&scanner->files_scanned_mutex);
 	scanner->no_files = 0;
 	g_mutex_init (&scanner->no_files_mutex);
-	scanner->cancellable = g_cancellable_new ();
 	scanner->update_timeout = 0;
-
-	/* Append the widget */
-
-	statusbar = pragha_statusbar_get ();
-	pragha_statusbar_add_widget(statusbar, hbox);
-	g_object_unref(G_OBJECT(statusbar));
 
 	return scanner;
 }

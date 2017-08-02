@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2016 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -17,8 +17,6 @@
 
 #ifndef PRAGHA_SESSION_H
 #define PRAGHA_SESSION_H
-
-#include <glib.h>
 
 #include "pragha.h"
 

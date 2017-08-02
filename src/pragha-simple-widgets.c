@@ -53,13 +53,16 @@ gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon_name)
 
 	label = gtk_label_new(NULL);
 	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
+	gtk_widget_set_halign (label, GTK_ALIGN_START);
+
 	markup = g_strdup_printf("<span size='large' weight='bold'>%s</span>", header);
 	gtk_label_set_markup(GTK_LABEL(label), markup);
-	gtk_misc_set_alignment (GTK_MISC(label), 0, 0.5);
 	g_free(markup);
 
 	gtk_style_context_add_class (gtk_widget_get_style_context (xfce_heading),
-	                             GTK_STYLE_CLASS_ENTRY);
+	                             "view");
+	gtk_style_context_add_class (gtk_widget_get_style_context (xfce_heading),
+	                             "XfceHeading");
 
 	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
@@ -286,12 +289,24 @@ pragha_toolbar_button_get_property (GObject     *object,
 }
 
 static void
+pragha_toolbar_button_finalize (GObject *object)
+{
+	PraghaToolbarButton *button = PRAGHA_TOOLBAR_BUTTON (object);
+	if (button->icon_name) {
+		g_free (button->icon_name);
+		button->icon_name = NULL;
+	}
+	(*G_OBJECT_CLASS (pragha_toolbar_button_parent_class)->finalize) (object);
+}
+
+static void
 pragha_toolbar_button_class_init (PraghaToolbarButtonClass *class)
 {
 	GObjectClass *gobject_class = G_OBJECT_CLASS (class);
 
   	gobject_class->set_property = pragha_toolbar_button_set_property;
 	gobject_class->get_property = pragha_toolbar_button_get_property;
+	gobject_class->finalize = pragha_toolbar_button_finalize;
 
 	g_object_class_install_property (gobject_class, PROP_ICON_NAME,
 	                                 g_param_spec_string ("icon-name",
@@ -326,6 +341,7 @@ pragha_toolbar_button_new (const gchar *icon_name)
 	                        "image", image,
 	                        "icon-name", icon_name,
 	                        "icon-size", GTK_ICON_SIZE_LARGE_TOOLBAR,
+	                        "valign", GTK_ALIGN_CENTER,
 	                        NULL);
 
 	return button;
@@ -430,12 +446,24 @@ pragha_toggle_button_get_property (GObject     *object,
 }
 
 static void
+pragha_toggle_button_finalize (GObject *object)
+{
+	PraghaToggleButton *button = PRAGHA_TOGGLE_BUTTON (object);
+	if (button->icon_name) {
+		g_free (button->icon_name);
+		button->icon_name = NULL;
+	}
+	(*G_OBJECT_CLASS (pragha_toggle_button_parent_class)->finalize) (object);
+}
+
+static void
 pragha_toggle_button_class_init (PraghaToggleButtonClass *class)
 {
 	GObjectClass *gobject_class = G_OBJECT_CLASS (class);
 
   	gobject_class->set_property = pragha_toggle_button_set_property;
 	gobject_class->get_property = pragha_toggle_button_get_property;
+	gobject_class->finalize = pragha_toggle_button_finalize;
 
 	g_object_class_install_property (gobject_class, PROP_ICON_NAME,
 	                                 g_param_spec_string ("icon-name",
@@ -470,6 +498,7 @@ pragha_toggle_button_new (const gchar *icon_name)
 	                        "image", image,
 	                        "icon-name", icon_name,
 	                        "icon-size", GTK_ICON_SIZE_LARGE_TOOLBAR,
+	                        "valign", GTK_ALIGN_CENTER,
 	                        NULL);
 
 	return button;

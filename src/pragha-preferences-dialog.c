@@ -40,6 +40,8 @@
 #include "pragha-simple-widgets.h"
 #include "pragha-library-pane.h"
 #include "pragha-database.h"
+#include "pragha-database-provider.h"
+#include "pragha-provider.h"
 
 struct _PreferencesTab {
 	GtkWidget *widget;
@@ -72,7 +74,6 @@ struct _PreferencesDialog {
 	GtkWidget *album_art_pattern_w;
 
 	GtkWidget *library_view_w;
-	GtkWidget *fuse_folders_w;
 	GtkWidget *sort_by_year_w;
 
 	GtkWidget *instant_filter_w;
@@ -83,6 +84,18 @@ struct _PreferencesDialog {
 	GtkWidget *close_to_tray_w;
 	GtkWidget *add_recursively_w;
 };
+
+enum library_columns {
+	COLUMN_NAME,
+	COLUMN_KIND,
+	COLUMN_FRIENDLY,
+	COLUMN_ICON_NAME,
+	COLUMN_VISIBLE,
+	COLUMN_IGNORED,
+	COLUMN_MARKUP,
+	N_COLUMNS
+};
+
 
 /*
  * Utils.
@@ -222,7 +235,7 @@ album_art_pattern_helper (GtkDialog *parent, PreferencesDialog *dialogs)
 }
 
 static GSList *
-pragha_preferences_dialog_get_library_list (PreferencesDialog *dialog)
+pragha_preferences_dialog_get_library_list (GtkWidget *library_tree)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -231,11 +244,13 @@ pragha_preferences_dialog_get_library_list (PreferencesDialog *dialog)
 	GError *error = NULL;
 	gboolean ret;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(dialog->library_view_w));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(library_tree));
 
 	ret = gtk_tree_model_get_iter_first(model, &iter);
 	while (ret) {
-		gtk_tree_model_get (model, &iter, 0, &u_folder, -1);
+		gtk_tree_model_get (model, &iter,
+		                    COLUMN_NAME, &u_folder,
+		                    -1);
 		if (u_folder) {
 			folder = g_filename_from_utf8 (u_folder, -1, NULL, NULL, &error);
 			if (!folder) {
@@ -253,36 +268,37 @@ pragha_preferences_dialog_get_library_list (PreferencesDialog *dialog)
 }
 
 static void
-pragha_preferences_dialog_set_library_list (PreferencesDialog *dialog, GSList *library_list)
+pragha_preferences_dialog_set_library_list (GtkWidget *library_tree, GSList *library_list)
 {
+	PraghaProvider *provider;
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	GError *error = NULL;
-	gint cnt = 0, i = 0;
 	GSList *list;
+	gchar *markup = NULL;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(dialog->library_view_w));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(library_tree));
 	gtk_list_store_clear (GTK_LIST_STORE(model));
 
-	cnt = g_slist_length(library_list);
-	list = library_list;
+	for (list = library_list; list != NULL; list = list->next)
+	{
+		provider = PRAGHA_PROVIDER(list->data);
 
-	for (i = 0; i < cnt; i++) {
-		/* Convert to UTF-8 before adding to the model */
-		gchar *u_file = g_filename_to_utf8 (list->data, -1,
-		                                    NULL, NULL, &error);
-		if (!u_file) {
-			g_warning("Unable to convert file to UTF-8");
-			g_error_free(error);
-			error = NULL;
-			list = list->next;
-			continue;
-		}
+		markup = g_markup_printf_escaped("%s (%s)",
+			pragha_provider_get_friendly_name(provider),
+			pragha_provider_get_name(provider));
+
 		gtk_list_store_append (GTK_LIST_STORE(model), &iter);
-		gtk_list_store_set (GTK_LIST_STORE(model),
-		                    &iter, 0, u_file, -1);
-		list = list->next;
-		g_free(u_file);
+		gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+		                    COLUMN_NAME, pragha_provider_get_name(provider),
+		                    COLUMN_KIND, pragha_provider_get_kind(provider),
+		                    COLUMN_FRIENDLY, pragha_provider_get_friendly_name(provider),
+		                    COLUMN_ICON_NAME, pragha_provider_get_icon_name(provider),
+		                    COLUMN_VISIBLE, pragha_provider_get_visible(provider),
+		                    COLUMN_IGNORED, pragha_provider_get_ignored(provider),
+		                    COLUMN_MARKUP, markup,
+		                    -1);
+
+		g_free (markup);
 	}
 }
 
@@ -292,18 +308,18 @@ pragha_preferences_dialog_set_library_list (PreferencesDialog *dialog, GSList *l
 static void
 pragha_preferences_dialog_restore_changes (PreferencesDialog *dialog)
 {
+	PraghaDatabaseProvider *provider;
 	GSList *library_list = NULL;
 	const gchar *start_mode = NULL;
 
 	/*
 	 * Collection settings.
 	 */
-	library_list = pragha_preferences_get_library_list (dialog->preferences);
-	pragha_preferences_dialog_set_library_list(dialog, library_list);
-	free_str_list(library_list);
-
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->fuse_folders_w),
-		pragha_preferences_get_fuse_folders(dialog->preferences));
+	provider = pragha_database_provider_get ();
+	library_list = pragha_database_provider_get_list (provider);
+	pragha_preferences_dialog_set_library_list(dialog->library_view_w, library_list);
+	g_slist_free_full (library_list, g_object_unref);
+	g_object_unref (G_OBJECT (provider));
 
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->sort_by_year_w),
 		pragha_preferences_get_sort_by_year(dialog->preferences));
@@ -403,12 +419,13 @@ pragha_preferences_dialog_restore_changes (PreferencesDialog *dialog)
 static void
 pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 {
-	PraghaDatabase *database;
-	GSList *list, *library_dir = NULL, *folder_scanned = NULL;
+	PraghaDatabaseProvider *dbase_provider;
+	GSList *list, *library_dir = NULL, *folder_scanned = NULL, *folders_added = NULL, *folders_deleted = NULL;
 	gchar *window_state_sink = NULL;
 	const gchar *album_art_pattern;
+	gchar *prov_base = NULL;
 	gboolean show_album_art, instant_search, approximate_search, restore_playlist, add_recursively, use_hint;
-	gboolean test_change, pref_setted, pref_toggled, library_locked;
+	gboolean test_change = FALSE, pref_setted, pref_toggled, library_locked;
 #if GTK_CHECK_VERSION (3, 12, 0)
 	gboolean system_titlebar;
 #endif
@@ -453,58 +470,63 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 #endif
 
 	/*
-	 *Get scanded folders and compare. If changed show infobar
+	 * Get scanded folders and compare. If changed show infobar
 	 */
-	library_dir = pragha_preferences_dialog_get_library_list (dialog);
-	folder_scanned =
-		pragha_preferences_get_filename_list (dialog->preferences,
-		                                      GROUP_LIBRARY,
-		                                      KEY_LIBRARY_SCANNED);
+
+	dbase_provider = pragha_database_provider_get ();
+
+	folder_scanned = pragha_provider_get_list (dbase_provider);
+	library_dir = pragha_preferences_dialog_get_library_list (dialog->library_view_w);
 
 	library_locked = pragha_preferences_get_lock_library (dialog->preferences);
+	if (library_locked == FALSE)
+	{
+		folders_added = pragha_string_list_get_added (folder_scanned, library_dir);
+		folders_deleted = pragha_string_list_get_removed (folder_scanned, library_dir);
 
-	if ((folder_scanned || library_dir) && (library_locked == FALSE)) {
-		test_change = FALSE;
-		for (list = folder_scanned; list != NULL; list = list->next) {
-			if (is_present_str_list(list->data, library_dir))
-				continue;
+		if (folders_added)
+		{
+			/* Here you can only add local folders. */
+			for (list = folders_added; list != NULL; list = list->next)
+			{
+				prov_base = g_filename_display_basename (list->data);
+				pragha_provider_add_new (dbase_provider,
+				                         list->data,
+				                         "local",
+				                         prov_base,
+				                         "drive-harddisk");
+				g_free (prov_base);
+			}
 			test_change = TRUE;
-			break;
-		}
-		for (list = library_dir; list != NULL; list = list->next) {
-			if (is_present_str_list(list->data, folder_scanned))
-				continue;
-			test_change = TRUE;
-			break;
 		}
 
-		if (test_change) {
-			pragha_preferences_set_library_list (dialog->preferences, library_dir);
+		if (folders_deleted)
+		{
+			for (list = folders_deleted; list != NULL; list = list->next)
+			{
+				pragha_provider_remove (dbase_provider, list->data);
+			}
+			test_change = TRUE;
 		}
 	}
+	g_object_unref (G_OBJECT (dbase_provider));
+
+	if (test_change)
+		pragha_preferences_local_provider_changed (dialog->preferences);
 
 	if (library_dir)
-		free_str_list(library_dir);
+		g_slist_free_full (library_dir, g_free);
 	if (folder_scanned)
-		free_str_list(folder_scanned);
+		g_slist_free_full (folder_scanned, g_free);
+	if (folders_added)
+		g_slist_free_full (folders_added, g_free);
+	if (folders_deleted)
+		g_slist_free_full (folders_deleted, g_free);
 
 	/*
 	 * Library view changes
 	 */
 	style = pragha_preferences_get_library_style (dialog->preferences);
-
-	/* Save fuse folders preference, and reload view if needed */
-
-	pref_setted = pragha_preferences_get_fuse_folders (dialog->preferences);
-	pref_toggled = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(dialog->fuse_folders_w));
-
-	pragha_preferences_set_fuse_folders (dialog->preferences, pref_toggled);
-
-	if ((style == FOLDERS) && (pref_setted != pref_toggled)) {
-		database = pragha_database_get ();
-		pragha_database_change_tracks_done (database);
-		g_object_unref (database);
-	}
 
 	/* Save sort by year preference, and reload view if needed */
 
@@ -514,9 +536,9 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 	pragha_preferences_set_sort_by_year (dialog->preferences, pref_toggled);
 
 	if ((style != FOLDERS) && (pref_setted != pref_toggled)) {
-		database = pragha_database_get ();
-		pragha_database_change_tracks_done (database);
-		g_object_unref (database);
+		dbase_provider = pragha_database_provider_get ();
+		pragha_provider_update_done (dbase_provider);
+		g_object_unref (dbase_provider);
 	}
 
 	/*
@@ -628,7 +650,7 @@ pragha_preferences_dialog_delete (GtkWidget *widget, GdkEvent *event, Preference
 static void
 library_add_cb_response (GtkDialog *add_dialog, gint response, PreferencesDialog *dialog)
 {
-	gchar *u_folder, *folder;
+	gchar *u_folder, *folder, *basename, *markup;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	GError *error = NULL;
@@ -637,26 +659,36 @@ library_add_cb_response (GtkDialog *add_dialog, gint response, PreferencesDialog
 	case GTK_RESPONSE_ACCEPT:
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(dialog->library_view_w));
 		folder = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(add_dialog));
+
 		if (!folder)
 			break;
 
-		u_folder = g_filename_to_utf8(folder, -1,
-					      NULL, NULL, &error);
+		u_folder = g_filename_to_utf8(folder, -1, NULL, NULL, &error);
 		if (!u_folder) {
-			g_warning("Unable to get UTF-8 from "
-				  "filename: %s",
-				  folder);
+			g_warning("Unable to get UTF-8 from filename: %s", folder);
 			g_error_free(error);
 			g_free(folder);
 			break;
 		}
 
-		gtk_list_store_append(GTK_LIST_STORE(model), &iter);
-		gtk_list_store_set(GTK_LIST_STORE(model), &iter, 0,
-				   u_folder, -1);
+		basename = g_filename_display_basename (u_folder);
+		markup = g_markup_printf_escaped("%s (%s)", basename, u_folder);
+
+		gtk_list_store_append (GTK_LIST_STORE(model), &iter);
+		gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+		                    COLUMN_NAME, u_folder,
+		                    COLUMN_KIND, "local",
+		                    COLUMN_FRIENDLY, basename,
+		                    COLUMN_ICON_NAME, "drive-harddisk",
+		                    COLUMN_VISIBLE, TRUE,
+		                    COLUMN_IGNORED, FALSE,
+		                    COLUMN_MARKUP, markup,
+		                    -1);
 
 		g_free(u_folder);
 		g_free(folder);
+		g_free (basename);
+		g_free(markup);
 
 		break;
 	default:
@@ -775,6 +807,7 @@ change_audio_sink(GtkComboBox *combo, PreferencesDialog *dialog)
 static void
 pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 {
+	PraghaDatabaseProvider *provider;
 	GSList *library_dir = NULL;
 	const gchar *start_mode = pragha_preferences_get_start_mode(dialog->preferences);
 
@@ -861,14 +894,12 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 
 	/* Lbrary Options */
 
-	library_dir = pragha_preferences_get_library_list (dialog->preferences);
-	if (library_dir) {
-		pragha_preferences_dialog_set_library_list(dialog, library_dir);
-		free_str_list(library_dir);
-	}
+	provider = pragha_database_provider_get ();
+	library_dir = pragha_database_provider_get_list (provider);
+	pragha_preferences_dialog_set_library_list(dialog->library_view_w, library_dir);
+	g_slist_free_full (library_dir, g_object_unref);
+	g_object_unref (G_OBJECT (provider));
 
-	if (pragha_preferences_get_fuse_folders(dialog->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->fuse_folders_w), TRUE);
 	if (pragha_preferences_get_sort_by_year(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->sort_by_year_w), TRUE);
 }
@@ -956,7 +987,7 @@ pref_create_library_page (PreferencesDialog *dialog)
 {
 	GtkWidget *table;
 	GtkWidget *library_view, *library_view_scroll, *library_bbox_align, *library_bbox, *library_add, \
-		*library_remove, *hbox_library, *fuse_folders, *sort_by_year, *infobar, *label;
+		*library_remove, *hbox_library, *sort_by_year, *infobar, *label;
 	GtkListStore *library_store;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
@@ -973,19 +1004,43 @@ pref_create_library_page (PreferencesDialog *dialog)
 	gtk_box_pack_start (GTK_BOX (gtk_info_bar_get_content_area (GTK_INFO_BAR (infobar))), label, FALSE, FALSE, 0);
 	pragha_hig_workarea_table_add_wide_control(table, &row, infobar);
 
+	/* Local library. */
+
 	hbox_library = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
-	library_store = gtk_list_store_new(1, G_TYPE_STRING);
+	library_store = gtk_list_store_new (N_COLUMNS,
+	                                    G_TYPE_STRING,  // Name.
+	                                    G_TYPE_STRING,  // King.
+	                                    G_TYPE_STRING,  // Friendly name.
+	                                    G_TYPE_STRING,  // Icon name.
+	                                    G_TYPE_BOOLEAN, // Visible
+	                                    G_TYPE_BOOLEAN, // Ignored
+	                                    G_TYPE_STRING); // Markup.
+
 	library_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(library_store));
 
-	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes (_("Folders"),
-	                                                   renderer,
-	                                                   "text",
-	                                                   0,
-	                                                   NULL);
-
+	column = gtk_tree_view_column_new ();
+	gtk_tree_view_column_set_title (column, _("Folders"));
 	gtk_tree_view_column_set_resizable(column, GTK_TREE_VIEW_COLUMN_GROW_ONLY);
+
+	renderer = gtk_cell_renderer_toggle_new ();
+	gtk_tree_view_column_pack_start (column, renderer, FALSE);
+	gtk_tree_view_column_set_attributes (column, renderer,
+	                                     "active", COLUMN_VISIBLE,
+	                                     NULL);
+
+	renderer = gtk_cell_renderer_pixbuf_new();
+	gtk_tree_view_column_pack_start (column, renderer, FALSE);
+	gtk_tree_view_column_set_attributes (column, renderer,
+	                                     "icon-name", COLUMN_ICON_NAME,
+	                                     NULL);
+
+	renderer = gtk_cell_renderer_text_new();
+	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+	gtk_tree_view_column_pack_start (column, renderer, TRUE);
+	gtk_tree_view_column_set_attributes (column, renderer,
+	                                     "markup", COLUMN_MARKUP,
+	                                     NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(library_view), column);
 
 	library_view_scroll = gtk_scrolled_window_new(NULL, NULL);
@@ -1015,8 +1070,7 @@ pref_create_library_page (PreferencesDialog *dialog)
 
 	pragha_hig_workarea_table_add_wide_tall_control(table, &row, hbox_library);
 
-	fuse_folders = gtk_check_button_new_with_label(_("Merge folders in the folders estructure view"));
-	pragha_hig_workarea_table_add_wide_control(table, &row, fuse_folders);
+	/* Sort by year option. */
 
 	sort_by_year = gtk_check_button_new_with_label(_("Sort albums by release year"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, sort_by_year);
@@ -1024,7 +1078,6 @@ pref_create_library_page (PreferencesDialog *dialog)
 	/* Store references */
 
 	dialog->library_view_w = library_view;
-	dialog->fuse_folders_w = fuse_folders;
 	dialog->sort_by_year_w = sort_by_year;
 
 	/* Setup signal handlers */
@@ -1244,11 +1297,16 @@ pragha_preferences_dialog_disconnect_handler (PreferencesDialog *dialog,
 void
 pragha_preferences_dialog_show (PreferencesDialog *dialog)
 {
+	PraghaDatabaseProvider *provider;
 	GSList *library_list = NULL;
+
 	if (string_is_empty (pragha_preferences_get_installed_version (dialog->preferences))) {
-		library_list = pragha_preferences_get_library_list (dialog->preferences);
-		pragha_preferences_dialog_set_library_list (dialog, library_list);
-		free_str_list(library_list);
+		provider = pragha_database_provider_get ();
+		library_list = pragha_database_provider_get_list (provider);
+		g_object_unref (G_OBJECT (provider));
+
+		pragha_preferences_dialog_set_library_list (dialog->library_view_w, library_list);
+		g_slist_free_full (library_list, g_object_unref);
 	}
 	gtk_notebook_set_current_page (GTK_NOTEBOOK(dialog->notebook), 0);
 	gtk_widget_show (dialog->widget);

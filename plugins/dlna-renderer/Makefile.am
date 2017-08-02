@@ -14,7 +14,6 @@ libpdlnarenderer_la_SOURCES =		\
 libpdlnarenderer_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 
 libpdlnarenderer_la_CFLAGS =				\
-	$(GRILO_CFLAGS)							\
 	$(GSTREAMER_CFLAGS)						\
 	$(GSTREAMER_BASE_CFLAGS)				\
 	$(GLIB_CFLAGS) 							\
@@ -28,7 +27,6 @@ libpdlnarenderer_la_CFLAGS =				\
 	-Wall
 
 libpdlnarenderer_la_LIBADD =				\
-	$(GRILO_LIBS) 							\
 	$(GSTREAMER_LIBS)						\
 	$(GLIB_LIBS) 							\
 	$(GIO_LIBS) 							\
@@ -37,6 +35,15 @@ libpdlnarenderer_la_LIBADD =				\
 	$(TAGLIB_C_LIBS)						\
 	$(LIBPEAS_LIBS)							\
 	$(LIBPEAS_GTK_LIBS)
+
+if HAVE_GRILO3
+libpdlnarenderer_la_CFLAGS += $(GRILO3_CFLAGS)
+libpdlnarenderer_la_LIBADD += $(GRILO3_LIBS)
+endif
+if HAVE_GRILO2
+libpdlnarenderer_la_CFLAGS += $(GRILO2_CFLAGS)
+libpdlnarenderer_la_LIBADD += $(GRILO2_LIBS)
+endif
 
 if HAVE_GSTREAMER_AUDIO
 libpdlnarenderer_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)

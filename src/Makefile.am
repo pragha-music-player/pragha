@@ -19,7 +19,13 @@ pragha_SOURCES = \
 	pragha-art-cache.h \
 	pragha-backend.c \
 	pragha-backend.h \
+	pragha-background-task-bar.c \
+	pragha-background-task-bar.h \
+	pragha-background-task-widget.c \
+	pragha-background-task-widget.h \
 	pragha-cmdline.c \
+	pragha-database-provider.c \
+	pragha-database-provider.h \
 	pragha-database.c \
 	pragha-database.h \
 	pragha-debug.c \
@@ -57,6 +63,8 @@ pragha_SOURCES = \
 	pragha-prepared-statement.c \
 	pragha-prepared-statement.h \
 	pragha-prepared-statement-private.h \
+	pragha-provider.c \
+	pragha-provider.h \
 	pragha-scanner.c \
 	pragha-scanner.h \
 	pragha-search-entry.c \
@@ -69,6 +77,8 @@ pragha_SOURCES = \
 	pragha-simple-async.h \
 	pragha-simple-widgets.c \
 	pragha-simple-widgets.h \
+	pragha-song-cache.c \
+	pragha-song-cache.h \
 	pragha-statusbar.c \
 	pragha-statusbar.h \
 	pragha-statusicon.c \
@@ -87,6 +97,7 @@ pragha_SOURCES = \
 	pragha-window.h \
 	pragha.c \
 	pragha.h \
+	pragha-window-ui.h \
 	xml_helper.c \
 	xml_helper.h
 
@@ -150,3 +161,15 @@ pragha-res.o: $(top_srcdir)/win32/pragha.rc
 
 pragha_LDADD += pragha-res.o
 endif
+
+pragha-window-ui.h: pragha-window.ui Makefile
+	$(AM_V_GEN) exo-csource --strip-comments --strip-content --static --name=pragha_window_ui $< > $@
+
+EXTRA_DIST = \
+	pragha-window.ui
+
+DISTCLEANFILES = \
+	pragha-window-ui.h
+
+BUILT_SOURCES = \
+	pragha-window-ui.h

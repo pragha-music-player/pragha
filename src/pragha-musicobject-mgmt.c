@@ -24,9 +24,10 @@
 #include "pragha-file-utils.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-tags-mgmt.h"
+#include "pragha-music-enum.h"
 
 PraghaMusicobject *
-new_musicobject_from_file(const gchar *file)
+new_musicobject_from_file(const gchar *file, const gchar *provider)
 {
 	PraghaMusicobject *mobj = NULL;
 	gchar *mime_type = NULL;
@@ -39,6 +40,7 @@ new_musicobject_from_file(const gchar *file)
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 	                     "file", file,
 	                     "source", FILE_LOCAL,
+	                     "provider", provider,
 	                     "mime-type", mime_type,
 	                     NULL);
 
@@ -59,60 +61,50 @@ new_musicobject_from_file(const gchar *file)
 PraghaMusicobject *
 new_musicobject_from_db(PraghaDatabase *cdbase, gint location_id)
 {
+	PraghaPreparedStatement *statement = NULL;
+	PraghaMusicEnum *enum_map = NULL;
 	PraghaMusicobject *mobj = NULL;
 
-	CDEBUG(DBG_MOBJ, "Creating new musicobject with location id: %d",
-	       location_id);
+	CDEBUG(DBG_MOBJ, "Creating new musicobject with location id: %d", location_id);
 
-	const gchar *sql = "SELECT \
-MIME_TYPE.name, \
-TRACK.samplerate, \
-TRACK.channels, \
-TRACK.length, \
-TRACK.bitrate, \
-COMMENT.name, \
-YEAR.year, \
-TRACK.track_no, \
-GENRE.name, \
-ALBUM.name, \
-ARTIST.name, \
-TRACK.title, \
-LOCATION.name \
-FROM MIME_TYPE, TRACK, COMMENT, YEAR, GENRE, ALBUM, ARTIST, LOCATION \
-WHERE TRACK.location = ? \
-AND MIME_TYPE.id = TRACK.file_type \
-AND COMMENT.id = TRACK.comment \
-AND YEAR.id = TRACK.year \
-AND GENRE.id = TRACK.genre \
-AND ALBUM.id = TRACK.album \
-AND ARTIST.id = TRACK.artist \
-AND LOCATION.id = ?";
+	const gchar *sql =
+		"SELECT LOCATION.name, PROVIDER_TYPE.name, PROVIDER.name, MIME_TYPE.name, TRACK.title, ARTIST.name, ALBUM.name, GENRE.name, COMMENT.name, YEAR.year, TRACK.track_no, TRACK.length, TRACK.bitrate, TRACK.channels, TRACK.samplerate \
+		 FROM LOCATION, PROVIDER_TYPE, PROVIDER, MIME_TYPE, TRACK, ARTIST, ALBUM, GENRE, COMMENT, YEAR \
+		 WHERE TRACK.location = ? AND PROVIDER.id = TRACK.provider AND PROVIDER_TYPE.id = PROVIDER.type AND MIME_TYPE.id = TRACK.file_type AND ARTIST.id = TRACK.artist AND ALBUM.id = TRACK.album AND GENRE.id = TRACK.genre AND COMMENT.id = TRACK.comment AND YEAR.id = TRACK.year \
+		 AND LOCATION.id = ?";
 
-	PraghaPreparedStatement *statement = pragha_database_create_statement (cdbase, sql);
+	statement = pragha_database_create_statement (cdbase, sql);
 	pragha_prepared_statement_bind_int (statement, 1, location_id);
 	pragha_prepared_statement_bind_int (statement, 2, location_id);
 
-	if (pragha_prepared_statement_step (statement)) {
+	if (pragha_prepared_statement_step (statement))
+	{
 		mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
-		                     "file", pragha_prepared_statement_get_string (statement, 12),
-		                     "source", FILE_LOCAL,
-		                     "mime-type", pragha_prepared_statement_get_string (statement, 0),
-		                     "title", pragha_prepared_statement_get_string (statement, 11),
-		                     "artist", pragha_prepared_statement_get_string (statement, 10),
-		                     "album", pragha_prepared_statement_get_string (statement, 9),
-		                     "genre", pragha_prepared_statement_get_string (statement, 8),
-		                     "comment", pragha_prepared_statement_get_string (statement, 5),
-		                     "year", pragha_prepared_statement_get_int (statement, 6),
-		                     "track-no", pragha_prepared_statement_get_int (statement, 7),
-		                     "length", pragha_prepared_statement_get_int (statement, 3),
-		                     "bitrate", pragha_prepared_statement_get_int (statement, 4),
-		                     "channels", pragha_prepared_statement_get_int (statement, 2),
-		                     "samplerate", pragha_prepared_statement_get_int (statement, 1),
+		                     "file", pragha_prepared_statement_get_string (statement, 0),
+		                     "provider", pragha_prepared_statement_get_string (statement, 2),
+		                     "mime-type", pragha_prepared_statement_get_string (statement, 3),
+		                     "title", pragha_prepared_statement_get_string (statement, 4),
+		                     "artist", pragha_prepared_statement_get_string (statement, 5),
+		                     "album", pragha_prepared_statement_get_string (statement, 6),
+		                     "genre", pragha_prepared_statement_get_string (statement, 7),
+		                     "comment", pragha_prepared_statement_get_string (statement, 8),
+		                     "year", pragha_prepared_statement_get_int (statement, 9),
+		                     "track-no", pragha_prepared_statement_get_int (statement, 10),
+		                     "length", pragha_prepared_statement_get_int (statement, 11),
+		                     "bitrate", pragha_prepared_statement_get_int (statement, 12),
+		                     "channels", pragha_prepared_statement_get_int (statement, 13),
+		                     "samplerate", pragha_prepared_statement_get_int (statement, 14),
 		                     NULL);
+
+		enum_map = pragha_music_enum_get ();
+		pragha_musicobject_set_source (mobj,
+			pragha_music_enum_map_get(enum_map,
+				pragha_prepared_statement_get_string (statement, 1)));
+		g_object_unref (enum_map);
 	}
-	else {
-		g_critical("Track with location id : %d not found in DB",
-			   location_id);
+	else
+	{
+		g_critical("Track with location id : %d not found in DB", location_id);
 	}
 
 	pragha_prepared_statement_free (statement);

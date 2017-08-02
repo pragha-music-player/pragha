@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2010-2015 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2010-2017 matias <mati86dl@gmail.com>                   */
 /* Copyright (C) 2012-2013 Pavel Vasin                                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
@@ -54,6 +54,7 @@ typedef struct {
 	void (*tick) (PraghaBackend *backend);
 	void (*seeked) (PraghaBackend *backend);
 	void (*buffering) (PraghaBackend *backend, gint percent);
+	void (*download_done) (PraghaBackend *backend, gchar *filename);
 	void (*finished) (PraghaBackend *backend);
 	void (*error) (PraghaBackend *backend, const GError *error);
 	void (*tags_changed) (PraghaBackend *backend, gint changed);
@@ -64,6 +65,8 @@ void               pragha_backend_seek                 (PraghaBackend *backend, 
 
 gint64             pragha_backend_get_current_length   (PraghaBackend *backend);
 gint64             pragha_backend_get_current_position (PraghaBackend *backend);
+
+void               pragha_backend_set_local_storage    (PraghaBackend *backend, gboolean local_storage);
 
 void               pragha_backend_set_soft_volume      (PraghaBackend *backend, gboolean value);
 gdouble            pragha_backend_get_volume           (PraghaBackend *backend);

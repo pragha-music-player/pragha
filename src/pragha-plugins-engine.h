@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2013-2015 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2013-2017 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -39,12 +39,13 @@ struct _PraghaPluginsEngineClass
 	GObjectClass parent_class;
 };
 
-gboolean             pragha_plugins_is_shutdown     (PraghaPluginsEngine *engine);
+gboolean             pragha_plugins_engine_is_starting (PraghaPluginsEngine *engine);
+gboolean             pragha_plugins_engine_is_shutdown (PraghaPluginsEngine *engine);
 
-void                 pragha_plugins_engine_shutdown (PraghaPluginsEngine *engine);
-void                 pragha_plugins_engine_startup  (PraghaPluginsEngine *engine);
+void                 pragha_plugins_engine_shutdown    (PraghaPluginsEngine *engine);
+void                 pragha_plugins_engine_startup     (PraghaPluginsEngine *engine);
 
-PraghaPluginsEngine *pragha_plugins_engine_new      (GObject             *object);
+PraghaPluginsEngine *pragha_plugins_engine_new         (GObject             *object);
 
 G_END_DECLS
 

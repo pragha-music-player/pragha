@@ -502,7 +502,7 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	 */
 	vbox_aling = gtk_alignment_new(0.5, 0.5, 1, 0);
 
- 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+ 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(vbox_aling), GTK_WIDGET(vbox));
 
  	/*
@@ -863,9 +863,11 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	g_object_set(vol_button, "use-symbolic", FALSE, NULL);
 	gtk_button_set_relief(GTK_BUTTON(vol_button), GTK_RELIEF_NONE);
 	g_object_set(G_OBJECT(vol_button), "size", GTK_ICON_SIZE_LARGE_TOOLBAR, NULL);
+	gtk_widget_set_valign (GTK_WIDGET(vol_button), GTK_ALIGN_CENTER);
 	toolbar->vol_button = vol_button;
 
-	toolbar->extra_button_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+	toolbar->extra_button_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_widget_set_valign (GTK_WIDGET(toolbar->extra_button_box), GTK_ALIGN_CENTER);
 
 #if GTK_CHECK_VERSION (3, 12, 0)
 	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(toolbar->extra_button_box));

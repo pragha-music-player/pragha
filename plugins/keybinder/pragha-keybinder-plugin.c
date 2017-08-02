@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2017 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -24,6 +24,7 @@
 #include <gmodule.h>
 #include <gtk/gtk.h>
 #include <keybinder.h>
+#include <gdk/gdkx.h>
 
 #include <libpeas/peas.h>
 #include <libpeas-gtk/peas-gtk.h>
@@ -101,6 +102,9 @@ pragha_plugin_activate (PeasActivatable *activatable)
 {
 	PraghaKeybinderPlugin *plugin = PRAGHA_KEYBINDER_PLUGIN (activatable);
 
+	if (!GDK_IS_X11_DISPLAY (gdk_display_get_default ()))
+		return;
+
 	PraghaKeybinderPluginPrivate *priv = plugin->priv;
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
@@ -119,6 +123,9 @@ static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
 	CDEBUG(DBG_PLUGIN, "Keybinder plugin %s", G_STRFUNC);
+
+	if (!GDK_IS_X11_DISPLAY (gdk_display_get_default ()))
+		return;
 
 	keybinder_unbind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler);
 	keybinder_unbind("XF86AudioStop", (KeybinderHandler) keybind_stop_handler);

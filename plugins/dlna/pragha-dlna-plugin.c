@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2014 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2014-2016 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -45,6 +45,7 @@
 #include "src/pragha-utils.h"
 #include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-playlist.h"
+#include "src/pragha-database-provider.h"
 
 #include "plugins/pragha-plugin-macros.h"
 
@@ -67,7 +68,6 @@ pragha_dlna_plugin_append_track (PraghaDlnaPlugin  *plugin,
                                  gint               id)
 {
 	RygelMusicItem *item = NULL;
-	RygelMediaObject *object;
 	gchar *uri = NULL, *u_title = NULL, *item_id = NULL, *content_type = NULL;
 	const gchar *file = NULL, *title = NULL;
 	gboolean uncertain;
@@ -84,24 +84,26 @@ pragha_dlna_plugin_append_track (PraghaDlnaPlugin  *plugin,
 	                             RYGEL_MUSIC_ITEM_UPNP_CLASS);
 
 	if (item != NULL) {
-		rygel_music_item_set_artist (item, pragha_musicobject_get_artist(mobj));
-		rygel_music_item_set_album (item, pragha_musicobject_get_album(mobj));
-		rygel_music_item_set_track_number (item, pragha_musicobject_get_track_no(mobj));
-
-		rygel_audio_item_set_duration (RYGEL_AUDIO_ITEM(item), (glong)pragha_musicobject_get_length(mobj));
-
 		file = pragha_musicobject_get_file (mobj);
-		content_type = g_content_type_guess (file, NULL, 0, &uncertain);
-		rygel_media_item_set_mime_type (RYGEL_MEDIA_ITEM (item), content_type);
-		g_free(content_type);
 
 		uri = g_filename_to_uri (file, NULL, NULL);
-
-		object = RYGEL_MEDIA_OBJECT (item);
-		gee_collection_add (GEE_COLLECTION (object->uris), uri);
+		rygel_media_object_add_uri (RYGEL_MEDIA_OBJECT (item), uri);
 		g_free (uri);
 
+		content_type = g_content_type_guess (file, NULL, 0, &uncertain);
+		rygel_media_file_item_set_mime_type (RYGEL_MEDIA_FILE_ITEM (item), content_type);
+		g_free(content_type);
+
+		rygel_music_item_set_track_number (item, pragha_musicobject_get_track_no(mobj));
+
+		rygel_audio_item_set_album (RYGEL_AUDIO_ITEM(item), pragha_musicobject_get_album(mobj));
+		rygel_audio_item_set_duration (RYGEL_AUDIO_ITEM(item), (glong)pragha_musicobject_get_length(mobj));
+
+		rygel_media_object_set_artist (RYGEL_MEDIA_OBJECT(item), pragha_musicobject_get_artist(mobj));
+
 		rygel_simple_container_add_child_item (priv->container, RYGEL_MEDIA_ITEM(item));
+
+		g_object_unref (item);
 	}
 
 	g_free(u_title);
@@ -112,22 +114,30 @@ static void
 pragha_dlna_plugin_share_library (PraghaDlnaPlugin *plugin)
 {
 	PraghaDatabase *cdbase;
+	PraghaPreparedStatement *statement;
 	PraghaMusicobject *mobj;
 	gint i = 0;
+
+	const gchar *sql = NULL;
+
 	PraghaDlnaPluginPrivate *priv = plugin->priv;
 
 	/* Query and insert entries */
 
 	set_watch_cursor (pragha_application_get_window(priv->pragha));
 
-	cdbase = pragha_application_get_database (priv->pragha);
+	sql = "SELECT location FROM TRACK "
+	      "INNER JOIN provider ON track.provider = provider.id "
+	      "INNER JOIN provider_type ON provider.type = provider_type.id "
+	      "WHERE provider_type.name  = ?";
 
-	const gchar *sql = "SELECT id FROM LOCATION";
-	PraghaPreparedStatement *statement = pragha_database_create_statement (cdbase, sql);
+	cdbase = pragha_application_get_database (priv->pragha);
+	statement = pragha_database_create_statement (cdbase, sql);
+	pragha_prepared_statement_bind_string (statement, 1, "local");
 
 	while (pragha_prepared_statement_step (statement)) {
-		gint location_id = pragha_prepared_statement_get_int (statement, 0);
-		mobj = new_musicobject_from_db (cdbase, location_id);
+		mobj = new_musicobject_from_db (cdbase,
+			pragha_prepared_statement_get_int (statement, 0));
 		if (G_LIKELY(mobj)) {
 			pragha_dlna_plugin_append_track (plugin, mobj, i++);
 			g_object_unref (mobj);
@@ -140,8 +150,8 @@ pragha_dlna_plugin_share_library (PraghaDlnaPlugin *plugin)
 }
 
 static void
-pragha_dlna_plugin_database_changed (PraghaDatabase   *cdbase,
-                                     PraghaDlnaPlugin *plugin)
+pragha_dlna_plugin_database_changed (PraghaDatabaseProvider *provider,
+                                     PraghaDlnaPlugin       *plugin)
 {
 	PraghaDlnaPluginPrivate *priv = plugin->priv;
 
@@ -178,6 +188,7 @@ pragha_dlna_plugin_share_playlist (PraghaDlnaPlugin *plugin)
 
 		pragha_process_gtk_events ();
 	}
+	g_list_free(list);
 
 	remove_watch_cursor (pragha_application_get_window(priv->pragha));
 }
@@ -199,7 +210,7 @@ pragha_dlna_plugin_playlist_changed (PraghaPlaylist   *playlist,
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
 {
-	PraghaDatabase *cdbase;
+	PraghaDatabaseProvider *provider;
 	PraghaPlaylist *playlist;
     GError *error = NULL;
 	struct ifaddrs *addrs,*tmp;
@@ -211,13 +222,26 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	CDEBUG(DBG_PLUGIN, "DLNA plugin %s", G_STRFUNC);
 
+	/* Init rygel */
+
 	rygel_media_engine_init (&error);
 	if (error != NULL) {
-		g_print ("Could not initialize media engine: %s\n", error->message);
+		g_critical ("Could not initialize media engine: %s\n", error->message);
 		g_error_free (error);
 	}
 
-	priv->container = rygel_simple_container_new_root (_("Pragha Music Player"));
+	/* Create root container */
+
+	priv->container = rygel_simple_container_new_root (_("Local Music"));
+
+	/* Put initial music on container */
+
+	if (FALSE)
+		pragha_dlna_plugin_share_library (plugin);
+	else
+		pragha_dlna_plugin_share_playlist (plugin);
+
+	/* Launch server */
 
 	priv->server = rygel_media_server_new (_("Pragha Music Player"),
 	                                       RYGEL_MEDIA_CONTAINER(priv->container),
@@ -232,24 +256,23 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	}
 	freeifaddrs (addrs);
 
-	cdbase = pragha_application_get_database (priv->pragha);
-	g_signal_connect (cdbase, "TracksChanged",
-		              G_CALLBACK(pragha_dlna_plugin_database_changed), plugin);
+	/* Connect signals to update music */
+
+	provider = pragha_database_provider_get ();
+	g_signal_connect (provider, "update-done",
+	                  G_CALLBACK(pragha_dlna_plugin_database_changed), plugin);
+	g_object_unref (provider);
 
 	playlist = pragha_application_get_playlist (priv->pragha);
 	g_signal_connect (playlist, "playlist-changed",
-		              G_CALLBACK(pragha_dlna_plugin_playlist_changed), plugin);
+	                  G_CALLBACK(pragha_dlna_plugin_playlist_changed), plugin);
 
-	if (FALSE)
-		pragha_dlna_plugin_share_library (plugin);
-	else
-		pragha_dlna_plugin_share_playlist (plugin);
 }
 
 static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
-	PraghaDatabase *cdbase;
+	PraghaDatabaseProvider *provider;
 	PraghaPlaylist *playlist;
 
 	PraghaDlnaPlugin *plugin = PRAGHA_DLNA_PLUGIN (activatable);
@@ -258,10 +281,11 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	CDEBUG(DBG_PLUGIN, "DLNA plugin %s", G_STRFUNC);
 
-	cdbase = pragha_application_get_database (priv->pragha);
-	g_signal_handlers_disconnect_by_func (cdbase,
+	provider = pragha_database_provider_get ();
+	g_signal_handlers_disconnect_by_func (provider,
 	                                      pragha_dlna_plugin_database_changed,
 	                                      plugin);
+	g_object_unref (provider);
 
 	playlist = pragha_application_get_playlist (priv->pragha);
 	g_signal_handlers_disconnect_by_func (playlist,

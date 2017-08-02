@@ -123,6 +123,9 @@ pragha_music_enum_map_get (PraghaMusicEnum *enum_map, const gchar *name)
 {
 	gint i = 0;
 
+	if (g_ascii_strcasecmp(name, "local") == 0)
+		return FILE_LOCAL;
+
 	/* First check if exist */
 	for (i = 0; i <= enum_map->size; i++) {
 		if (enum_map->map[i].name == NULL)

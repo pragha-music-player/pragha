@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2010-2015 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2010-2017 matias <mati86dl@gmail.com>                   */
 /* Copyright (C) 2012-2013 Pavel Vasin                                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
@@ -62,19 +62,29 @@ typedef enum {
 
 struct PraghaBackendPrivate {
 	PraghaPreferences *preferences;
-	PraghaArtCache *art_cache;
-	GstElement *pipeline;
-	GstElement *audio_sink;
-	GstElement *preamp;
-	GstElement *equalizer;
-	guint timer;
-	gboolean is_live;
-	gboolean can_seek;
-	gboolean seeking; //this is hack, we should catch seek by seqnum, but it's currently broken in gstreamer
-	gboolean emitted_error;
-	GError *error;
-	GstState target_state;
+	PraghaArtCache    *art_cache;
+
+	GstElement        *pipeline;
+	GstElement        *audio_sink;
+	GstElement        *preamp;
+	GstElement        *equalizer;
+
+	guint              timer;
+
+	gboolean           is_live;
+	gboolean           can_seek;
+	gboolean           seeking; //this is hack, we should catch seek by seqnum, but it's currently broken in gstreamer
+
+	gboolean           local_storage;
+	gchar             *temp_location;
+	guint              download_timeid;
+
+	gboolean           emitted_error;
+	GError            *error;
+
+	GstState           target_state;
 	PraghaBackendState state;
+
 	PraghaMusicobject *mobj;
 };
 
@@ -97,6 +107,7 @@ enum {
 	SIGNAL_TICK,
 	SIGNAL_SEEKED,
 	SIGNAL_BUFFERING,
+	SIGNAL_DOWNLOAD_DONE,
 	SIGNAL_FINISHED,
 	SIGNAL_ERROR,
 	SIGNAL_TAGS_CHANGED,
@@ -120,6 +131,18 @@ emit_tick_cb (gpointer user_data)
 static void
 pragha_backend_source_notify_cb (GObject *obj, GParamSpec *pspec, PraghaBackend *backend)
 {
+	GstElement* element;
+
+	g_object_get (obj, "source", &element, NULL);
+	if (!element)
+		return;
+
+	if (g_object_class_find_property(G_OBJECT_GET_CLASS(element), "user-agent")) {
+		g_object_set (element, "user-agent", PACKAGE_NAME"/"PACKAGE_VERSION, NULL);
+		g_object_set(element, "ssl-use-system-ca-file", FALSE, NULL);
+		g_object_set(element, "ssl-strict", FALSE, NULL);
+	}
+
 	g_signal_emit (backend, signals[SIGNAL_SET_DEVICE], 0, obj);
 }
 
@@ -211,6 +234,73 @@ pragha_backend_optimize_audio_flags (PraghaBackend *backend)
 	flags &= ~GST_PLAY_FLAG_NATIVE_VIDEO;
 
 	g_object_set (priv->pipeline, "flags", flags, NULL);
+}
+
+static void
+pragha_backend_got_temp_location (GstObject  *gstobject,
+                                  GstObject  *prop_object,
+                                  GParamSpec *prop,
+                                  gpointer    user_data)
+{
+	PraghaBackend *backend = user_data;
+	PraghaBackendPrivate *priv = backend->priv;
+
+	if (priv->temp_location != NULL) {
+		g_free(priv->temp_location);
+		priv->temp_location = NULL;
+	}
+
+	if (priv->local_storage) {
+		g_object_get (G_OBJECT (prop_object), "temp-location", &priv->temp_location, NULL);
+	}
+}
+
+static gboolean
+pragha_backend_parse_local_storage_buffering (gpointer user_data)
+{
+	PraghaBackend *backend = user_data;
+	PraghaBackendPrivate *priv = backend->priv;
+	gboolean ret = TRUE;
+	GstQuery *query;
+
+	query = gst_query_new_buffering (GST_FORMAT_PERCENT);
+	if (gst_element_query (priv->pipeline, query)) {
+		GstFormat format;
+		gint64 start, stop;
+		gdouble fill;
+		gst_query_parse_buffering_range (query, &format, &start, &stop, NULL);
+		if (stop != -1)
+			fill = (gdouble) stop / GST_FORMAT_PERCENT_MAX;
+		else
+			fill = -1.0;
+
+		if (fill == 1.0) {
+			g_signal_emit (backend, signals[SIGNAL_DOWNLOAD_DONE], 0, priv->temp_location);
+			priv->download_timeid = 0;
+			ret = FALSE;
+		}
+	}
+	gst_query_unref (query);
+
+	return ret;
+}
+
+void
+pragha_backend_set_local_storage (PraghaBackend *backend,
+                                  gboolean       local_storage)
+{
+	PraghaBackendPrivate *priv = backend->priv;
+	GstPlayFlags flags;
+
+	g_object_get (priv->pipeline, "flags", &flags, NULL);
+	if (local_storage == TRUE)
+		flags |= GST_PLAY_FLAG_DOWNLOAD;
+	else
+		flags &= ~GST_PLAY_FLAG_DOWNLOAD;
+	g_object_set (priv->pipeline, "flags", flags, NULL);
+
+
+	priv->local_storage = local_storage;
 }
 
 gdouble
@@ -669,7 +759,8 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, Pra
 
 				if (priv->timer == 0)
 					priv->timer = g_timeout_add_seconds (1, emit_tick_cb, backend);
-
+				if (priv->local_storage && priv->download_timeid == 0)
+					priv->download_timeid = g_timeout_add_seconds (1, pragha_backend_parse_local_storage_buffering, backend);
 				pragha_backend_set_state (backend, ST_PLAYING);
 			}
 			break;
@@ -679,6 +770,10 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, Pra
 				if (priv->timer > 0) {
 					g_source_remove(priv->timer);
 					priv->timer = 0;
+				}
+				if (priv->download_timeid > 0) {
+					g_source_remove(priv->download_timeid);
+					priv->download_timeid = 0;
 				}
 
 				pragha_backend_set_state (backend, ST_PAUSED);
@@ -698,6 +793,10 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, Pra
 			if (priv->timer > 0) {
 				g_source_remove(priv->timer);
 				priv->timer = 0;
+			}
+			if (priv->download_timeid > 0) {
+				g_source_remove(priv->download_timeid);
+				priv->download_timeid = 0;
 			}
 			break;
 		}
@@ -1005,6 +1104,15 @@ pragha_backend_class_init (PraghaBackendClass *klass)
 		              g_cclosure_marshal_VOID__INT,
 		              G_TYPE_NONE, 1, G_TYPE_INT);
 
+	signals[SIGNAL_DOWNLOAD_DONE] =
+		g_signal_new ("download-done",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaBackendClass, download_done),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__STRING,
+		              G_TYPE_NONE, 1, G_TYPE_STRING);
+
 	signals[SIGNAL_FINISHED] =
 		g_signal_new ("finished",
 		              G_TYPE_FROM_CLASS (gobject_class),
@@ -1039,12 +1147,15 @@ static void
 pragha_backend_init (PraghaBackend *backend)
 {
 	PraghaBackendPrivate *priv = PRAGHA_BACKEND_GET_PRIVATE (backend);
+
 	backend->priv = priv;
+
 	priv->target_state = GST_STATE_READY;
 	priv->state = ST_STOPPED;
 	priv->is_live = FALSE;
 	priv->can_seek = FALSE;
 	priv->seeking = FALSE;
+	priv->local_storage = FALSE;
 	priv->emitted_error = FALSE;
 	priv->error = NULL;
 	priv->preferences = pragha_preferences_get ();
@@ -1124,6 +1235,9 @@ pragha_backend_init (PraghaBackend *backend)
 	g_signal_connect (bus, "message::clock-lost", G_CALLBACK (pragha_backend_message_clock_lost), backend);
 	g_signal_connect (bus, "message::tag", G_CALLBACK (pragha_backend_message_tag), backend);
 	gst_object_unref (bus);
+
+	g_signal_connect (priv->pipeline, "deep-notify::temp-location",
+	                  G_CALLBACK (pragha_backend_got_temp_location), backend);
 
 	if(pragha_preferences_get_software_mixer (priv->preferences)) {
 		pragha_backend_set_soft_volume (backend, TRUE);

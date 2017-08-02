@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2013-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2013-2017 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -35,6 +35,7 @@ struct _PraghaPluginsEngine {
 	PeasEngine        *peas_engine;
 	PeasExtensionSet  *peas_exten_set;
 
+	gboolean           starting;
 	gboolean           shutdown;
 };
 
@@ -59,7 +60,13 @@ on_extension_removed (PeasExtensionSet  *set,
 }
 
 gboolean
-pragha_plugins_is_shutdown (PraghaPluginsEngine *engine)
+pragha_plugins_engine_is_starting (PraghaPluginsEngine *engine)
+{
+	return engine->starting;
+}
+
+gboolean
+pragha_plugins_engine_is_shutdown (PraghaPluginsEngine *engine)
 {
 	return engine->shutdown;
 }
@@ -73,9 +80,6 @@ pragha_plugins_engine_shutdown (PraghaPluginsEngine *engine)
 	CDEBUG(DBG_PLUGIN,"Plugins engine shutdown");
 
 	engine->shutdown = TRUE;
-
-	g_signal_handlers_disconnect_by_func (engine->peas_exten_set, (GCallback) on_extension_added, engine);
-	g_signal_handlers_disconnect_by_func (engine->peas_exten_set, (GCallback) on_extension_removed, engine);
 
 	loaded_plugins = peas_engine_get_loaded_plugins (engine->peas_engine);
 	if (loaded_plugins) {
@@ -116,6 +120,8 @@ pragha_plugins_engine_startup (PraghaPluginsEngine *engine)
 	else {
 		peas_engine_set_loaded_plugins (engine->peas_engine, (const gchar **) default_plugins);
 	}
+
+	engine->starting = FALSE;
 }
 
 /*
@@ -159,6 +165,7 @@ static void
 pragha_plugins_engine_init (PraghaPluginsEngine *engine)
 {
 	engine->peas_engine = peas_engine_get_default ();
+	engine->starting = TRUE;
 	engine->shutdown = FALSE;
 }
 

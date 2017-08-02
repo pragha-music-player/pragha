@@ -38,6 +38,16 @@ void remove_watch_cursor (GtkWidget *widget);
 
 GdkPixbuf * pragha_gdk_pixbuf_new_from_memory (gconstpointer data, gsize size);
 gchar* convert_length_str(gint length);
+
+gboolean
+pragha_string_list_is_present (GSList *list, const gchar *str);
+gboolean
+pragha_string_list_is_not_present (GSList *list, const gchar *str);
+GSList *
+pragha_string_list_get_added (GSList *list, GSList *new_list);
+GSList *
+pragha_string_list_get_removed (GSList *list, GSList *new_list);
+
 gboolean is_present_str_list(const gchar *str, GSList *list);
 GSList* delete_from_str_list(const gchar *str, GSList *list);
 gchar * path_get_dir_as_uri (const gchar *path);

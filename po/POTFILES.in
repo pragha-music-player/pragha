@@ -1,4 +1,8 @@
+#
+# Sources
+#
 src/info-bar-import-music.c
+src/pragha-background-task-bar.c
 src/pragha-cmdline.c
 src/pragha-equalizer-dialog.c
 src/pragha-filter-dialog.c
@@ -16,8 +20,22 @@ src/pragha-toolbar.c
 src/pragha-utils.c
 src/pragha-window.c
 src/pragha.c
+
+#
+# Builder Files
+#
+[type: gettext/glade]src/pragha-window.ui
+
+#
+# Desktop Files
+#
 data/pragha.desktop.in
+
+#
+# Plugins
+#
 plugins/acoustid/pragha-acoustid-plugin.c
+plugins/ampache/pragha-ampache-plugin.c
 plugins/cdrom/pragha-cdrom-plugin.c
 plugins/devices/pragha-device-client.c
 plugins/devices/pragha-devices-plugin.c

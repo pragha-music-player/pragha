@@ -39,9 +39,11 @@ AC_ARG_ENABLE(debug,[  --enable-debug    Turn on debugging],[
 	CFLAGS="$CFLAGS -DNDEBUG"
 ])
 
+dnl ***********************************************************************
+dnl Check for win32 platform
+dnl ***********************************************************************
 case "${host}" in
-        i[[3456789]]86-mingw32*) WIN32="yes" ;;
-        *cygwin*) WIN32="yes" ;;
+        *-*-mingw*|*-*-cygwin*) WIN32="yes" ;;
         *) WIN32="no" ;;
 esac
 AM_CONDITIONAL([WIN32], test "$WIN32" = "yes")
@@ -159,22 +161,69 @@ dnl Check rygel
 RYGEL_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
 XDT_CHECK_OPTIONAL_PACKAGE([RYGEL],
-                           [rygel-server-2.2], [0.20.0],
-                           [rygel-server-2.2],
-                           [rygel-server-2.2 library], [yes])
+                           [rygel-server-2.6], [0.26.0],
+                           [rygel-server-2.6],
+                           [rygel-server-2.6 library], [yes])
 else
 AM_CONDITIONAL([HAVE_RYGEL], 0)
 fi
 
 dnl Check grilo
-GRILO_FOUND="no"
+GRILO3_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
-XDT_CHECK_OPTIONAL_PACKAGE([GRILO],
-                           [grilo-0.2], [0.2.10],
+XDT_CHECK_OPTIONAL_PACKAGE([GRILO3],
+                           [grilo-0.3], [0.3.0],
+                           [grilo-0.3],
+                           [grilo-0.3 library], [yes])
+else
+AM_CONDITIONAL([HAVE_GRILO3], 0)
+fi
+
+GRILO2_FOUND="no"
+if test x"$LIBPEAS_FOUND" = x"yes"; then
+XDT_CHECK_OPTIONAL_PACKAGE([GRILO2],
+                           [grilo-0.2], [0.2.11],
                            [grilo-0.2],
                            [grilo-0.2 library], [yes])
 else
-AM_CONDITIONAL([HAVE_GRILO], 0)
+AM_CONDITIONAL([HAVE_GRILO2], 0)
+fi
+
+GRILO_FOUND="no"
+if test x"$GRILO3_FOUND" = x"yes"; then
+GRILO_FOUND="yes"
+fi
+if test x"$GRILO2_FOUND" = x"yes"; then
+GRILO_FOUND="yes"
+fi
+
+dnl Check grilo-net
+GRILO_NET3_FOUND="no"
+if test x"$LIBPEAS_FOUND" = x"yes"; then
+XDT_CHECK_OPTIONAL_PACKAGE([GRILO_NET3],
+                           [grilo-net-0.3], [0.3.0],
+                           [grilo-net-0.3],
+                           [grilo-net-0.3 library], [yes])
+else
+AM_CONDITIONAL([HAVE_GRILO_NET3], 0)
+fi
+
+GRILO_NET2_FOUND="no"
+if test x"$LIBPEAS_FOUND" = x"yes"; then
+XDT_CHECK_OPTIONAL_PACKAGE([GRILO_NET2],
+                           [grilo-net-0.2], [0.2.5],
+                           [grilo-net-0.2],
+                           [grilo-net-0.2 library], [yes])
+else
+AM_CONDITIONAL([HAVE_GRILO_NET2], 0)
+fi
+
+GRILO_NET_FOUND="no"
+if test x"$GRILO_NET3_FOUND" = x"yes"; then
+GRILO_NET_FOUND="yes"
+fi
+if test x"$GRILO_NET2_FOUND" = x"yes"; then
+GRILO_NET_FOUND="yes"
 fi
 
 dnl Check libclastfm
@@ -255,10 +304,12 @@ AC_CONFIG_FILES([data/icons/64x64/Makefile])
 AC_CONFIG_FILES([data/icons/128x128/Makefile])
 AC_CONFIG_FILES([po/Makefile.in])
 AC_CONFIG_FILES([src/Makefile])
+AC_CONFIG_FILES([win32/Makefile])
 
 if test x"$LIBPEAS_FOUND" = x"yes"; then
 AC_CONFIG_FILES([plugins/Makefile])
 AC_CONFIG_FILES([plugins/acoustid/Makefile])
+AC_CONFIG_FILES([plugins/ampache/Makefile])
 AC_CONFIG_FILES([plugins/mpris2/Makefile])
 AC_CONFIG_FILES([plugins/keybinder/Makefile])
 AC_CONFIG_FILES([plugins/gnome-media-keys/Makefile])
@@ -279,7 +330,11 @@ echo ""
 echo "Build Configuration for $PACKAGE version $VERSION"
 echo ""
 echo "  Gtk version used......: $GTK_VERSION"
+echo "  Gstreamer version used: $GSTREAMER_VERSION"
+echo ""
 echo "  Prefix................: ${prefix}"
+echo "  Host..................: ${host}"
+echo ""
 echo "  Debug enabled.........: $debug"
 echo ""
 echo "  Plugins enabled.......: $LIBPEAS_FOUND"
@@ -291,8 +346,9 @@ echo "   * Controls Pragha using multimedia keys....(Need keybinder-3.0 >= 0.2.0
 echo "   * Search lyrics, artists info and albums art.....(Need libglyr >= 1.0.1).: $LIBGLYR_FOUND"
 echo "   * Search metadata on AcoustID.....................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
 echo "   * Search radios on TuneIn.........................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
-echo "   * Share music library on DLNA............(Need rygel-server-2.2 >= 0.20).: $RYGEL_FOUND"
-echo "   * Play songs on DLNA Servers..................(Need grilo-0.2 >= 0.2.10).: $GRILO_FOUND"
+echo "   * Share music library on DLNA............(Need rygel-server-2.2 >= 0.26).: $RYGEL_FOUND"
+echo "   * Play songs on DLNA Servers......................(Need grilo >= 0.2.11).: $GRILO_FOUND"
+echo "   * Append music on Ampache server...............(Need grilo-net >= 0.2.5).: $GRILO_NET_FOUND"
 echo "   * Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
 echo "   * EXPERIMENTAL management of removable devices..........(Need gudev-1.0).: $GUDEV_FOUND"
 echo "   * EXPERIMENTAL management of mtp devices....:(Need gudev-1.0 and libmtp).: $LIBMTP_FOUND"

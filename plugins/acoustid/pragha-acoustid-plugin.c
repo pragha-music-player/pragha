@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2014 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2014-2016 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -47,6 +47,8 @@
 #include "src/pragha-window.h"
 #include "src/pragha-tagger.h"
 #include "src/pragha-tags-dialog.h"
+#include "src/pragha-statusbar.h"
+#include "src/pragha-background-task-widget.h"
 
 #include "plugins/pragha-plugin-macros.h"
 
@@ -58,12 +60,14 @@
 #define PRAGHA_ACOUSTID_PLUGIN_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), PRAGHA_TYPE_ACOUSTID_PLUGIN, PraghaAcoustidPluginClass))
 
 struct _PraghaAcoustidPluginPrivate {
-	PraghaApplication *pragha;
+	PraghaApplication          *pragha;
 
-	PraghaMusicobject *mobj;
+	PraghaMusicobject          *mobj;
 
-	GtkActionGroup    *action_group_main_menu;
-	guint              merge_id_main_menu;
+	PraghaBackgroundTaskWidget *task_widget;
+
+	GtkActionGroup             *action_group_main_menu;
+	guint                       merge_id_main_menu;
 };
 typedef struct _PraghaAcoustidPluginPrivate PraghaAcoustidPluginPrivate;
 
@@ -189,7 +193,6 @@ pragha_acoustid_plugin_get_metadata_done (SoupSession *session,
                                           gpointer     user_data)
 {
 	GtkWidget *dialog;
-	GtkWidget *window;
 	PraghaStatusbar *statusbar;
 	XMLNode *xml = NULL, *xi;
 	gchar *otitle = NULL, *oartist = NULL, *oalbum = NULL;
@@ -199,8 +202,9 @@ pragha_acoustid_plugin_get_metadata_done (SoupSession *session,
 	PraghaAcoustidPlugin *plugin = user_data;
 	PraghaAcoustidPluginPrivate *priv = plugin->priv;
 
-	window = pragha_application_get_window (priv->pragha);
-	remove_watch_cursor (window);
+	statusbar = pragha_statusbar_get ();
+	pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
+	g_object_unref(G_OBJECT(statusbar));
 
 	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
 		return;
@@ -247,7 +251,7 @@ pragha_acoustid_plugin_get_metadata_done (SoupSession *session,
 		dialog = pragha_tags_dialog_new ();
 
 		g_signal_connect (G_OBJECT (dialog), "response",
-			              G_CALLBACK (pragha_acoustid_dialog_response), plugin);
+		                  G_CALLBACK (pragha_acoustid_dialog_response), plugin);
 
 		pragha_tags_dialog_set_musicobject (PRAGHA_TAGS_DIALOG(dialog), priv->mobj);
 		pragha_tags_dialog_set_changed (PRAGHA_TAGS_DIALOG(dialog), prechanged);
@@ -278,7 +282,7 @@ pragha_acoustid_plugin_get_metadata (PraghaAcoustidPlugin *plugin, gint duration
 	query = g_strdup_printf ("http://api.acoustid.org/v2/lookup?client=%s&meta=%s&format=%s&duration=%d&fingerprint=%s",
 	                         "yPvUXBmO", "recordings+releasegroups+compress", "xml", duration, fingerprint);
 
-	session = soup_session_sync_new ();
+	session = soup_session_new ();
 
 	msg = soup_message_new ("GET", query);
 	soup_session_queue_message (session, msg,
@@ -292,7 +296,7 @@ error_cb (GstBus *bus, GstMessage *msg, void *data)
 {
 	GError *err;
 	gchar *debug_info;
-   
+
 	/* Print error details on the screen */
 	gst_message_parse_error (msg, &err, &debug_info);
 	g_printerr ("Error received from element %s: %s\n", GST_OBJECT_NAME (msg->src), err->message);
@@ -342,9 +346,9 @@ pragha_acoustid_get_fingerprint (const gchar *filename, gchar **fingerprint)
 static void
 pragha_acoustid_get_metadata_dialog (PraghaAcoustidPlugin *plugin)
 {
-	GtkWidget *window;
 	PraghaBackend *backend = NULL;
 	PraghaMusicobject *mobj = NULL;
+	PraghaStatusbar *statusbar;
 	const gchar *file = NULL;
 	gchar *fingerprint = NULL;
 	gint duration = 0;
@@ -359,13 +363,23 @@ pragha_acoustid_get_metadata_dialog (PraghaAcoustidPlugin *plugin)
 	file = pragha_musicobject_get_file (mobj);
 	duration = pragha_musicobject_get_length (mobj);
 
-	window = pragha_application_get_window (priv->pragha);
-	set_watch_cursor (window);
+	statusbar = pragha_statusbar_get ();
+	priv->task_widget = pragha_background_task_widget_new (_("Searching tags on AcoustID"),
+	                                                      "edit-find",
+	                                                      0,
+	                                                      NULL);
+	g_object_ref (G_OBJECT(priv->task_widget));
+	pragha_statusbar_add_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
+	g_object_unref(G_OBJECT(statusbar));
 
 	if (pragha_acoustid_get_fingerprint (file, &fingerprint))
 		pragha_acoustid_plugin_get_metadata (plugin, duration, fingerprint);
-	else
-		remove_watch_cursor (window);
+	else {
+		statusbar = pragha_statusbar_get ();
+		pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
+		pragha_statusbar_set_misc_text (statusbar, _("There was an error when searching your tags on AcoustID"));
+		g_object_unref (statusbar);
+	}
 
 	g_free (fingerprint);
 }
@@ -424,8 +438,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                  G_CALLBACK (pragha_gmenu_search_metadata_action), plugin);
 
 	item = g_menu_item_new (_("Search tags on AcoustID"), "win.search-metadata");
-
 	pragha_menubar_append_action (priv->pragha, "pragha-plugins-placeholder", action, item);
+	g_object_unref (item);
 
 	/* Connect playback signals */
 

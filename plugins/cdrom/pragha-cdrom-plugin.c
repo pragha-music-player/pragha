@@ -46,6 +46,7 @@
 #include "src/pragha-plugins-engine.h"
 #include "src/pragha-statusicon.h"
 #include "src/pragha-music-enum.h"
+#include "src/pragha-database-provider.h"
 #include "src/pragha-window.h"
 
 #if HAVE_GUDEV
@@ -64,6 +65,10 @@
 
 struct _PraghaCdromPluginPrivate {
 	PraghaApplication *pragha;
+
+	guint64             bus_hooked;
+	guint64             device_hooked;
+	gchar              *disc_id;
 
 	GtkWidget          *device_setting_widget;
 	GtkWidget          *audio_cd_device_w;
@@ -151,10 +156,10 @@ pragha_preferences_set_audio_cd_device (PraghaPreferences *preferences,
 }
 
 static PraghaMusicobject *
-new_musicobject_from_cdda (PraghaApplication *pragha,
-                           cdrom_drive_t *cdda_drive,
-                           cddb_disc_t *cddb_disc,
-                           gint track_no)
+new_musicobject_from_cdda (PraghaCdromPlugin *plugin,
+                           cdrom_drive_t     *cdda_drive,
+                           cddb_disc_t       *cddb_disc,
+                           gint               track_no)
 {
 	PraghaPreferences *preferences;
 	PraghaMusicEnum *enum_map = NULL;
@@ -162,16 +167,18 @@ new_musicobject_from_cdda (PraghaApplication *pragha,
 	gint channels, start, end;
 	gchar *ntitle = NULL, *nfile = NULL;
 
+	PraghaCdromPluginPrivate *priv = plugin->priv;
+
 	CDEBUG(DBG_PLUGIN, "Creating new musicobject from cdda: %d", track_no);
 
-	channels = cdio_get_track_channels(cdda_drive->p_cdio,
-					   track_no);
+	channels = cdio_get_track_channels(cdda_drive->p_cdio, track_no);
 	start = cdio_cddap_track_firstsector(cdda_drive, track_no);
 	end = cdio_cddap_track_lastsector(cdda_drive, track_no);
 
-	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
+	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
+	                     NULL);
 
-	preferences = pragha_application_get_preferences (pragha);
+	preferences = pragha_application_get_preferences (priv->pragha);
 	if (pragha_preferences_get_use_cddb (preferences) && cddb_disc) {
 		cddb_track_t *track;
 		const gchar *title, *artist, *album, *genre;
@@ -202,8 +209,11 @@ new_musicobject_from_cdda (PraghaApplication *pragha,
 	}
 
 	enum_map = pragha_music_enum_get ();
-	pragha_musicobject_set_source (mobj, pragha_music_enum_map_get(enum_map, "FILE_CDDA"));
+	pragha_musicobject_set_source (mobj, pragha_music_enum_map_get(enum_map, "CDROM"));
 	g_object_unref (enum_map);
+
+	if (priv->disc_id)
+		pragha_musicobject_set_provider (mobj, priv->disc_id);
 
 	nfile = g_strdup_printf("cdda://%d", track_no);
 	pragha_musicobject_set_file(mobj, nfile);
@@ -223,7 +233,8 @@ new_musicobject_from_cdda (PraghaApplication *pragha,
 }
 
 static gint
-cddb_add_tracks (cdrom_drive_t *cdda_drive, cddb_disc_t *cddb_disc)
+pragha_cdrom_plugin_add_cddb_tracks (cdrom_drive_t *cdda_drive,
+                                     cddb_disc_t   *cddb_disc)
 {
 	cddb_track_t *track;
 	lba_t lba;
@@ -250,42 +261,37 @@ cddb_add_tracks (cdrom_drive_t *cdda_drive, cddb_disc_t *cddb_disc)
 	return 0;
 }
 
-static void
-add_audio_cd_tracks (PraghaApplication *pragha, cdrom_drive_t *cdda_drive, cddb_disc_t *cddb_disc)
+static GList *
+pragha_cdrom_plugin_get_mobj_list (PraghaCdromPlugin *plugin,
+                                   cdrom_drive_t     *cdda_drive,
+                                   cddb_disc_t       *cddb_disc)
 {
-	PraghaPlaylist *playlist;
 	PraghaMusicobject *mobj;
-
 	gint num_tracks = 0, i = 0;
 	GList *list = NULL;
 
 	num_tracks = cdio_cddap_tracks(cdda_drive);
 	if (!num_tracks)
-		return;
+		return NULL;
 
 	for (i = 1; i <= num_tracks; i++) {
-		mobj = new_musicobject_from_cdda(pragha, cdda_drive, cddb_disc, i);
+		mobj = new_musicobject_from_cdda (plugin, cdda_drive, cddb_disc, i);
 		if (G_LIKELY(mobj))
 			list = g_list_append(list, mobj);
 
 		pragha_process_gtk_events ();
 	}
-	if (list) {
-		playlist = pragha_application_get_playlist (pragha);
-		pragha_playlist_append_mobj_list(playlist, list);
-		g_list_free (list);
-	}
+	return list;
 }
 
-static cdrom_drive_t*
-find_audio_cd (PraghaApplication *pragha)
+static cdrom_drive_t *
+pragha_cdrom_plugin_get_drive (PraghaPreferences *preferences)
 {
 	cdrom_drive_t *drive = NULL;
 	gchar **cdda_devices = NULL;
-	PraghaPreferences *preferences;
+	const gchar *audio_cd_device = NULL;
 
-	preferences = pragha_application_get_preferences (pragha);
-	const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(preferences);
+	audio_cd_device = pragha_preferences_get_audio_cd_device(preferences);
 
 	if (!audio_cd_device) {
 		cdda_devices = cdio_get_devices_with_cap(NULL, CDIO_FS_AUDIO, FALSE);
@@ -301,7 +307,8 @@ find_audio_cd (PraghaApplication *pragha)
 			g_warning("Unable to identify Audio CD");
 			goto exit;
 		}
-	} else {
+	}
+	else {
 		CDEBUG(DBG_PLUGIN, "Trying Audio CD Device: %s", audio_cd_device);
 
 		drive = cdio_cddap_identify(audio_cd_device, 0, NULL);
@@ -317,16 +324,28 @@ exit:
 	return drive;
 }
 
-void
-pragha_application_append_audio_cd (PraghaApplication *pragha)
+static void
+pragha_application_append_audio_cd (PraghaCdromPlugin *plugin)
 {
+	PraghaDatabaseProvider *provider;
+	PraghaDatabase *database;
+	PraghaPlaylist *playlist;
+	PraghaPreferences *preferences;
+	PraghaMusicobject *mobj;
 	lba_t lba;
 	gint matches;
+	cdrom_drive_t *cdda_drive = NULL;
 	cddb_disc_t *cddb_disc = NULL;
 	cddb_conn_t *cddb_conn = NULL;
-	PraghaPreferences *preferences;
+	const gchar *title_disc = NULL;
+	guint discid = 0;
+	GList *list = NULL, *l;
 
-	cdrom_drive_t *cdda_drive = find_audio_cd(pragha);
+	PraghaCdromPluginPrivate *priv = plugin->priv;
+
+	preferences = pragha_application_get_preferences (priv->pragha);
+
+	cdda_drive = pragha_cdrom_plugin_get_drive (preferences);
 	if (!cdda_drive)
 		return;
 
@@ -335,7 +354,6 @@ pragha_application_append_audio_cd (PraghaApplication *pragha)
 		return;
 	}
 
-	preferences = pragha_application_get_preferences (pragha);
 	if (pragha_preferences_get_use_cddb (preferences)) {
 		cddb_conn = cddb_new ();
 		if (!cddb_conn)
@@ -345,17 +363,20 @@ pragha_application_append_audio_cd (PraghaApplication *pragha)
 		if (!cddb_disc)
 			goto add;
 
-		lba = cdio_get_track_lba(cdda_drive->p_cdio,
-					 CDIO_CDROM_LEADOUT_TRACK);
+		lba = cdio_get_track_lba(cdda_drive->p_cdio, CDIO_CDROM_LEADOUT_TRACK);
 		if (lba == CDIO_INVALID_LBA)
 			goto add;
 
 		cddb_disc_set_length(cddb_disc, FRAMES_TO_SECONDS(lba));
-		if (cddb_add_tracks(cdda_drive, cddb_disc) < 0)
+		if (pragha_cdrom_plugin_add_cddb_tracks(cdda_drive, cddb_disc) < 0)
 			goto add;
 
 		if (!cddb_disc_calc_discid(cddb_disc))
 			goto add;
+
+		discid = cddb_disc_get_discid (cddb_disc);
+		if (discid)
+			priv->disc_id = g_strdup_printf ("Discid://%x", discid);
 
 		cddb_disc_set_category(cddb_disc, CDDB_CAT_MISC);
 
@@ -363,18 +384,44 @@ pragha_application_append_audio_cd (PraghaApplication *pragha)
 		if (matches == -1)
 			goto add;
 
-		if (!cddb_read(cddb_conn,
-			       cddb_disc)) {
+		if (!cddb_read(cddb_conn, cddb_disc)) {
 			cddb_error_print(cddb_errno(cddb_conn));
 			goto add;
 		}
 
 		CDEBUG(DBG_PLUGIN, "Successfully initialized CDDB");
+
 		goto add;
 	}
 
 add:
-	add_audio_cd_tracks(pragha, cdda_drive, cddb_disc);
+	list = pragha_cdrom_plugin_get_mobj_list (plugin, cdda_drive, cddb_disc);
+	if (list) {
+		playlist = pragha_application_get_playlist (priv->pragha);
+		pragha_playlist_append_mobj_list (playlist, list);
+
+		if (priv->disc_id) {
+			title_disc = cddb_disc_get_title (cddb_disc);
+
+			provider = pragha_database_provider_get ();
+			pragha_provider_add_new (provider,
+			                         priv->disc_id,
+			                         "CDROM",
+			                         title_disc ? title_disc : _("Audio CD"),
+			                         "media-optical");
+			pragha_provider_set_visible (provider, priv->disc_id, TRUE);
+
+			database = pragha_application_get_database (priv->pragha);
+			for (l = list; l != NULL; l = l->next) {
+				mobj = l->data;
+				pragha_database_add_new_musicobject (database, mobj);
+			}
+			pragha_provider_update_done (provider);
+			g_object_unref (provider);
+		}
+		g_list_free (list);
+	}
+
 	CDEBUG(DBG_PLUGIN, "Successfully opened Audio CD device");
 
 	if (cdda_drive)
@@ -392,7 +439,7 @@ pragha_musicobject_is_cdda_type (PraghaMusicobject *mobj)
 	PraghaMusicSource file_source = FILE_NONE;
 
 	enum_map = pragha_music_enum_get ();
-	file_source = pragha_music_enum_map_get(enum_map, "FILE_CDDA");
+	file_source = pragha_music_enum_map_get(enum_map, "CDROM");
 	g_object_unref (enum_map);
 
 	return (file_source == pragha_musicobject_get_source (mobj));
@@ -401,7 +448,9 @@ pragha_musicobject_is_cdda_type (PraghaMusicobject *mobj)
 static void
 pragha_cdrom_plugin_set_device (PraghaBackend *backend, GObject *obj, gpointer user_data)
 {
+	PraghaPreferences *preferences;
 	PraghaMusicobject *mobj = NULL;
+	const gchar *audio_cd_device;
 	GObject *source;
 
 	PraghaCdromPlugin *plugin = user_data;
@@ -413,8 +462,8 @@ pragha_cdrom_plugin_set_device (PraghaBackend *backend, GObject *obj, gpointer u
 
 	g_object_get (obj, "source", &source, NULL);
 	if (source) {
-		PraghaPreferences *preferences = pragha_application_get_preferences (priv->pragha);
-		const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device (preferences);
+		preferences = pragha_application_get_preferences (priv->pragha);
+		audio_cd_device = pragha_preferences_get_audio_cd_device (preferences);
 		if (audio_cd_device) {
 			g_object_set (source, "device", audio_cd_device, NULL);
 		}
@@ -447,11 +496,10 @@ pragha_cdrom_plugin_device_added_response (GtkWidget *dialog,
                                            gpointer   user_data)
 {
 	PraghaCdromPlugin *plugin = user_data;
-	PraghaCdromPluginPrivate *priv = plugin->priv;
 
 	switch (response) {
 		case PRAGHA_DEVICE_RESPONSE_PLAY:
-			pragha_application_append_audio_cd (priv->pragha);
+			pragha_application_append_audio_cd (plugin);
 			break;
 		case PRAGHA_DEVICE_RESPONSE_NONE:
 		default:
@@ -470,11 +518,19 @@ pragha_cdrom_plugin_device_added (PraghaDeviceClient *device_client,
 	GtkWidget *dialog;
 
 	PraghaCdromPlugin *plugin = user_data;
+	PraghaCdromPluginPrivate *priv = plugin->priv;
 
 	if (device_type != PRAGHA_DEVICE_AUDIO_CD)
 		return;
 
-	dialog = pragha_gudev_dialog_new (NULL, _("Audio/Data CD"), "media-optical",
+	if (priv->bus_hooked || priv->device_hooked)
+		return;
+
+	priv->bus_hooked = g_udev_device_get_property_as_uint64 (u_device, "BUSNUM");
+	priv->device_hooked = g_udev_device_get_property_as_uint64 (u_device, "DEVNUM");
+
+	dialog = pragha_gudev_dialog_new (pragha_application_get_window (priv->pragha),
+	                                 _("Audio/Data CD"), "media-optical",
 	                                 _("An audio CD was inserted"), NULL,
 	                                 _("Add Audio _CD"), PRAGHA_DEVICE_RESPONSE_PLAY);
 
@@ -490,10 +546,40 @@ pragha_cdrom_plugin_device_removed (PraghaDeviceClient *device_client,
                                     GUdevDevice        *u_device,
                                     gpointer            user_data)
 {
+	PraghaDatabaseProvider *provider;
+	PraghaMusicEnum *enum_map = NULL;
+	guint64 busnum = 0;
+	guint64 devnum = 0;
+
+	PraghaCdromPlugin *plugin = user_data;
+	PraghaCdromPluginPrivate *priv = plugin->priv;
+
 	if (device_type != PRAGHA_DEVICE_AUDIO_CD)
 		return;
 
-	g_print ("CDROM REMOVEDDDDD.. Cri cri.. never detect it.. .\n");
+	busnum = g_udev_device_get_property_as_uint64(u_device, "BUSNUM");
+	devnum = g_udev_device_get_property_as_uint64(u_device, "DEVNUM");
+
+	if (busnum == priv->bus_hooked && devnum == priv->device_hooked) {
+		if (priv->disc_id) {
+			provider = pragha_database_provider_get ();
+			pragha_provider_remove (provider, priv->disc_id);
+			pragha_provider_update_done (provider);
+			g_object_unref (provider);
+		}
+
+		priv->bus_hooked = 0;
+		priv->device_hooked = 0;
+
+		if (priv->disc_id) {
+			g_free (priv->disc_id);
+			priv->disc_id = NULL;
+		}
+
+		enum_map = pragha_music_enum_get ();
+		pragha_music_enum_map_remove (enum_map, "CDROM");
+		g_object_unref (enum_map);
+	}
 }
 #endif
 
@@ -503,8 +589,7 @@ pragha_cdrom_plugin_device_removed (PraghaDeviceClient *device_client,
 static void
 pragha_cdrom_plugin_append_action (GtkAction *action, PraghaCdromPlugin *plugin)
 {
-	PraghaCdromPluginPrivate *priv = plugin->priv;
-	pragha_application_append_audio_cd (priv->pragha);
+	pragha_application_append_audio_cd (plugin);
 }
 
 static void
@@ -728,8 +813,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                  G_CALLBACK (pragha_gmenu_add_cdrom_action), plugin);
 
 	item = g_menu_item_new (_("Add Audio _CD"), "win.add-cdrom");
-
 	pragha_menubar_append_action (priv->pragha, "pragha-plugins-append-music", action, item);
+	g_object_unref (item);
 
 	/* Connect signals */
 
@@ -751,7 +836,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	#endif
 
 	enum_map = pragha_music_enum_get ();
-	pragha_music_enum_map_get (enum_map, "FILE_CDDA");
+	pragha_music_enum_map_get (enum_map, "CDROM");
 	g_object_unref (enum_map);
 
 	/* Settings */
@@ -761,6 +846,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
+	PraghaDatabaseProvider *provider;
 	PraghaBackend *backend;
 	PraghaPreferences *preferences;
 	PraghaStatusIcon *status_icon = NULL;
@@ -801,18 +887,48 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	g_object_unref (device_client);
 	#endif
 
-	pragha_cdrom_plugin_remove_setting (plugin);
+	/* Remove from database */
 
-	preferences = pragha_application_get_preferences (priv->pragha);
-	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "lastfm");
-	if (!pragha_plugins_is_shutdown(pragha_application_get_plugins_engine(priv->pragha))) {
-		pragha_preferences_remove_group (preferences, plugin_group);
+	if (priv->disc_id) {
+		provider = pragha_database_provider_get ();
+		pragha_provider_remove (provider, priv->disc_id);
+		g_object_unref (provider);
 	}
-	g_free (plugin_group);
+
+	/* Crop library to not save from playlist */
 
 	enum_map = pragha_music_enum_get ();
-	pragha_music_enum_map_remove (enum_map, "FILE_CDDA");
+	pragha_music_enum_map_remove (enum_map, "CDROM");
 	g_object_unref (enum_map);
+
+	/* If plugin is disables by user remove the rest of preferences */
+
+	if (!pragha_plugins_engine_is_shutdown(pragha_application_get_plugins_engine(priv->pragha)))
+	{
+		/* Remove setting widgets */
+
+		pragha_cdrom_plugin_remove_setting (plugin);
+
+		/* Remove settings */
+
+		preferences = pragha_application_get_preferences (priv->pragha);
+		plugin_group = pragha_preferences_get_plugin_group_name (preferences, "cdrom");
+		pragha_preferences_remove_group (preferences, plugin_group);
+		g_free (plugin_group);
+
+		/* Force update library view */
+
+		if (priv->disc_id) {
+			provider = pragha_database_provider_get ();
+			pragha_provider_update_done (provider);
+			g_object_unref (provider);
+		}
+	}
+
+	/* Free and shutdown */
+
+	if (priv->disc_id)
+		g_free (priv->disc_id);
 
 	libcddb_shutdown ();
 }

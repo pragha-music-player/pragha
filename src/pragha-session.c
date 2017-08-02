@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2016 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -27,45 +27,25 @@
 
 #include "pragha.h"
 
-#if HAVE_LIBXFCE4UI
-static void
-pragha_session_quit (XfceSMClient *sm_client, PraghaApplication *pragha)
-{
-	pragha_application_quit (pragha);
-}
-
-static void
-pragha_session_save_state (XfceSMClient *sm_client, PraghaApplication *pragha)
-{
-	/* Nothing here? */
-}
-
+#if HAVE_LIBXFCE4UI && !GTK_CHECK_VERSION (3, 21, 3)
 void
 pragha_init_session_support(PraghaApplication *pragha)
 {
 	XfceSMClient *client;
 	GError *error = NULL;
- 
+
 	client =  xfce_sm_client_get ();
 	xfce_sm_client_set_priority (client, XFCE_SM_CLIENT_PRIORITY_DEFAULT);
 	xfce_sm_client_set_restart_style (client, XFCE_SM_CLIENT_RESTART_NORMAL);
 	xfce_sm_client_set_desktop_file(client, DESKTOPENTRY);
 
-	g_signal_connect (G_OBJECT (client), "quit",
-	                  G_CALLBACK (pragha_session_quit), pragha);
-	g_signal_connect (G_OBJECT (client), "save-state",
-	                  G_CALLBACK (pragha_session_save_state), pragha);
+	g_signal_connect_swapped (G_OBJECT (client), "quit",
+	                          G_CALLBACK (pragha_application_quit), pragha);
 
 	if(!xfce_sm_client_connect (client, &error)) {
 		g_warning ("Failed to connect to session manager: %s", error->message);
 		g_error_free (error);
 	}
-}
-#else
-#ifdef G_OS_WIN32
-void
-pragha_init_session_support(PraghaApplication *pragha)
-{
 }
 #else
 void
@@ -81,5 +61,4 @@ pragha_init_session_support(PraghaApplication *pragha)
 	gtk_window_set_role (GTK_WINDOW (window), role);
 	g_free (role);
 }
-#endif
 #endif

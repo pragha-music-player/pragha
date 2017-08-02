@@ -1,16 +1,18 @@
 /*************************************************************************/
-/* Copyright (C) 2013 matias <mati86dl@gmail.com>			 */
-/* 									 */
+/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
+/* Copyright (C) 2009-2017 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2012-2013 Pavel Vasin                                   */
+/*                                                                       */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
-/* the Free Software Foundation, either version 3 of the License, or	 */
-/* (at your option) any later version.					 */
-/* 									 */
-/* This program is distributed in the hope that it will be useful,	 */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	 */
-/* GNU General Public License for more details.				 */
-/* 									 */
+/* the Free Software Foundation, either version 3 of the License, or     */
+/* (at your option) any later version.                                   */
+/*                                                                       */
+/* This program is distributed in the hope that it will be useful,       */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
+/* GNU General Public License for more details.                          */
+/*                                                                       */
 /* You should have received a copy of the GNU General Public License	 */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
@@ -71,6 +73,12 @@ gint
 pragha_database_find_location (PraghaDatabase *database, const gchar *location);
 
 gint
+pragha_database_find_provider (PraghaDatabase *database, const gchar *provider);
+
+gint
+pragha_database_find_provider_type (PraghaDatabase *database, const gchar *provider_type);
+
+gint
 pragha_database_find_mime_type (PraghaDatabase *database, const gchar *mime_type);
 
 gint
@@ -96,6 +104,9 @@ pragha_database_find_radio (PraghaDatabase *database, const gchar *radio);
 
 gint
 pragha_database_add_new_location (PraghaDatabase *database, const gchar *location);
+
+gint
+pragha_database_add_new_provider_type (PraghaDatabase *database, const gchar *provider_type);
 
 gint
 pragha_database_add_new_mime_type (PraghaDatabase *database, const gchar *mime_type);
@@ -186,8 +197,6 @@ pragha_database_get_track_count (PraghaDatabase *database);
 
 void
 pragha_database_change_playlists_done(PraghaDatabase *database);
-void
-pragha_database_change_tracks_done(PraghaDatabase *database);
 
 void
 pragha_database_compatibilize_version (PraghaDatabase *database);

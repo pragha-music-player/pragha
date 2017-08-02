@@ -19,6 +19,7 @@
 
 #include "pragha-musicobject.h"
 #include "pragha-database.h"
+#include "pragha-database-provider.h"
 #include "pragha-library-pane.h"
 #include "pragha-tags-mgmt.h"
 
@@ -74,7 +75,7 @@ pragha_tagger_add_location_id(PraghaTagger *tagger, gint location_id)
 void
 pragha_tagger_apply_changes(PraghaTagger *tagger)
 {
-	PraghaPreferences *preferences;
+	PraghaDatabaseProvider *provider;
 
 	PraghaTaggerPrivate *priv = tagger->priv;
 
@@ -84,10 +85,9 @@ pragha_tagger_apply_changes(PraghaTagger *tagger)
 	if(priv->loc_arr->len) {
 		pragha_database_update_local_files_change_tag(priv->cdbase, priv->loc_arr, priv->changed, priv->mobj);
 
-		preferences = pragha_preferences_get();
-		if(pragha_library_need_update_view(preferences, priv->changed))
-			pragha_database_change_tracks_done(priv->cdbase);
-		g_object_unref(preferences);
+		provider = pragha_database_provider_get ();
+		pragha_provider_update_done (provider);
+		g_object_unref (provider);
 	}
 }
 

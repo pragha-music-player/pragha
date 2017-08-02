@@ -24,6 +24,7 @@
 #else
 #include <glib/gi18n.h>
 #endif
+#include <stdlib.h>
 
 #include "pragha-device-client.h"
 
@@ -89,6 +90,21 @@ pragha_gudev_dialog_new (GtkWidget *parent, const gchar *title, const gchar *ico
 	return dialog;
 }
 
+gint
+pragha_gudev_get_property_as_int (GUdevDevice *device,
+                                  const gchar *property,
+                                  gint         base)
+{
+	const char *strvalue;
+
+	strvalue = g_udev_device_get_property (device, property);
+	if (strvalue == NULL) {
+		return 0;
+	}
+
+	return strtol (strvalue, NULL, base);
+}
+
 /* Identify devices.*/
 
 static gint
@@ -110,15 +126,15 @@ pragha_gudev_get_device_type (GUdevDevice *device)
 
 	is_cdrom = (g_strcmp0 (id_type, "cd") == 0);
 	if (is_cdrom) {
-		/* silently ignore CD drives without media */
 		if (g_udev_device_get_property_as_boolean (device, "ID_CDROM_MEDIA")) {
-
 			audio_tracks = g_udev_device_get_property_as_uint64 (device, "ID_CDROM_MEDIA_TRACK_COUNT_AUDIO");
 			data_tracks = g_udev_device_get_property_as_uint64 (device, "ID_CDROM_MEDIA_TRACK_COUNT_DATA");
 
 			if (audio_tracks > 0)
 				return PRAGHA_DEVICE_AUDIO_CD;
 		}
+		else
+			return PRAGHA_DEVICE_EMPTY_AUDIO_CD;
 	}
 
 	devtype = g_udev_device_get_property (device, "DEVTYPE");
@@ -155,8 +171,12 @@ pragha_gudev_device_changed (PraghaDeviceClient *client, GUdevDevice *device)
 	PraghaDeviceType device_type = PRAGHA_DEVICE_UNKNOWN;
 
 	device_type = pragha_gudev_get_device_type (device);
-	if (device_type == PRAGHA_DEVICE_AUDIO_CD)
+	if (device_type == PRAGHA_DEVICE_AUDIO_CD) {
 		g_signal_emit (client, signals[SIGNAL_DEVICE_ADDED], 0, device_type, device);
+	}
+	else if (device_type == PRAGHA_DEVICE_EMPTY_AUDIO_CD) {
+		g_signal_emit (client, signals[SIGNAL_DEVICE_REMOVED], 0, PRAGHA_DEVICE_AUDIO_CD, device);
+	}
 }
 
 static void

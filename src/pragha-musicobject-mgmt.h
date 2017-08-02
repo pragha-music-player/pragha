@@ -32,7 +32,7 @@
 #define TAG_YEAR_CHANGED    1<<5
 #define TAG_COMMENT_CHANGED 1<<6
 
-PraghaMusicobject* new_musicobject_from_file(const gchar *file);
+PraghaMusicobject* new_musicobject_from_file(const gchar *file, const gchar *provider);
 PraghaMusicobject* new_musicobject_from_db(PraghaDatabase *cdbase, gint location_id);
 PraghaMusicobject* new_musicobject_from_location(const gchar *uri, const gchar *name);
 void pragha_update_musicobject_change_tag(PraghaMusicobject *mobj, gint changed, PraghaMusicobject *nmobj);

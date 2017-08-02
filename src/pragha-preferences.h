@@ -78,7 +78,6 @@ struct _PraghaPreferencesClass
 #define KEY_LIBRARY_SCANNED        "library_scanned"
 #define KEY_LIBRARY_VIEW_ORDER     "library_view_order"
 #define KEY_LIBRARY_LAST_SCANNED   "library_last_scanned"
-#define KEY_FUSE_FOLDERS           "library_fuse_folders"
 #define KEY_SORT_BY_YEAR           "library_sort_by_year"
 
 #define GROUP_AUDIO    "Audio"
@@ -238,11 +237,8 @@ pragha_preferences_get_plugin_group_name (PraghaPreferences *preferences,
 void
 pragha_preferences_need_restart (PraghaPreferences *preferences);
 
-GSList *
-pragha_preferences_get_library_list (PraghaPreferences *preferences);
 void
-pragha_preferences_set_library_list (PraghaPreferences *preferences,
-                                     GSList *list);
+pragha_preferences_local_provider_changed (PraghaPreferences *preferences);
 
 const gchar *
 pragha_preferences_get_installed_version (PraghaPreferences *preferences);
@@ -270,12 +266,6 @@ pragha_preferences_set_sort_by_year (PraghaPreferences *preferences,
                                      gboolean sort_by_year);
 gboolean
 pragha_preferences_get_sort_by_year (PraghaPreferences *preferences);
-
-void
-pragha_preferences_set_fuse_folders (PraghaPreferences *preferences,
-                                     gboolean fuse_folders);
-gboolean
-pragha_preferences_get_fuse_folders (PraghaPreferences *preferences);
 
 void
 pragha_preferences_set_shuffle (PraghaPreferences *preferences,
