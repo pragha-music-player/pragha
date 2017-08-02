@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2015-2016 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2015-2017 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -59,12 +59,14 @@
 #include "src/pragha-hig.h"
 #include "src/pragha-database-provider.h"
 #include "src/pragha-background-task-widget.h"
+#include "src/pragha-song-cache.h"
 #include "plugins/pragha-plugin-macros.h"
 
 typedef struct _PraghaAmpachePluginPrivate PraghaAmpachePluginPrivate;
 
 struct _PraghaAmpachePluginPrivate {
 	PraghaApplication          *pragha;
+	PraghaSongCache            *cache;
 
 	GrlNetWc                   *glrnet;
 	GCancellable               *cancellable;
@@ -1011,8 +1013,8 @@ pragha_ampache_plugin_prepare_source (PraghaBackend       *backend,
                                       PraghaAmpachePlugin *plugin)
 {
 	PraghaMusicobject *mobj;
-	const gchar *filename = NULL;
-	gchar *uri = NULL;
+	const gchar *location = NULL;
+	gchar *filename = NULL, *uri = NULL;
 
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 
@@ -1020,10 +1022,35 @@ pragha_ampache_plugin_prepare_source (PraghaBackend       *backend,
 	if (!pragha_musicobject_is_ampache_file (mobj))
 		return;
 
-	filename =  pragha_musicobject_get_file (mobj);
-	uri = g_strdup_printf ("%s&ssid=%s", filename, priv->auth);
+	location =  pragha_musicobject_get_file (mobj);
+	filename = pragha_song_cache_get_from_location (priv->cache, location);
+	if (filename != NULL) {
+		uri = g_filename_to_uri (filename, NULL, NULL);
+		g_free (filename);
+	}
+	else {
+		uri = g_strdup_printf ("%s&ssid=%s", location, priv->auth);
+	}
 	pragha_backend_set_playback_uri (backend, uri);
 	g_free (uri);
+}
+
+static void
+pragha_ampache_plugin_download_done (PraghaBackend       *backend,
+                                     gchar               *filename,
+                                     PraghaAmpachePlugin *plugin)
+{
+	PraghaMusicobject *mobj;
+	const gchar *location = NULL;
+
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	mobj = pragha_backend_get_musicobject (backend);
+	if (!pragha_musicobject_is_ampache_file (mobj))
+		return;
+
+	location = pragha_musicobject_get_file (mobj);
+	pragha_song_cache_put_location (priv->cache, location, filename);
 }
 
 /*
@@ -1052,6 +1079,10 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->cancellable = g_cancellable_new ();
 
 	/* New cache */
+
+	priv->cache = pragha_song_cache_get ();
+
+	/* Temp tables.*/
 
 	priv->tracks_table = g_hash_table_new_full (g_str_hash,
 	                                            g_str_equal,
@@ -1092,8 +1123,11 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	/* Backend signals */
 
 	backend = pragha_application_get_backend (priv->pragha);
+	pragha_backend_set_local_storage (backend, TRUE);
 	g_signal_connect (backend, "prepare-source",
 	                  G_CALLBACK(pragha_ampache_plugin_prepare_source), plugin);
+	g_signal_connect (backend, "download-done",
+	                  G_CALLBACK(pragha_ampache_plugin_download_done), plugin);
 
 	/* Append setting */
 
@@ -1120,6 +1154,8 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	/* Cache */
 
 	g_hash_table_destroy (priv->tracks_table);
+	g_object_unref (priv->cache);
+
 	g_object_unref (priv->glrnet);
 
 	/* If user disable the plugin (Pragha not shutdown) */
@@ -1145,6 +1181,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	}
 
 	backend = pragha_application_get_backend (priv->pragha);
+	pragha_backend_set_local_storage (backend, FALSE);
 	g_signal_handlers_disconnect_by_func (backend, pragha_ampache_plugin_prepare_source, plugin);
 
 	/* Menu Action */

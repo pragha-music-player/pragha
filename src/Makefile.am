@@ -77,6 +77,8 @@ pragha_SOURCES = \
 	pragha-simple-async.h \
 	pragha-simple-widgets.c \
 	pragha-simple-widgets.h \
+	pragha-song-cache.c \
+	pragha-song-cache.h \
 	pragha-statusbar.c \
 	pragha-statusbar.h \
 	pragha-statusicon.c \

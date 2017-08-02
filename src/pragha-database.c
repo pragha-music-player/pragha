@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2016 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2017 matias <mati86dl@gmail.com>                   */
 /* Copyright (C) 2012-2013 Pavel Vasin                                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify	 */
@@ -984,7 +984,7 @@ pragha_database_init_schema (PraghaDatabase *database)
 	gint i;
 
 	const gchar *queries[] = {
-		"PRAGMA user_version=133",
+		"PRAGMA user_version=140",
 
 		"PRAGMA synchronous=OFF",
 
@@ -1007,6 +1007,14 @@ pragha_database_init_schema (PraghaDatabase *database)
 		"CREATE TABLE IF NOT EXISTS LOCATION "
 			"(id INTEGER PRIMARY KEY,"
 			"name TEXT,"
+			"UNIQUE(name));",
+
+		"CREATE TABLE IF NOT EXISTS CACHE "
+			"(id INTEGER PRIMARY KEY,"
+			"name TEXT,"
+			"size INT,"
+			"playcount INT,"
+			"timestamp INT,"
 			"UNIQUE(name));",
 
 		"CREATE TABLE IF NOT EXISTS PROVIDER "
