@@ -11,7 +11,7 @@ m4_define([pragha_version_micro], [3])
 m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
 
 dnl Initialize autoconf
-AC_COPYRIGHT([Copyright (c) 2009-2015
+AC_COPYRIGHT([Copyright (c) 2009-2017
         Matias De lellis <mati86dl@gmail.com>])
 AC_INIT([pragha], [pragha_version()], [mati86dl@gmail.com])
 AC_CONFIG_HEADERS([config.h])
@@ -70,7 +70,7 @@ LT_PREREQ([2.2.6])
 LT_INIT([disable-static])
 
 dnl Check for i18n support
-XDT_I18N([bg ca_ES cs de es el fr hu it ja ko_KR lt nl no pl pt pt_BR ru sv tr uk vi zh_CN])
+XDT_I18N([bg ca_ES cs da de es el fr hu id it ja ko_KR lt nl no pl pt pt_BR ru sk sv tr uk vi zh_CN])
 
 GSTREAMER_REQUIRED=0.11.90
 

@@ -3,20 +3,21 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Translators:
+# zk, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: Pragha\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-08-02 23:11-0300\n"
-"PO-Revision-Date: 2015-07-11 23:28+0000\n"
-"Last-Translator: Matias De lellis <mati86dl@gmail.com>\n"
-"Language-Team: Norwegian (http://www.transifex.com/matias/Pragha/language/"
-"no/)\n"
-"Language: no\n"
+"PO-Revision-Date: 2016-01-13 00:13+0000\n"
+"Last-Translator: zk\n"
+"Language-Team: Indonesian (http://www.transifex.com/matias/Pragha/language/"
+"id/)\n"
+"Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #. Create root container
 #: ../src/info-bar-import-music.c:55 ../plugins/dlna/pragha-dlna-plugin.c:235
@@ -27,25 +28,25 @@ msgstr ""
 #: ../src/info-bar-import-music.c:77 ../src/info-bar-import-music.c:124
 #: ../src/info-bar-import-music.c:167
 msgid "_No"
-msgstr ""
+msgstr "_Tidak"
 
 #: ../src/info-bar-import-music.c:78 ../src/info-bar-import-music.c:125
 #: ../src/info-bar-import-music.c:168
 msgid "_Yes"
-msgstr ""
+msgstr "_Ya"
 
 #: ../src/info-bar-import-music.c:80
 #, c-format
 msgid "Would you like to import %s to library?"
-msgstr ""
+msgstr "Apakah Anda ingin mengimpor %s ke pustaka?"
 
 #: ../src/info-bar-import-music.c:127
 msgid "Would you like to update your music library?"
-msgstr ""
+msgstr "Apakah Anda ingin memperbarui pustaka musik Anda?"
 
 #: ../src/info-bar-import-music.c:170
 msgid "Some changes need restart pragha."
-msgstr ""
+msgstr "Beberapa ubahan memerlukan pragha untuk dijalankan ulang."
 
 #: ../src/pragha-background-task-bar.c:91
 #: ../src/pragha-background-task-bar.c:136
@@ -54,154 +55,154 @@ msgstr ""
 
 #: ../src/pragha-cmdline.c:192
 msgid "FILENAME"
-msgstr ""
+msgstr "NAMABERKAS"
 
 #: ../src/pragha-cmdline.c:251
 msgid "Use --help to see a full list of available command line options."
-msgstr ""
+msgstr "Gunakan --help untuk melihat seluruh daftar opsi perintah baris."
 
 #: ../src/pragha-equalizer-dialog.c:50
 msgid "Disabled"
-msgstr ""
+msgstr "Dinonaktifkan"
 
 #: ../src/pragha-equalizer-dialog.c:51
 msgid "Classical"
-msgstr ""
+msgstr "Klasik"
 
 #: ../src/pragha-equalizer-dialog.c:52
 msgid "Club"
-msgstr ""
+msgstr "Klub"
 
 #: ../src/pragha-equalizer-dialog.c:53
 msgid "Dance"
-msgstr ""
+msgstr "Dansa"
 
 #: ../src/pragha-equalizer-dialog.c:54
 msgid "Full Bass"
-msgstr ""
+msgstr "Penuh Bass"
 
 #: ../src/pragha-equalizer-dialog.c:55
 msgid "Full Bass and Treble"
-msgstr ""
+msgstr "Penuh Bass dan Trebel"
 
 #: ../src/pragha-equalizer-dialog.c:56
 msgid "Full Treble"
-msgstr ""
+msgstr "Penuh Trebel"
 
 #: ../src/pragha-equalizer-dialog.c:57
 msgid "Laptop Speakers and Headphones"
-msgstr ""
+msgstr "Penyuara Laptop dan Fon Kepala"
 
 #: ../src/pragha-equalizer-dialog.c:58
 msgid "Large Hall"
-msgstr ""
+msgstr "Aula Besar"
 
 #: ../src/pragha-equalizer-dialog.c:59
 msgid "Live"
-msgstr ""
+msgstr "Langsung"
 
 #: ../src/pragha-equalizer-dialog.c:60
 msgid "Party"
-msgstr ""
+msgstr "Pesta"
 
 #: ../src/pragha-equalizer-dialog.c:61
 msgid "Pop"
-msgstr ""
+msgstr "Pop"
 
 #: ../src/pragha-equalizer-dialog.c:62
 msgid "Reggae"
-msgstr ""
+msgstr "Reggae"
 
 #: ../src/pragha-equalizer-dialog.c:63
 msgid "Rock"
-msgstr ""
+msgstr "Rock"
 
 #: ../src/pragha-equalizer-dialog.c:64
 msgid "Ska"
-msgstr ""
+msgstr "Ska"
 
 #: ../src/pragha-equalizer-dialog.c:65
 msgid "Smiley Face Curve"
-msgstr ""
+msgstr "Lengkung Muka Tersenyum"
 
 #: ../src/pragha-equalizer-dialog.c:66
 msgid "Soft"
-msgstr ""
+msgstr "Ringan"
 
 #: ../src/pragha-equalizer-dialog.c:67
 msgid "Soft Rock"
-msgstr ""
+msgstr "Rock Ringan"
 
 #: ../src/pragha-equalizer-dialog.c:68
 msgid "Techno"
-msgstr ""
+msgstr "Tekno"
 
 #: ../src/pragha-equalizer-dialog.c:69
 msgid "Custom"
-msgstr ""
+msgstr "Ubahsuai"
 
 #: ../src/pragha-equalizer-dialog.c:418
 msgid "Equalizer"
-msgstr ""
+msgstr "Ekualiser"
 
 #: ../src/pragha-filter-dialog.c:218 ../src/pragha-library-pane.c:533
 #: ../plugins/notify/pragha-notify-plugin.c:166
 msgid "Unknown Artist"
-msgstr "Ukjent Artist"
+msgstr "Artis tidak diketahui"
 
 #: ../src/pragha-filter-dialog.c:219 ../src/pragha-library-pane.c:540
 #: ../src/pragha-library-pane.c:545
 #: ../plugins/notify/pragha-notify-plugin.c:167
 msgid "Unknown Album"
-msgstr "Ukjent Album"
+msgstr "Album tidak diketahui"
 
 #. The search dialog
 #: ../src/pragha-filter-dialog.c:369
 msgid "Search in playlist"
-msgstr ""
+msgstr "Cari dalam daftar putar"
 
 #: ../src/pragha-filter-dialog.c:372
 msgid "_Close"
-msgstr ""
+msgstr "_Tutup"
 
 #: ../src/pragha-filter-dialog.c:375 ../src/pragha-playlist.c:209
 msgid "Add to playback queue"
-msgstr ""
+msgstr "Tambah ke antrean pemutaran"
 
 #: ../src/pragha-filter-dialog.c:376
 msgid "_Jump to"
-msgstr ""
+msgstr "L_ompat ke"
 
 #: ../src/pragha-library-pane.c:136
 msgid "_Skip"
-msgstr ""
+msgstr "_Lewati"
 
 #: ../src/pragha-library-pane.c:137
 msgid "S_kip All"
-msgstr ""
+msgstr "Le_wati Semua"
 
 #: ../src/pragha-library-pane.c:138
 msgid "Delete _All"
-msgstr ""
+msgstr "Hapus _Semua"
 
 #: ../src/pragha-library-pane.c:198
 msgid "_Expand library"
-msgstr ""
+msgstr "Per_luas pustaka"
 
 #: ../src/pragha-library-pane.c:200
 msgid "_Collapse library"
-msgstr ""
+msgstr "Per_kecil pustaka"
 
 #: ../src/pragha-library-pane.c:202 ../src/pragha-library-pane.c:1637
 msgid "Folders structure"
-msgstr ""
+msgstr "Struktur folder"
 
 #: ../src/pragha-library-pane.c:204 ../src/pragha-library-pane.c:1646
 #: ../src/pragha-playlist.c:115 ../src/pragha-playlist.c:3404
 #: ../src/pragha-playlist.c:3574 ../src/pragha-statusicon.c:180
 #: ../src/pragha-tags-dialog.c:116 ../src/pragha-tags-dialog.c:841
 msgid "Artist"
-msgstr "Artist"
+msgstr "Artis"
 
 #: ../src/pragha-library-pane.c:206 ../src/pragha-library-pane.c:1655
 #: ../src/pragha-playlist.c:116 ../src/pragha-playlist.c:3405
@@ -219,7 +220,7 @@ msgstr "Genre"
 
 #: ../src/pragha-library-pane.c:210 ../src/pragha-library-pane.c:1676
 msgid "Artist / Album"
-msgstr "Artist / Album"
+msgstr "Artis / Album"
 
 #: ../src/pragha-library-pane.c:212 ../src/pragha-library-pane.c:1700
 msgid "Genre / Album"
@@ -227,83 +228,84 @@ msgstr "Genre / Album"
 
 #: ../src/pragha-library-pane.c:214 ../src/pragha-library-pane.c:1688
 msgid "Genre / Artist"
-msgstr "Genre / Artist"
+msgstr "Genre / Artis"
 
 #: ../src/pragha-library-pane.c:216 ../src/pragha-library-pane.c:1715
 msgid "Genre / Artist / Album"
-msgstr "Genre / Artist / Album"
+msgstr "Genre / Artis / Album"
 
 #. Playlist and Radio tree
 #: ../src/pragha-library-pane.c:266
 msgid "_Add to current playlist"
-msgstr ""
+msgstr "T_ambah ke daftar putar saat ini"
 
 #: ../src/pragha-library-pane.c:268
 msgid "_Replace current playlist"
-msgstr ""
+msgstr "_Ganti daftar putar saat ini"
 
 #: ../src/pragha-library-pane.c:270
 msgid "Replace and _play"
-msgstr ""
+msgstr "Ganti dan _putar"
 
 #: ../src/pragha-library-pane.c:272 ../src/pragha-playlists-mgmt.c:514
 msgid "Rename"
-msgstr ""
+msgstr "Ubah nama"
 
 #: ../src/pragha-library-pane.c:274
 msgid "Delete"
-msgstr "Slett"
+msgstr "Hapus"
 
 #: ../src/pragha-library-pane.c:276 ../src/pragha-menubar.c:224
 #: ../src/pragha-menubar.c:229 ../src/pragha-playlists-mgmt.c:1309
 #: ../src/pragha-playlists-mgmt.c:1345 ../src/pragha-window.ui.h:11
 msgid "Export"
-msgstr "Eksporter"
+msgstr "Ekspor"
 
 #. Set dialog properties
 #: ../src/pragha-library-pane.c:278 ../src/pragha-tags-dialog.c:98
 msgid "Edit tags"
-msgstr "Rediger tagger"
+msgstr "Sunting tag"
 
 #: ../src/pragha-library-pane.c:280
 msgid "Move to _trash"
-msgstr ""
+msgstr "Pindah ke _tempat sampah"
 
 #: ../src/pragha-library-pane.c:282
 msgid "Delete from library"
-msgstr ""
+msgstr "Hapus dari pustaka"
 
 #: ../src/pragha-library-pane.c:284 ../src/pragha-menubar.c:239
 #: ../src/pragha-window.ui.h:19
 msgid "_Rescan library"
-msgstr ""
+msgstr "_Pindai ulang pustaka"
 
 #: ../src/pragha-library-pane.c:286 ../src/pragha-menubar.c:241
 #: ../src/pragha-window.ui.h:20
 #: ../plugins/removable-media/pragha-devices-removable.c:317
 msgid "_Update library"
-msgstr ""
+msgstr "Per_barui pustaka"
 
 #: ../src/pragha-library-pane.c:288
+#, fuzzy
 msgid "_Remove library"
-msgstr ""
+msgstr "_Pindai ulang pustaka"
 
 #: ../src/pragha-library-pane.c:538
 msgid "Unknown"
-msgstr "Ukjente"
+msgstr "Tidak diketahui"
 
 #: ../src/pragha-library-pane.c:550
 msgid "Unknown Genre"
-msgstr "Ukjent Genre"
+msgstr "Genre tidak diketahui"
 
 #: ../src/pragha-library-pane.c:878
 msgid "File can't be moved to trash. Delete permanently?"
-msgstr ""
+msgstr "Berkas tidak bisa dipindah ke tempat sampah. Hapus secara permanen?"
 
 #: ../src/pragha-library-pane.c:879
 #, c-format
 msgid "The file \"%s\" cannot be moved to the trash. Details: %s"
-msgstr ""
+msgstr "Berkas \"%s\" tidak bisa dipindah ke tempat sampah. Detail: %s"
 
 #: ../src/pragha-library-pane.c:887 ../src/pragha-playlists-mgmt.c:85
 #: ../src/pragha-playlists-mgmt.c:517 ../src/pragha-playlists-mgmt.c:589
@@ -313,29 +315,29 @@ msgstr ""
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:975
 #: ../plugins/tunein/pragha-tunein-plugin.c:263
 msgid "_Cancel"
-msgstr ""
+msgstr "_Batal"
 
 #: ../src/pragha-library-pane.c:893
 msgid "_Delete"
-msgstr ""
+msgstr "_Hapus"
 
 #: ../src/pragha-library-pane.c:1943 ../src/pragha-library-pane.c:2057
 #: ../src/pragha-playlists-mgmt.c:618 ../src/pragha-playlists-mgmt.c:645
 #: ../src/pragha.c:305 ../plugins/mpris2/pragha-mpris2-plugin.c:853
 msgid "Playlists"
-msgstr "Spillelister"
+msgstr "Daftar Putar"
 
 #: ../src/pragha-library-pane.c:1959 ../src/pragha-library-pane.c:2066
 msgid "Radios"
-msgstr ""
+msgstr "Radio"
 
 #: ../src/pragha-library-pane.c:2563
 msgid "Really want to move the files to trash?"
-msgstr ""
+msgstr "Yakin ingin memindahkan berkas ke tempat sampah?"
 
 #: ../src/pragha-library-pane.c:2565
 msgid "Delete permanently instead of moving to trash"
-msgstr ""
+msgstr "Hapus secara permanen daripada memindahkannya ke tempat sampah"
 
 #: ../src/pragha-library-pane.c:2619
 msgid ""
@@ -343,132 +345,135 @@ msgid ""
 "\n"
 "Warning: To recover we must rescan the entire library."
 msgstr ""
+"Apakah Anda yakin ingin menghapus berkas ini dari pustaka?\n"
+"\n"
+"Peringatan: Untuk memulihkannya, pragha harus memindai ulang seluruh pustaka."
 
 #: ../src/pragha-menubar.c:192
 msgid "_Playback"
-msgstr ""
+msgstr "_Pemutaran"
 
 #: ../src/pragha-menubar.c:193
 msgid "Play_list"
-msgstr ""
+msgstr "_Daftar Putar"
 
 #: ../src/pragha-menubar.c:194
 msgid "_View"
-msgstr ""
+msgstr "_Tampilan"
 
 #: ../src/pragha-menubar.c:195 ../src/pragha-playlist.c:222
 msgid "_Tools"
-msgstr "_Verktøy"
+msgstr "_Alat"
 
 #: ../src/pragha-menubar.c:196
 msgid "_Help"
-msgstr "_Hjelp"
+msgstr "_Bantuan"
 
 #: ../src/pragha-menubar.c:197 ../src/pragha-statusicon.c:83
 #: ../plugins/notify/pragha-notify-plugin.c:177
 msgid "Previous track"
-msgstr ""
+msgstr "Trek sebelumnya"
 
 #: ../src/pragha-menubar.c:199 ../src/pragha-statusicon.c:85
 msgid "Play / Pause"
-msgstr ""
+msgstr "Putar / Jeda"
 
 #: ../src/pragha-menubar.c:201 ../src/pragha-statusicon.c:87
 msgid "Stop"
-msgstr "Stopp"
+msgstr "Setop"
 
 #: ../src/pragha-menubar.c:203 ../src/pragha-statusicon.c:89
 #: ../plugins/notify/pragha-notify-plugin.c:181
 msgid "Next track"
-msgstr ""
+msgstr "Trek selanjutnya"
 
 #: ../src/pragha-menubar.c:205 ../src/pragha-playlist.c:225
 #: ../src/pragha-statusicon.c:91 ../src/pragha-window.ui.h:4
 msgid "Edit track information"
-msgstr ""
+msgstr "Sunting informasi trek"
 
 #: ../src/pragha-menubar.c:207 ../src/pragha-statusicon.c:93
 #: ../src/pragha-window.ui.h:23
 msgid "_Quit"
-msgstr "_Avslutt"
+msgstr "_Keluar"
 
 #: ../src/pragha-menubar.c:209 ../src/pragha-statusicon.c:79
 #: ../src/pragha-window.ui.h:1
 msgid "_Add files"
-msgstr ""
+msgstr "T_ambah berkas"
 
 #: ../src/pragha-menubar.c:210
 msgid "Open a media file"
-msgstr "Åpne en mediafil"
+msgstr "Buka berkas media"
 
 #: ../src/pragha-menubar.c:211 ../src/pragha-statusicon.c:81
 #: ../src/pragha-window.ui.h:2
 msgid "Add _location"
-msgstr ""
+msgstr "Tambah _lokasi"
 
 #: ../src/pragha-menubar.c:213 ../src/pragha-window.ui.h:3
 msgid "_Add the library"
-msgstr ""
+msgstr "T_ambah pustaka"
 
 #: ../src/pragha-menubar.c:215 ../src/pragha-window.ui.h:6
 msgid "Remove selection from playlist"
-msgstr ""
+msgstr "Buang yang dipilih dari daftar putar"
 
 #: ../src/pragha-menubar.c:217 ../src/pragha-playlist.c:215
 #: ../src/pragha-window.ui.h:7
 msgid "Crop playlist"
-msgstr ""
+msgstr "Potong daftar putar"
 
 #: ../src/pragha-menubar.c:219 ../src/pragha-playlist.c:217
 #: ../src/pragha-window.ui.h:8
 msgid "Clear playlist"
-msgstr ""
+msgstr "Kosongkan daftar putar"
 
 #: ../src/pragha-menubar.c:221 ../src/pragha-playlist.c:219
 #: ../src/pragha-playlists-mgmt.c:69 ../src/pragha-playlists-mgmt.c:92
 #: ../src/pragha-playlists-mgmt.c:1216 ../src/pragha-window.ui.h:9
 msgid "Save playlist"
-msgstr "Lagre Spilleliste"
+msgstr "Simpan daftar putar"
 
 #: ../src/pragha-menubar.c:222 ../src/pragha-menubar.c:227
 #: ../src/pragha-playlists-mgmt.c:1305 ../src/pragha-playlists-mgmt.c:1341
 #: ../src/pragha-window.ui.h:10
 msgid "New playlist"
-msgstr ""
+msgstr "Daftar putar baru"
 
 #: ../src/pragha-menubar.c:226 ../src/pragha-playlist.c:220
 #: ../src/pragha-playlists-mgmt.c:71 ../src/pragha-playlists-mgmt.c:94
 #: ../src/pragha-playlists-mgmt.c:1218 ../src/pragha-window.ui.h:12
 msgid "Save selection"
-msgstr ""
+msgstr "Simpan yang dipilih"
 
 #: ../src/pragha-menubar.c:231 ../src/pragha-window.ui.h:13
 msgid "_Search in playlist"
-msgstr ""
+msgstr "_Cari di dalam daftar putar"
 
 #: ../src/pragha-menubar.c:233 ../src/pragha-window.ui.h:21
 msgid "_Preferences"
-msgstr "_Innstillinger"
+msgstr "_Preferensi"
 
 #: ../src/pragha-menubar.c:235 ../src/pragha-window.ui.h:14
 msgid "Jump to playing song"
-msgstr ""
+msgstr "Lompat ke lagu yang diputar"
 
 #: ../src/pragha-menubar.c:237 ../src/pragha-window.ui.h:5
 msgid "E_qualizer"
-msgstr ""
+msgstr "E_kualiser"
 
 #: ../src/pragha-menubar.c:243
 msgid "_Statistics"
-msgstr "_Statistikker"
+msgstr "_Statistik"
 
 #: ../src/pragha-menubar.c:245
 msgid "Homepage"
-msgstr "Hjemmeside"
+msgstr "Halaman Beranda"
 
 #: ../src/pragha-menubar.c:247
 msgid "Community"
-msgstr "Fellesskap"
+msgstr "Komunitas"
 
 #: ../src/pragha-menubar.c:249
 msgid "Wiki"
@@ -476,163 +481,162 @@ msgstr "Wiki"
 
 #: ../src/pragha-menubar.c:251
 msgid "Translate Pragha"
-msgstr ""
+msgstr "Terjemahkan Pragha"
 
 #: ../src/pragha-menubar.c:253 ../src/pragha-statusicon.c:77
 #: ../src/pragha-window.ui.h:22
 msgid "About"
-msgstr "Om"
+msgstr "Tentang"
 
 #: ../src/pragha-menubar.c:258
 msgid "_Shuffle"
-msgstr "_Tilfeldig"
+msgstr "_Karau"
 
 #: ../src/pragha-menubar.c:261
 msgid "_Repeat"
-msgstr "_Gjenta"
+msgstr "_Ulangi"
 
 #: ../src/pragha-menubar.c:264
 msgid "_Fullscreen"
-msgstr ""
+msgstr "_Layar Penuh"
 
 #: ../src/pragha-menubar.c:267
 msgid "Lateral _panel"
-msgstr ""
+msgstr "_Panel lateral"
 
 #: ../src/pragha-menubar.c:270
 msgid "Secondary lateral panel"
-msgstr ""
+msgstr "Panel lateral sekunder"
 
 #: ../src/pragha-menubar.c:273
 msgid "Playback controls below"
-msgstr ""
+msgstr "Pengendali pemutaran di bawah"
 
 #: ../src/pragha-menubar.c:276
 msgid "Menubar"
-msgstr ""
+msgstr "Bilah menu"
 
 #: ../src/pragha-menubar.c:279
 msgid "Status bar"
-msgstr ""
+msgstr "Bilah status"
 
 #: ../src/pragha-menubar.c:640
 msgid "Total Tracks:"
-msgstr "Antall Låter:"
+msgstr "Total Trek:"
 
 #: ../src/pragha-menubar.c:642
 msgid "Total Artists:"
-msgstr "Antall Artister:"
+msgstr "Total Artis:"
 
 #: ../src/pragha-menubar.c:644
 msgid "Total Albums:"
-msgstr "Antall Album:"
+msgstr "Total Album:"
 
 #: ../src/pragha-menubar.c:647
 msgid "Statistics"
-msgstr "Statistikker"
+msgstr "Statistik"
 
 #. Create labels
 #: ../src/pragha-playlist.c:114 ../src/pragha-playlist.c:3403
 #: ../src/pragha-playlist.c:3573 ../src/pragha-statusicon.c:179
 #: ../src/pragha-tags-dialog.c:115 ../src/pragha-tags-dialog.c:836
 msgid "Title"
-msgstr "Tittel"
+msgstr "Judul"
 
 #: ../src/pragha-playlist.c:118 ../src/pragha-playlist.c:3407
 #: ../src/pragha-playlist.c:3577 ../src/pragha-tags-dialog.c:577
 msgid "Bitrate"
-msgstr "Bithastighet"
+msgstr "Lajubit"
 
 #: ../src/pragha-playlist.c:119 ../src/pragha-playlist.c:3408
 #: ../src/pragha-playlist.c:3578 ../src/pragha-tags-dialog.c:120
 msgid "Year"
-msgstr "År"
+msgstr "Tahun"
 
 #: ../src/pragha-playlist.c:120 ../src/pragha-playlist.c:3409
 #: ../src/pragha-playlist.c:3579 ../src/pragha-tags-dialog.c:121
 #: ../src/pragha-tags-dialog.c:856
 msgid "Comment"
-msgstr ""
+msgstr "Komentar"
 
 #. Create labels
 #: ../src/pragha-playlist.c:121 ../src/pragha-playlist.c:3410
 #: ../src/pragha-playlist.c:3580 ../src/pragha-statusicon.c:182
 #: ../src/pragha-tags-dialog.c:576
 msgid "Length"
-msgstr "Lengde"
+msgstr "Durasi"
 
 #: ../src/pragha-playlist.c:122 ../src/pragha-playlist.c:3411
 #: ../src/pragha-playlist.c:3581 ../src/pragha-tags-dialog.c:581
 msgid "Filename"
-msgstr "Filnavn"
+msgstr "Nama berkas"
 
 #: ../src/pragha-playlist.c:123 ../src/pragha-playlist.c:3412
 #: ../src/pragha-playlist.c:3582 ../src/pragha-tags-dialog.c:582
 msgid "Mimetype"
-msgstr ""
+msgstr "Tipe mime"
 
 #: ../src/pragha-playlist.c:211
 msgid "Remove from playback queue"
-msgstr ""
+msgstr "Buang dari antrean daftar putar"
 
 #: ../src/pragha-playlist.c:213
 msgid "Remove from playlist"
-msgstr ""
+msgstr "Buang dari daftar putar"
 
 #: ../src/pragha-playlist.c:221
 msgid "_Send to"
-msgstr ""
+msgstr "_Kirim ke"
 
 #: ../src/pragha-playlist.c:2498
 #, c-format
 msgid "Copy \"%i\" to selected track numbers"
-msgstr ""
+msgstr "Salin \"%i\" ke nomor trek yang dipilih"
 
 #: ../src/pragha-playlist.c:2504
 #, c-format
 msgid "Copy \"%s\" to selected titles"
-msgstr ""
+msgstr "Salin \"%s\" ke judul yang dipilih"
 
 #: ../src/pragha-playlist.c:2510
 #, c-format
 msgid "Copy \"%s\" to selected artists"
-msgstr ""
+msgstr "Salin \"%s\" ke artis yang dipilih"
 
 #: ../src/pragha-playlist.c:2516
 #, c-format
 msgid "Copy \"%s\" to selected albums"
-msgstr ""
+msgstr "Salin \"%s\" ke album yang dipilih"
 
 #: ../src/pragha-playlist.c:2522
 #, c-format
 msgid "Copy \"%s\" to selected genres"
-msgstr ""
+msgstr "Salin \"%s\" ke genre yang dipilih"
 
 #: ../src/pragha-playlist.c:2528
 #, c-format
 msgid "Copy \"%i\" to selected years"
-msgstr ""
+msgstr "Salin \"%i\" ke tahun yang dipilih"
 
 #: ../src/pragha-playlist.c:2534
 #, c-format
 msgid "Copy \"%s\" to selected comments"
-msgstr ""
+msgstr "Salin \"%s\" ke komentar yang dipilih"
 
 #. Create the checkmenu items
 #: ../src/pragha-playlist.c:3402 ../src/pragha-playlist.c:3572
 #: ../src/pragha.c:625
 msgid "Track"
 msgid_plural "Tracks"
-msgstr[0] ""
-msgstr[1] "Spor"
+msgstr[0] "Trek"
 
 #: ../src/pragha-playlist.c:3415
 msgid "Clear sort"
-msgstr ""
+msgstr "Hilangkan pengurutan"
 
 #: ../src/pragha-playlists-mgmt.c:73 ../src/pragha-preferences-dialog.c:1129
 msgid "Playlist"
-msgstr ""
+msgstr "Daftar Putar"
 
 #: ../src/pragha-playlists-mgmt.c:86 ../src/pragha-playlists-mgmt.c:518
 #: ../src/pragha-playlists-mgmt.c:1212 ../src/pragha-preferences-dialog.c:1350
@@ -640,53 +644,53 @@ msgstr ""
 #: ../src/pragha.c:408 ../plugins/song-info/pragha-song-info-dialog.c:83
 #: ../plugins/tunein/pragha-tunein-plugin.c:264
 msgid "_Ok"
-msgstr ""
+msgstr "_Ok"
 
 #: ../src/pragha-playlists-mgmt.c:129
 msgid "<b>con_playlist</b> is a reserved playlist name"
-msgstr "<b>con_playlist</b>er et navn som allerede er brukt"
+msgstr "<b>con_playlist</b> adalah nama daftar putar bawaan sistem"
 
 #: ../src/pragha-playlists-mgmt.c:153
 #, c-format
 msgid "Do you want to overwrite the playlist: %s ?"
-msgstr ""
+msgstr "Apakah Anda ingin menimpa daftar putar: %s ?"
 
 #: ../src/pragha-playlists-mgmt.c:507
 msgid "Choose a new name"
-msgstr ""
+msgstr "Pilih nama baru"
 
 #: ../src/pragha-playlists-mgmt.c:556
 #, c-format
 msgid "Do you want to delete the item: %s ?"
-msgstr ""
+msgstr "Apakah Anda ingin menghapus item: %s ?"
 
 #: ../src/pragha-playlists-mgmt.c:586
 msgid "Export playlist to file"
-msgstr "Eksporter spilleliste til fil"
+msgstr "Ekspor daftar putar ke berkas"
 
 #: ../src/pragha-playlists-mgmt.c:590
 msgid "_Save"
-msgstr ""
+msgstr "_Simpan"
 
 #: ../src/pragha-playlists-mgmt.c:1036
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:948
 #, c-format
 msgid "Added %d songs from %d of the imported playlist."
-msgstr ""
+msgstr "Menambahkan %d lagu dari %d daftar putar yang diimpor."
 
 #: ../src/pragha-playlists-mgmt.c:1196
 msgid "What do you want to do?"
-msgstr ""
+msgstr "Apa yang ingin Anda lakukan?"
 
 #: ../src/pragha-playlists-mgmt.c:1198
 #, c-format
 msgid "Replace the playlist \"%s\""
-msgstr ""
+msgstr "Ganti daftar putar \"%s\""
 
 #: ../src/pragha-playlists-mgmt.c:1203
 #, c-format
 msgid "Add to playlist \"%s\""
-msgstr ""
+msgstr "Tambahkan ke daftar putar \"%s\""
 
 #: ../src/pragha-preferences-dialog.c:206
 msgid ""
@@ -694,38 +698,38 @@ msgid ""
 "A maximum of six patterns are allowed.\n"
 "Wildcards are not accepted as of now ( patches welcome :-) )."
 msgstr ""
-"Mønstre bør se slik ut:<filename>;<filename>;....\n"
-"Maksimalt seks mønstre er tillatt.\n"
-"Wildcards godtas ikke fra nå av (patcher velkommen :-) )."
+"Pola harus dalam bentuk:<filename>;<filename>;....\n"
+"Maksimal enam pola yang diizinkan.\n"
+"Untuk sekarang belum bisa menggunakan wildcard ( mengharapkan patch :-) )."
 
 #: ../src/pragha-preferences-dialog.c:229
 msgid "Album art pattern"
-msgstr "Albumcover mønster"
+msgstr "Pola gambar album"
 
 #: ../src/pragha-preferences-dialog.c:549
 #: ../src/pragha-preferences-dialog.c:1200
 msgid "Start normal"
-msgstr ""
+msgstr "Mulai normal"
 
 #: ../src/pragha-preferences-dialog.c:553
 #: ../src/pragha-preferences-dialog.c:1201
 msgid "Start fullscreen"
-msgstr ""
+msgstr "Mulai layar penuh"
 
 #: ../src/pragha-preferences-dialog.c:557
 #: ../src/pragha-preferences-dialog.c:1202
 msgid "Start in system tray"
-msgstr ""
+msgstr "Mulai di dalam baki sistem"
 
 #. Create a folder chooser dialog
 #: ../src/pragha-preferences-dialog.c:707
 msgid "Select a folder to add to library"
-msgstr "Velg en mappe for å legge til samling"
+msgstr "Pilih folder untuk ditambahkan ke pustaka"
 
 #: ../src/pragha-preferences-dialog.c:711
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:976
 msgid "_Open"
-msgstr ""
+msgstr "_Buka"
 
 #: ../src/pragha-preferences-dialog.c:935
 #: ../src/pragha-preferences-dialog.c:1375
@@ -734,222 +738,223 @@ msgstr "Audio"
 
 #: ../src/pragha-preferences-dialog.c:937
 msgid "Audio sink"
-msgstr "Audio synk"
+msgstr "Keluaran audio"
 
 #: ../src/pragha-preferences-dialog.c:941
 #: ../src/pragha-preferences-dialog.c:960
 #: ../src/pragha-preferences-dialog.c:966
 msgid "Restart Required"
-msgstr "Krever Omstart"
+msgstr "Butuh Memulai Ulang"
 
 #: ../src/pragha-preferences-dialog.c:956
 msgid "Audio Device"
-msgstr "Lydenhet"
+msgstr "Perangkat Audio"
 
 #: ../src/pragha-preferences-dialog.c:965
 msgid "Use software mixer"
-msgstr "Bruk mykvare mikser"
+msgstr "Gunakan pengadon perangkat lunak"
 
 #: ../src/pragha-preferences-dialog.c:999
 #: ../src/pragha-preferences-dialog.c:1356
 msgid "Library"
-msgstr "Samling"
+msgstr "Pustaka"
 
 #: ../src/pragha-preferences-dialog.c:1003
 msgid "Can not change directories while they are analyzing."
-msgstr ""
+msgstr "Tidak bisa mengubah direktori ketika sedang dianalisa."
 
 #: ../src/pragha-preferences-dialog.c:1023
 msgid "Folders"
-msgstr "Mappe"
+msgstr "Folder"
 
 #: ../src/pragha-preferences-dialog.c:1056 ../src/pragha.c:209
 msgid "_Add"
-msgstr ""
+msgstr "_Tambah"
 
 #: ../src/pragha-preferences-dialog.c:1057
 msgid "_Remove"
-msgstr ""
+msgstr "_Buang"
 
 #. Sort by year option.
 #: ../src/pragha-preferences-dialog.c:1075
 msgid "Sort albums by release year"
-msgstr ""
+msgstr "Urutkan album berdasarkan tahun rilis"
 
 #. Labels
 #: ../src/pragha-preferences-dialog.c:1117
 #: ../src/pragha-preferences-dialog.c:1355
 msgid "Appearance"
-msgstr ""
+msgstr "Penampilan"
 
 #: ../src/pragha-preferences-dialog.c:1119
 msgid "Use system title bar and borders"
-msgstr ""
+msgstr "Gunakan bilah judul dan batas tepi sistem"
 
 #: ../src/pragha-preferences-dialog.c:1126
 msgid "Use small icons on the toolbars"
-msgstr ""
+msgstr "Gunakan ikon kecil pada bilah alat"
 
 #: ../src/pragha-preferences-dialog.c:1131
 msgid "Highlight rows on current playlist"
-msgstr ""
+msgstr "Sorot baris pada daftar putar saat ini"
 
 #: ../src/pragha-preferences-dialog.c:1134
 msgid "Controls"
-msgstr ""
+msgstr "Pengendali"
 
 #: ../src/pragha-preferences-dialog.c:1136
 msgid "Show Album art in Panel"
-msgstr "Vis Albumcover i Panel"
+msgstr "Tampilkan gambar Album di Panel"
 
 #: ../src/pragha-preferences-dialog.c:1139
 msgid "Size of Album art"
-msgstr "Størrelse på Albumcover"
+msgstr "Ukuran gambar Album"
 
 #: ../src/pragha-preferences-dialog.c:1144
 msgid "Album art file pattern"
-msgstr "Albumcover filmønster"
+msgstr "Pola berkas gambar Album"
 
 #: ../src/pragha-preferences-dialog.c:1188
 msgid "Search"
-msgstr ""
+msgstr "Cari"
 
 #. Instant search.
 #: ../src/pragha-preferences-dialog.c:1190 ../src/pragha-search-entry.c:41
 msgid "Search while typing"
-msgstr ""
+msgstr "Cari saat mengetik"
 
 #. Aproximate search.
 #: ../src/pragha-preferences-dialog.c:1193 ../src/pragha-search-entry.c:48
 msgid "Search similar words"
-msgstr ""
+msgstr "Cari kata serupa"
 
 #: ../src/pragha-preferences-dialog.c:1196
 msgid "When starting pragha"
-msgstr ""
+msgstr "Ketika memulai pragha"
 
 #: ../src/pragha-preferences-dialog.c:1199
 msgid "Remember last window state"
-msgstr ""
+msgstr "Ingat keadaan terakhir jendela"
 
 #: ../src/pragha-preferences-dialog.c:1205
 msgid "Restore last playlist"
-msgstr ""
+msgstr "Pulihkan daftar putar terakhir"
 
 #: ../src/pragha-preferences-dialog.c:1208
 msgid "When adding folders"
-msgstr ""
+msgstr "Ketika menambahkan folder"
 
 #: ../src/pragha-preferences-dialog.c:1209 ../src/pragha.c:200
 msgid "Add files recursively"
-msgstr ""
+msgstr "Tambah berkas secara rekursif"
 
 #: ../src/pragha-preferences-dialog.c:1233
 #: ../src/pragha-preferences-dialog.c:1390
 msgid "Desktop"
-msgstr ""
+msgstr "Desktop"
 
 #: ../src/pragha-preferences-dialog.c:1235
 msgid "Show Pragha icon in the notification area"
-msgstr ""
+msgstr "Tampilkan ikon Pragha di area notifikasi"
 
 #: ../src/pragha-preferences-dialog.c:1238
 msgid "Minimize Pragha when closing window"
-msgstr ""
+msgstr "Minimalkan Pragha ketika menutup jendela"
 
 #: ../src/pragha-preferences-dialog.c:1259
 #: ../src/pragha-preferences-dialog.c:1359
 msgid "Plugins"
-msgstr ""
+msgstr "Plugin"
 
 #. The main preferences dialog
 #: ../src/pragha-preferences-dialog.c:1346
 msgid "Preferences"
-msgstr ""
+msgstr "Preferensi"
 
 #: ../src/pragha-preferences-dialog.c:1357
 msgid "General"
-msgstr "Generell"
+msgstr "Umum"
 
 #: ../src/pragha-preferences-dialog.c:1394
 msgid "Services"
-msgstr ""
+msgstr "Layanan"
 
 #. Add to dialog
 #: ../src/pragha-preferences-dialog.c:1407
 msgid "Preferences of Pragha"
-msgstr ""
+msgstr "Preferensi Pragha"
 
 #: ../src/pragha-scanner.c:97 ../plugins/ampache/pragha-ampache-plugin.c:490
-#, c-format
+#, fuzzy, c-format
 msgid "%i files analyzed of %i detected"
-msgstr ""
+msgstr "%i berkas dianalisa dari %i yang terdeteksi"
 
 #. Create background task widget
 #. New Task widget
 #: ../src/pragha-scanner.c:103 ../src/pragha-scanner.c:341
 #: ../src/pragha-scanner.c:734 ../plugins/ampache/pragha-ampache-plugin.c:1094
 msgid "Searching files to analyze"
-msgstr ""
+msgstr "Mencari berkas untuk dianalisa"
 
 #: ../src/pragha-scanner.c:258
 msgid "Library scan complete"
-msgstr "Skanning av samling ferdig"
+msgstr "Pemindaian berkas selesai"
 
 #: ../src/pragha-statusicon.c:174 ../src/pragha-toolbar.c:174
 #: ../src/pragha-toolbar.c:524
 msgid "<b>Not playing</b>"
-msgstr "<b>Spiller ikke</b>"
+msgstr "<b>Tidak memutar</b>"
 
 #: ../src/pragha-tags-dialog.c:119
 msgid "Track No"
-msgstr "Tittel"
+msgstr "No Trek"
 
 #: ../src/pragha-tags-dialog.c:122
 msgid "File"
-msgstr "Fil"
+msgstr "Berkas"
 
 #. The main edit dialog
 #: ../src/pragha-tags-dialog.c:457 ../src/pragha-tags-dialog.c:659
 msgid "Details"
-msgstr ""
+msgstr "Detail"
 
 #: ../src/pragha-tags-dialog.c:559
 msgid "channel"
 msgid_plural "channels"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "saluran"
 
 #: ../src/pragha-tags-dialog.c:578
 msgid "Channels"
-msgstr "Kanaler"
+msgstr "Saluran"
 
 #: ../src/pragha-tags-dialog.c:579
 msgid "Samplerate"
-msgstr "Samplingsfrekvens"
+msgstr "Lajusampel"
 
 #: ../src/pragha-tags-dialog.c:580
 msgid "Folder"
-msgstr ""
+msgstr "Folder"
 
 #: ../src/pragha-tags-dialog.c:829
 msgid "Selection to"
-msgstr ""
+msgstr "Pilihan ke"
 
 #: ../src/pragha-tags-dialog.c:867
 msgid "Open folder"
-msgstr ""
+msgstr "Buka folder"
 
 #: ../src/pragha-tags-mgmt.c:197
 #, c-format
 msgid ""
 "Do you want to set the track number of ALL of the selected tracks to: %d ?"
 msgstr ""
+"Apakah Anda ingin menetapkan nomor trek dari SEMUA trek terpilih ke: %d ?"
 
 #: ../src/pragha-tags-mgmt.c:215
 #, c-format
 msgid "Do you want to set the title tag of ALL of the selected tracks to: %s ?"
 msgstr ""
+"Apakah Anda ingin menetapkan tag judul dari SEMUA trek terpilih ke: %s ?"
 
 #: ../src/pragha-toolbar.c:150
 #, c-format
@@ -957,57 +962,56 @@ msgid ""
 "%s <small><span weight=\"light\">by</span></small> %s <small><span weight="
 "\"light\">in</span></small> %s"
 msgstr ""
-"%s <small><span weight=\"light\">av</span></small> %s <small><span weight="
-"\"light\">i</span></small> %s"
+"%s <small><span weight=\"light\">oleh</span></small> %s <small><span weight="
+"\"light\">di dalam</span></small> %s"
 
 #: ../src/pragha-toolbar.c:155
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:52
 #, c-format
 msgid "%s <small><span weight=\"light\">by</span></small> %s"
-msgstr "%s <small><span weight=\"light\">av</span></small> %s"
+msgstr "%s <small><span weight=\"light\">oleh</span></small> %s"
 
 #: ../src/pragha-toolbar.c:159
 #, c-format
 msgid "%s <small><span weight=\"light\">in</span></small> %s"
-msgstr "%s <small><span weight=\"light\">i</span></small> %s"
+msgstr "%s <small><span weight=\"light\">di dalam</span></small> %s"
 
 #: ../src/pragha-toolbar.c:809
 msgid "Previous Track"
-msgstr "Forrige Spor"
+msgstr "Trek Sebelumnya"
 
 #: ../src/pragha-toolbar.c:813
 msgid "Play / Pause Track"
-msgstr "Spill / Pause Spor"
+msgstr "Putar / Jeda Trek"
 
 #: ../src/pragha-toolbar.c:817
 msgid "Stop playback"
-msgstr "Stopp Spilling"
+msgstr "Setop Pemutaran"
 
 #: ../src/pragha-toolbar.c:821
 msgid "Next Track"
-msgstr "Neste Spor"
+msgstr "Trek Selanjutnya"
 
 #: ../src/pragha-toolbar.c:853
 msgid "Leave Fullscreen"
-msgstr ""
+msgstr "Tinggalkan Layar Penuh"
 
 #: ../src/pragha-toolbar.c:857
 msgid "Play songs in a random order"
-msgstr ""
+msgstr "Putar lagu dengan acak"
 
 #: ../src/pragha-toolbar.c:860
 msgid "Repeat playback list at the end"
-msgstr ""
+msgstr "Ulangi daftar pemutaran saat selesai"
 
 #: ../src/pragha-utils.c:243
 msgid "day"
 msgid_plural "days"
-msgstr[0] ""
-msgstr[1] "dag"
+msgstr[0] "hari"
 
 #: ../src/pragha-utils.c:546
 msgid "Unable to open the browser"
-msgstr ""
+msgstr "Tidak bisa membuka peramban"
 
 #: ../src/pragha-window.c:115
 #, c-format
@@ -1016,38 +1020,41 @@ msgid ""
 "(%s)\n"
 "<b>Reason:</b> %s"
 msgstr ""
+"<b>Galat memutar trek ini.</b>\n"
+"(%s)\n"
+"<b>Alasan:</b> %s"
 
 #: ../src/pragha-window.c:118
 msgid "_Stop"
-msgstr ""
+msgstr "_Setop"
 
 #: ../src/pragha-window.c:119
 msgid "_Next"
-msgstr ""
+msgstr "Sela_njutnya"
 
 #: ../src/pragha.c:178
 msgid "Select a file to play"
-msgstr "Velg fil for avspilling"
+msgstr "Pilih berkas untuk diputar"
 
 #: ../src/pragha.c:222 ../plugins/lastfm/pragha-lastfm-plugin.c:980
 msgid "Supported media"
-msgstr "Støttet media"
+msgstr "Media yang didukung"
 
 #: ../src/pragha.c:308
 msgid "All files"
-msgstr "Alle filer"
+msgstr "Semua berkas"
 
 #: ../src/pragha.c:384
 msgid "Enter the URL of an internet radio stream"
-msgstr ""
+msgstr "Masukkan URL strim radio internet"
 
 #: ../src/pragha.c:391
 msgid "Give it a name to save"
-msgstr ""
+msgstr "Beri nama untuk menyimpan"
 
 #: ../src/pragha.c:404
 msgid "Add a location"
-msgstr ""
+msgstr "Tambah lokasi"
 
 #: ../src/pragha.c:536
 msgid "translator-credits"
@@ -1058,45 +1065,49 @@ msgstr ""
 #: ../src/pragha.c:756 ../src/pragha.c:988 ../src/pragha.c:1380
 #: ../plugins/dlna/pragha-dlna-plugin.c:246
 msgid "Pragha Music Player"
-msgstr ""
+msgstr "Pragha Pemutar Musik"
 
 #: ../src/pragha-window.ui.h:15
 #, fuzzy
 msgid "Show lateral _panel"
-msgstr "Vis Albumcover i Panel"
+msgstr "_Panel lateral"
 
 #: ../src/pragha-window.ui.h:16
+#, fuzzy
 msgid "Show secondary lateral panel"
-msgstr ""
+msgstr "Panel lateral sekunder"
 
 #: ../src/pragha-window.ui.h:17
+#, fuzzy
 msgid "Show menubar"
-msgstr ""
+msgstr "Bilah menu"
 
 #: ../src/pragha-window.ui.h:18
+#, fuzzy
 msgid "Show status bar"
-msgstr ""
+msgstr "Bilah status"
 
 #: ../data/pragha.desktop.in.h:1
 msgid "Music Player"
-msgstr ""
+msgstr "Pemutar Musik"
 
 #: ../data/pragha.desktop.in.h:2
 msgid "Manage and listen to music"
-msgstr ""
+msgstr "Kelola dan dengarkan musik"
 
 #: ../plugins/acoustid/pragha-acoustid-plugin.c:103
 #: ../plugins/acoustid/pragha-acoustid-plugin.c:440
 msgid "Search tags on AcoustID"
-msgstr ""
+msgstr "Cari tag di AcoustID"
 
 #: ../plugins/acoustid/pragha-acoustid-plugin.c:263
 msgid "AcoustID not found any similar song"
-msgstr ""
+msgstr "AcoustID tidak menemukan lagu serupa"
 
 #: ../plugins/acoustid/pragha-acoustid-plugin.c:367
+#, fuzzy
 msgid "Searching tags on AcoustID"
-msgstr ""
+msgstr "Cari tag di AcoustID"
 
 #: ../plugins/acoustid/pragha-acoustid-plugin.c:380
 msgid "There was an error when searching your tags on AcoustID"
@@ -1104,231 +1115,233 @@ msgstr ""
 
 #: ../plugins/ampache/pragha-ampache-plugin.c:152
 #: ../plugins/ampache/pragha-ampache-plugin.c:1119
+#, fuzzy
 msgid "Refresh the Ampache library"
-msgstr ""
+msgstr "Hapus dari pustaka"
 
 #: ../plugins/ampache/pragha-ampache-plugin.c:695
+#, fuzzy
 msgid "Server"
-msgstr ""
+msgstr "Layanan"
 
 #: ../plugins/ampache/pragha-ampache-plugin.c:707
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1809
 msgid "Username"
-msgstr "Brukernavn"
+msgstr "Nama pengguna"
 
 #: ../plugins/ampache/pragha-ampache-plugin.c:719
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1816
 msgid "Password"
-msgstr "Passord"
+msgstr "Sandi"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:410
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:707
 msgid "Audio CD"
-msgstr ""
+msgstr "CD Audio"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:533
 msgid "Audio/Data CD"
-msgstr ""
+msgstr "CD Audio/Data"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:534
 msgid "An audio CD was inserted"
-msgstr ""
+msgstr "Sebuah CD audio telah dimasukkan"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:535
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:604
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:815
 msgid "Add Audio _CD"
-msgstr ""
+msgstr "Tambah _CD Audio"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:709
 msgid "Audio CD Device"
-msgstr "Audio CD Enhet"
+msgstr "Perangkat CD Audio"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:729
 msgid "Connect to CDDB server"
-msgstr "Koble til CDDB server"
+msgstr "Sambung ke server CDDB"
 
 #: ../plugins/devices/pragha-device-client.c:77
 msgid "Ignore"
-msgstr ""
+msgstr "Abaikan"
 
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:89
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:282
 msgid "Search music on DLNA server"
-msgstr ""
+msgstr "Cari musik di server DLNA"
 
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:220
 #, c-format
 msgid "Music of the %s server was added."
-msgstr ""
+msgstr "Musik dari server %s telah ditambahkan."
 
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:225
 msgid "Could not find any DLNA server."
-msgstr ""
+msgstr "Tidak menemukan server DLNA."
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:170
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1568
 msgid "_Lastfm"
-msgstr ""
+msgstr "_Lastfm"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:171
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:211
 msgid "Love track"
-msgstr ""
+msgstr "Sukai trek"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:173
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:213
 msgid "Unlove track"
-msgstr ""
+msgstr "Batal sukai trek"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:175
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:972
 msgid "Import a XSPF playlist"
-msgstr ""
+msgstr "Impor daftar putar XSPF"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:177
 msgid "Add favorites"
-msgstr ""
+msgstr "Tambah favorit"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:179
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:215
 msgid "Add similar"
-msgstr ""
+msgstr "Tambah serupa"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:428
 msgid "Unable to establish conection with Last.fm"
-msgstr ""
+msgstr "Tidak bisa membuat koneksi dengan Last.fm"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:636
 msgid "Last.fm suggested a tag correction"
-msgstr ""
+msgstr "Last.fm menyarankan perbaikan tag"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:662
 msgid "Love song on Last.fm failed."
-msgstr ""
+msgstr "Gagal menyukai lagu di Last.fm."
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:680
 msgid "Unlove song on Last.fm failed."
-msgstr ""
+msgstr "Gagal batal suka lagu di Last.fm."
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:787
 #, c-format
 msgid "Added %d tracks of %d suggested from Last.fm"
-msgstr ""
+msgstr "Menambahkan %d trek dari %d yang disarankan dari Last.fm"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:790
 #, c-format
 msgid "Last.fm doesn't suggest any similar track"
-msgstr ""
+msgstr "Last.fm tidak menyarankan trek serupa"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:794
 #, c-format
 msgid "Added %d songs of the last %d loved on Last.fm."
-msgstr ""
+msgstr "Menambahkan %d lagu dari %d yang disukai di Last.fm."
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:797
 #, c-format
 msgid "You don't have favorite tracks on Last.fm"
-msgstr ""
+msgstr "Anda tidak memiliki trek favorit di Last.fm"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1267
 msgid "Last.fm submission failed"
-msgstr ""
+msgstr "Kiriman untuk Last.fm gagal"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1269
 msgid "Track scrobbled on Last.fm"
-msgstr ""
+msgstr "Trek di skrobel di Last.fm"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1379
 msgid "Update current song on Last.fm failed."
-msgstr ""
+msgstr "Pembaruan lagu saat ini di Last.fm gagal."
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1806
 msgid "Scrobble on Last.fm"
-msgstr ""
+msgstr "Skrobel pada Last.fm"
 
 #: ../plugins/notify/pragha-notify-plugin.c:165
 #, c-format
 msgid "by <b>%s</b> in <b>%s</b> <b>(%s)</b>"
-msgstr ""
+msgstr "oleh <b>%s</b> dalam <b>%s</b> <b>(%s)</b>"
 
 #: ../plugins/notify/pragha-notify-plugin.c:267
 msgid "Notifications"
-msgstr ""
+msgstr "Notifikasi"
 
 #: ../plugins/notify/pragha-notify-plugin.c:269
 msgid "Show Album art in notifications"
-msgstr ""
+msgstr "Tampilkan gambar Album di notifikasi"
 
 #: ../plugins/notify/pragha-notify-plugin.c:274
 msgid "Add actions to change track in notifications"
-msgstr ""
+msgstr "Tambah tindakan untuk mengubah trek di notifikasi"
 
 #: ../plugins/removable-media/pragha-devices-removable.c:225
 #, c-format
 msgid "Unable to access \"%s\""
-msgstr ""
+msgstr "Tidak bisa mengakses \"%s\""
 
 #: ../plugins/removable-media/pragha-devices-removable.c:229
 #: ../plugins/removable-media/pragha-devices-removable.c:315
 msgid "Removable Device"
-msgstr ""
+msgstr "Perangkat Yang Dapat Dilepas"
 
 #: ../plugins/removable-media/pragha-devices-removable.c:311
 #, c-format
 msgid "Want to manage \"%s\" volume?"
-msgstr ""
+msgstr "Ingin mengelola volume \"%s\"?"
 
 #: ../plugins/song-info/pragha-song-info-plugin.c:88
 msgid "Search _lyric"
-msgstr ""
+msgstr "Cari _lirik"
 
 #: ../plugins/song-info/pragha-song-info-plugin.c:90
 msgid "Search _artist info"
-msgstr ""
+msgstr "Cari info _artis"
 
 #: ../plugins/song-info/pragha-song-info-plugin.c:377
 msgid "Song Information"
-msgstr ""
+msgstr "Informasi Lagu"
 
 #: ../plugins/song-info/pragha-song-info-plugin.c:379
 msgid "Download the album art while playing their songs."
-msgstr ""
+msgstr "Unduh gambar album ketika memutar lagu."
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:51
 #, c-format
 msgid "Lyrics thanks to %s"
-msgstr ""
+msgstr "Lirik, terima kasih kepada %s"
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:58
 #, c-format
 msgid "Artist info"
-msgstr ""
+msgstr "Info artis"
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:59
 #, c-format
 msgid "%s <small><span weight=\"light\">thanks to</span></small> %s"
-msgstr ""
+msgstr "%s <small><span weight=\"light\">terima kasih kepada</span></small> %s"
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:81
 #: ../plugins/song-info/pragha-song-info-thread-pane.c:100
 msgid "Lyrics not found."
-msgstr ""
+msgstr "Lirik tidak ditemukan."
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:84
 #: ../plugins/song-info/pragha-song-info-thread-pane.c:104
 msgid "Artist information not found."
-msgstr ""
+msgstr "Informasi artis tidak ditemukan."
 
 #: ../plugins/song-info/pragha-song-info-thread-pane.c:185
 #: ../plugins/song-info/pragha-song-info-thread-pane.c:193
 msgid "Searching..."
-msgstr ""
+msgstr "Mencari..."
 
 #: ../plugins/tunein/pragha-tunein-plugin.c:95
 #: ../plugins/tunein/pragha-tunein-plugin.c:322
 msgid "Search radio on TuneIn"
-msgstr ""
+msgstr "Cari radio di TuneIn"
 
 #: ../plugins/tunein/pragha-tunein-plugin.c:148
 #: ../plugins/tunein/pragha-tunein-plugin.c:159
@@ -1337,10 +1350,14 @@ msgid "There was an error when searching radio on TuneIn"
 msgstr ""
 
 #: ../plugins/tunein/pragha-tunein-plugin.c:205
+#, fuzzy
 msgid "Searching radio on TuneIn"
-msgstr ""
+msgstr "Cari radio di TuneIn"
 
 #: ../plugins/tunein/pragha-tunein-plugin.c:260
 #: ../plugins/tunein/pragha-tunein-plugin.c:271
 msgid "Search in TuneIn"
-msgstr ""
+msgstr "Cari di TuneIn"
+
+#~ msgid "Merge folders in the folders estructure view"
+#~ msgstr "Gabungkan folder di dalam tilikan folder estruktur"
