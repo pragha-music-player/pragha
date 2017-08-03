@@ -1,7 +1,49 @@
 ==============================================================
-Overview of changes between Pragha 1.3.3 and 1.3.2.2
+Overview of changes between Pragha 1.3.90 and 1.3.3
 ==============================================================
 
+News:
+	New Ampache plugin.
+	Uses a new concept of 'provider' that allows show music from multiple
+	collections independently.
+	New standard widget to display progress of long tasks.
+
+Others Changes:
+	Allow apply a custom css. Related to Issue #64, #87
+	Register session in GtkApplication now compatible with xfce 4.14
+	Implement disconect device action to mtp plugin.
+	Add backward compatibility to grilo.
+	Use a .ui file to define menu button.
+	Remove custom invisible char of lastfm password
+	Dist pragha.ico/.rc needed to msys build
+	Fixes some border, spacing and margins.
+
+Bugs fixed:
+	Use same accel to show second sidebar that gnome-builder. Issue #73
+	Fix Menu icon blured preferring non symbolic icons. Issue #85
+	Fixing duration formatting thanks to Jeremiah Menétrey. Issue #103
+	Fix dnd over an empty place in the playlist. Issue #104
+	Align to center the toolbar icons instead vertical fill. Issue #108
+	Dont use keybinder plugin on wayland. Issue #118
+	Fix a few of Gtk deprecations.
+	Misc fixes to Gtk 3.20 and GCC 6.0.
+	Valgrind: Fix a lot of memory leaks.
+	Fixed typo analized -> analyzed thanks to radej.
+
+	Fix spelling and grammar on README thanks to rski.
+	Consider all rows as fixed size. It is supposed to improve speed.
+
+Updates Translations:
+	New Danish tranlations thanks to scootergrisen.
+	New Indonesian tranlations thanks to Zk.
+	New Slovak tranlations thanks to prescott.
+	A lot of updated translations. Thank you very much to all.
+
+==============================================================
+OTHERS REALESES:
+==============================================================
+
+V1.3.3
 Codename: "Just a preamp..."
 
 News:
@@ -28,10 +70,6 @@ Updates Translations:
 	Update Russian translation thanks to Lazy_Kent.
 	Update Bulgarian translation thanks to lyubomirv.
 	Update Swedish translation thanks to monotux.
-
-==============================================================
-OTHERS REALESES:
-==============================================================
 
 V1.3.2.2
 Codename: "Gtk 3.14: Que cunda el panico. haha. ;)"

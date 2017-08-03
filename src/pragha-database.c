@@ -1108,32 +1108,28 @@ pragha_database_change_playlists_done(PraghaDatabase *database)
 void
 pragha_database_compatibilize_version (PraghaDatabase *database)
 {
-	/*gint i;
+	gboolean success = TRUE;
+	gint i;
 
-	const gchar *mime_types[] = {
-		"audio/x-wav",
-		"audio/mpeg",
-		"audio/x-flac",
-		"audio/ogg",
-		"audio/x-ms-wma",
-		"audio/x-m4a",
-		"audio/ape",
-		"audio/x-mod"
+	const gchar *queries[] = {
+		"DROP TABLE TRACK",
+		"DROP TABLE LOCATION",
+		"DROP TABLE ARTIST",
+		"DROP TABLE ALBUM",
+		"DROP TABLE GENRE",
+		"DROP TABLE YEAR",
+		"DROP TABLE COMMENT",
+		"DROP TABLE MIME_TYPE"
 	};
 
-	const gchar *sql_queries[] = {
-		"UPDATE TRACK SET file_type = file_type + 1",
-		"ALTER TABLE TRACK ADD COLUMN provider INT"
-	};
-
-	for (i = 0; i < G_N_ELEMENTS(mime_types); i++) {
-		if (!pragha_database_find_mime_type (database, mime_types[i]))
-			pragha_database_add_new_mime_type (database, mime_types[i]);
+	for (i = 0; i < G_N_ELEMENTS(queries); i++) {
+		if (!pragha_database_exec_query (database, queries[i]))
+			success = FALSE;
 	}
+	if (success && !pragha_database_init_schema (database))
+		success = FALSE;
 
-	for (i = 0; i < G_N_ELEMENTS(sql_queries); i++) {
-		pragha_database_exec_query (database, sql_queries[i]);
-	}*/
+	database->priv->successfully = success;
 }
 
 gint

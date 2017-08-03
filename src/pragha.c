@@ -1073,7 +1073,7 @@ pragha_application_startup (GApplication *application)
 	}
 
 	version = pragha_preferences_get_installed_version (pragha->preferences);
-	if (string_is_not_empty (version) && (g_ascii_strcasecmp (version, "1.3.1") < 0)) {
+	if (string_is_not_empty (version) && (g_ascii_strcasecmp (version, "1.3.90") < 0)) {
 		pragha_database_compatibilize_version (pragha->cdbase);
 	}
 
