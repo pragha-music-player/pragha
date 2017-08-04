@@ -1,0 +1,50 @@
+<interface>
+  <!--
+    This program is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation; either version 2 of the License, or (at your option)
+    any later version.
+
+    This program is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+    more details.
+
+    You should have received a copy of the GNU General Public License along with
+    this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+    Place, Suite 330, Boston, MA  02111-1307  USA
+  -->
+  <menu id='lastfm-menu'>
+    <section>
+      <section id='pragha-plugins-placeholder'>
+        <submenu id='lastfm-sudmenu'>
+          <attribute name='label' translatable='yes'>_Lastfm</attribute>
+          <section>
+            <item>
+              <attribute name='label' translatable='yes'>Love track</attribute>
+              <attribute name='action'>win.lastfm-love</attribute>
+            </item>
+            <item>
+              <attribute name='label' translatable='yes'>Unlove track</attribute>
+              <attribute name='action'>win.lastfm-unlove</attribute>
+            </item>
+          </section>
+          <section>
+            <item>
+              <attribute name='label' translatable='yes'>Import a XSPF playlist</attribute>
+              <attribute name='action'>win.lastfm-import</attribute>
+            </item>
+            <item>
+              <attribute name='label' translatable='yes'>Add favorites</attribute>
+              <attribute name='action'>win.lastfm-favorities</attribute>
+            </item>
+            <item>
+              <attribute name='label' translatable='yes'>Add similar</attribute>
+              <attribute name='action'>win.lastfm-similar</attribute>
+            </item>
+          </section>
+        </submenu>
+      </section>
+    </section>
+  </menu>
+</interface>

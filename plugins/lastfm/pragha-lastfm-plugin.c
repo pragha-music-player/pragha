@@ -48,6 +48,8 @@
 #include "src/pragha-window.h"
 #include "src/xml_helper.h"
 
+#include "pragha-lastfm-menu-ui.h"
+
 #include "plugins/pragha-plugin-macros.h"
 
 #include <clastfm.h>
@@ -256,21 +258,6 @@ static GActionEntry lastfm_entries[] = {
 	{ "lastfm-favorities", pragha_gmenu_lastfm_add_favorites_action, NULL, NULL, NULL },
 	{ "lastfm-similar",    pragha_gmenu_lastfm_get_similar_action,   NULL, NULL, NULL }
 };
-
-static const gchar *lastfm_menu_ui = \
-	NEW_MENU("menubar") \
-		OPEN_PLACEHOLDER("pragha-plugins-placeholder") \
-			NEW_NAMED_SUBMENU("lastfm-sudmenu", "_Lastfm") \
-				NEW_ITEM("Love track",             "win", "lastfm-love") \
-				NEW_ITEM("Unlove track",           "win", "lastfm-unlove") \
-				SEPARATOR \
-				NEW_ITEM("Import a XSPF playlist", "win", "lastfm-import") \
-				NEW_ITEM("Add favorites",          "win", "lastfm-favorities") \
-				NEW_ITEM("Add similar",            "win", "lastfm-similar") \
-			CLOSE_SUBMENU \
-		CLOSE_PLACEHOLDER \
-	CLOSE_MENU;
-
 
 /* Save a get the lastfm password.
  * TODO: Implement any basic crypto.

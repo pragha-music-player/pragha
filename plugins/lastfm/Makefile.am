@@ -47,6 +47,17 @@ libplastfm_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
 libplastfm_la_LIBADD += $(LIBXFCE4UI_LIBS)
 endif
 
+pragha-lastfm-menu-ui.h: pragha-lastfm-menu.ui Makefile
+	$(AM_V_GEN) exo-csource --strip-comments --strip-content --static --name=lastfm_menu_ui $< > $@
+
 plugin_DATA = lastfm.plugin
 
-EXTRA_DIST = $(plugin_DATA)
+EXTRA_DIST = \
+	$(plugin_DATA) \
+	pragha-lastfm-menu.ui
+
+DISTCLEANFILES = \
+	pragha-lastfm-menu-ui.h
+
+BUILT_SOURCES = \
+	pragha-lastfm-menu-ui.h
