@@ -126,6 +126,8 @@ void pragha_playlist_activate_path        (PraghaPlaylist* cplaylist, GtkTreePat
 void pragha_playlist_activate_unique_mobj (PraghaPlaylist* cplaylist, PraghaMusicobject *mobj);
 
 gint pragha_playlist_get_no_tracks      (PraghaPlaylist *playlist);
+gint pragha_playlist_get_no_unplayed_tracks (PraghaPlaylist *playlist);
+
 gint pragha_playlist_get_total_playtime (PraghaPlaylist *playlist);
 
 gboolean pragha_playlist_has_queue(PraghaPlaylist* cplaylist);

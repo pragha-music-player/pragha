@@ -4164,6 +4164,12 @@ pragha_playlist_get_no_tracks (PraghaPlaylist *playlist)
 	return playlist->no_tracks;
 }
 
+gint
+pragha_playlist_get_no_unplayed_tracks (PraghaPlaylist *playlist)
+{
+	return playlist->unplayed_tracks;
+}
+
 gint pragha_playlist_get_total_playtime (PraghaPlaylist *playlist)
 {
 	GtkTreeIter iter;

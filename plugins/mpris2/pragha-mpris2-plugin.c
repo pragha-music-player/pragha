@@ -703,15 +703,27 @@ mpris_Player_get_MaximumRate (GError **error, PraghaMpris2Plugin *plugin)
 static GVariant *
 mpris_Player_get_CanGoNext (GError **error, PraghaMpris2Plugin *plugin)
 {
-	// do we need to go into such detail?
-	return g_variant_new_boolean(TRUE);
+	PraghaPlaylist *playlist;
+	gboolean can_go_next = FALSE;
+
+	playlist = pragha_application_get_playlist (plugin->priv->pragha);
+	if (pragha_playlist_get_no_unplayed_tracks(playlist) > 0)
+		can_go_next = TRUE;
+
+	return g_variant_new_boolean(can_go_next);
 }
 
 static GVariant *
 mpris_Player_get_CanGoPrevious (GError **error, PraghaMpris2Plugin *plugin)
 {
-	// do we need to go into such detail?
-	return g_variant_new_boolean(TRUE);
+	PraghaPlaylist *playlist;
+	gboolean can_go_prev = FALSE;
+
+	playlist = pragha_application_get_playlist (plugin->priv->pragha);
+	if (pragha_playlist_get_no_unplayed_tracks(playlist) < pragha_playlist_get_no_tracks(playlist))
+		can_go_prev = TRUE;
+
+	return g_variant_new_boolean(can_go_prev);
 }
 
 static GVariant *
@@ -719,7 +731,7 @@ mpris_Player_get_CanPlay (GError **error, PraghaMpris2Plugin *plugin)
 {
 	PraghaBackend *backend = pragha_application_get_backend (plugin->priv->pragha);
 
-	return g_variant_new_boolean(pragha_backend_get_state (backend) == ST_PAUSED);
+	return g_variant_new_boolean(pragha_backend_get_state (backend) != ST_STOPPED);
 }
 
 static GVariant *
@@ -727,7 +739,7 @@ mpris_Player_get_CanPause (GError **error, PraghaMpris2Plugin *plugin)
 {
 	PraghaBackend *backend = pragha_application_get_backend (plugin->priv->pragha);
 
-	return g_variant_new_boolean(pragha_backend_get_state (backend) == ST_PLAYING);
+	return g_variant_new_boolean(pragha_backend_get_state (backend) != ST_STOPPED);
 }
 
 static GVariant *
