@@ -312,7 +312,7 @@ pragha_status_icon_set_application (PraghaStatusIcon *status_icon, PraghaApplica
 
 	status_icon->pragha = pragha;
 
-	gtk_status_icon_set_from_icon_name (GTK_STATUS_ICON(status_icon), "pragha");
+	gtk_status_icon_set_from_icon_name (GTK_STATUS_ICON(status_icon), "pragha-panel");
 
 	actions = gtk_action_group_new ("Systray Actions");
 	gtk_action_group_set_translation_domain (actions, GETTEXT_PACKAGE);

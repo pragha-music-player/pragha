@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   sodipodi:docname="pragha-panel-symbolic.svg"
+   inkscape:export-filename="/home/sam/dev/RESOURCES/gnome-icon-theme-symbolic/src/gnome-stencils.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90"
+   height="16"
+   id="svg7384"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   width="16">
+  <title
+     id="title3412">Pragha Panel Symbolic</title>
+  <metadata
+     id="metadata90">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Pragha Panel Symbolic</dc:title>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by/3.0/" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by/3.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     inkscape:bbox-nodes="true"
+     inkscape:bbox-paths="true"
+     bordercolor="#666666"
+     borderopacity="1"
+     inkscape:current-layer="svg7384"
+     inkscape:cx="5.9006123"
+     inkscape:cy="12.669443"
+     gridtolerance="10"
+     inkscape:guide-bbox="true"
+     guidetolerance="10"
+     id="namedview88"
+     inkscape:object-nodes="true"
+     inkscape:object-paths="false"
+     objecttolerance="10"
+     pagecolor="#3a3b39"
+     inkscape:pageopacity="1"
+     inkscape:pageshadow="2"
+     showborder="false"
+     showgrid="false"
+     showguides="true"
+     inkscape:snap-bbox="true"
+     inkscape:snap-bbox-edge-midpoints="true"
+     inkscape:snap-bbox-midpoints="false"
+     inkscape:snap-global="true"
+     inkscape:snap-grids="true"
+     inkscape:snap-nodes="true"
+     inkscape:snap-others="false"
+     inkscape:snap-to-guides="true"
+     inkscape:window-height="1025"
+     inkscape:window-maximized="1"
+     inkscape:window-width="1920"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:zoom="11.313708">
+    <inkscape:grid
+       dotted="false"
+       empspacing="4"
+       enabled="true"
+       id="grid4866"
+       originx="-472.0002px"
+       originy="-800.99179px"
+       snapvisiblegridlinesonly="true"
+       spacingx="1px"
+       spacingy="1px"
+       type="xygrid"
+       visible="true" />
+    <inkscape:grid
+       color="#000000"
+       dotted="true"
+       empcolor="#000000"
+       empopacity="0.25098039"
+       empspacing="4"
+       enabled="true"
+       id="grid13609"
+       opacity="0.1254902"
+       originx="-472.0002px"
+       originy="-800.99179px"
+       snapvisiblegridlinesonly="true"
+       spacingx="0.5px"
+       spacingy="0.5px"
+       type="xygrid"
+       visible="true" />
+  </sodipodi:namedview>
+  <defs
+     id="defs7386">
+    <filter
+       id="filter7554"
+       style="color-interpolation-filters:sRGB">
+      <feBlend
+         id="feBlend7556"
+         in2="BackgroundImage"
+         mode="darken" />
+    </filter>
+  </defs>
+  <g
+     inkscape:groupmode="layer"
+     id="layer13"
+     inkscape:label="places"
+     style="display:inline"
+     transform="translate(-713.0004,583.99179)">
+    <path
+       style="fill:#bebebe;fill-opacity:1;stroke:none;stroke-width:1.13625288;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 721.36109,-583.99179 c -0.29989,0.29761 -0.465,0.61557 -0.74164,0.85074 -0.27865,0.2569 -0.51282,0.25851 -1.11635,0.45513 -0.34683,0.11772 -1.68603,0.49116 -3.31757,1.88802 -2.09891,1.79738 -2.77497,4.6861 -1.63759,7.09298 0.70971,1.50101 1.66748,1.59237 1.77603,2.21046 0.10419,0.59923 -0.60334,1.25596 -0.87387,1.95236 -0.18633,0.47545 -0.24177,1.02023 -0.19138,1.55031 l 1.89868,0 c 0.45974,-0.9841 2.7063,-0.9082 2.26539,-2.77736 -0.32161,-1.07136 -2.00139,-0.90864 -3.38013,-2.10193 -1.73268,-1.49982 -1.91748,-4.14216 -0.67021,-5.95677 0.57341,-0.83209 1.45784,-1.51791 2.35635,-2.04402 0.74604,-0.36399 1.70284,-0.63352 2.31752,-0.16646 0.10854,0.41548 -0.0155,1.16077 -0.0431,1.50368 -0.081,0.97783 -0.0859,1.43532 0.005,2.41552 0.22848,2.48135 1.39141,4.94571 1.2363,7.35269 -0.0361,0.54973 -0.15492,1.19384 -0.40386,1.77465 l 2.8845,0 c 0.1171,-0.37334 0.20603,-0.76947 0.2637,-1.1957 0.1064,-0.79577 -0.14936,-1.83567 0.20016,-2.54256 0.38226,-0.77101 1.15915,-0.86808 1.9092,-1.67414 1.24341,-1.33542 1.93371,-2.93886 1.90126,-4.69676 -0.0309,-1.70443 -1.12856,-3.52029 -2.76372,-4.37189 -1.28556,-0.66988 -2.59498,-0.51752 -3.13054,-1.04533 -0.14032,-0.13709 -0.21833,-0.29012 -0.32456,-0.47362 l -0.41792,0 z m 0.37483,2.80229 c 2.79996,0.0939 4.71685,3.6837 3.63669,6.16344 -0.67986,1.56291 -1.76224,1.70165 -2.41272,-0.02 -0.458,-1.01556 -0.82063,-2.05489 -1.11904,-3.11991 -0.27676,-0.98379 -0.41041,-2.00796 -0.37834,-3.02182 0.0926,-0.004 0.18304,-0.004 0.27341,-0.002 z"
+       id="rect5976"
+       inkscape:connector-curvature="0" />
+  </g>
+</svg>
