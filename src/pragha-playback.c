@@ -139,6 +139,33 @@ void pragha_playback_next_track(PraghaApplication *pragha)
 	pragha_advance_playback (pragha);
 }
 
+gboolean
+pragha_playback_can_go_prev (PraghaApplication *pragha)
+{
+	PraghaPlaylist *playlist;
+	gboolean can_go_prev = FALSE;
+
+	playlist = pragha_application_get_playlist (pragha);
+	if (pragha_playlist_get_no_unplayed_tracks(playlist) < pragha_playlist_get_no_tracks(playlist))
+		can_go_prev = TRUE;
+
+	return can_go_prev;
+}
+
+gboolean
+pragha_playback_can_go_next (PraghaApplication *pragha)
+{
+	PraghaPlaylist *playlist;
+	gboolean can_go_next = FALSE;
+
+	playlist = pragha_application_get_playlist (pragha);
+	if (pragha_playlist_get_no_unplayed_tracks(playlist) > 0)
+		can_go_next = TRUE;
+
+	return can_go_next;
+}
+
+
 /******************************************/
 /* Update playback state based on backend */
 /******************************************/
