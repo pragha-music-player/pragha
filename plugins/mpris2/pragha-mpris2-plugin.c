@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2017 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -703,27 +703,13 @@ mpris_Player_get_MaximumRate (GError **error, PraghaMpris2Plugin *plugin)
 static GVariant *
 mpris_Player_get_CanGoNext (GError **error, PraghaMpris2Plugin *plugin)
 {
-	PraghaPlaylist *playlist;
-	gboolean can_go_next = FALSE;
-
-	playlist = pragha_application_get_playlist (plugin->priv->pragha);
-	if (pragha_playlist_get_no_unplayed_tracks(playlist) > 0)
-		can_go_next = TRUE;
-
-	return g_variant_new_boolean(can_go_next);
+	return g_variant_new_boolean(pragha_playback_can_go_next(plugin->priv->pragha));
 }
 
 static GVariant *
 mpris_Player_get_CanGoPrevious (GError **error, PraghaMpris2Plugin *plugin)
 {
-	PraghaPlaylist *playlist;
-	gboolean can_go_prev = FALSE;
-
-	playlist = pragha_application_get_playlist (plugin->priv->pragha);
-	if (pragha_playlist_get_no_unplayed_tracks(playlist) < pragha_playlist_get_no_tracks(playlist))
-		can_go_prev = TRUE;
-
-	return g_variant_new_boolean(can_go_prev);
+	return g_variant_new_boolean(pragha_playback_can_go_prev(plugin->priv->pragha));
 }
 
 static GVariant *
@@ -1224,10 +1210,12 @@ static void
 pragha_mpris_update_any (PraghaMpris2Plugin *plugin)
 {
 	PraghaBackend *backend;
+	PraghaBackendState playback_state = ST_STOPPED;
 	PraghaPreferences *preferences;
-	gboolean change_detected = FALSE, shuffle, repeat;
+	gboolean new_song = FALSE, change_detected = FALSE;
+	gboolean shuffle, repeat, can_next, can_prev, can_play, can_pause, can_seek;
 	GVariantBuilder b;
-	const gchar *newtitle = NULL;
+	const gchar *current_title = NULL;
 	gdouble curr_vol;
 
 	if(NULL == plugin->priv->dbus_connection)
@@ -1235,48 +1223,89 @@ pragha_mpris_update_any (PraghaMpris2Plugin *plugin)
 
 	CDEBUG(DBG_PLUGIN, "MPRIS update any");
 
+	g_variant_builder_init(&b, G_VARIANT_TYPE("a{sv}"));
+
 	backend = pragha_application_get_backend (plugin->priv->pragha);
 
-	if (pragha_backend_get_state (backend) != ST_STOPPED) {
-		newtitle = pragha_musicobject_get_file (pragha_backend_get_musicobject (backend));
+	playback_state = pragha_backend_get_state (backend);
+	if (playback_state != ST_STOPPED) {
+		current_title = pragha_musicobject_get_file (pragha_backend_get_musicobject (backend));
 	}
 
-	g_variant_builder_init(&b, G_VARIANT_TYPE("a{sv}"));
+	if (g_strcmp0(plugin->priv->saved_title, current_title)) {
+		new_song = TRUE;
+		change_detected = TRUE;
+		if (plugin->priv->saved_title)
+			g_free(plugin->priv->saved_title);
+		if (string_is_not_empty(current_title))
+			plugin->priv->saved_title = g_strdup(current_title);
+		else
+			plugin->priv->saved_title = NULL;
+		g_variant_builder_add (&b, "{sv}", "Metadata", mpris_Player_get_Metadata (NULL, plugin));
+	}
 
 	preferences = pragha_application_get_preferences (plugin->priv->pragha);
 
 	shuffle = pragha_preferences_get_shuffle (preferences);
-	if (plugin->priv->saved_shuffle != shuffle) {
+	if (new_song || (plugin->priv->saved_shuffle != shuffle)) {
 		change_detected = TRUE;
 		plugin->priv->saved_shuffle = shuffle;
 		g_variant_builder_add (&b, "{sv}", "Shuffle", mpris_Player_get_Shuffle (NULL, plugin));
 	}
-	if (plugin->priv->state != pragha_backend_get_state (backend)) {
+
+	if (new_song || (plugin->priv->state != playback_state)) {
 		change_detected = TRUE;
-		plugin->priv->state = pragha_backend_get_state (backend);
+		plugin->priv->state = playback_state;
 		g_variant_builder_add (&b, "{sv}", "PlaybackStatus", mpris_Player_get_PlaybackStatus (NULL, plugin));
 	}
+
 	repeat = pragha_preferences_get_repeat (preferences);
-	if (plugin->priv->saved_playbackstatus != repeat) {
+	if (new_song || (plugin->priv->saved_playbackstatus != repeat)) {
 		change_detected = TRUE;
 		plugin->priv->saved_playbackstatus = repeat;
 		g_variant_builder_add (&b, "{sv}", "LoopStatus", mpris_Player_get_LoopStatus (NULL, plugin));
 	}
+
 	curr_vol = pragha_backend_get_volume (backend);
-	if (plugin->priv->volume != curr_vol) {
+	if (new_song || (plugin->priv->volume != curr_vol)) {
 		change_detected = TRUE;
 		plugin->priv->volume = curr_vol;
 		g_variant_builder_add (&b, "{sv}", "Volume", mpris_Player_get_Volume (NULL, plugin));
 	}
-	if (g_strcmp0(plugin->priv->saved_title, newtitle)) {
+
+	can_next = pragha_playback_can_go_next (plugin->priv->pragha);
+	if (new_song || (plugin->priv->saved_can_next != can_next)) {
 		change_detected = TRUE;
-		if(plugin->priv->saved_title)
-			g_free(plugin->priv->saved_title);
-		if(string_is_not_empty(newtitle))
-			plugin->priv->saved_title = g_strdup(newtitle);
-		else
-			plugin->priv->saved_title = NULL;
-		g_variant_builder_add (&b, "{sv}", "Metadata", mpris_Player_get_Metadata (NULL, plugin));
+		plugin->priv->saved_can_next = can_next;
+		g_variant_builder_add (&b, "{sv}", "CanGoNext", mpris_Player_get_CanGoNext (NULL, plugin));
+	}
+
+	can_prev = pragha_playback_can_go_prev (plugin->priv->pragha);
+	if (new_song || (plugin->priv->saved_can_prev != can_prev)) {
+		change_detected = TRUE;
+		plugin->priv->saved_can_prev = can_prev;
+		g_variant_builder_add (&b, "{sv}", "CanGoPrevious", mpris_Player_get_CanGoPrevious (NULL, plugin));
+	}
+
+	can_play = (playback_state != ST_STOPPED);
+	if (new_song || (plugin->priv->saved_can_play != can_play)) {
+		change_detected = TRUE;
+		plugin->priv->saved_can_play = can_play;
+		g_variant_builder_add (&b, "{sv}", "CanPlay", mpris_Player_get_CanPlay (NULL, plugin));
+	}
+
+	can_pause = (playback_state != ST_STOPPED);
+	if (new_song || (plugin->priv->saved_can_pause != can_pause)) {
+		change_detected = TRUE;
+		plugin->priv->saved_can_pause = can_pause;
+		g_variant_builder_add (&b, "{sv}", "CanPause", mpris_Player_get_CanPause (NULL, plugin));
+	}
+
+	can_seek = pragha_backend_can_seek (backend);
+	if (new_song || (plugin->priv->saved_can_seek != can_seek)) {
+		change_detected = TRUE;
+		plugin->priv->saved_can_seek = can_seek;
+		g_variant_builder_add (&b, "{sv}", "CanSeek", mpris_Player_get_CanSeek (NULL, plugin));
 	}
 
 	if (change_detected) {
@@ -1451,6 +1480,14 @@ any_notify_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 }
 
 static void
+playlist_any_notify_cb (PraghaPlaylist *playlist, gpointer user_data)
+{
+	PraghaMpris2Plugin *plugin = user_data;
+
+	pragha_mpris_update_any (plugin);
+}
+
+static void
 pragha_art_cache_changed_handler (PraghaArtCache *cache, PraghaMpris2Plugin *plugin)
 {
 	PraghaBackend *backend;
@@ -1481,6 +1518,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 {
 	PraghaPreferences *preferences;
 	PraghaBackend *backend;
+	PraghaPlaylist *playlist;
 	PraghaArtCache *art_cache;
 
 	PraghaMpris2Plugin *plugin = PRAGHA_MPRIS2_PLUGIN (activatable);
@@ -1494,6 +1532,11 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->saved_playbackstatus = FALSE;
 	priv->saved_title = NULL;
 	priv->volume = 0;
+	priv->saved_can_next = FALSE;
+	priv->saved_can_prev = FALSE;
+	priv->saved_can_play = FALSE;
+	priv->saved_can_pause = FALSE;
+	priv->saved_can_seek = FALSE;
 
 	priv->introspection_data = g_dbus_node_info_new_for_xml (mpris2xml, NULL);
 	g_assert (priv->introspection_data != NULL);
@@ -1515,6 +1558,10 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	g_signal_connect (backend, "notify::volume", G_CALLBACK (any_notify_cb), plugin);
 	g_signal_connect (backend, "notify::state", G_CALLBACK (any_notify_cb), plugin);
 	g_signal_connect (backend, "seeked", G_CALLBACK (seeked_cb), plugin);
+
+	playlist = pragha_application_get_playlist (priv->pragha);
+	g_signal_connect (playlist, "playlist-changed",
+	                  G_CALLBACK(playlist_any_notify_cb), plugin);
 
 	art_cache = pragha_application_get_art_cache (priv->pragha);
 	g_signal_connect (art_cache, "cache-changed",

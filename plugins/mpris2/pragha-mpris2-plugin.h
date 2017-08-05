@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2017 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -51,6 +51,12 @@ struct _PraghaMpris2PluginPrivate {
 	gboolean           saved_shuffle;
 	gchar             *saved_title;
 	gdouble            volume;
+	gboolean           saved_can_next;
+	gboolean           saved_can_prev;
+	gboolean           saved_can_play;
+	gboolean           saved_can_pause;
+	gboolean           saved_can_seek;
+
 	PraghaBackendState state;
 };
 
