@@ -715,9 +715,14 @@ mpris_Player_get_CanGoPrevious (GError **error, PraghaMpris2Plugin *plugin)
 static GVariant *
 mpris_Player_get_CanPlay (GError **error, PraghaMpris2Plugin *plugin)
 {
-	PraghaBackend *backend = pragha_application_get_backend (plugin->priv->pragha);
+	PraghaBackend *backend;
+	gboolean can_play = FALSE;
 
-	return g_variant_new_boolean(pragha_backend_get_state (backend) != ST_STOPPED);
+	backend = pragha_application_get_backend (plugin->priv->pragha);
+	can_play = ((pragha_backend_get_state (backend) != ST_STOPPED) ||
+	            (pragha_playback_get_no_tracks(plugin->priv->pragha) > 0));
+
+	return g_variant_new_boolean (can_play);
 }
 
 static GVariant *
@@ -848,7 +853,7 @@ static GVariant *
 mpris_Playlists_get_ActivePlaylist (GError **error, PraghaMpris2Plugin *plugin)
 {
 	return g_variant_new("(b(oss))",
-		FALSE, "/", _("Playlists"), _("Playlists"));
+		FALSE, "/", _("Tracks"), _("Tracks"));
 
 	/* Formally this is correct, but in the practice only is used to
 	   display a confuse message "invalid" in the ubuntu-soundmenu.
@@ -1217,6 +1222,7 @@ pragha_mpris_update_any (PraghaMpris2Plugin *plugin)
 	GVariantBuilder b;
 	const gchar *current_title = NULL;
 	gdouble curr_vol;
+	gint has_tracks = 0;
 
 	if(NULL == plugin->priv->dbus_connection)
 		return; /* better safe than sorry */
@@ -1287,7 +1293,8 @@ pragha_mpris_update_any (PraghaMpris2Plugin *plugin)
 		g_variant_builder_add (&b, "{sv}", "CanGoPrevious", mpris_Player_get_CanGoPrevious (NULL, plugin));
 	}
 
-	can_play = (playback_state != ST_STOPPED);
+	has_tracks = pragha_playback_get_no_tracks(plugin->priv->pragha);
+	can_play = (playback_state != ST_STOPPED) || has_tracks;
 	if (new_song || (plugin->priv->saved_can_play != can_play)) {
 		change_detected = TRUE;
 		plugin->priv->saved_can_play = can_play;
