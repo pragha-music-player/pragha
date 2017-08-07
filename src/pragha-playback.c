@@ -165,6 +165,14 @@ pragha_playback_can_go_next (PraghaApplication *pragha)
 	return can_go_next;
 }
 
+gint
+pragha_playback_get_no_tracks (PraghaApplication *pragha)
+{
+	PraghaPlaylist *playlist;
+	playlist = pragha_application_get_playlist (pragha);
+	return pragha_playlist_get_no_tracks(playlist);
+}
+
 
 /******************************************/
 /* Update playback state based on backend */

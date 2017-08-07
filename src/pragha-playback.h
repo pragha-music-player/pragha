@@ -33,6 +33,7 @@ void pragha_advance_playback              (PraghaApplication *pragha);
 
 gboolean pragha_playback_can_go_prev      (PraghaApplication *pragha);
 gboolean pragha_playback_can_go_next      (PraghaApplication *pragha);
+gint     pragha_playback_get_no_tracks    (PraghaApplication *pragha);
 
 void pragha_backend_finished_song         (PraghaBackend *backend, PraghaApplication *pragha);
 void pragha_backend_tags_changed          (PraghaBackend *backend, gint changed, PraghaApplication *pragha);
