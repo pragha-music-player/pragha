@@ -67,7 +67,7 @@ pragha_art_cache_class_init (PraghaArtCacheClass *klass)
 static void
 pragha_art_cache_init (PraghaArtCache *cache)
 {
-	cache->cache_dir = g_build_path (G_DIR_SEPARATOR_S, g_get_user_cache_dir (), "pragha", NULL);
+	cache->cache_dir = g_build_path (G_DIR_SEPARATOR_S, g_get_user_cache_dir (), "pragha", "art", NULL);
 	g_mkdir_with_parents (cache->cache_dir, S_IRWXU);
 }
 
