@@ -64,6 +64,7 @@ struct _PraghaPreferencesClass
 #define KEY_INSTANT_SEARCH         "instant_filter"
 #define KEY_APPROXIMATE_SEARCH     "aproximate_search"
 #define KEY_USE_HINT               "use_hint"
+#define KEY_CACHE_SIZE             "cache_size"
 
 #define GROUP_PLAYLIST "Playlist"
 #define KEY_SAVE_PLAYLIST          "save_playlist"
@@ -167,6 +168,17 @@ pragha_preferences_set_double_list (PraghaPreferences *preferences,
                                     const gchar *key,
                                     gdouble list[],
                                     gsize length);
+
+gint
+pragha_preferences_get_integer (PraghaPreferences *preferences,
+                                const gchar       *group_name,
+                                const gchar       *key);
+
+void
+pragha_preferences_set_integer (PraghaPreferences *preferences,
+                                const gchar       *group_name,
+                                const gchar       *key,
+                                      gint         integer);
 
 gchar *
 pragha_preferences_get_string (PraghaPreferences *preferences,

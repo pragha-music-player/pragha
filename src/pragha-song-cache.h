@@ -41,7 +41,6 @@ struct _PraghaSongCacheClass
 
 PraghaSongCache *pragha_song_cache_get                (void);
 
-const gchar     *pragha_song_cache_get_template      (PraghaSongCache *cache);
 void             pragha_song_cache_put_location      (PraghaSongCache *cache, const gchar *location, const gchar *filename);
 gchar           *pragha_song_cache_get_from_location (PraghaSongCache *cache, const gchar *location);
 

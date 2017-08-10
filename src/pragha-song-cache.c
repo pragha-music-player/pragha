@@ -17,6 +17,7 @@
 
 #include "pragha-database.h"
 #include "pragha-song-cache.h"
+#include "pragha-preferences.h"
 
 #include <glib/gstdio.h>
 #include <gio/gio.h>
@@ -25,7 +26,7 @@ struct _PraghaSongCache {
 	GObject        _parent;
 	PraghaDatabase *cdbase;
 	gchar          *cache_dir;
-	gchar          *template_filename;
+	gint            cache_size;
 };
 
 G_DEFINE_TYPE(PraghaSongCache, pragha_song_cache, G_TYPE_OBJECT)
@@ -65,9 +66,17 @@ pragha_song_cache_class_init (PraghaSongCacheClass *klass)
 static void
 pragha_song_cache_init (PraghaSongCache *cache)
 {
+	PraghaPreferences *preferences;
+
 	cache->cdbase = pragha_database_get ();
 	cache->cache_dir = g_build_path (G_DIR_SEPARATOR_S, g_get_user_cache_dir (), "pragha", "songs", NULL);
 	g_mkdir_with_parents (cache->cache_dir, S_IRWXU);
+
+	preferences = pragha_preferences_get ();
+	cache->cache_size = pragha_preferences_get_integer (preferences, GROUP_GENERAL, KEY_CACHE_SIZE);
+	if (cache->cache_size == 0)
+		cache->cache_size = 1*1024*1024*1024; /* 1GB by default */
+	g_object_unref (G_OBJECT(preferences));
 }
 
 PraghaSongCache *
@@ -87,10 +96,59 @@ pragha_song_cache_get (void)
 	return cache;
 }
 
-const gchar *
-pragha_song_cache_get_template (PraghaSongCache *cache)
+static gboolean
+pragha_song_cache_drop_song (PraghaSongCache *cache, const gchar *basename)
 {
-	return cache->template_filename;
+	PraghaPreparedStatement *statement;
+	gchar *filename = NULL;
+	GFile *file;
+	gboolean done = FALSE;
+
+	filename = g_strdup_printf ("%s%s%s", cache->cache_dir, G_DIR_SEPARATOR_S, basename);
+	file = g_file_new_for_path (filename);
+
+	done = g_file_delete (file, NULL, NULL);
+	if (done) {
+		statement = pragha_database_create_statement (cache->cdbase, "DELETE FROM CACHE WHERE name = ?");
+		pragha_prepared_statement_bind_string (statement, 1, basename);
+		pragha_prepared_statement_step (statement);
+		pragha_prepared_statement_free (statement);
+	}
+
+	g_free (filename);
+	g_object_unref (file);
+
+	return done;
+}
+
+static void
+pragha_song_cache_purge (PraghaSongCache *cache)
+{
+	PraghaPreparedStatement *statement;
+	gint cache_used = 0, song_size = 0;
+	const gchar *basename = NULL;
+
+	statement = pragha_database_create_statement (cache->cdbase, "SELECT SUM (size) FROM CACHE");
+	if (pragha_prepared_statement_step (statement))
+		cache_used = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+
+	if (cache->cache_size < cache_used)
+	{
+		statement = pragha_database_create_statement (cache->cdbase, "SELECT name, size FROM CACHE ORDER BY timestamp");
+		while (pragha_prepared_statement_step (statement))
+		{
+			basename = pragha_prepared_statement_get_string (statement, 0);
+			song_size = pragha_prepared_statement_get_int (statement, 1);
+			if (pragha_song_cache_drop_song(cache, basename))
+			{
+				cache_used -= song_size;
+				if (cache->cache_size > cache_used)
+					break;
+			}
+		}
+		pragha_prepared_statement_free (statement);
+	}
 }
 
 void
@@ -134,6 +192,9 @@ pragha_song_cache_put_location (PraghaSongCache *cache, const gchar *location, c
 		pragha_prepared_statement_free (statement);
 	}
 
+	/* Clean cache if necessary. */
+	pragha_song_cache_purge (cache);
+
 	g_free (file_basename);
 	g_free (dest_filename);
 }
@@ -144,6 +205,7 @@ pragha_song_cache_get_from_location (PraghaSongCache *cache, const gchar *locati
 	PraghaPreparedStatement *statement;
 	gchar *basename = NULL, *filename = NULL;
 	gint location_id = 0;
+	GTimeVal tv;
 
 	location_id = pragha_database_find_location (cache->cdbase, location);
 
@@ -158,6 +220,13 @@ pragha_song_cache_get_from_location (PraghaSongCache *cache, const gchar *locati
 		if (g_file_test(filename, G_FILE_TEST_EXISTS)) {
 			statement = pragha_database_create_statement (cache->cdbase, "UPDATE CACHE SET playcount = playcount + 1 WHERE id = ?");
 			pragha_prepared_statement_bind_int (statement, 1, location_id);
+			pragha_prepared_statement_step (statement);
+			pragha_prepared_statement_free (statement);
+
+			g_get_current_time(&tv);
+			statement = pragha_database_create_statement (cache->cdbase, "UPDATE CACHE SET timestamp = ? WHERE id = ?");
+			pragha_prepared_statement_bind_int (statement, 1, tv.tv_sec);
+			pragha_prepared_statement_bind_int (statement, 2, location_id);
 			pragha_prepared_statement_step (statement);
 			pragha_prepared_statement_free (statement);
 		}

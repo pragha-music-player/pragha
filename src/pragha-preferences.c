@@ -237,6 +237,41 @@ pragha_preferences_set_integer_list (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_integer:
+ *
+ */
+gint
+pragha_preferences_get_integer (PraghaPreferences *preferences,
+                                const gchar       *group_name,
+                                const gchar       *key)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), 0);
+
+	return g_key_file_get_integer (preferences->priv->rc_keyfile,
+	                               group_name,
+	                               key,
+	                               NULL);
+}
+
+/**
+ * pragha_preferences_set_integer:
+ *
+ */
+void
+pragha_preferences_set_integer (PraghaPreferences *preferences,
+                                const gchar       *group_name,
+                                const gchar       *key,
+                                gint               integer)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	g_key_file_set_integer (preferences->priv->rc_keyfile,
+	                        group_name,
+	                        key,
+	                        integer);
+}
+
+/**
  * pragha_preferences_get_string:
  *
  */
