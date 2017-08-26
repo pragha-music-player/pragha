@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2014-2017 Matias De lellis -->
-<application>
-  <id type="desktop">pragha.desktop</id>
+<component>
+  <id>io.github.pragha-music-player</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0+</project_license>
   <name>Pragha Mucic Player</name>
@@ -25,11 +25,18 @@
       <li>Native desktop notifications with libnotify</li>
     </ul>
   </description>
+  <launchable type="desktop-id">pragha.desktop</launchable>
   <url type="homepage">http://pragha-music-player.github.io</url>
   <screenshots>
-    <screenshot type="default">http://pragha-music-player.github.io/images/Pragha-Xfce-HIG.png</screenshot>
-    <screenshot>http://pragha-music-player.github.io/images/Pragha-Gnome3-HIG.png</screenshot>
-    <screenshot>http://pragha-music-player.github.io/images/Pragha-W7.jpg</screenshot>
+    <screenshot type="default">
+      <image>http://pragha-music-player.github.io/images/Pragha-Xfce-HIG.png</image>
+    </screenshot>
+    <screenshot>
+      <image>http://pragha-music-player.github.io/images/Pragha-Gnome3-HIG.png</image>
+    </screenshot>
+    <screenshot>
+      <image>http://pragha-music-player.github.io/images/Pragha-W7.jpg</image>
+    </screenshot>
   </screenshots>
-  <updatecontact>mati86dl_at_gmail.com</updatecontact>
-</application>
+  <update_contact>mati86dl_at_gmail.com</update_contact>
+</component>
