@@ -28,7 +28,8 @@ G_BEGIN_DECLS
 typedef enum {
 	ST_PLAYING = 1,
 	ST_STOPPED,
-	ST_PAUSED
+	ST_PAUSED,
+	ST_BUFFERING
 } PraghaBackendState;
 
 #define PRAGHA_TYPE_BACKEND                  (pragha_backend_get_type ())
@@ -72,9 +73,6 @@ void               pragha_backend_set_soft_volume      (PraghaBackend *backend, 
 gdouble            pragha_backend_get_volume           (PraghaBackend *backend);
 void               pragha_backend_set_volume           (PraghaBackend *backend, gdouble volume);
 void               pragha_backend_set_delta_volume     (PraghaBackend *backend, gdouble delta);
-
-gboolean           pragha_backend_is_playing           (PraghaBackend *backend);
-gboolean           pragha_backend_is_paused            (PraghaBackend *backend);
 
 gboolean           pragha_backend_emitted_error        (PraghaBackend *backend);
 GError            *pragha_backend_get_error            (PraghaBackend *backend);

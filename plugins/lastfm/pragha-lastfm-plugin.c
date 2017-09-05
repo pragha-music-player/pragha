@@ -377,7 +377,7 @@ static void
 pragha_lastfm_update_menu_actions (PraghaLastfmPlugin *plugin)
 {
 	PraghaBackend *backend;
-	PraghaBackendState state = 0;
+	PraghaBackendState state = ST_STOPPED;
 	GtkWindow *window;
 
 	PraghaLastfmPluginPrivate *priv = plugin->priv;

@@ -389,7 +389,7 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 {
 	GtkWindow *window;
 	GtkAction *action;
-	PraghaBackendState state = 0;
+	PraghaBackendState state = ST_STOPPED;
 
 	PraghaAcoustidPlugin *plugin = user_data;
 	PraghaAcoustidPluginPrivate *priv = plugin->priv;

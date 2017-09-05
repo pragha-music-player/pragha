@@ -282,7 +282,7 @@ static void
 pragha_status_icon_update_state (PraghaBackend *backend, GParamSpec *pspec, PraghaStatusIcon *status_icon)
 {
 	GtkAction *action;
-	PraghaBackendState state = 0;
+	PraghaBackendState state = ST_STOPPED;
 
 	state = pragha_backend_get_state (backend);
 

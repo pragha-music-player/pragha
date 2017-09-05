@@ -572,6 +572,7 @@ pragha_playlist_update_track_state (PraghaPlaylist *playlist, GtkTreePath *path,
 	else {
 		switch (state) {
 			case ST_PLAYING:
+			case ST_BUFFERING:
 				pixbuf = playlist->playing_pixbuf;
 				break;
 			case ST_PAUSED:
@@ -1341,7 +1342,7 @@ pragha_playlist_update_playback_sequence (PraghaPlaylist *playlist, PraghaUpdate
 void update_current_playlist_view_track(PraghaPlaylist *cplaylist, PraghaBackend *backend)
 {
 	GtkTreePath *path;
-	PraghaBackendState state;
+	PraghaBackendState state = ST_STOPPED;
 
 	path = get_current_track (cplaylist);
 	if(path) {

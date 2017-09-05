@@ -254,7 +254,7 @@ static void
 backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
 {
 	PraghaMusicSource file_source = FILE_NONE;
-	PraghaBackendState state = 0;
+	PraghaBackendState state = ST_STOPPED;
 
 	PraghaSongInfoPlugin *plugin = user_data;
 

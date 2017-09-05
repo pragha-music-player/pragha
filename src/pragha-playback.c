@@ -85,6 +85,7 @@ void pragha_playback_play_pause_resume(PraghaApplication *pragha)
 		playlist = pragha_application_get_playlist (pragha);
 		pragha_playlist_go_any_track (playlist);
 		break;
+	case ST_BUFFERING:
 	default:
 		break;
 	}
