@@ -48,11 +48,13 @@ pragha_close_window(GtkWidget *widget, GdkEvent *event, PraghaApplication *pragh
 	preferences = pragha_application_get_preferences (pragha);
 	if (pragha_preferences_get_hide_instead_close (preferences)) {
 		status_icon = pragha_application_get_status_icon (pragha);
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 		if (pragha_preferences_get_show_status_icon (preferences) &&
 		    gtk_status_icon_is_embedded (GTK_STATUS_ICON(status_icon)))
 			pragha_window_toggle_state(pragha, FALSE);
 		else
 			gtk_window_iconify (GTK_WINDOW(pragha_application_get_window(pragha)));
+G_GNUC_END_IGNORE_DEPRECATIONS
 	}
 	else {
 		pragha_application_quit (pragha);
@@ -390,6 +392,7 @@ pragha_window_init (PraghaApplication *pragha)
 	}
 	else if(!g_ascii_strcasecmp(start_mode, ICONIFIED_STATE)) {
 		status_icon = pragha_application_get_status_icon (pragha);
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 		if(gtk_status_icon_is_embedded (GTK_STATUS_ICON(status_icon))) {
 			gtk_widget_hide(GTK_WIDGET(window));
 		}
@@ -398,6 +401,7 @@ pragha_window_init (PraghaApplication *pragha)
 			gtk_window_iconify (GTK_WINDOW(window));
 			gtk_widget_show(window);
 		}
+G_GNUC_END_IGNORE_DEPRECATIONS
 	}
 	else {
 		gtk_widget_show(window);
@@ -442,7 +446,7 @@ pragha_window_new (PraghaApplication *pragha)
 	GtkWidget *menubar, *pane1, *pane2, *infobox;
 	GtkWidget *playlist_statusbar_vbox, *vbox_main;
 	GtkWidget *menu_button;
-	GtkBuilder *menu_ui;
+	GtkBuilder *song_box, *menu_ui;
 	GtkCssProvider *css_provider;
 	GIcon *icon = NULL;
 	GError *error = NULL;
@@ -561,9 +565,7 @@ pragha_window_new (PraghaApplication *pragha)
 
 	gtk_box_pack_start (GTK_BOX(vbox_main), menubar,
 	                    FALSE, FALSE, 0);
-#if GTK_CHECK_VERSION (3, 12, 0)
 	if (pragha_preferences_get_system_titlebar (preferences))
-#endif
 		gtk_box_pack_start (GTK_BOX(vbox_main), GTK_WIDGET(toolbar),
 		                    FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(vbox_main), infobox,
@@ -578,9 +580,7 @@ pragha_window_new (PraghaApplication *pragha)
 	/* Add menu-button to toolbar */
 
 	menu_button =  gtk_menu_button_new ();
-#if GTK_CHECK_VERSION (3, 12, 0)
 	g_object_set(menu_button, "use-popover", FALSE, NULL);
-#endif
 	gtk_button_set_relief(GTK_BUTTON(menu_button), GTK_RELIEF_NONE);
 
 	icon = g_themed_icon_new_from_names ((gchar **)fallbacks_icon_menu, -1);
@@ -661,13 +661,12 @@ pragha_window_new (PraghaApplication *pragha)
 		g_object_unref (css_provider);
 	}
 
-#if GTK_CHECK_VERSION (3, 12, 0)
 	if (!pragha_preferences_get_system_titlebar (preferences))
 		gtk_window_set_titlebar (GTK_WINDOW (window), GTK_WIDGET(toolbar));
 
-	GtkWidget *song = pragha_toolbar_get_song_box(toolbar);
-	gtk_header_bar_set_custom_title(GTK_HEADER_BAR(toolbar), GTK_WIDGET(song));
-#endif
+	song_box = pragha_toolbar_get_song_box(toolbar);
+	gtk_header_bar_set_custom_title(GTK_HEADER_BAR(toolbar), GTK_WIDGET(song_box));
+
 	gtk_widget_show (GTK_WIDGET(toolbar));
 
 	pragha_window_init (pragha);

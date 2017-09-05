@@ -351,7 +351,6 @@ pragha_filter_dialog (PraghaPlaylist *playlist)
 	gtk_tree_view_append_column (GTK_TREE_VIEW(filter_view), column);
 	g_object_unref(G_OBJECT(filter_model));
 
-	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(filter_view), TRUE);
 	gtk_tree_view_set_headers_visible (GTK_TREE_VIEW(filter_view), FALSE);
 	gtk_tree_view_set_enable_search (GTK_TREE_VIEW(filter_view), FALSE);
 

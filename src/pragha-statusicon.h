@@ -31,9 +31,11 @@ typedef struct _PraghaApplication PraghaApplication;
 #define PRAGHA_IS_STATUS_ICON_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_STATUS_ICON))
 #define PRAGHA_STATUS_ICON_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_STATUS_ICON, PraghaStatusIconClass))
 
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 typedef struct {
 	GtkStatusIconClass __parent__;
 } PraghaStatusIconClass;
+G_GNUC_END_IGNORE_DEPRECATIONS
 
 typedef struct _PraghaStatusIcon PraghaStatusIcon;
 

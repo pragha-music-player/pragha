@@ -78,57 +78,6 @@ gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon_name)
 	return vbox;
 }
 
-/*
- * PraghaTrackProgress: An extension of GtkProgressBar reducing their default size
- */
-#define PRAGHA_TYPE_TRACK_PROGRESS (pragha_track_progress_get_type())
-#define PRAGHA_TRACK_PROGRESS(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_TRACK_PROGRESS, PraghaTrackProgress))
-#define PRAGHA_TRACK_PROGRESS_CONST(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_TRACK_PROGRESS, PraghaTrackProgress const))
-#define PRAGHA_TRACK_PROGRESS_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PRAGHA_TYPE_TRACK_PROGRESS, PraghaTrackProgressClass))
-#define PRAGHA_IS_TRACK_PROGRESS(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_TRACK_PROGRESS))
-#define PRAGHA_IS_TRACK_PROGRESS_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_TRACK_PROGRESS))
-#define PRAGHA_TRACK_PROGRESS_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_TRACK_PROGRESS, PraghaTrackProgressClass))
-
-typedef struct _PraghaTrackProgressClass PraghaTrackProgressClass;
-
-struct _PraghaTrackProgressClass {
-	GtkProgressBarClass parent_class;
-};
-struct _PraghaTrackProgress {
-	GtkProgressBar _parent;
-};
-G_DEFINE_TYPE(PraghaTrackProgress, pragha_track_progress, GTK_TYPE_PROGRESS_BAR)
-
-static void
-pragha_track_progress_get_preferred_height (GtkWidget *widget,
-                                            gint      *minimum,
-                                            gint      *natural)
-{
-	if (minimum)
-		*minimum = 14;
-	if (natural)
-		*natural = 14;
-}
-
-static void
-pragha_track_progress_class_init (PraghaTrackProgressClass *class)
-{
-	GtkWidgetClass *widget_class;
-
-	widget_class = GTK_WIDGET_CLASS (class);
-	widget_class->get_preferred_height = pragha_track_progress_get_preferred_height;
-}
-
-static void
-pragha_track_progress_init (PraghaTrackProgress *progress)
-{
-}
-
-PraghaTrackProgress *
-pragha_track_progress_new (void)
-{
-	return g_object_new (PRAGHA_TYPE_TRACK_PROGRESS, NULL);
-}
 
 /*
  * PraghaContainer: An extension of GtkContainer to expand their default size.

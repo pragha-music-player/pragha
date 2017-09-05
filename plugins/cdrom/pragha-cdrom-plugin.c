@@ -707,7 +707,8 @@ pragha_cdrom_plugin_append_setting (PraghaCdromPlugin *plugin)
 	pragha_hig_workarea_table_add_section_title(table, &row, _("Audio CD"));
 
 	audio_cd_device_label = gtk_label_new(_("Audio CD Device"));
-	gtk_misc_set_alignment (GTK_MISC (audio_cd_device_label), 0, 0);
+	gtk_widget_set_halign (GTK_WIDGET(audio_cd_device_label), GTK_ALIGN_START);
+	gtk_widget_set_valign (GTK_WIDGET(audio_cd_device_label), GTK_ALIGN_START);
 
 	audio_cd_device_entry = gtk_entry_new ();
 	gtk_entry_set_max_length (GTK_ENTRY(audio_cd_device_entry), AUDIO_CD_DEVICE_ENTRY_LEN);

@@ -726,7 +726,6 @@ pragha_need_restart_cb (PraghaPreferences *preferences, PraghaApplication *pragh
 	pragha_window_add_widget_to_infobox (pragha, infobar);
 }
 
-#if GTK_CHECK_VERSION (3, 12, 0)
 static void
 pragha_system_titlebar_changed_cb (PraghaPreferences *preferences, GParamSpec *pspec, PraghaApplication *pragha)
 {
@@ -786,7 +785,6 @@ pragha_system_titlebar_changed_cb (PraghaPreferences *preferences, GParamSpec *p
 	}
 	g_object_unref(toolbar);
 }
-#endif
 
 
 static void
@@ -1179,10 +1177,8 @@ pragha_application_startup (GApplication *application)
 	g_signal_connect (pragha->preferences, "NeedRestart",
 	                  G_CALLBACK (pragha_need_restart_cb), pragha);
 
-#if GTK_CHECK_VERSION (3, 12, 0)
 	g_signal_connect (pragha->preferences, "notify::system-titlebar",
 	                  G_CALLBACK (pragha_system_titlebar_changed_cb), pragha);
-#endif
 
 	pragha->sidebar2_binding =
 		g_object_bind_property (pragha->preferences, "secondary-lateral-panel",

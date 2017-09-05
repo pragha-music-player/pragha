@@ -238,7 +238,8 @@ pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
 	gtk_widget_show_all (GTK_WIDGET(pane));
 
 	pane->pane_title = gtk_label_new (_("Lyrics"));
-	gtk_misc_set_alignment (GTK_MISC(pane->pane_title), 0.0, 0.5);
+	gtk_widget_set_halign (GTK_WIDGET(pane->pane_title), GTK_ALIGN_START);
+	gtk_widget_set_valign (GTK_WIDGET(pane->pane_title), GTK_ALIGN_CENTER);
 
 	pane->context_menu = pragha_songinfo_pane_context_menu_new(pane);
 	pane->text_view = view;

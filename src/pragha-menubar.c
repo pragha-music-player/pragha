@@ -718,7 +718,6 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 
 	preferences = pragha_application_get_preferences (pragha);
 
-#if GTK_CHECK_VERSION (3, 12, 0)
 	if (!pragha_preferences_get_system_titlebar(preferences)) {
 		GtkAction *fullscreen_action = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Fullscreen");
 		gtk_action_set_sensitive (GTK_ACTION (fullscreen_action), FALSE);
@@ -726,7 +725,6 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 		GtkAction *below_action = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Playback controls below");
 		gtk_action_set_sensitive (GTK_ACTION (below_action), FALSE);
 	}
-#endif
 
 	GtkAction *action_shuffle = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/PlaybackMenu/Shuffle");
 	g_object_bind_property (preferences, "shuffle", action_shuffle, "active", binding_flags);

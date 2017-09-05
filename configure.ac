@@ -21,8 +21,8 @@ AM_INIT_AUTOMAKE([no-dist-gzip dist-bzip2])
 AM_MAINTAINER_MODE()
 
 dnl Set required and max glib/gdk versions
-AC_DEFINE(GDK_VERSION_MIN_REQUIRED, GDK_VERSION_3_8, [Ignore post 3.10 deprecations])
-AC_DEFINE(GDK_VERSION_MAX_ALLOWED, GDK_VERSION_3_10, [Ignore post 3.10 deprecations])
+AC_DEFINE(GDK_VERSION_MIN_REQUIRED, GDK_VERSION_3_14, [Ignore post 3.14 deprecations])
+AC_DEFINE(GDK_VERSION_MAX_ALLOWED, GDK_VERSION_3_14, [Ignore post 3.14 deprecations])
 
 dnl *********************
 dnl * Debugging support *
@@ -77,8 +77,8 @@ GSTREAMER_REQUIRED=0.11.90
 dnl Check for required packages
 XDT_CHECK_PACKAGE([GSTREAMER], [gstreamer-1.0], [$GSTREAMER_REQUIRED])
 XDT_CHECK_PACKAGE([GSTREAMER_BASE], [gstreamer-base-1.0], [$GSTREAMER_REQUIRED])
-XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.36])
-XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [3.8.0])
+XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.42])
+XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [3.14.0])
 XDT_CHECK_PACKAGE([SQLITE3], [sqlite3], [3.4])
 XDT_CHECK_PACKAGE([TAGLIB_C], [taglib_c], [1.8])
 

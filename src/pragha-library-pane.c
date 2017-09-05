@@ -281,11 +281,11 @@ GtkActionEntry library_tree_context_aentries[] = {
 	 "", "Move to trash", G_CALLBACK(pragha_library_pane_delete_from_hdd_action)},
 	{"Delete from library", "list-remove", N_("Delete from library"),
 	 "", "Delete from library", G_CALLBACK(pragha_library_pane_delete_from_db_action)},
-	{"Rescan library", GTK_STOCK_EXECUTE, N_("_Rescan library"),
+	{"Rescan library", "system-run", N_("_Rescan library"),
 	 "", "Rescan library", G_CALLBACK(pragha_library_pane_upgrade_library_action)},
-	{"Update library", GTK_STOCK_EXECUTE, N_("_Update library"),
+	{"Update library", "system-run", N_("_Update library"),
 	 "", "Update library", G_CALLBACK(pragha_library_pane_update_library_action)},
-	{"Remove library", GTK_STOCK_EXECUTE, N_("_Remove library"),
+	{"Remove library", "system-run", N_("_Remove library"),
 	 "", "Remove library", G_CALLBACK(pragha_library_pane_remove_library_action)}
 
 };
@@ -3069,7 +3069,8 @@ pragha_library_pane_init (PraghaLibraryPane *library)
 	library->search_entry = pragha_library_pane_search_entry_new (library);
 	library->library_tree = pragha_library_pane_tree_new (library);
 	library->pane_title = gtk_label_new("");
-	gtk_misc_set_alignment (GTK_MISC(library->pane_title), 0, 0.5);
+	gtk_widget_set_halign (GTK_WIDGET(library->pane_title), GTK_ALIGN_START);
+	gtk_widget_set_valign (GTK_WIDGET(library->pane_title), GTK_ALIGN_CENTER);
 
 	/* Create main widget */
 

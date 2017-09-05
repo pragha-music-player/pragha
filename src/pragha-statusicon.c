@@ -33,6 +33,7 @@
 #include "pragha-window.h"
 #include "pragha.h"
 
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 struct _PraghaStatusIcon {
 	GtkStatusIcon __parent__;
 
@@ -42,6 +43,8 @@ struct _PraghaStatusIcon {
 };
 
 G_DEFINE_TYPE(PraghaStatusIcon, pragha_status_icon, GTK_TYPE_STATUS_ICON)
+
+G_GNUC_END_IGNORE_DEPRECATIONS
 
 static void systray_about_action        (GtkAction *action, PraghaStatusIcon *status_icon);
 static void systray_open_file_action    (GtkAction *action, PraghaStatusIcon *status_icon);
@@ -312,7 +315,9 @@ pragha_status_icon_set_application (PraghaStatusIcon *status_icon, PraghaApplica
 
 	status_icon->pragha = pragha;
 
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 	gtk_status_icon_set_from_icon_name (GTK_STATUS_ICON(status_icon), "pragha-panel");
+G_GNUC_END_IGNORE_DEPRECATIONS
 
 	actions = gtk_action_group_new ("Systray Actions");
 	gtk_action_group_set_translation_domain (actions, GETTEXT_PACKAGE);

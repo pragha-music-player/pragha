@@ -34,7 +34,6 @@ G_DEFINE_TYPE (GtkCellRendererBubble,
                gtk_cell_renderer_bubble,
                GTK_TYPE_CELL_RENDERER_TEXT);
 
-#if GTK_CHECK_VERSION (3, 14, 0)
 static void
 get_background_color (GtkStyleContext *context,
                       GtkStateFlags    state,
@@ -53,7 +52,6 @@ get_background_color (GtkStyleContext *context,
   *color = *c;
   gdk_rgba_free (c);
 }
-#endif
 
 static void
 gtk_cell_renderer_bubble_finalize (GObject *object)
@@ -172,11 +170,7 @@ render (GtkCellRenderer      *cell,
 
       style = gtk_widget_get_style_context (widget);
       
-#if GTK_CHECK_VERSION (3, 14, 0)
       get_background_color (style, GTK_STATE_FLAG_SELECTED, &selected);
-#else
-      gtk_style_context_get_background_color (style, GTK_STATE_FLAG_SELECTED, &selected);
-#endif
       
       pattern = cairo_pattern_create_linear (cell_area->x,
                                              cell_area->y,

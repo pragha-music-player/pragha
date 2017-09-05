@@ -90,7 +90,7 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 	GtkWidget *chk_title, *chk_artist, *chk_album, *chk_genre, *chk_tno, *chk_year, *chk_comment;
 	GtkWidget *entry_title, *entry_artist, *entry_album, *entry_genre,  *entry_tno, *entry_year, *entry_comment, *entry_file;
 	GtkWidget *hbox_title, *hbox_artist, *hbox_album, *hbox_genre, *hbox_tno, *hbox_year, *hbox_comment;
-	GtkWidget *hbox_spins, *comment_view_scroll, *chk_alignment;
+	GtkWidget *hbox_spins, *comment_view_scroll;
 	GtkEntryCompletion *completion;
 
 	/* Set dialog properties */
@@ -121,14 +121,22 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 	label_comment = gtk_label_new(_("Comment"));
 	label_file = gtk_label_new(_("File"));
 
-	gtk_misc_set_alignment(GTK_MISC (label_title), 1, 0.5);
-	gtk_misc_set_alignment(GTK_MISC (label_artist), 1, 0.5);
-	gtk_misc_set_alignment(GTK_MISC (label_album), 1, 0.5);
-	gtk_misc_set_alignment(GTK_MISC (label_genre), 1, 0.5);
-	gtk_misc_set_alignment(GTK_MISC (label_tno), 1, 0.5);
-	gtk_misc_set_alignment(GTK_MISC (label_year), 1, 0.5);
-	gtk_misc_set_alignment(GTK_MISC (label_comment), 1, 0);
-	gtk_misc_set_alignment(GTK_MISC (label_file), 1, 0.5);
+	gtk_widget_set_halign (GTK_WIDGET(label_title), GTK_ALIGN_END);
+	gtk_widget_set_valign (GTK_WIDGET(label_title), GTK_ALIGN_CENTER);
+	gtk_widget_set_halign (GTK_WIDGET(label_artist), GTK_ALIGN_END);
+	gtk_widget_set_valign (GTK_WIDGET(label_artist), GTK_ALIGN_CENTER);
+	gtk_widget_set_halign (GTK_WIDGET(label_album), GTK_ALIGN_END);
+	gtk_widget_set_valign (GTK_WIDGET(label_album), GTK_ALIGN_CENTER);
+	gtk_widget_set_halign (GTK_WIDGET(label_genre), GTK_ALIGN_END);
+	gtk_widget_set_valign (GTK_WIDGET(label_genre), GTK_ALIGN_CENTER);
+	gtk_widget_set_halign (GTK_WIDGET(label_tno), GTK_ALIGN_END);
+	gtk_widget_set_valign (GTK_WIDGET(label_tno), GTK_ALIGN_CENTER);
+	gtk_widget_set_halign (GTK_WIDGET(label_year), GTK_ALIGN_END);
+	gtk_widget_set_valign (GTK_WIDGET(label_year), GTK_ALIGN_CENTER);
+	gtk_widget_set_halign (GTK_WIDGET(label_comment), GTK_ALIGN_END);
+	gtk_widget_set_valign (GTK_WIDGET(label_comment), GTK_ALIGN_START);
+	gtk_widget_set_halign (GTK_WIDGET(label_file), GTK_ALIGN_END);
+	gtk_widget_set_valign (GTK_WIDGET(label_file), GTK_ALIGN_CENTER);
 
 	gtk_label_set_attribute_bold(GTK_LABEL(label_title));
 	gtk_label_set_attribute_bold(GTK_LABEL(label_artist));
@@ -307,11 +315,11 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 	                                    GTK_SHADOW_IN);
 	gtk_container_add(GTK_CONTAINER(comment_view_scroll), entry_comment);
 
-	chk_alignment = gtk_alignment_new(0.5, 0, 0, 0);
-	gtk_container_add(GTK_CONTAINER(chk_alignment), chk_comment);
+	gtk_widget_set_halign (GTK_WIDGET(chk_comment), GTK_ALIGN_CENTER);
+	gtk_widget_set_valign (GTK_WIDGET(chk_comment), GTK_ALIGN_START);
 
 	gtk_box_pack_start (GTK_BOX(hbox_comment), comment_view_scroll, TRUE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX(hbox_comment), chk_alignment, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX(hbox_comment), chk_comment, FALSE, FALSE, 0);
 	gtk_widget_set_hexpand (hbox_comment, TRUE);
 
 	gtk_grid_attach (GTK_GRID(tag_table), label_comment, 0, 5, 1, 1);
@@ -581,13 +589,20 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 	label_filename = gtk_label_new(_("Filename"));
 	label_mimetype = gtk_label_new(_("Mimetype"));
 
-	gtk_misc_set_alignment(GTK_MISC (label_length), 1, 0);
-	gtk_misc_set_alignment(GTK_MISC (label_bitrate), 1, 0);
-	gtk_misc_set_alignment(GTK_MISC (label_channels), 1, 0);
-	gtk_misc_set_alignment(GTK_MISC (label_samplerate), 1, 0);
-	gtk_misc_set_alignment(GTK_MISC (label_folder), 1, 0);
-	gtk_misc_set_alignment(GTK_MISC (label_filename), 1, 0);
-	gtk_misc_set_alignment(GTK_MISC (label_mimetype), 1, 0);
+	gtk_widget_set_halign (GTK_WIDGET(label_length), GTK_ALIGN_END);
+	gtk_widget_set_valign (GTK_WIDGET(label_length), GTK_ALIGN_START);
+	gtk_widget_set_halign (GTK_WIDGET(label_bitrate), GTK_ALIGN_END);
+	gtk_widget_set_valign (GTK_WIDGET(label_bitrate), GTK_ALIGN_START);
+	gtk_widget_set_halign (GTK_WIDGET(label_channels), GTK_ALIGN_END);
+	gtk_widget_set_valign (GTK_WIDGET(label_channels), GTK_ALIGN_START);
+	gtk_widget_set_halign (GTK_WIDGET(label_samplerate), GTK_ALIGN_END);
+	gtk_widget_set_valign (GTK_WIDGET(label_samplerate), GTK_ALIGN_START);
+	gtk_widget_set_halign (GTK_WIDGET(label_folder), GTK_ALIGN_END);
+	gtk_widget_set_valign (GTK_WIDGET(label_folder), GTK_ALIGN_START);
+	gtk_widget_set_halign (GTK_WIDGET(label_filename), GTK_ALIGN_END);
+	gtk_widget_set_valign (GTK_WIDGET(label_filename), GTK_ALIGN_START);
+	gtk_widget_set_halign (GTK_WIDGET(label_mimetype), GTK_ALIGN_END);
+	gtk_widget_set_valign (GTK_WIDGET(label_mimetype), GTK_ALIGN_START);
 
 	gtk_label_set_attribute_bold(GTK_LABEL(label_length));
 	gtk_label_set_attribute_bold(GTK_LABEL(label_bitrate));
@@ -607,13 +622,20 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 	info_filename = gtk_label_new(filename);
 	info_mimetype = gtk_label_new(mimetype);
 
-	gtk_misc_set_alignment(GTK_MISC (info_length), 0, 0);
-	gtk_misc_set_alignment(GTK_MISC (info_bitrate), 0, 0);
-	gtk_misc_set_alignment(GTK_MISC (info_channels), 0, 0);
-	gtk_misc_set_alignment(GTK_MISC (info_samplerate), 0, 0);
-	gtk_misc_set_alignment(GTK_MISC (info_folder), 0, 0);
-	gtk_misc_set_alignment(GTK_MISC (info_filename), 0, 0);
-	gtk_misc_set_alignment(GTK_MISC (info_mimetype), 0, 0);
+	gtk_widget_set_halign (GTK_WIDGET(info_length), GTK_ALIGN_START);
+	gtk_widget_set_valign (GTK_WIDGET(info_length), GTK_ALIGN_START);
+	gtk_widget_set_halign (GTK_WIDGET(info_bitrate), GTK_ALIGN_START);
+	gtk_widget_set_valign (GTK_WIDGET(info_bitrate), GTK_ALIGN_START);
+	gtk_widget_set_halign (GTK_WIDGET(info_channels), GTK_ALIGN_START);
+	gtk_widget_set_valign (GTK_WIDGET(info_channels), GTK_ALIGN_START);
+	gtk_widget_set_halign (GTK_WIDGET(info_samplerate), GTK_ALIGN_START);
+	gtk_widget_set_valign (GTK_WIDGET(info_samplerate), GTK_ALIGN_START);
+	gtk_widget_set_halign (GTK_WIDGET(info_folder), GTK_ALIGN_START);
+	gtk_widget_set_valign (GTK_WIDGET(info_folder), GTK_ALIGN_START);
+	gtk_widget_set_halign (GTK_WIDGET(info_filename), GTK_ALIGN_START);
+	gtk_widget_set_valign (GTK_WIDGET(info_filename), GTK_ALIGN_START);
+	gtk_widget_set_halign (GTK_WIDGET(info_mimetype), GTK_ALIGN_START);
+	gtk_widget_set_valign (GTK_WIDGET(info_mimetype), GTK_ALIGN_START);
 
 	gtk_label_set_selectable(GTK_LABEL(info_length), TRUE);
 	gtk_label_set_selectable(GTK_LABEL(info_bitrate), TRUE);

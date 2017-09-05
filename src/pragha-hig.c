@@ -17,10 +17,6 @@
 
 #include "pragha-hig.h"
 
-#if !GTK_CHECK_VERSION (3, 12, 0)
-#define gtk_widget_set_margin_start gtk_widget_set_margin_left
-#endif
-
 void
 gtk_label_set_attribute_bold(GtkLabel *label)
 {

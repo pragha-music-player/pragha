@@ -30,8 +30,6 @@ typedef struct _PraghaToggleButton  PraghaToggleButton;
 
 gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon);
 
-PraghaTrackProgress *pragha_track_progress_new (void);
-
 PraghaContainer     *pragha_container_new      (void);
 
 void pragha_toolbar_button_set_icon_name (PraghaToolbarButton *button, const gchar *icon_name);

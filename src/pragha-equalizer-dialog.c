@@ -340,7 +340,8 @@ pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent)
 	label = gtk_label_new("Preamp");
 
 	gtk_label_set_justify (GTK_LABEL(label), GTK_JUSTIFY_CENTER);
-	gtk_misc_set_alignment (GTK_MISC(label), 0.5, 0.5);
+	gtk_widget_set_halign (GTK_WIDGET(label), GTK_ALIGN_CENTER);
+	gtk_widget_set_valign (GTK_WIDGET(label), GTK_ALIGN_CENTER);
 
 	gtk_grid_attach (GTK_GRID(grid), label,
 	                 0, 4, 1, 1);
@@ -349,18 +350,21 @@ pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent)
 
 	label = gtk_label_new("+12 dB");
 	gtk_widget_set_vexpand (label, TRUE);
-	gtk_misc_set_alignment (GTK_MISC(label), 1.0, 0.0);
+	gtk_widget_set_halign (GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_widget_set_valign (GTK_WIDGET(label), GTK_ALIGN_START);
 	gtk_grid_attach (GTK_GRID(grid), label,
 	                 1, 1, 1, 1);
 
 	label = gtk_label_new("0 dB");
 	gtk_widget_set_vexpand (label, TRUE);
-	gtk_misc_set_alignment (GTK_MISC(label), 1.0, 0.5);
+	gtk_widget_set_halign (GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_widget_set_valign (GTK_WIDGET(label), GTK_ALIGN_CENTER);
 	gtk_grid_attach (GTK_GRID(grid), label,
 	                 1, 2, 1, 1);
 	label = gtk_label_new("-12 dB");
 	gtk_widget_set_vexpand (label, TRUE);
-	gtk_misc_set_alignment (GTK_MISC(label), 1.0, 1.0);
+	gtk_widget_set_halign (GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_widget_set_valign (GTK_WIDGET(label), GTK_ALIGN_END);
 	gtk_grid_attach (GTK_GRID(grid), label,
 	                 1, 3, 1, 1);
 
@@ -392,7 +396,8 @@ pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent)
 		label = gtk_label_new(label_band_frec[i]);
 
 		gtk_label_set_justify (GTK_LABEL(label), GTK_JUSTIFY_CENTER);
-		gtk_misc_set_alignment (GTK_MISC(label), 0.5, 0.5);
+		gtk_widget_set_halign (GTK_WIDGET(label), GTK_ALIGN_CENTER);
+		gtk_widget_set_valign (GTK_WIDGET(label), GTK_ALIGN_CENTER);
 
 		gtk_grid_attach (GTK_GRID(grid), GTK_WIDGET(label),
 		                 i+2, 4, 1, 1);
