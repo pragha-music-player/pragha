@@ -239,6 +239,8 @@ pragha_file_get_media_type (const gchar *filename)
 			ret = MEDIA_TYPE_PLAYLIST;
 		else if (is_valid_mime(result, mime_image))
 			ret = MEDIA_TYPE_IMAGE;
+		else if (g_str_has_prefix(result, "audio/") || g_str_has_prefix(result, "video/"))
+			ret = MEDIA_TYPE_AUDIO;
 	}
 
 	g_free(result);
