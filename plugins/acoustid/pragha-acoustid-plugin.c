@@ -249,6 +249,8 @@ pragha_acoustid_plugin_get_metadata_done (SoupSession *session,
 
 	if (prechanged)	{
 		dialog = pragha_tags_dialog_new ();
+		gtk_window_set_transient_for (GTK_WINDOW(dialog),
+			GTK_WINDOW(pragha_application_get_window(priv->pragha)));
 
 		g_signal_connect (G_OBJECT (dialog), "response",
 		                  G_CALLBACK (pragha_acoustid_dialog_response), plugin);

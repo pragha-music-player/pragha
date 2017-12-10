@@ -374,6 +374,8 @@ pragha_playback_edit_current_track (PraghaApplication *pragha)
 		return;
 
 	dialog = pragha_tags_dialog_new();
+	gtk_window_set_transient_for (GTK_WINDOW(dialog),
+		GTK_WINDOW(pragha_application_get_window (pragha)));
 
 	g_signal_connect (G_OBJECT (dialog), "response",
 	                  G_CALLBACK (pragha_edit_tags_dialog_response), pragha);
