@@ -321,6 +321,8 @@ pragha_playlist_edit_tags (GtkAction *action, PraghaPlaylist *playlist)
 	PraghaMusicobject *mobj;
 
 	dialog = pragha_tags_dialog_new();
+	gtk_window_set_transient_for (GTK_WINDOW(dialog),
+		GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(playlist))));
 
 	/* Get a list of references and music objects selected. */
 

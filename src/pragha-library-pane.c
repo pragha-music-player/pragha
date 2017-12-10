@@ -2386,6 +2386,8 @@ pragha_library_pane_edit_tags_action (GtkAction *action, PraghaLibraryPane *libr
 	PraghaMusicobject *omobj = NULL;
 
 	dialog = pragha_tags_dialog_new();
+	gtk_window_set_transient_for (GTK_WINDOW(dialog),
+		GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(library))));
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(library->library_tree));
 	sel = gtk_tree_selection_count_selected_rows(selection);
