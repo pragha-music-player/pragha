@@ -3928,10 +3928,6 @@ create_current_playlist_view (PraghaPlaylist *cplaylist)
 	g_signal_connect(G_OBJECT(current_playlist), "key-press-event",
 			  G_CALLBACK (current_playlist_key_press), cplaylist);
 
-	/* Store the treeview in the scrollbar widget */
-
-	g_object_bind_property (cplaylist->preferences, "use-hint", current_playlist, "rules-hint", binding_flags);
-
 	g_object_unref(store);
 
 	return current_playlist;
