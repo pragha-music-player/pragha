@@ -1,6 +1,6 @@
 SUBDIRS = icons
 
-appdatadir = $(datadir)/appdata
+appdatadir = $(datadir)/metainfo
 dist_appdata_DATA = pragha.appdata.xml
 
 desktopdir=$(datadir)/applications
