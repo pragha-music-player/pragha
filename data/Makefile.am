@@ -1,7 +1,7 @@
 SUBDIRS = icons
 
 appdatadir = $(datadir)/metainfo
-dist_appdata_DATA = pragha.appdata.xml
+dist_appdata_DATA = io.github.pragha-music-player.metainfo.xml
 
 desktopdir=$(datadir)/applications
 desktop_in_files = pragha.desktop.in
