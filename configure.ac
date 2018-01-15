@@ -169,27 +169,25 @@ AM_CONDITIONAL([HAVE_RYGEL], 0)
 fi
 
 dnl Check grilo
+GRILO_FOUND="no"
 GRILO3_FOUND="no"
+GRILO2_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
 XDT_CHECK_OPTIONAL_PACKAGE([GRILO3],
                            [grilo-0.3], [0.3.0],
                            [grilo-0.3],
                            [grilo-0.3 library], [yes])
-else
-AM_CONDITIONAL([HAVE_GRILO3], 0)
-fi
-
-GRILO2_FOUND="no"
-if test x"$LIBPEAS_FOUND" = x"yes"; then
+if test x"$GRILO3_FOUND" = x"no"; then
 XDT_CHECK_OPTIONAL_PACKAGE([GRILO2],
                            [grilo-0.2], [0.2.11],
                            [grilo-0.2],
                            [grilo-0.2 library], [yes])
+fi
 else
+AM_CONDITIONAL([HAVE_GRILO3], 0)
 AM_CONDITIONAL([HAVE_GRILO2], 0)
 fi
 
-GRILO_FOUND="no"
 if test x"$GRILO3_FOUND" = x"yes"; then
 GRILO_FOUND="yes"
 fi
@@ -198,27 +196,26 @@ GRILO_FOUND="yes"
 fi
 
 dnl Check grilo-net
+GRILO_NET_FOUND="no"
 GRILO_NET3_FOUND="no"
+GRILO_NET2_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
 XDT_CHECK_OPTIONAL_PACKAGE([GRILO_NET3],
                            [grilo-net-0.3], [0.3.0],
                            [grilo-net-0.3],
                            [grilo-net-0.3 library], [yes])
-else
-AM_CONDITIONAL([HAVE_GRILO_NET3], 0)
-fi
-
-GRILO_NET2_FOUND="no"
-if test x"$LIBPEAS_FOUND" = x"yes"; then
+if test x"$GRILO_NET3_FOUND" = x"no"; then
 XDT_CHECK_OPTIONAL_PACKAGE([GRILO_NET2],
                            [grilo-net-0.2], [0.2.5],
                            [grilo-net-0.2],
                            [grilo-net-0.2 library], [yes])
+fi
 else
+AM_CONDITIONAL([HAVE_GRILO_NET3], 0)
 AM_CONDITIONAL([HAVE_GRILO_NET2], 0)
 fi
 
-GRILO_NET_FOUND="no"
+
 if test x"$GRILO_NET3_FOUND" = x"yes"; then
 GRILO_NET_FOUND="yes"
 fi
