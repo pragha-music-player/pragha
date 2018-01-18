@@ -1,0 +1,9 @@
+[Plugin]
+Module=pkoel
+Name=Koel Client
+Description=Play music on a Koel Server
+Authors=Matias De lellis <mati86dl@gmail.com>
+Copyright=Copyright © 2018 Matias De lellis
+Website=https://github.com/matiasdelellis/pragha
+Help=https://github.com/matiasdelellis/pragha
+

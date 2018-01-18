@@ -157,6 +157,17 @@ else
 AM_CONDITIONAL([HAVE_LIBSOUP], 0)
 fi
 
+dnl Check libpsuop
+JSON_GLIB_FOUND="no"
+if test x"$LIBPEAS_FOUND" = x"yes"; then
+XDT_CHECK_OPTIONAL_PACKAGE([JSON_GLIB],
+                           [json-glib-1.0], [1.4.0],
+                           [json-glib-1.0],
+                           [json-glib-1.0 library], [yes])
+else
+AM_CONDITIONAL([HAVE_JSON_GLIB], 0)
+fi
+
 dnl Check rygel
 RYGEL_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
@@ -182,6 +193,8 @@ XDT_CHECK_OPTIONAL_PACKAGE([GRILO2],
                            [grilo-0.2], [0.2.11],
                            [grilo-0.2],
                            [grilo-0.2 library], [yes])
+else
+AM_CONDITIONAL([HAVE_GRILO2], 0)
 fi
 else
 AM_CONDITIONAL([HAVE_GRILO3], 0)
@@ -209,12 +222,13 @@ XDT_CHECK_OPTIONAL_PACKAGE([GRILO_NET2],
                            [grilo-net-0.2], [0.2.5],
                            [grilo-net-0.2],
                            [grilo-net-0.2 library], [yes])
+else
+AM_CONDITIONAL([HAVE_GRILO_NET2], 0)
 fi
 else
 AM_CONDITIONAL([HAVE_GRILO_NET3], 0)
 AM_CONDITIONAL([HAVE_GRILO_NET2], 0)
 fi
-
 
 if test x"$GRILO_NET3_FOUND" = x"yes"; then
 GRILO_NET_FOUND="yes"
@@ -268,6 +282,14 @@ fi
 fi
 fi
 
+KOEL_SUPPORT="no"
+if test x"$LIBSOUP_FOUND" = x"yes"; then
+if test x"$JSON_GLIB_FOUND" = x"yes"; then
+KOEL_SUPPORT="yes"
+fi
+fi
+
+
 dnl Check gstreamer-audio
 GSTREAMER_AUDIO_FOUND="no"
 XDT_CHECK_OPTIONAL_PACKAGE([GSTREAMER_AUDIO],
@@ -310,6 +332,7 @@ AC_CONFIG_FILES([plugins/acoustid/Makefile])
 AC_CONFIG_FILES([plugins/ampache/Makefile])
 AC_CONFIG_FILES([plugins/mpris2/Makefile])
 AC_CONFIG_FILES([plugins/keybinder/Makefile])
+AC_CONFIG_FILES([plugins/koel/Makefile])
 AC_CONFIG_FILES([plugins/gnome-media-keys/Makefile])
 AC_CONFIG_FILES([plugins/song-info/Makefile])
 AC_CONFIG_FILES([plugins/notify/Makefile])
@@ -347,6 +370,7 @@ echo "   * Search radios on TuneIn.........................(Need libsoup >= 2.38
 echo "   * Share music library on DLNA............(Need rygel-server-2.2 >= 0.26).: $RYGEL_FOUND"
 echo "   * Play songs on DLNA Servers......................(Need grilo >= 0.2.11).: $GRILO_FOUND"
 echo "   * Append music on Ampache server...............(Need grilo-net >= 0.2.5).: $GRILO_NET_FOUND"
+echo "   * Append music on Koel server...............(Need libsoup and json-glib).: $KOEL_SUPPORT"
 echo "   * Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
 echo "   * EXPERIMENTAL management of removable devices..........(Need gudev-1.0).: $GUDEV_FOUND"
 echo "   * EXPERIMENTAL management of mtp devices....:(Need gudev-1.0 and libmtp).: $LIBMTP_FOUND"

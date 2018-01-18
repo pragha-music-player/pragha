@@ -57,6 +57,12 @@ if HAVE_GRILO_NET2
 SUBDIRS += ampache
 endif
 
+if HAVE_JSON_GLIB
+if HAVE_LIBSOUP
+SUBDIRS += koel
+endif
+endif
+
 if HAVE_LIBCDIO
 if HAVE_LIBCDIO_PARANOIA
 if HAVE_LIBCDDB
