@@ -355,7 +355,7 @@ pragha_ampache_xml_get_media (xmlDocPtr doc, xmlNodePtr node)
 		if (!xmlStrcmp (node->name, (const xmlChar *) "track"))
 		{
 			tracknoc = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
-			trackno = atoi (tracknoc);
+			trackno = string_is_not_empty(tracknoc) ? atoi (tracknoc) : 0;
 			g_free (tracknoc);
 		}
 		if (!xmlStrcmp (node->name, (const xmlChar *) "title"))
@@ -373,7 +373,7 @@ pragha_ampache_xml_get_media (xmlDocPtr doc, xmlNodePtr node)
 		if (!xmlStrcmp (node->name, (const xmlChar *) "year"))
 		{
 			yearc = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
-			year = atoi (yearc);
+			year = string_is_not_empty(yearc) ? atoi (yearc) : 0;
 			g_free (yearc);
 		}
 		if (!xmlStrcmp (node->name, (const xmlChar *) "genre"))
@@ -387,7 +387,7 @@ pragha_ampache_xml_get_media (xmlDocPtr doc, xmlNodePtr node)
 		if (!xmlStrcmp (node->name, (const xmlChar *) "time"))
 		{
 			lenghtc = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
-			lenght = atoi (lenghtc);
+			lenght = string_is_not_empty(lenghtc) ? atoi (lenghtc) : 0;
 			g_free (lenghtc);
 		}
 
@@ -524,8 +524,6 @@ pragha_ampache_get_songs_done (GObject      *object,
 				                         "folder-remote");
 				pragha_provider_set_visible (provider, priv->server, TRUE);
 			}
-			g_object_unref (provider);
-			g_object_unref (database);
 
 			/* Save cache */
 
@@ -534,7 +532,9 @@ pragha_ampache_get_songs_done (GObject      *object,
 			/* Update done */
 
 			pragha_provider_update_done (provider);
+
 			g_object_unref (provider);
+			g_object_unref (database);
 		}
 		else
 		{
@@ -876,7 +876,6 @@ pragha_ampache_get_auth_done (GObject      *object,
 	}
 
 	if (priv->auth != NULL)
-
 	{
 		priv->ping_timer_id = g_timeout_add_seconds (10*60,
 		                                             pragha_ampache_plugin_ping_server,

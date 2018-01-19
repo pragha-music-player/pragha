@@ -436,13 +436,13 @@ pragha_koel_plugin_cache_provider_done (SoupSession *session,
 			                         "folder-remote");
 			pragha_provider_set_visible (provider, priv->server, TRUE);
 		}
-		g_object_unref (provider);
-		g_object_unref (database);
 
 		pragha_koel_save_cache (plugin);
 
 		pragha_provider_update_done (provider);
+
 		g_object_unref (provider);
+		g_object_unref (database);
 	}
 	else
 	{
@@ -897,7 +897,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	priv->task_widget = pragha_background_task_widget_new (_("Searching files to analyze"),
 	                                                       "network-server",
-	                                                       100,
+	                                                       0,
 	                                                       priv->cancellable);
 	g_object_ref (G_OBJECT(priv->task_widget));
 
