@@ -72,6 +72,12 @@ LT_INIT([disable-static])
 dnl Check for i18n support
 XDT_I18N([bg ca_ES cs da de es el fr hu id it ja ko_KR lt nl no pl pt pt_BR ru sk sv tr uk vi zh_CN])
 
+dnl Check tools required
+AC_CHECK_PROG([HAVE_EXO_CSOURCE], [exo-csource], [yes])
+if test x"$HAVE_EXO_CSOURCE" != xyes; then
+  AC_MSG_FAILURE([exo-csource not installed])
+fi
+
 GSTREAMER_REQUIRED=0.11.90
 
 dnl Check for required packages
