@@ -113,6 +113,7 @@ pragha_search_entry_new (PraghaPreferences *preferences)
 
 	search_entry = gtk_entry_new ();
 
+	gtk_entry_set_placeholder_text (GTK_ENTRY(search_entry), _("Search"));
 	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_PRIMARY, "edit-find-symbolic");
 
 	g_signal_connect (search_entry, "icon-press", G_CALLBACK (pragha_search_bar_icon_pressed_cb), preferences);

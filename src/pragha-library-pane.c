@@ -72,7 +72,8 @@ struct _PraghaLibraryPane {
 
 	/* Filter stuff */
 	gchar             *filter_entry;
-	guint              timeout_id;
+	guint              filter_id;
+	gboolean           filter_active;
 
 	/* Fixbuf used on library tree. */
 	GdkPixbuf         *pixbuf_artist;
@@ -166,6 +167,9 @@ static void pragha_library_pane_delete_from_db_action              (GtkAction *a
 static void pragha_library_pane_upgrade_library_action             (GtkAction *action, PraghaLibraryPane *library);
 static void pragha_library_pane_update_library_action              (GtkAction *action, PraghaLibraryPane *library);
 static void pragha_library_pane_remove_library_action             (GtkAction *action, PraghaLibraryPane *library);
+
+static void
+pragha_library_expand_categories(PraghaLibraryPane *clibrary);
 
 static gint
 get_library_icon_size (void);
@@ -1294,26 +1298,31 @@ library_pane_init_dnd(PraghaLibraryPane *clibrary)
 	                 clibrary);
 }
 
+
 /**********/
 /* Search */
 /**********/
 
-static gboolean set_all_visible(GtkTreeModel *model,
-				GtkTreePath *path,
-				GtkTreeIter *iter,
-				gpointer data)
+static gboolean
+pragha_library_pane_set_all_visible_func (GtkTreeModel *model,
+                                          GtkTreePath  *path,
+                                          GtkTreeIter  *iter,
+                                          gpointer      data)
 {
-	gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-			   L_MACH, FALSE,
-			   L_VISIBILE, TRUE,
-			   -1);
+	PraghaLibraryPane *library = data;
+	if (library->filter_entry != NULL)
+		return TRUE;
+	/* Have to give control to GTK periodically ... */
+	pragha_process_gtk_events ();
+	gtk_tree_store_set (GTK_TREE_STORE(model), iter,
+	                    L_MACH, FALSE, L_VISIBILE, TRUE, -1);
 	return FALSE;
 }
 
 static void
-library_expand_filtered_tree_func(GtkTreeView *view,
-                                  GtkTreePath *path,
-                                  gpointer data)
+pragha_library_pane_expand_filtered_tree_func(GtkTreeView *view,
+                                              GtkTreePath *path,
+                                              gpointer     data)
 {
 	GtkTreeIter iter;
 	LibraryNodeType node_type;
@@ -1334,31 +1343,28 @@ library_expand_filtered_tree_func(GtkTreeView *view,
 }
 
 static void
-set_visible_parents_nodes(GtkTreeModel *model, GtkTreeIter *c_iter)
+pragha_library_pane_set_visible_parents_nodes (GtkTreeModel *model, GtkTreeIter *c_iter)
 {
 	GtkTreeIter t_iter, parent;
 
 	t_iter = *c_iter;
 
 	while(gtk_tree_model_iter_parent(model, &parent, &t_iter)) {
-		gtk_tree_store_set(GTK_TREE_STORE(model), &parent,
-				   L_VISIBILE, TRUE,
-				   -1);
+		gtk_tree_store_set (GTK_TREE_STORE(model), &parent,
+		                   L_VISIBILE, TRUE, -1);
 		t_iter = parent;
 	}
 }
 
 static gboolean
-any_parent_node_mach(GtkTreeModel *model, GtkTreeIter *iter)
+pragha_libary_pane_any_parent_node_mach (GtkTreeModel *model, GtkTreeIter *iter)
 {
 	GtkTreeIter t_iter, parent;
 	gboolean p_mach = FALSE;
 
 	t_iter = *iter;
 	while(gtk_tree_model_iter_parent(model, &parent, &t_iter)) {
-		gtk_tree_model_get(model, &parent,
-				   L_MACH, &p_mach,
-				   -1);
+		gtk_tree_model_get(model, &parent, L_MACH, &p_mach, -1);
 		if (p_mach)
 			return TRUE;
 
@@ -1368,96 +1374,176 @@ any_parent_node_mach(GtkTreeModel *model, GtkTreeIter *iter)
 	return FALSE;
 }
 
-static gboolean filter_tree_func(GtkTreeModel *model,
-				 GtkTreePath *path,
-				 GtkTreeIter *iter,
-				 gpointer data)
+static gboolean
+pragha_libary_pane_filter_tree_func (GtkTreeModel *model,
+                                     GtkTreePath  *path,
+                                     GtkTreeIter  *iter,
+                                     gpointer      data)
 {
-	PraghaLibraryPane *clibrary = data;
 	gchar *node_data = NULL, *u_str;
 	gboolean p_mach;
+
+	PraghaLibraryPane *library = data;
+
+	if (library->filter_entry == NULL)
+		return TRUE;
 
 	/* Mark node and its parents visible if search entry matches.
 	   If search entry doesn't match, check if _any_ ancestor has
 	   been marked as visible and if so, mark current node as visible too. */
 
-	if (clibrary->filter_entry) {
-		gtk_tree_model_get(model, iter, L_NODE_DATA, &node_data, -1);
-		u_str = g_utf8_strdown(node_data, -1);
-		if (pragha_strstr_lv(u_str, clibrary->filter_entry, clibrary->preferences)) {
-			/* Set visible the match row */
-			gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-					   L_MACH, TRUE,
-					   L_VISIBILE, TRUE,
-					   -1);
+	gtk_tree_model_get(model, iter, L_NODE_DATA, &node_data, -1);
+	u_str = g_utf8_strdown(node_data, -1);
+	if (pragha_strstr_lv(u_str, library->filter_entry, library->preferences))
+	{
+		/* Set visible the match row */
+		gtk_tree_store_set (GTK_TREE_STORE(model), iter,
+		                    L_MACH, TRUE, L_VISIBILE, TRUE, -1);
 
-			/* Also set visible the parents */
-			set_visible_parents_nodes(model, iter);
-		}
-		else {
-			/* Check parents. If any node is visible due it mach,
-			 * also shows. So, show the children of coincidences. */
-			p_mach = any_parent_node_mach(model, iter);
-			gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-					   L_MACH, FALSE,
-					   L_VISIBILE, p_mach,
-					   -1);
-		}
-		g_free(u_str);
-		g_free(node_data);
+		/* Also set visible the parents */
+		pragha_library_pane_set_visible_parents_nodes (model, iter);
 	}
 	else
-		return TRUE;
+	{
+		/* Check parents. If any node is visible due it mach,
+		 * also shows. So, show the children of coincidences. */
+		p_mach = pragha_libary_pane_any_parent_node_mach (model, iter);
+		gtk_tree_store_set (GTK_TREE_STORE(model), iter,
+		                    L_MACH, FALSE, L_VISIBILE, p_mach, -1);
+	}
+	g_free(u_str);
+	g_free(node_data);
 
 	return FALSE;
 }
 
-gboolean do_refilter(PraghaLibraryPane *clibrary)
+static void
+pragha_library_pane_do_filter (PraghaLibraryPane *library)
 {
 	GtkTreeModel *filter_model;
 
+	/* Have to give control to GTK periodically ... */
+	pragha_process_gtk_events ();
+
 	/* Remove the model of widget. */
-	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(clibrary->library_tree));
+	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(library->library_tree));
 	g_object_ref(filter_model);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), NULL);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(library->library_tree), NULL);
+
+	/* Have to give control to GTK periodically ... */
+	pragha_process_gtk_events ();
 
 	/* Set visibility of rows in the library store. */
-	gtk_tree_model_foreach(GTK_TREE_MODEL(clibrary->library_store),
-				filter_tree_func,
-				clibrary);
+	gtk_tree_model_foreach (GTK_TREE_MODEL(library->library_store),
+	                        pragha_libary_pane_filter_tree_func, library);
+
+	/* Have to give control to GTK periodically ... */
+	pragha_process_gtk_events ();
 
 	/* Set the model again.*/
-	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), filter_model);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(library->library_tree), filter_model);
 	g_object_unref(filter_model);
 
+	/* Have to give control to GTK periodically ... */
+	pragha_process_gtk_events ();
+
 	/* Expand all and then reduce properly. */
-	gtk_tree_view_expand_all(GTK_TREE_VIEW(clibrary->library_tree));
-	gtk_tree_view_map_expanded_rows(GTK_TREE_VIEW(clibrary->library_tree),
-		library_expand_filtered_tree_func,
-		filter_model);
+	gtk_tree_view_expand_all(GTK_TREE_VIEW(library->library_tree));
+	gtk_tree_view_map_expanded_rows(GTK_TREE_VIEW(library->library_tree),
+	                                pragha_library_pane_expand_filtered_tree_func, filter_model);
 
-	clibrary->timeout_id = 0;
+	/* Have to give control to GTK periodically ... */
+	pragha_process_gtk_events ();
 
-	return FALSE;
 }
 
-void queue_refilter (PraghaLibraryPane *clibrary)
+static void
+pragha_library_pane_show_all (PraghaLibraryPane *library)
 {
-	if (clibrary->timeout_id) {
-		g_source_remove (clibrary->timeout_id);
-		clibrary->timeout_id = 0;
+	GtkTreeModel *filter_model;
+
+	/* Have to give control to GTK periodically ... */
+	pragha_process_gtk_events ();
+
+	/* Remove the model of widget. */
+	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(library->library_tree));
+	g_object_ref(filter_model);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(library->library_tree), NULL);
+
+	/* Have to give control to GTK periodically ... */
+	pragha_process_gtk_events ();
+
+	/* Set all nodes visibles. */
+	gtk_tree_model_foreach (GTK_TREE_MODEL(library->library_store),
+	                        pragha_library_pane_set_all_visible_func, library);
+
+	/* Have to give control to GTK periodically ... */
+	pragha_process_gtk_events ();
+
+	/* Set the model again. */
+	gtk_tree_view_set_model(GTK_TREE_VIEW(library->library_tree), filter_model);
+	g_object_unref(filter_model);
+
+	/* Have to give control to GTK periodically ... */
+	pragha_process_gtk_events ();
+
+	/* Expand the categories. */
+
+	pragha_library_expand_categories(library);
+}
+
+static gboolean
+pragha_library_pane_do_refilter (PraghaLibraryPane *clibrary)
+{
+	gchar *needle = NULL;
+	gboolean ret = FALSE;
+
+	if (clibrary->filter_active == TRUE)
+		return TRUE;
+
+	clibrary->filter_active = TRUE;
+	needle = g_strdup(clibrary->filter_entry);
+
+	pragha_process_gtk_events ();
+
+	if (clibrary->filter_entry != NULL)
+		pragha_library_pane_do_filter (clibrary);
+	else
+		pragha_library_pane_show_all (clibrary);
+
+	/* Have to give control to GTK periodically ... */
+	pragha_process_gtk_events ();
+
+	clibrary->filter_id = 0;
+	clibrary->filter_active = FALSE;
+
+	/* If changed the needle search again. */
+	if (g_ascii_strcasecmp(needle, clibrary->filter_entry))
+		ret = TRUE;
+
+	g_free(needle);
+
+	return ret;
+}
+
+void
+pragha_library_panel_queue_refilter (PraghaLibraryPane *clibrary)
+{
+	if (clibrary->filter_id != 0 && clibrary->filter_active == FALSE) {
+		g_source_remove(clibrary->filter_id);
+		clibrary->filter_id = 0;
 	}
 
-	clibrary->timeout_id = g_timeout_add(500, (GSourceFunc)do_refilter, clibrary);
+	if (clibrary->filter_id == 0)
+		clibrary->filter_id = g_timeout_add(500, (GSourceFunc)pragha_library_pane_do_refilter, clibrary);
 }
 
 static void
 simple_library_search_keyrelease_handler (GtkEntry          *entry,
                                           PraghaLibraryPane *clibrary)
 {
-	const gchar *text = NULL;
-	gboolean has_text;
-	
+	const gchar *filter_entry = NULL;
+
 	if (!pragha_preferences_get_instant_search(clibrary->preferences))
 		return;
 
@@ -1466,46 +1552,36 @@ simple_library_search_keyrelease_handler (GtkEntry          *entry,
 		clibrary->filter_entry = NULL;
 	}
 
-	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
+	filter_entry = gtk_entry_get_text (entry);
+	if (string_is_not_empty(filter_entry))
+		clibrary->filter_entry = g_utf8_strdown (filter_entry, -1);
 
-	if (has_text) {
-		text = gtk_entry_get_text (entry);
-		clibrary->filter_entry = g_utf8_strdown (text, -1);
-
-		queue_refilter(clibrary);
-	}
-	else {
-		clear_library_search (clibrary);
-	}
+	pragha_library_panel_queue_refilter(clibrary);
 }
 
-gboolean simple_library_search_activate_handler(GtkEntry *entry,
-						PraghaLibraryPane *clibrary)
+gboolean
+simple_library_search_activate_handler (GtkEntry          *entry,
+                                        PraghaLibraryPane *clibrary)
 {
-	const gchar *text = NULL;
-	gboolean has_text;
+	const gchar *filter_entry = NULL;
 
-	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
+	if (!pragha_preferences_get_instant_search(clibrary->preferences))
+		return;
 
 	if (clibrary->filter_entry != NULL) {
 		g_free (clibrary->filter_entry);
 		clibrary->filter_entry = NULL;
 	}
+	filter_entry = gtk_entry_get_text (entry);
+	if (string_is_not_empty(filter_entry))
+		clibrary->filter_entry = g_utf8_strdown (filter_entry, -1);
 
-	if (has_text) {
-		text = gtk_entry_get_text (entry);
-		clibrary->filter_entry = g_utf8_strdown (text, -1);
-
-		do_refilter (clibrary);
-	}
-	else {
-		clear_library_search (clibrary);
-	}
+	pragha_library_panel_queue_refilter (clibrary);
 
 	return FALSE;
 }
 
-void
+static void
 pragha_library_expand_categories(PraghaLibraryPane *clibrary)
 {
 	GtkTreeModel *filter_model, *model;
@@ -1528,29 +1604,6 @@ pragha_library_expand_categories(PraghaLibraryPane *clibrary)
 
 		valid = gtk_tree_model_iter_next(model, &iter);
 	}
-}
-
-void clear_library_search(PraghaLibraryPane *clibrary)
-{
-	GtkTreeModel *filter_model;
-
-	/* Remove the model of widget. */
-	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(clibrary->library_tree));
-	g_object_ref(filter_model);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), NULL);
-
-	/* Set all nodes visibles. */
-	gtk_tree_model_foreach(GTK_TREE_MODEL(clibrary->library_store),
-			       set_all_visible,
-			       clibrary);
-
-	/* Set the model again. */
-	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), filter_model);
-	g_object_unref(filter_model);
-
-	/* Expand the categories. */
-
-	pragha_library_expand_categories(clibrary);
 }
 
 /*
@@ -3088,7 +3141,6 @@ pragha_library_pane_init (PraghaLibraryPane *library)
 	library->filter_entry = NULL;
 	library->dragging = FALSE;
 	library->view_change = FALSE;
-	library->timeout_id = 0;
 	library->library_tree_nodes = NULL;
 
 	/* Init drag and drop */
