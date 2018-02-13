@@ -59,11 +59,13 @@ static int signals[LAST_SIGNAL] = { 0 };
  **/
 static void pragha_songinfo_pane_show_artist_info_action (GtkAction *action, PraghaSonginfoPane *pane);
 static void pragha_songinfo_pane_show_lyrics_action      (GtkAction *action, PraghaSonginfoPane *pane);
+static void pragha_songinfo_pane_show_similar_action     (GtkAction *action, PraghaSonginfoPane *pane);
 
 gchar *songinfo_pane_context_menu_xml = "<ui> \
 	<popup>                                   \
 	<menuitem action=\"Artist info\"/>        \
 	<menuitem action=\"Lyrics\"/>             \
+	<menuitem action=\"Similar songs\"/>      \
 	</popup>                                  \
 	</ui>";
 
@@ -71,7 +73,9 @@ GtkActionEntry songinfo_pane_context_aentries[] = {
 	{"Artist info", NULL, N_("Artist info"),
 	 "", "Artist info", G_CALLBACK(pragha_songinfo_pane_show_artist_info_action)},
 	{"Lyrics", NULL, N_("Lyrics"),
-	 "", "Lyrics", G_CALLBACK(pragha_songinfo_pane_show_lyrics_action)}
+	 "", "Lyrics", G_CALLBACK(pragha_songinfo_pane_show_lyrics_action)},
+  	{"Similar songs", NULL, N_("Similar songs"),
+	 "", "Similar songs", G_CALLBACK(pragha_songinfo_pane_show_similar_action)}
 };
 
 /*
@@ -157,6 +161,15 @@ pragha_songinfo_pane_show_lyrics_action (GtkAction *action, PraghaSonginfoPane *
 {
 	gtk_label_set_text (GTK_LABEL(pane->pane_title), _("Lyrics"));
 	pane->info_type = GLYR_GET_LYRICS;
+
+	g_signal_emit (pane, signals[SIGNAL_TYPE_CHANGED], 0);
+}
+
+static void
+pragha_songinfo_pane_show_similar_action (GtkAction *action, PraghaSonginfoPane *pane)
+{
+	gtk_label_set_text (GTK_LABEL(pane->pane_title), _("Similar songs"));
+	pane->info_type = GLYR_GET_SIMILAR_SONGS;
 
 	g_signal_emit (pane, signals[SIGNAL_TYPE_CHANGED], 0);
 }

@@ -39,6 +39,24 @@ typedef struct {
 
 
 /*
+ * Utils.
+ */
+
+static GString *
+glyr_append_song_list (GString *string, GlyrMemCache *it)
+{
+	gchar **tags;
+	gchar *song = NULL;
+	tags = g_strsplit (it->data, "\n", 4);
+	song = g_strdup_printf ("%s - %s\n", tags[0], tags[1]);
+	string = g_string_append(string, song);
+	g_free (song);
+	g_strfreev (tags);
+	return string;
+}
+
+
+/*
  * Function to check if has the last
  */
 
@@ -73,6 +91,8 @@ static void
 glyr_finished_successfully_pane (glyr_struct *glyr_info)
 {
 	PraghaSonginfoPane *pane;
+	GlyrMemCache *it = glyr_info->head;
+	GString *data = NULL;
 
 	switch (glyr_info->head->type) {
 		case GLYR_TYPE_LYRICS:
@@ -82,6 +102,17 @@ glyr_finished_successfully_pane (glyr_struct *glyr_info)
 		case GLYR_TYPE_ARTIST_BIO:
 			pane = pragha_songinfo_plugin_get_pane (glyr_info->plugin);
 			pragha_songinfo_pane_set_text (pane,glyr_info->query.artist, glyr_info->head->data, glyr_info->head->prov);
+			break;
+		case GLYR_TYPE_SIMILAR_SONG:
+			it = glyr_info->head;
+			data = g_string_new (NULL);
+			while (it != NULL) {
+				data = glyr_append_song_list (data, it);
+				it = it->next;
+			}
+			pane = pragha_songinfo_plugin_get_pane (glyr_info->plugin);
+			pragha_songinfo_pane_set_text (pane, glyr_info->query.title, data->str, glyr_info->head->prov);
+			g_string_free(data, TRUE);
 			break;
 		case GLYR_TYPE_COVERART:
 		default:
@@ -102,6 +133,10 @@ glyr_finished_incorrectly_pane (glyr_struct *glyr_info)
 		case GLYR_GET_ARTIST_BIO:
 			pane = pragha_songinfo_plugin_get_pane (glyr_info->plugin);
 			pragha_songinfo_pane_set_text (pane, glyr_info->query.artist, _("Artist information not found."), "");
+			break;
+		case GLYR_GET_SIMILAR_SONGS:
+			pane = pragha_songinfo_plugin_get_pane (glyr_info->plugin);
+			pragha_songinfo_pane_set_text (pane, glyr_info->query.title, _("No recommended song."), "");
 			break;
 		case GLYR_GET_COVERART:
 		default:
@@ -189,6 +224,8 @@ pragha_songinfo_plugin_get_info_to_pane (PraghaSongInfoPlugin *plugin,
 			glyr_opt_lang (&glyr_info->query, "auto");
 			glyr_opt_lang_aware_only (&glyr_info->query, TRUE);
 			break;
+		case GLYR_GET_SIMILAR_SONGS:
+			glyr_opt_number (&glyr_info->query, 50);
 		case GLYR_GET_LYRICS:
 			pragha_songinfo_pane_set_text (pane, title, _("Searching..."), "");
 
