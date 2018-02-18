@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2013 matias <mati86dl@gmail.com>
+ * Copyright (C) 2011-2018 matias <mati86dl@gmail.com>
  * Copyright (C) 2013 Pavel Vasin
  *
  * This program is free software: you can redistribute it and/or modify
@@ -89,7 +89,7 @@ pragha_art_cache_get (void)
 }
 
 static gchar *
-pragha_art_cache_build_path (PraghaArtCache *cache, const gchar *artist, const gchar *album)
+pragha_art_cache_build_album_path (PraghaArtCache *cache, const gchar *artist, const gchar *album)
 {
 	gchar *artist_escaped = pragha_escape_slashes (artist);
 	gchar *album_escaped = pragha_escape_slashes (album);
@@ -100,9 +100,9 @@ pragha_art_cache_build_path (PraghaArtCache *cache, const gchar *artist, const g
 }
 
 gchar *
-pragha_art_cache_get_uri (PraghaArtCache *cache, const gchar *artist, const gchar *album)
+pragha_art_cache_get_album_uri (PraghaArtCache *cache, const gchar *artist, const gchar *album)
 {
-	gchar *path = pragha_art_cache_build_path (cache, artist, album);
+	gchar *path = pragha_art_cache_build_album_path (cache, artist, album);
 
 	if (g_file_test (path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
 		g_free (path);
@@ -113,9 +113,9 @@ pragha_art_cache_get_uri (PraghaArtCache *cache, const gchar *artist, const gcha
 }
 
 gboolean
-pragha_art_cache_contains (PraghaArtCache *cache, const gchar *artist, const gchar *album)
+pragha_art_cache_contains_album (PraghaArtCache *cache, const gchar *artist, const gchar *album)
 {
-	gchar *path = pragha_art_cache_get_uri (cache, artist, album);
+	gchar *path = pragha_art_cache_get_album_uri (cache, artist, album);
 
 	if (path) {
 		g_free (path);
@@ -126,7 +126,7 @@ pragha_art_cache_contains (PraghaArtCache *cache, const gchar *artist, const gch
 }
 
 void
-pragha_art_cache_put (PraghaArtCache *cache, const gchar *artist, const gchar *album, gconstpointer data, gsize size)
+pragha_art_cache_put_album (PraghaArtCache *cache, const gchar *artist, const gchar *album, gconstpointer data, gsize size)
 {
 	GError *error = NULL;
 
@@ -134,7 +134,7 @@ pragha_art_cache_put (PraghaArtCache *cache, const gchar *artist, const gchar *a
 	if (!pixbuf)
 		return;
 
-	gchar *path = pragha_art_cache_build_path (cache, artist, album);
+	gchar *path = pragha_art_cache_build_album_path (cache, artist, album);
 
 	gdk_pixbuf_save (pixbuf, path, "jpeg", &error, "quality", "100", NULL);
 
@@ -148,3 +148,64 @@ pragha_art_cache_put (PraghaArtCache *cache, const gchar *artist, const gchar *a
 	g_free (path);
 	g_object_unref (pixbuf);
 }
+
+static gchar *
+pragha_art_cache_build_artist_path (PraghaArtCache *cache, const gchar *artist)
+{
+	gchar *artist_escaped = pragha_escape_slashes (artist);
+	gchar *result = g_strdup_printf ("%s%sartist-%s.jpeg", cache->cache_dir, G_DIR_SEPARATOR_S, artist_escaped);
+	g_free (artist_escaped);
+	return result;
+}
+
+
+gchar *
+pragha_art_cache_get_artist_uri (PraghaArtCache *cache, const gchar *artist)
+{
+	gchar *path = pragha_art_cache_build_artist_path (cache, artist);
+
+	if (g_file_test (path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
+		g_free (path);
+		return NULL;
+	}
+
+	return path;
+}
+
+gboolean
+pragha_art_cache_contains_artist (PraghaArtCache *cache, const gchar *artist)
+{
+	gchar *path = pragha_art_cache_get_artist_uri (cache, artist);
+
+	if (path) {
+		g_free (path);
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+void
+pragha_art_cache_put_artist (PraghaArtCache *cache, const gchar *artist, gconstpointer data, gsize size)
+{
+	GError *error = NULL;
+
+	GdkPixbuf *pixbuf = pragha_gdk_pixbuf_new_from_memory (data, size);
+	if (!pixbuf)
+		return;
+
+	gchar *path = pragha_art_cache_build_artist_path (cache, artist);
+
+	gdk_pixbuf_save (pixbuf, path, "jpeg", &error, "quality", "100", NULL);
+
+	if (error) {
+		g_warning ("Failed to save artist art file %s: %s\n", path, error->message);
+		g_error_free (error);
+	}
+
+	g_signal_emit (cache, signals[SIGNAL_CACHE_CHANGED], 0);
+
+	g_free (path);
+	g_object_unref (pixbuf);
+}
+

@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2017 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -49,6 +49,7 @@
 
 #include "src/pragha.h"
 #include "src/pragha-hig.h"
+#include "src/pragha-playlist.h"
 #include "src/pragha-playback.h"
 #include "src/pragha-sidebar.h"
 #include "src/pragha-simple-async.h"
@@ -168,11 +169,13 @@ related_get_album_art_handler (PraghaSongInfoPlugin *plugin)
 	PraghaMusicobject *mobj;
 	const gchar *artist = NULL;
 	const gchar *album = NULL;
-	gchar *album_art_path;
+	gchar *album_art_path = NULL;
+
+	PraghaSongInfoPluginPrivate *priv = plugin->priv;
 
 	CDEBUG(DBG_INFO, "Get album art handler");
 
-	backend = pragha_application_get_backend (plugin->priv->pragha);
+	backend = pragha_application_get_backend (priv->pragha);
 	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
@@ -183,16 +186,15 @@ related_get_album_art_handler (PraghaSongInfoPlugin *plugin)
 	if (string_is_empty(artist) || string_is_empty(album))
 		return;
 
-	art_cache = pragha_application_get_art_cache (plugin->priv->pragha);
-	album_art_path = pragha_art_cache_get_uri (art_cache, artist, album);
-
+	art_cache = pragha_application_get_art_cache (priv->pragha);
+	album_art_path = pragha_art_cache_get_album_uri (art_cache, artist, album);
 	if (album_art_path)
 		goto exists;
 
 	pragha_songinfo_plugin_get_album_art (plugin, artist, album);
 
 exists:
-	g_free(album_art_path);
+	g_free (album_art_path);
 }
 
 static void
@@ -210,18 +212,21 @@ cancel_pane_search (PraghaSongInfoPlugin *plugin)
 static void
 related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 {
-	PraghaSongInfoPluginPrivate *priv = plugin->priv;
 	PraghaBackend *backend;
 	PraghaMusicobject *mobj;
 	const gchar *artist = NULL;
 	const gchar *title = NULL;
 	const gchar *filename = NULL;
+	GLYR_GET_TYPE view_type = GLYR_GET_UNKNOWN;
+
+	PraghaSongInfoPluginPrivate *priv = plugin->priv;
 
 	CDEBUG (DBG_INFO, "Get song info handler");
 
-	backend = pragha_application_get_backend (plugin->priv->pragha);
+	backend = pragha_application_get_backend (priv->pragha);
 	if (pragha_backend_get_state (backend) == ST_STOPPED) {
-		pragha_songinfo_pane_clear_text (plugin->priv->pane);
+		pragha_songinfo_pane_clear_text (priv->pane);
+		pragha_songinfo_pane_clear_list (priv->pane);
 		return;
 	}
 
@@ -234,7 +239,9 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 		return;
 
 	cancel_pane_search (plugin);
-	priv->pane_search = pragha_songinfo_plugin_get_info_to_pane (plugin, pragha_songinfo_pane_get_default_view(plugin->priv->pane), artist, title, filename);
+
+	view_type = pragha_songinfo_pane_get_default_view (priv->pane);
+	priv->pane_search = pragha_songinfo_plugin_get_info_to_pane (plugin, view_type, artist, title, filename);
 }
 
 static void
@@ -246,8 +253,10 @@ pragha_song_info_get_info (gpointer data)
 	if (priv->download_album_art)
 		related_get_album_art_handler (plugin);
 
-	if (gtk_widget_is_visible(GTK_WIDGET(priv->pane)))
-		related_get_song_info_pane_handler (plugin);
+	if (!gtk_widget_is_visible(GTK_WIDGET(priv->pane)))
+		return;
+
+	related_get_song_info_pane_handler (plugin);
 }
 
 static void
@@ -257,6 +266,7 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 	PraghaBackendState state = ST_STOPPED;
 
 	PraghaSongInfoPlugin *plugin = user_data;
+	PraghaSongInfoPluginPrivate *priv = plugin->priv;
 
 	cancel_pane_search (plugin);
 
@@ -264,8 +274,10 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 
 	CDEBUG(DBG_INFO, "Configuring thread to get the cover art");
 
-	if (state == ST_STOPPED)
-		pragha_songinfo_pane_clear_text (plugin->priv->pane);
+	if (state == ST_STOPPED) {
+		pragha_songinfo_pane_clear_text (priv->pane);
+		pragha_songinfo_pane_clear_list (priv->pane);
+	}
 
 	if (state != ST_PLAYING)
 		return;
@@ -273,11 +285,34 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 	file_source = pragha_musicobject_get_source (pragha_backend_get_musicobject (backend));
 
 	if (file_source == FILE_NONE) {
-		pragha_songinfo_pane_clear_text (plugin->priv->pane);
+		pragha_songinfo_pane_clear_text (priv->pane);
+		pragha_songinfo_pane_clear_list (priv->pane);
 		return;
 	}
 
 	pragha_song_info_get_info (plugin);
+}
+
+static void
+pragha_songinfo_pane_append (PraghaSonginfoPane *pane,
+                             PraghaMusicobject *mobj,
+                             PraghaSongInfoPlugin *plugin)
+{
+	PraghaPlaylist *playlist;
+	const gchar *provider = NULL;
+
+	PraghaSongInfoPluginPrivate *priv = plugin->priv;
+
+	provider = pragha_musicobject_get_provider (mobj);
+	if (string_is_empty(provider))
+	{
+		open_url (pragha_musicobject_get_file(mobj), NULL);
+	}
+	else
+	{
+		playlist = pragha_application_get_playlist (priv->pragha);
+		pragha_playlist_append_single_song (playlist, g_object_ref(mobj));
+	}
 }
 
 /*
@@ -476,6 +511,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	g_signal_connect (G_OBJECT(priv->pane), "type-changed",
 	                  G_CALLBACK(pragha_songinfo_pane_type_changed), plugin);
+	g_signal_connect (G_OBJECT(priv->pane), "append",
+	                  G_CALLBACK(pragha_songinfo_pane_append), plugin);
 
 	/* Default values */
 

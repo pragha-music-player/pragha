@@ -577,7 +577,7 @@ save_embedded_art (PraghaBackend *backend, const GstTagList *taglist)
 	const gchar *artist = pragha_musicobject_get_artist (priv->mobj);
 	const gchar *album = pragha_musicobject_get_album (priv->mobj);
 
-	if (pragha_art_cache_contains (priv->art_cache, artist, album))
+	if (pragha_art_cache_contains_album (priv->art_cache, artist, album))
 		goto out;
 
 	//ok, we need it
@@ -590,7 +590,7 @@ save_embedded_art (PraghaBackend *backend, const GstTagList *taglist)
 	if (!gst_buffer_map (buf, &info, GST_MAP_READ))
 		goto out;
 
-	pragha_art_cache_put (priv->art_cache, artist, album, info.data, info.size);
+	pragha_art_cache_put_album (priv->art_cache, artist, album, info.data, info.size);
 
 	gst_buffer_unmap (buf, &info);
 

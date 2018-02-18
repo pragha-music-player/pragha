@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -21,6 +21,8 @@
 #include <gtk/gtk.h>
 #include <glib-object.h>
 
+#include "src/pragha-musicobject.h"
+
 G_BEGIN_DECLS
 
 #define PRAGHA_TYPE_SONGINFO_PANE            (pragha_songinfo_pane_get_type ())
@@ -35,13 +37,21 @@ typedef struct _PraghaSonginfoPane PraghaSonginfoPane;
 typedef struct {
 	GtkScrolledWindowClass __parent__;
 	void (*type_changed)   (PraghaSonginfoPane *pane);
+	void (*append)         (PraghaSonginfoPane *pane, PraghaMusicobject *mobj);
 } PraghaSonginfoPaneClass;
 
+void                pragha_songinfo_pane_set_title             (PraghaSonginfoPane *pane,
+                                                                const gchar        *title);
+
 void                pragha_songinfo_pane_set_text              (PraghaSonginfoPane *pane,
-                                                                const gchar        *title,
                                                                 const gchar        *text,
                                                                 const gchar        *provider);
+
+void                pragha_songinfo_pane_append_song_row       (PraghaSonginfoPane *pane,
+                                                                GtkWidget          *row);
+
 void                pragha_songinfo_pane_clear_text            (PraghaSonginfoPane *pane);
+void                pragha_songinfo_pane_clear_list            (PraghaSonginfoPane *pane);
 
 GtkWidget          *pragha_songinfo_pane_get_pane_title        (PraghaSonginfoPane *pane);
 GtkMenu            *pragha_songinfo_pane_get_popup_menu        (PraghaSonginfoPane *pane);

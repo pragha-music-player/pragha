@@ -254,9 +254,9 @@ pragha_playback_update_current_album_art (PraghaApplication *pragha, PraghaMusic
 		return;
 
 	art_cache = pragha_application_get_art_cache (pragha);
-	album_path = pragha_art_cache_get_uri (art_cache,
-	                                       pragha_musicobject_get_artist(mobj),
-	                                       pragha_musicobject_get_album(mobj));
+	album_path = pragha_art_cache_get_album_uri (art_cache,
+	                                             pragha_musicobject_get_artist(mobj),
+	                                             pragha_musicobject_get_album(mobj));
 
 	if (album_path == NULL) {
 		if (!pragha_musicobject_is_local_file(mobj))

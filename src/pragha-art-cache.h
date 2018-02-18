@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2011-2018 matias <mati86dl@gmail.com>
  * Copyright (C) 2013 Pavel Vasin
  *
  * This program is free software: you can redistribute it and/or modify
@@ -42,9 +43,13 @@ struct _PraghaArtCacheClass
 
 PraghaArtCache * pragha_art_cache_get      (void);
 
-gchar *          pragha_art_cache_get_uri  (PraghaArtCache *cache, const gchar *artist, const gchar *album);
-gboolean         pragha_art_cache_contains (PraghaArtCache *cache, const gchar *artist, const gchar *album);
-void             pragha_art_cache_put      (PraghaArtCache *cache, const gchar *artist, const gchar *album, gconstpointer data, gsize size);
+gchar *          pragha_art_cache_get_album_uri   (PraghaArtCache *cache, const gchar *artist, const gchar *album);
+gboolean         pragha_art_cache_contains_album  (PraghaArtCache *cache, const gchar *artist, const gchar *album);
+void             pragha_art_cache_put_album       (PraghaArtCache *cache, const gchar *artist, const gchar *album, gconstpointer data, gsize size);
+
+gchar *          pragha_art_cache_get_artist_uri  (PraghaArtCache *cache, const gchar *artist);
+gboolean         pragha_art_cache_contains_artist (PraghaArtCache *cache, const gchar *artist);
+void             pragha_art_cache_put_artist      (PraghaArtCache *cache, const gchar *artist, gconstpointer data, gsize size);
 
 G_END_DECLS
 

@@ -26,6 +26,7 @@
 #include "pragha-song-info-plugin.h"
 #include "pragha-song-info-pane.h"
 
+#include "src/pragha-art-cache.h"
 #include "src/pragha-simple-async.h"
 
 typedef struct {
@@ -34,24 +35,23 @@ typedef struct {
 	GlyrMemCache         *head;
 } glyr_struct;
 
-/* Save the downloaded album art in cache, and updates the gui.*/
+/* Save the downloaded artist art in cache, and updates the gui.*/
 
 static void
 glyr_finished_successfully (glyr_struct *glyr_info)
 {
 	PraghaApplication *pragha;
 	PraghaArtCache *art_cache;
-	const gchar *artist = NULL, *album = NULL;
+	const gchar *artist = NULL;
 
 	pragha = pragha_songinfo_plugin_get_application (glyr_info->plugin);
 
 	artist = glyr_info->query.artist;
-	album = glyr_info->query.album;
 
 	art_cache = pragha_application_get_art_cache (pragha);
 
 	if (glyr_info->head->data)
-		pragha_art_cache_put_album (art_cache, artist, album, glyr_info->head->data, glyr_info->head->size);
+		pragha_art_cache_put_artist (art_cache, artist, glyr_info->head->data, glyr_info->head->size);
 
 	glyr_free_list(glyr_info->head);
 }
@@ -92,23 +92,21 @@ get_related_info_idle_func (gpointer data)
 }
 
 void
-pragha_songinfo_plugin_get_album_art (PraghaSongInfoPlugin *plugin,
-                                      const gchar          *artist,
-                                      const gchar          *album)
+pragha_songinfo_plugin_get_artist_art (PraghaSongInfoPlugin *plugin,
+                                       const gchar          *artist)
 {
 	glyr_struct *glyr_info;
 
-	CDEBUG(DBG_INFO, "Get album art handler");
+	CDEBUG(DBG_INFO, "Get artist art handler");
 
 	glyr_info = g_slice_new0 (glyr_struct);
 
 	glyr_query_init(&glyr_info->query);
 
-	glyr_opt_type (&glyr_info->query, GLYR_GET_COVERART);
-	glyr_opt_from (&glyr_info->query, "lastfm;musicbrainz");
+	glyr_opt_type (&glyr_info->query, GLYR_GET_ARTIST_PHOTOS);
+	glyr_opt_from (&glyr_info->query, "lastfm");
 
 	glyr_opt_artist (&glyr_info->query, artist);
-	glyr_opt_album (&glyr_info->query, album);
 
 	glyr_info->plugin = plugin;
 

@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -34,8 +34,14 @@
 struct _PraghaSonginfoPane {
 	GtkScrolledWindow  parent;
 
+	/* Title */
+	GtkWidget         *title;
+
 	/* Text widget */
 	GtkWidget         *text_view;
+
+	/* List widget */
+	GtkWidget         *list_view;
 
 	/* Info that show thde pane */
 	GLYR_GET_TYPE      info_type;
@@ -49,6 +55,7 @@ G_DEFINE_TYPE(PraghaSonginfoPane, pragha_songinfo_pane, GTK_TYPE_SCROLLED_WINDOW
 
 enum {
 	SIGNAL_TYPE_CHANGED,
+	SIGNAL_APPEND,
 	LAST_SIGNAL
 };
 static int signals[LAST_SIGNAL] = { 0 };
@@ -83,8 +90,15 @@ GtkActionEntry songinfo_pane_context_aentries[] = {
  */
 
 void
+pragha_songinfo_pane_set_title (PraghaSonginfoPane *pane,
+                                const gchar        *title)
+{
+	gtk_label_set_text (GTK_LABEL(pane->title), title);
+	gtk_widget_show (GTK_WIDGET(pane->title));
+}
+
+void
 pragha_songinfo_pane_set_text (PraghaSonginfoPane *pane,
-                               const gchar        *title,
                                const gchar        *text,
                                const gchar        *provider)
 {
@@ -96,25 +110,51 @@ pragha_songinfo_pane_set_text (PraghaSonginfoPane *pane,
 	gtk_text_buffer_set_text (buffer, "", -1);
 
 	gtk_text_buffer_get_start_iter (GTK_TEXT_BUFFER(buffer), &iter);
-	gtk_text_buffer_insert_with_tags_by_name (GTK_TEXT_BUFFER(buffer), &iter, title, -1,
-	                                          "style_bold", "style_large", "margin_top", NULL);
-
-	gtk_text_buffer_insert (GTK_TEXT_BUFFER(buffer), &iter, "\n\n", -1);
 	gtk_text_buffer_insert (GTK_TEXT_BUFFER(buffer), &iter, text, -1);
 
 	if (string_is_not_empty(provider)) {
-		gtk_text_buffer_insert (GTK_TEXT_BUFFER(buffer), &iter, "\n\n", -1);
+		if (string_is_not_empty(text))
+			gtk_text_buffer_insert (GTK_TEXT_BUFFER(buffer), &iter, "\n\n", -1);
 		gtk_text_buffer_insert (GTK_TEXT_BUFFER(buffer), &iter, _("Thanks to "), -1);
 		gtk_text_buffer_insert_with_tags_by_name (GTK_TEXT_BUFFER(buffer), &iter, provider, -1, "style_bold", "style_italic", NULL);
 	}
 }
 
 void
+pragha_songinfo_pane_append_song_row (PraghaSonginfoPane *pane,
+                                      GtkWidget          *row)
+{
+	gtk_list_box_insert (GTK_LIST_BOX(pane->list_view), row, 0);
+	gtk_widget_show (GTK_WIDGET(pane->list_view));
+}
+
+void
 pragha_songinfo_pane_clear_text (PraghaSonginfoPane *pane)
 {
 	GtkTextBuffer *buffer;
+
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (pane->text_view));
 	gtk_text_buffer_set_text (buffer, "", -1);
+
+	gtk_widget_hide (GTK_WIDGET(pane->title));
+}
+
+void
+pragha_songinfo_pane_clear_list (PraghaSonginfoPane *pane)
+{
+	GList *list, *l;
+	GtkWidget *children;
+
+	list = gtk_container_get_children (GTK_CONTAINER(pane->list_view));
+	l = list;
+	while (l != NULL) {
+		children = l->data;
+		gtk_container_remove(GTK_CONTAINER(pane->list_view), children);
+		l = g_list_next(l);
+	}
+	g_list_free(list);
+
+	gtk_widget_hide (GTK_WIDGET(pane->list_view));
 }
 
 GtkWidget *
@@ -144,6 +184,60 @@ pragha_songinfo_pane_get_default_view (PraghaSonginfoPane *pane)
 /*
  * Private
  */
+
+static void
+pragha_song_info_row_activated (GtkListBox         *box,
+                                GtkListBoxRow      *row,
+                                PraghaSonginfoPane *pane)
+{
+	PraghaMusicobject *mobj = NULL;
+
+	mobj = g_object_get_data (G_OBJECT(row), "SONG");
+	if (mobj == NULL)
+		return;
+
+	g_signal_emit (pane, signals[SIGNAL_APPEND], 0, mobj);
+}
+
+
+static void
+song_list_header_func (GtkListBoxRow *row,
+                       GtkListBoxRow *before,
+                       gpointer       user_data)
+{
+	GtkWidget *header;
+	header = gtk_separator_new (GTK_ORIENTATION_HORIZONTAL);
+	gtk_list_box_row_set_header (row, header);
+}
+
+static gint
+song_list_sort_func (GtkListBoxRow *a,
+                     GtkListBoxRow *b,
+                     gpointer user_data)
+{
+	PraghaMusicobject *mobja = NULL, *mobjb = NULL;
+	const gchar *providera = NULL, *providerb = NULL;
+
+	mobja = g_object_get_data (G_OBJECT(a), "SONG");
+	mobjb = g_object_get_data (G_OBJECT(b), "SONG");
+
+	providera = pragha_musicobject_get_provider (mobja);
+	providerb = pragha_musicobject_get_provider (mobjb);
+
+	if (string_is_empty(providera) && string_is_not_empty(providerb))
+		return 1;
+
+	if (string_is_not_empty(providera) && string_is_empty(providerb))
+		return -1;
+
+	if (string_is_empty(providera) && string_is_empty(providerb))
+		return -1;
+
+	if (string_is_not_empty(providera) && string_is_not_empty(providerb))
+		return 1;
+
+	return 0;
+}
 
 /* Menus */
 
@@ -219,8 +313,25 @@ pragha_songinfo_pane_finalize (GObject *object)
 static void
 pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
 {
-	GtkWidget *view;
+	GtkWidget *box, *label, *view, *list;
 	GtkTextBuffer *buffer;
+	PangoAttrList *attrs;
+	GtkStyleContext *context;
+
+	box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
+	context = gtk_widget_get_style_context (box);
+	gtk_style_context_add_class (context, GTK_STYLE_CLASS_VIEW);
+
+	label = gtk_label_new (_("Lyrics"));
+	gtk_widget_set_halign (label, GTK_ALIGN_START);
+	gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+	gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
+
+	attrs = pango_attr_list_new ();
+	pango_attr_list_insert (attrs, pango_attr_weight_new (PANGO_WEIGHT_BOLD));
+	pango_attr_list_insert (attrs, pango_attr_scale_new (PANGO_SCALE_X_LARGE));
+	gtk_label_set_attributes (GTK_LABEL (label), attrs);
+	pango_attr_list_unref (attrs);
 
 	view = gtk_text_view_new ();
 	gtk_text_view_set_editable (GTK_TEXT_VIEW (view), FALSE);
@@ -246,7 +357,16 @@ pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
 	gtk_scrolled_window_set_hadjustment (GTK_SCROLLED_WINDOW(pane), NULL);
 	gtk_scrolled_window_set_vadjustment (GTK_SCROLLED_WINDOW(pane), NULL);
 
-	gtk_container_add (GTK_CONTAINER (pane), view);
+	list = gtk_list_box_new ();
+	gtk_list_box_set_header_func (GTK_LIST_BOX (list),
+	                              song_list_header_func, list, NULL);
+	gtk_list_box_set_sort_func (GTK_LIST_BOX (list),
+	                            song_list_sort_func, list, NULL);
+
+	gtk_box_pack_start (GTK_BOX(box), GTK_WIDGET(label), FALSE, FALSE, 2);
+	gtk_box_pack_start (GTK_BOX(box), GTK_WIDGET(list), FALSE, FALSE, 2);
+	gtk_box_pack_start (GTK_BOX(box), GTK_WIDGET(view), FALSE, FALSE, 2);
+	gtk_container_add (GTK_CONTAINER (pane), box);
 
 	gtk_widget_show_all (GTK_WIDGET(pane));
 
@@ -254,8 +374,13 @@ pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
 	gtk_widget_set_halign (GTK_WIDGET(pane->pane_title), GTK_ALIGN_START);
 	gtk_widget_set_valign (GTK_WIDGET(pane->pane_title), GTK_ALIGN_CENTER);
 
+	g_signal_connect (list, "row-activated",
+	                  G_CALLBACK(pragha_song_info_row_activated), pane);
+
 	pane->context_menu = pragha_songinfo_pane_context_menu_new(pane);
+	pane->title = label;
 	pane->text_view = view;
+	pane->list_view = list;
 	pane->info_type = GLYR_GET_LYRICS;
 }
 
@@ -275,6 +400,15 @@ pragha_songinfo_pane_class_init (PraghaSonginfoPaneClass *klass)
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__VOID,
 		              G_TYPE_NONE, 0);
+
+	signals[SIGNAL_APPEND] =
+		g_signal_new ("append",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaSonginfoPaneClass, append),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__POINTER,
+		              G_TYPE_NONE, 1, G_TYPE_POINTER);
 }
 
 PraghaSonginfoPane *

@@ -1509,7 +1509,7 @@ pragha_art_cache_changed_handler (PraghaArtCache *cache, PraghaMpris2Plugin *plu
 		artist = pragha_musicobject_get_artist (mobj);
 		album = pragha_musicobject_get_album (mobj);
 	
-		album_art_path = pragha_art_cache_get_uri (cache, artist, album);
+		album_art_path = pragha_art_cache_get_album_uri (cache, artist, album);
 		if (album_art_path) {
 			pragha_mpris_update_metadata_changed (plugin);
 			g_free (album_art_path);

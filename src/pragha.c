@@ -650,7 +650,7 @@ pragha_art_cache_changed_handler (PraghaArtCache *cache, PraghaApplication *prag
 		artist = pragha_musicobject_get_artist (mobj);
 		album = pragha_musicobject_get_album (mobj);
 
-		album_art_path = pragha_art_cache_get_uri (cache, artist, album);
+		album_art_path = pragha_art_cache_get_album_uri (cache, artist, album);
 
 		if (album_art_path) {
 			toolbar = pragha_application_get_toolbar (pragha);

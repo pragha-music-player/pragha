@@ -16,6 +16,8 @@ libsong_info_la_SOURCES =						\
 	pragha-song-info-pane.h						\
 	pragha-song-info-thread-albumart.c			\
 	pragha-song-info-thread-albumart.h			\
+	pragha-song-info-thread-artistart.c			\
+	pragha-song-info-thread-artistart.h			\
 	pragha-song-info-thread-dialog.c			\
 	pragha-song-info-thread-dialog.h			\
 	pragha-song-info-thread-pane.c				\

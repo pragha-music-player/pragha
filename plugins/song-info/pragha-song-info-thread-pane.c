@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -27,6 +27,8 @@
 #include "pragha-song-info-pane.h"
 
 #include "src/pragha-simple-async.h"
+#include "src/pragha-musicobject-mgmt.h"
+#include "src/pragha-database.h"
 
 typedef struct {
 	PraghaSongInfoPlugin *plugin;
@@ -42,19 +44,90 @@ typedef struct {
  * Utils.
  */
 
-static GString *
-glyr_append_song_list (GString *string, GlyrMemCache *it)
+PraghaMusicobject *
+related_get_song_with_artist_and_title (PraghaSongInfoPlugin *plugin,
+                                        const gchar          *artist,
+                                        const gchar          *title)
 {
-	gchar **tags;
-	gchar *song = NULL;
-	tags = g_strsplit (it->data, "\n", 4);
-	song = g_strdup_printf ("%s - %s\n", tags[0], tags[1]);
-	string = g_string_append(string, song);
-	g_free (song);
-	g_strfreev (tags);
-	return string;
+	PraghaApplication *pragha;
+	PraghaDatabase *cdbase;
+	PraghaMusicobject *mobj = NULL;
+	gint location_id = 0;
+
+	pragha = pragha_songinfo_plugin_get_application(plugin);
+	cdbase = pragha_application_get_database (pragha);
+
+	const gchar *sql =
+		"SELECT LOCATION.id "
+		"FROM TRACK, ARTIST, PROVIDER, LOCATION "
+		"WHERE ARTIST.id = TRACK.artist "
+		"AND LOCATION.id = TRACK.location "
+		"AND TRACK.provider = PROVIDER.id AND PROVIDER.visible <> 0 "
+		"AND TRACK.title = ? COLLATE NOCASE "
+		"AND ARTIST.name = ? COLLATE NOCASE "
+		"ORDER BY RANDOM() LIMIT 1;";
+
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cdbase, sql);
+	pragha_prepared_statement_bind_string (statement, 1, title);
+	pragha_prepared_statement_bind_string (statement, 2, artist);
+
+	if (pragha_prepared_statement_step (statement)) {
+		location_id = pragha_prepared_statement_get_int (statement, 0);
+		mobj = new_musicobject_from_db (cdbase, location_id);
+	}
+
+	pragha_prepared_statement_free (statement);
+
+	return mobj;
 }
 
+static GtkWidget*
+glyr_get_song_list_row (PraghaSongInfoPlugin *plugin, GlyrMemCache *it)
+{
+	PraghaMusicobject *mobj = NULL;
+	GtkWidget *row, *box, *icon, *label;
+	gchar *title, *artist, *url, *song_name = NULL;
+	gchar **tags;
+
+	tags = g_strsplit (it->data, "\n", 4);
+	title = tags[0];
+	artist = tags[1];
+	url = tags[3];
+
+	mobj = related_get_song_with_artist_and_title (plugin, artist, title);
+	if (mobj == NULL) {
+		mobj = pragha_musicobject_new ();
+		pragha_musicobject_set_file (mobj, url);
+		pragha_musicobject_set_title (mobj, title);
+		pragha_musicobject_set_artist (mobj, artist);
+		icon = gtk_image_new_from_icon_name ("edit-find-symbolic", GTK_ICON_SIZE_MENU);
+	}
+	else {
+		icon = gtk_image_new_from_icon_name ("media-playback-start-symbolic", GTK_ICON_SIZE_MENU);
+	}
+
+	row = gtk_list_box_row_new ();
+
+	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	gtk_box_pack_start(GTK_BOX(box), icon, FALSE, FALSE, 6);
+
+	song_name = g_strdup_printf ("%s - %s", title, artist);
+	label = gtk_label_new (song_name);
+	gtk_label_set_ellipsize (GTK_LABEL(label), PANGO_ELLIPSIZE_END);
+	gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+	gtk_widget_set_halign (label, GTK_ALIGN_START);
+	gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 0);
+
+	gtk_container_add(GTK_CONTAINER(row), box);
+	gtk_widget_show_all (row);
+
+	g_object_set_data_full (G_OBJECT(row), "SONG", mobj, g_object_unref);
+
+	g_strfreev (tags);
+	g_free (song_name);
+
+	return row;
+}
 
 /*
  * Function to check if has the last
@@ -91,28 +164,27 @@ static void
 glyr_finished_successfully_pane (glyr_struct *glyr_info)
 {
 	PraghaSonginfoPane *pane;
-	GlyrMemCache *it = glyr_info->head;
-	GString *data = NULL;
+	GlyrMemCache *it = NULL;
+
+	pane = pragha_songinfo_plugin_get_pane (glyr_info->plugin);
 
 	switch (glyr_info->head->type) {
 		case GLYR_TYPE_LYRICS:
-			pane = pragha_songinfo_plugin_get_pane (glyr_info->plugin);
-			pragha_songinfo_pane_set_text (pane, glyr_info->query.title, glyr_info->head->data, glyr_info->head->prov);
+			pragha_songinfo_pane_set_title (pane, glyr_info->query.title);
+			pragha_songinfo_pane_set_text (pane, glyr_info->head->data, glyr_info->head->prov);
 			break;
 		case GLYR_TYPE_ARTIST_BIO:
-			pane = pragha_songinfo_plugin_get_pane (glyr_info->plugin);
-			pragha_songinfo_pane_set_text (pane,glyr_info->query.artist, glyr_info->head->data, glyr_info->head->prov);
+			pragha_songinfo_pane_set_title (pane, glyr_info->query.artist);
+			pragha_songinfo_pane_set_text (pane, glyr_info->head->data, glyr_info->head->prov);
 			break;
 		case GLYR_TYPE_SIMILAR_SONG:
 			it = glyr_info->head;
-			data = g_string_new (NULL);
 			while (it != NULL) {
-				data = glyr_append_song_list (data, it);
+				pragha_songinfo_pane_append_song_row (pane, glyr_get_song_list_row (glyr_info->plugin, it));
 				it = it->next;
 			}
-			pane = pragha_songinfo_plugin_get_pane (glyr_info->plugin);
-			pragha_songinfo_pane_set_text (pane, glyr_info->query.title, data->str, glyr_info->head->prov);
-			g_string_free(data, TRUE);
+			pragha_songinfo_pane_set_title (pane, glyr_info->query.title);
+			pragha_songinfo_pane_set_text (pane, "", glyr_info->head->prov);
 			break;
 		case GLYR_TYPE_COVERART:
 		default:
@@ -128,15 +200,18 @@ glyr_finished_incorrectly_pane (glyr_struct *glyr_info)
 	switch (glyr_info->query.type) {
 		case GLYR_GET_LYRICS:
 			pane = pragha_songinfo_plugin_get_pane (glyr_info->plugin);
-			pragha_songinfo_pane_set_text (pane, glyr_info->query.title, _("Lyrics not found."), "");
+			pragha_songinfo_pane_set_title (pane, glyr_info->query.title);
+			pragha_songinfo_pane_set_text (pane, _("Lyrics not found."), "");
 			break;
 		case GLYR_GET_ARTIST_BIO:
 			pane = pragha_songinfo_plugin_get_pane (glyr_info->plugin);
-			pragha_songinfo_pane_set_text (pane, glyr_info->query.artist, _("Artist information not found."), "");
+			pragha_songinfo_pane_set_title (pane, glyr_info->query.artist);
+			pragha_songinfo_pane_set_text (pane, _("Artist information not found."), "");
 			break;
 		case GLYR_GET_SIMILAR_SONGS:
 			pane = pragha_songinfo_plugin_get_pane (glyr_info->plugin);
-			pragha_songinfo_pane_set_text (pane, glyr_info->query.title, _("No recommended song."), "");
+			pragha_songinfo_pane_set_title (pane, glyr_info->query.title);
+			pragha_songinfo_pane_set_text (pane, _("No recommended songs."), "");
 			break;
 		case GLYR_GET_COVERART:
 		default:
@@ -214,10 +289,13 @@ pragha_songinfo_plugin_get_info_to_pane (PraghaSongInfoPlugin *plugin,
 	glyr_opt_type (&glyr_info->query, type);
 
 	pane = pragha_songinfo_plugin_get_pane (plugin);
+	pragha_songinfo_pane_clear_text (pane);
+	pragha_songinfo_pane_clear_list (pane);
 
 	switch (type) {
 		case GLYR_GET_ARTIST_BIO:
-			pragha_songinfo_pane_set_text (pane, artist, _("Searching..."), "");
+			pragha_songinfo_pane_set_title (pane, artist);
+			pragha_songinfo_pane_set_text (pane, _("Searching..."), "");
 
 			glyr_opt_artist(&glyr_info->query, artist);
 
@@ -227,7 +305,8 @@ pragha_songinfo_plugin_get_info_to_pane (PraghaSongInfoPlugin *plugin,
 		case GLYR_GET_SIMILAR_SONGS:
 			glyr_opt_number (&glyr_info->query, 50);
 		case GLYR_GET_LYRICS:
-			pragha_songinfo_pane_set_text (pane, title, _("Searching..."), "");
+			pragha_songinfo_pane_set_title (pane, title);
+			pragha_songinfo_pane_set_text (pane, _("Searching..."), "");
 
 			glyr_opt_artist(&glyr_info->query, artist);
 			glyr_opt_title(&glyr_info->query, title);
