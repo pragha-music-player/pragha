@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -46,6 +46,9 @@ void export_playlist (PraghaPlaylist* cplaylist, PraghaPlaylistActionRange choic
 void save_playlist(PraghaPlaylist* cplaylist, gint playlist_id, PraghaPlaylistActionRange type);
 void new_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, PraghaPlaylistActionRange type);
 void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, PraghaPlaylistActionRange type);
+
+void
+pragha_playlist_database_update_playlist (PraghaDatabase *cdbase, const gchar *playlist, GList *mlist);
 
 void pragha_playlist_save_selection (PraghaPlaylist *playlist, const gchar *name);
 void pragha_playlist_save_playlist  (PraghaPlaylist *playlist, const gchar *name);

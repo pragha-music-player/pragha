@@ -1,18 +1,18 @@
 /*************************************************************************/
-/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>			 */
-/* 									 */
-/* This program is free software: you can redistribute it and/or modify	 */
-/* it under the terms of the GNU General Public License as published by	 */
-/* the Free Software Foundation, either version 3 of the License, or	 */
-/* (at your option) any later version.					 */
-/* 									 */
-/* This program is distributed in the hope that it will be useful,	 */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	 */
-/* GNU General Public License for more details.				 */
-/* 									 */
-/* You should have received a copy of the GNU General Public License	 */
+/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
+/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
+/*                                                                       */
+/* This program is free software: you can redistribute it and/or modify  */
+/* it under the terms of the GNU General Public License as published by  */
+/* the Free Software Foundation, either version 3 of the License, or     */
+/* (at your option) any later version.                                   */
+/*                                                                       */
+/* This program is distributed in the hope that it will be useful,       */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
+/* GNU General Public License for more details.                          */
+/*                                                                       */
+/* You should have received a copy of the GNU General Public License     */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
@@ -1142,6 +1142,39 @@ void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, PraghaPla
 
 	save_playlist(cplaylist, playlist_id, type);
 }
+
+
+void
+pragha_playlist_database_update_playlist (PraghaDatabase *cdbase, const gchar *playlist, GList *mlist)
+{
+	GList *i;
+	const gchar *filename = NULL;
+	gint playlist_id;
+
+	if (string_is_empty(playlist)) {
+		g_warning("Playlist name is NULL");
+		return;
+	}
+
+	//TODO: Update instead replace playlist..
+	if ((playlist_id = pragha_database_find_playlist (cdbase, playlist)))
+		pragha_database_delete_playlist (cdbase, playlist);
+	playlist_id = pragha_database_add_new_playlist (cdbase, playlist);
+
+	pragha_database_begin_transaction (cdbase);
+	if (mlist != NULL)
+	{
+		for (i = mlist; i != NULL; i = i->next)
+		{
+			filename = pragha_musicobject_get_file (PRAGHA_MUSICOBJECT(i->data));
+			g_critical("Filename: %s", filename);
+			pragha_database_add_playlist_track (cdbase, playlist_id, filename);
+		}
+		g_list_free(mlist);
+	}
+	pragha_database_commit_transaction (cdbase);
+}
+
 
 gchar *
 new_radio (PraghaPlaylist *playlist,

@@ -45,6 +45,7 @@
 #include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-music-enum.h"
 #include "src/pragha-playlist.h"
+#include "src/pragha-playlists-mgmt.h"
 #include "src/pragha-menubar.h"
 #include "src/pragha-musicobject.h"
 #include "src/pragha-musicobject-mgmt.h"
@@ -349,10 +350,10 @@ pragha_koel_plugin_cache_provider_done (SoupSession *session,
 	PraghaMusicobject *mobj = NULL;
 
 	JsonParser *parser = NULL;
-	JsonNode *root, *albums_node, *artists_node, *songs_node;
+	JsonNode *root, *albums_node, *artists_node, *songs_node, *interactions_node;
 	JsonObject *root_object;
-	JsonArray *albums_array, *artists_array, *songs_array;
-	GList *l_songs, *l_song;
+	JsonArray *albums_array, *artists_array, *songs_array, *interactions_array;
+	GList *l_songs, *l_song, *liked = NULL;
 
 	PraghaKoelPlugin *plugin = user_data;
 	PraghaKoelPluginPrivate *priv = plugin->priv;
@@ -394,14 +395,14 @@ pragha_koel_plugin_cache_provider_done (SoupSession *session,
 
 		mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 		                     "file", url,
-				     "source", FILE_HTTP,
-				     "provider",  priv->server,
-				     "track-no", track,
-				     "title", title != NULL ? title : "",
-				     "artist", artist != NULL ? artist : "",
-				     "album", album != NULL ? album : "",
-				     "length", (gint)length,
-				     NULL);
+		                     "source", FILE_HTTP,
+		                     "provider",  priv->server,
+		                     "track-no", track,
+		                     "title", title != NULL ? title : "",
+		                     "artist", artist != NULL ? artist : "",
+		                     "album", album != NULL ? album : "",
+		                     "length", (gint)length,
+		                     NULL);
 
 		if (G_LIKELY(mobj))
 			pragha_koel_cache_insert_track (plugin, mobj);
@@ -411,6 +412,36 @@ pragha_koel_plugin_cache_provider_done (SoupSession *session,
 
 		g_free (url);
 	}
+
+	interactions_node = json_object_get_member(root_object, "interactions");
+	interactions_array = json_node_get_array (interactions_node);
+
+	l_songs = json_array_get_elements (interactions_array);
+	for (l_song = l_songs; l_song != NULL; l_song = g_list_next(l_song))
+	{
+		JsonObject *song_object = json_node_get_object ((JsonNode *)l_song->data);
+
+		if (!json_object_get_boolean_member (song_object, "liked"))
+			continue;
+
+		const gchar *song_id = json_object_get_string_member(song_object, "song_id");
+		gchar *url = g_strdup_printf("%s/api/%s", priv->server, song_id);
+
+		mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
+		                     "file", url,
+		                     "source", FILE_HTTP,
+		                     "provider",  priv->server,
+		                     NULL);
+
+		if (G_LIKELY(mobj))
+			liked = g_list_prepend (liked, mobj);
+
+		/* Have to give control to GTK periodically ... */
+		pragha_process_gtk_events ();
+
+		g_free (url);
+	}
+
 	g_object_unref(parser);
 
 	statusbar = pragha_statusbar_get ();
@@ -438,6 +469,11 @@ pragha_koel_plugin_cache_provider_done (SoupSession *session,
 		}
 
 		pragha_koel_save_cache (plugin);
+
+		if (G_LIKELY(liked)) {
+			pragha_playlist_database_update_playlist (database, _("Favorites on Koel"), liked);
+			g_list_free_full (liked, g_object_unref);
+		}
 
 		pragha_provider_update_done (provider);
 
