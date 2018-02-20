@@ -1334,11 +1334,11 @@ pragha_lastfm_now_playing_thread (gpointer data)
 		/* Fist check lastfm response, and compare tags. */
 		if (list != NULL) {
 			ntrack = list->data;
-			if (ntrack->name && g_ascii_strcasecmp(title, ntrack->name))
+			if (ntrack->name && !g_strrstr(ntrack->name, ";&#") && g_ascii_strcasecmp(title, ntrack->name))
 				changed |= TAG_TITLE_CHANGED;
-			if (ntrack->artist && g_ascii_strcasecmp(artist, ntrack->artist))
+			if (ntrack->artist && !g_strrstr(ntrack->artist, ";&#") && g_ascii_strcasecmp(artist, ntrack->artist))
 				changed |= TAG_ARTIST_CHANGED;
-			if (ntrack->album && g_ascii_strcasecmp(album, ntrack->album))
+			if (ntrack->album && !g_strrstr(ntrack->album, ";&#") && g_ascii_strcasecmp(album, ntrack->album))
 				changed |= TAG_ALBUM_CHANGED;
 		}
 
