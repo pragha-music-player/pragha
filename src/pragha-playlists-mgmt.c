@@ -1167,7 +1167,6 @@ pragha_playlist_database_update_playlist (PraghaDatabase *cdbase, const gchar *p
 		for (i = mlist; i != NULL; i = i->next)
 		{
 			filename = pragha_musicobject_get_file (PRAGHA_MUSICOBJECT(i->data));
-			g_critical("Filename: %s", filename);
 			pragha_database_add_playlist_track (cdbase, playlist_id, filename);
 		}
 		g_list_free(mlist);
