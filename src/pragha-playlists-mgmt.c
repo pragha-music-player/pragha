@@ -1169,7 +1169,6 @@ pragha_playlist_database_update_playlist (PraghaDatabase *cdbase, const gchar *p
 			filename = pragha_musicobject_get_file (PRAGHA_MUSICOBJECT(i->data));
 			pragha_database_add_playlist_track (cdbase, playlist_id, filename);
 		}
-		g_list_free(mlist);
 	}
 	pragha_database_commit_transaction (cdbase);
 }
