@@ -176,9 +176,11 @@ pragha_application_open_files (PraghaApplication *pragha)
 	gtk_window_set_title(GTK_WINDOW(window), (_("Select a file to play")));
 	gtk_window_set_default_size(GTK_WINDOW(window), 700, 450);
 	gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-	gtk_container_set_border_width(GTK_CONTAINER(window), 10);
+	gtk_widget_set_name (GTK_WIDGET(window), "GtkFileChooserDialog");
+	gtk_container_set_border_width(GTK_CONTAINER(window), 0);
 
 	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+	gtk_widget_set_name (GTK_WIDGET(vbox), "dialog-vbox1");
 
 	gtk_container_add(GTK_CONTAINER(window), vbox);
 
@@ -194,6 +196,7 @@ pragha_application_open_files (PraghaApplication *pragha)
 		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(chooser), last_folder);
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_container_set_border_width(GTK_CONTAINER(hbox), 6);
 
 	toggle = gtk_check_button_new_with_label(_("Add files recursively"));
 	if(pragha_preferences_get_add_recursively (preferences))
@@ -201,18 +204,18 @@ pragha_application_open_files (PraghaApplication *pragha)
 
 	bbox = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_END);
-	gtk_box_set_spacing(GTK_BOX(bbox), 6);
+	gtk_box_set_spacing(GTK_BOX(bbox), 4);
 
 	close_button = gtk_button_new_with_mnemonic (_("_Cancel"));
 	add_button = gtk_button_new_with_mnemonic (_("_Add"));
 	gtk_container_add(GTK_CONTAINER(bbox), close_button);
 	gtk_container_add(GTK_CONTAINER(bbox), add_button);
 
-	gtk_box_pack_start(GTK_BOX(hbox), toggle, TRUE, TRUE, 3);
-	gtk_box_pack_end(GTK_BOX(hbox), bbox, FALSE, FALSE, 3);
+	gtk_box_pack_start(GTK_BOX(hbox), toggle, TRUE, TRUE, 0);
+	gtk_box_pack_end(GTK_BOX(hbox), bbox, FALSE, FALSE, 0);
 
-	gtk_box_pack_end(GTK_BOX(vbox), hbox, FALSE, FALSE, 3);
-	gtk_box_pack_end(GTK_BOX(vbox), chooser, TRUE, TRUE, 3);
+	gtk_box_pack_end(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
+	gtk_box_pack_end(GTK_BOX(vbox), chooser, TRUE, TRUE, 0);
 
 	/* Create file filters  */
 
