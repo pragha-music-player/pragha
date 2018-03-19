@@ -597,11 +597,9 @@ pragha_library_pane_addto_playlist_and_play (PraghaLibraryPane *library, PraghaA
 	GList *list = NULL;
 	list = pragha_library_pane_get_mobj_list (library);
 	if (list) {
-
-		pragha_playlist_stopped_playback (pragha->playlist);
-		pragha_playlist_append_mobj_list_and_play(pragha->playlist,
-			                              list);	                                                         
-			                              
+		pragha_playlist_append_mobj_list(pragha->playlist, list);
+		pragha_playlist_activate_unique_mobj(pragha->playlist, g_list_first(list)->data);
+		
 		g_list_free(list);
 	}
 }

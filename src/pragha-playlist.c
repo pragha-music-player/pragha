@@ -2247,49 +2247,6 @@ pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
 	g_signal_emit (cplaylist, signals[PLAYLIST_CHANGED], 0);
 }
 
-/* Append a list of mobj to the current playlist and play the first*/
-void
-pragha_playlist_append_mobj_list_and_play(PraghaPlaylist *cplaylist, GList *list)
-{
-	PraghaMusicobject *mobj;
-	gint prev_tracks = 0;
-	GtkSortType order;
-	gint column;
-	GList *l;
-
-	prev_tracks = pragha_playlist_get_no_tracks(cplaylist);
-
-	/* TODO: pragha_playlist_set_changing() should be set cursor automatically. */
-	set_watch_cursor (GTK_WIDGET(cplaylist));
-	pragha_playlist_set_changing(cplaylist, TRUE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), NULL);
-
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), cplaylist->model);
-
-	gint i=0;
-	for (l = list; l != NULL; l = l->next) {
-		mobj = l->data;
-		if(i==0){
-			pragha_playlist_append_mobj_and_play(cplaylist, mobj);
-			
-			i++;
-		}else{
-			append_current_playlist(cplaylist, mobj);
-		}
-	}
-
-	
-
-	pragha_playlist_set_changing(cplaylist, FALSE);
-	remove_watch_cursor (GTK_WIDGET(cplaylist));
-
-	g_signal_emit (cplaylist, signals[PLAYLIST_CHANGED], 0);
-
-	if(gtk_tree_sortable_get_sort_column_id(GTK_TREE_SORTABLE(cplaylist->model),
-	                                        &column, &order))
-		select_numered_path_of_current_playlist(cplaylist, prev_tracks, TRUE);
-}
-
 /* Append a list of mobj to the current playlist */
 
 void
