@@ -162,6 +162,7 @@ static void playlist_comment_column_change_cb  (GtkCheckMenuItem *item, PraghaPl
 static void playlist_filename_column_change_cb (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
 static void playlist_mimetype_column_change_cb (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
 
+static void create_playlist_column(PraghaPlaylist *cplaylist, GtkTreeView *view,gchar *label,gint column_id);
 static void clear_sort_current_playlist_cb (GtkMenuItem *item, PraghaPlaylist *cplaylist);
 
 static gint compare_track_no (GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data);
@@ -3557,32 +3558,9 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 {
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
-	GtkWidget *state_pixbuf,
-		*label_track,
-		*label_title,
-		*label_artist,
-		*label_album,
-		*label_genre,
-		*label_bitrate,
-		*label_year,
-		*label_comment,
-		*label_length,
-		*label_filename,
-		*label_mimetype;
+	GtkWidget *state_pixbuf;
 	GtkWidget *col_button;
 	gint icon_size = 0;
-
-	label_track = gtk_label_new(_("Track"));
-	label_title = gtk_label_new(_("Title"));
-	label_artist = gtk_label_new(_("Artist"));
-	label_album = gtk_label_new(_("Album"));
-	label_genre = gtk_label_new(_("Genre"));
-	label_bitrate = gtk_label_new(_("Bitrate"));
-	label_year = gtk_label_new(_("Year"));
-	label_comment = gtk_label_new(_("Comment"));
-	label_length = gtk_label_new(_("Length"));
-	label_filename = gtk_label_new(_("Filename"));
-	label_mimetype = gtk_label_new(_("Mimetype"));
 
 	state_pixbuf = gtk_image_new_from_icon_name ("audio-volume-high", GTK_ICON_SIZE_MENU);
 
@@ -3611,237 +3589,53 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 	gtk_tree_view_column_set_alignment (column, 0.5);
 	gtk_widget_show (state_pixbuf);
 
-	/* Column : Track No */
-
-	renderer = gtk_cell_renderer_text_new();
-	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
-	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
-	column = gtk_tree_view_column_new_with_attributes(P_TRACK_NO_STR,
-							  renderer,
-							  "text",
-							  P_TRACK_NO,
-							  NULL);
-	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_view_column_set_sort_column_id(column, P_TRACK_NO);
-	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-	gtk_tree_view_column_set_widget(column, label_track);
-	gtk_widget_show(label_track);
-	col_button = gtk_widget_get_ancestor(label_track, GTK_TYPE_BUTTON);
-	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cplaylist);
-
-	/* Column : Title */
-
-	renderer = gtk_cell_renderer_text_new();
-	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
-	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
-	column = gtk_tree_view_column_new_with_attributes(P_TITLE_STR,
-							  renderer,
-							  "text",
-							  P_TITLE,
-							  NULL);
-	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_view_column_set_sort_column_id(column, P_TITLE);
-	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-	gtk_tree_view_column_set_widget(column, label_title);
-	gtk_widget_show(label_title);
-	col_button = gtk_widget_get_ancestor(label_title, GTK_TYPE_BUTTON);
-	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cplaylist);
-
-	/* Column : Artist */
-
-	renderer = gtk_cell_renderer_text_new();
-	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
-	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
-	column = gtk_tree_view_column_new_with_attributes(P_ARTIST_STR,
-							  renderer,
-							  "text",
-							  P_ARTIST,
-							  NULL);
-	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_view_column_set_sort_column_id(column, P_ARTIST);
-	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-	gtk_tree_view_column_set_widget(column, label_artist);
-	gtk_widget_show(label_artist);
-	col_button = gtk_widget_get_ancestor(label_artist, GTK_TYPE_BUTTON);
-	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cplaylist);
-
-	/* Column : Album */
-
-	renderer = gtk_cell_renderer_text_new();
-	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
-	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
-	column = gtk_tree_view_column_new_with_attributes(P_ALBUM_STR,
-							  renderer,
-							  "text",
-							  P_ALBUM,
-							  NULL);
-	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_view_column_set_sort_column_id(column, P_ALBUM);
-	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-	gtk_tree_view_column_set_widget(column, label_album);
-	gtk_widget_show(label_album);
-	col_button = gtk_widget_get_ancestor(label_album, GTK_TYPE_BUTTON);
-	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cplaylist);
-
-	/* Column : Genre */
-
-	renderer = gtk_cell_renderer_text_new();
-	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
-	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
-	column = gtk_tree_view_column_new_with_attributes(P_GENRE_STR,
-							  renderer,
-							  "text",
-							  P_GENRE,
-							  NULL);
-	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_view_column_set_sort_column_id(column, P_GENRE);
-	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-	gtk_tree_view_column_set_widget(column, label_genre);
-	gtk_widget_show(label_genre);
-	col_button = gtk_widget_get_ancestor(label_genre, GTK_TYPE_BUTTON);
-	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cplaylist);
-
-	/* Column : Bitrate */
-
-	renderer = gtk_cell_renderer_text_new();
-	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
-	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
-	column = gtk_tree_view_column_new_with_attributes(P_BITRATE_STR,
-							  renderer,
-							  "text",
-							  P_BITRATE,
-							  NULL);
-	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_view_column_set_sort_column_id(column, P_BITRATE);
-	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-	gtk_tree_view_column_set_widget(column, label_bitrate);
-	gtk_widget_show(label_bitrate);
-	col_button = gtk_widget_get_ancestor(label_bitrate, GTK_TYPE_BUTTON);
-	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cplaylist);
-
-	/* Column : Year */
-
-	renderer = gtk_cell_renderer_text_new();
-	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
-	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
-	column = gtk_tree_view_column_new_with_attributes(P_YEAR_STR,
-							  renderer,
-							  "text",
-							  P_YEAR,
-							  NULL);
-	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_view_column_set_sort_column_id(column, P_YEAR);
-	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-	gtk_tree_view_column_set_widget(column, label_year);
-	gtk_widget_show(label_year);
-	col_button = gtk_widget_get_ancestor(label_year, GTK_TYPE_BUTTON);
-	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cplaylist);
-
-	/* Column : Comment */
-
-	renderer = gtk_cell_renderer_text_new();
-	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
-	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
-	column = gtk_tree_view_column_new_with_attributes(P_COMMENT_STR,
-							  renderer,
-							  "text",
-							  P_COMMENT,
-							  NULL);
-	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_view_column_set_sort_column_id(column, P_COMMENT);
-	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-	gtk_tree_view_column_set_widget(column, label_comment);
-	gtk_widget_show(label_comment);
-	col_button = gtk_widget_get_ancestor(label_comment, GTK_TYPE_BUTTON);
-	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cplaylist);
-
-	/* Column : Length */
-
-	renderer = gtk_cell_renderer_text_new();
-	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
-	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
-	column = gtk_tree_view_column_new_with_attributes(P_LENGTH_STR,
-							  renderer,
-							  "text",
-							  P_LENGTH,
-							  NULL);
-	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_view_column_set_sort_column_id(column, P_LENGTH);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-	gtk_tree_view_column_set_widget(column, label_length);
-	gtk_widget_show(label_length);
-	col_button = gtk_widget_get_ancestor(label_length, GTK_TYPE_BUTTON);
-	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cplaylist);
-
-	/* Column : Filename */
-
-	renderer = gtk_cell_renderer_text_new();
-	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
-	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
-	column = gtk_tree_view_column_new_with_attributes(P_FILENAME_STR,
-							  renderer,
-							  "text",
-							  P_FILENAME,
-							  NULL);
-	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_view_column_set_sort_column_id(column, P_FILENAME);
-	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-	gtk_tree_view_column_set_widget(column, label_filename);
-	gtk_widget_show(label_filename);
-	col_button = gtk_widget_get_ancestor(label_filename, GTK_TYPE_BUTTON);
-	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cplaylist);
-
-	/* Column : Mimetype */
-
-	renderer = gtk_cell_renderer_text_new();
-	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
-	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
-	column = gtk_tree_view_column_new_with_attributes(P_MIMETYPE_STR,
-							  renderer,
-							  "text",
-							  P_MIMETYPE,
-							  NULL);
-	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_view_column_set_sort_column_id(column, P_MIMETYPE);
-	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-	gtk_tree_view_column_set_widget(column, label_mimetype);
-	gtk_widget_show(label_mimetype);
-	col_button = gtk_widget_get_ancestor(label_mimetype, GTK_TYPE_BUTTON);
-	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cplaylist);
-
+    create_playlist_column(cplaylist, GTK_TREE_VIEW(view),P_TRACK_NO_STR,P_TRACK_NO);
+    create_playlist_column(cplaylist, GTK_TREE_VIEW(view),P_TITLE_STR,P_TITLE);
+    create_playlist_column(cplaylist, GTK_TREE_VIEW(view),P_ARTIST_STR,P_ARTIST);
+    create_playlist_column(cplaylist, GTK_TREE_VIEW(view),P_ALBUM_STR,P_ALBUM);
+    create_playlist_column(cplaylist, GTK_TREE_VIEW(view),P_GENRE_STR,P_GENRE);
+    create_playlist_column(cplaylist, GTK_TREE_VIEW(view),P_BITRATE_STR,P_BITRATE);
+    create_playlist_column(cplaylist, GTK_TREE_VIEW(view),P_YEAR_STR,P_YEAR);
+    create_playlist_column(cplaylist, GTK_TREE_VIEW(view),P_COMMENT_STR,P_COMMENT);
+    create_playlist_column(cplaylist, GTK_TREE_VIEW(view),P_LENGTH_STR,P_LENGTH);
+    create_playlist_column(cplaylist, GTK_TREE_VIEW(view),P_FILENAME_STR,P_FILENAME);
+    create_playlist_column(cplaylist, GTK_TREE_VIEW(view),P_MIMETYPE_STR,P_MIMETYPE);
+    
 }
+
+
+static void
+create_playlist_column(PraghaPlaylist *cplaylist, GtkTreeView *view,gchar *label,gint column_id)
+{
+	GtkWidget *label_wgt;
+	GtkCellRenderer *renderer;
+	GtkTreeViewColumn *column;
+	GtkWidget *col_button;
+	
+	label_wgt = gtk_label_new(label);
+	
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	column = gtk_tree_view_column_new_with_attributes(label,
+							  renderer,
+							  "text",
+							  column_id,
+							  NULL);
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, column_id);
+	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	gtk_tree_view_column_set_widget(column, label_wgt);
+	gtk_widget_show(label_wgt);
+	col_button = gtk_widget_get_ancestor(label_wgt, GTK_TYPE_BUTTON);
+	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
+			 G_CALLBACK(header_right_click_cb), cplaylist);
+			 
+}
+
+
 
 void
 update_current_playlist_view_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, PraghaPlaylist *cplaylist)
