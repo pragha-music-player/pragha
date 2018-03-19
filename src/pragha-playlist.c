@@ -3624,6 +3624,7 @@ create_playlist_column(PraghaPlaylist *cplaylist, GtkTreeView *view,gchar *label
 							  NULL);
 	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
 	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_reorderable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, column_id);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
