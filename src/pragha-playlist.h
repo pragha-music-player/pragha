@@ -104,6 +104,9 @@ void
 pragha_playlist_append_mobj_and_play(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);
 void
 pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list);
+void
+pragha_playlist_append_mobj_list_and_play(PraghaPlaylist *cplaylist, GList *list);
+
 gboolean
 pragha_mobj_list_already_has_title_of_artist(GList *list,
 					     const gchar *title,

@@ -36,6 +36,7 @@ typedef struct {
 	void (*library_append_playlist) (PraghaLibraryPane *toolbar);
 	void (*library_replace_playlist) (PraghaLibraryPane *toolbar);
 	void (*library_replace_playlist_and_play) (PraghaLibraryPane *toolbar);
+	void (*library_addto_playlist_and_play) (PraghaLibraryPane *toolbar);
 } PraghaLibraryPaneClass;
 
 /* Library Views */
