@@ -592,6 +592,19 @@ pragha_library_pane_replace_tracks_and_play (PraghaLibraryPane *library, PraghaA
 }
 
 static void
+pragha_library_pane_addto_playlist_and_play (PraghaLibraryPane *library, PraghaApplication *pragha)
+{
+	GList *list = NULL;
+	list = pragha_library_pane_get_mobj_list (library);
+	if (list) {
+		pragha_playlist_append_mobj_list(pragha->playlist, list);
+		pragha_playlist_activate_unique_mobj(pragha->playlist, g_list_first(list)->data);
+		
+		g_list_free(list);
+	}
+}
+
+static void
 pragha_playlist_update_change_tags (PraghaPlaylist *playlist, gint changed, PraghaMusicobject *mobj, PraghaApplication *pragha)
 {
 	PraghaBackend *backend;
@@ -1151,7 +1164,9 @@ pragha_application_startup (GApplication *application)
 	                  G_CALLBACK(pragha_library_pane_replace_tracks), pragha);
 	g_signal_connect (pragha->library, "library-replace-playlist-and-play",
 	                  G_CALLBACK(pragha_library_pane_replace_tracks_and_play), pragha);
-
+	g_signal_connect (pragha->library, "library-addto-playlist-and-play",
+	                  G_CALLBACK(pragha_library_pane_addto_playlist_and_play), pragha);
+	                  
 	g_signal_connect (G_OBJECT(pragha->mainwindow), "window-state-event",
 	                  G_CALLBACK(pragha_toolbar_window_state_event), toolbar);
 	g_signal_connect (G_OBJECT(toolbar), "notify::timer-remaining-mode",

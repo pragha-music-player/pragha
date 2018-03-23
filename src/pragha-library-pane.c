@@ -92,6 +92,7 @@ enum
 	LIBRARY_APPEND_PLAYLIST,
 	LIBRARY_REPLACE_PLAYLIST,
 	LIBRARY_REPLACE_PLAYLIST_AND_PLAY,
+	LIBRARY_ADDTO_PLAYLIST_AND_PLAY,
 	LAST_SIGNAL
 };
 
@@ -158,6 +159,7 @@ static void pragha_library_pane_set_genre_artist_album_view_action (GtkAction *a
 static void library_tree_add_to_playlist_action                    (GtkAction *action, PraghaLibraryPane *library);
 static void library_tree_replace_playlist_action                   (GtkAction *action, PraghaLibraryPane *library);
 static void library_tree_replace_and_play                          (GtkAction *action, PraghaLibraryPane *library);
+static void library_tree_add_and_play                          	   (GtkAction *action, PraghaLibraryPane *library);
 static void pragha_library_pane_rename_item_action                 (GtkAction *action, PraghaLibraryPane *library);
 static void pragha_library_pane_remove_item_action                 (GtkAction *action, PraghaLibraryPane *library);
 static void pragha_library_pane_export_playlist_action             (GtkAction *action, PraghaLibraryPane *library);
@@ -226,11 +228,13 @@ gchar *library_tree_context_menu_xml = "<ui>		\
 	<menuitem action=\"Add to current playlist\"/>		\
 	<menuitem action=\"Replace current playlist\"/>		\
 	<menuitem action=\"Replace and play\"/>			\
+	<menuitem action=\"Add and play\"/>			\
 	</popup>						\
 	<popup name=\"PlaylistPopup\">				\
 	<menuitem action=\"Add to current playlist\"/>		\
 	<menuitem action=\"Replace current playlist\"/>		\
 	<menuitem action=\"Replace and play\"/>			\
+	<menuitem action=\"Add and play\"/>			\
 	<separator/>						\
 	<menuitem action=\"Rename\"/>				\
 	<menuitem action=\"Delete\"/>				\
@@ -240,6 +244,7 @@ gchar *library_tree_context_menu_xml = "<ui>		\
 	<menuitem action=\"Add to current playlist\"/>		\
 	<menuitem action=\"Replace current playlist\"/>		\
 	<menuitem action=\"Replace and play\"/>			\
+	<menuitem action=\"Add and play\"/>			\
 	<separator/>						\
 	<menuitem action=\"Rename\"/>				\
 	<menuitem action=\"Delete\"/>				\
@@ -248,6 +253,7 @@ gchar *library_tree_context_menu_xml = "<ui>		\
 	<menuitem action=\"Add to current playlist\"/>		\
 	<menuitem action=\"Replace current playlist\"/>		\
 	<menuitem action=\"Replace and play\"/>			\
+	<menuitem action=\"Add and play\"/>			\
 	<separator/>						\
 	<menuitem action=\"Rescan library\"/>			\
 	<menuitem action=\"Update library\"/>			\
@@ -257,6 +263,7 @@ gchar *library_tree_context_menu_xml = "<ui>		\
 	<menuitem action=\"Add to current playlist\"/>		\
 	<menuitem action=\"Replace current playlist\"/>		\
 	<menuitem action=\"Replace and play\"/>			\
+	<menuitem action=\"Add and play\"/>			\
 	<separator/>						\
 	<menuitem action=\"Edit tags\"/>			\
 	<separator/>						\
@@ -273,6 +280,8 @@ GtkActionEntry library_tree_context_aentries[] = {
 	 "", "Replace current playlist", G_CALLBACK(library_tree_replace_playlist_action)},
 	{"Replace and play", "media-playback-start", N_("Replace and _play"),
 	 "", "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
+	{"Add and play", "media-playback-start", N_("Add and _play"),
+	 "", "Add and play", G_CALLBACK(library_tree_add_and_play)},
 	{"Rename", NULL, N_("Rename"),
 	 "", "Rename", G_CALLBACK(pragha_library_pane_rename_item_action)},
 	{"Delete", "list-remove", N_("Delete"),
@@ -308,6 +317,12 @@ static void
 library_tree_replace_playlist_action(GtkAction *action, PraghaLibraryPane *library)
 {
 	g_signal_emit (library, signals[LIBRARY_REPLACE_PLAYLIST], 0);
+}
+
+static void
+library_tree_add_and_play(GtkAction *action, PraghaLibraryPane *library)
+{
+	g_signal_emit (library, signals[LIBRARY_ADDTO_PLAYLIST_AND_PLAY], 0);
 }
 
 static void
@@ -3236,6 +3251,13 @@ pragha_library_pane_class_init (PraghaLibraryPaneClass *klass)
 	                                                           NULL, NULL,
 	                                                           g_cclosure_marshal_VOID__VOID,
 	                                                           G_TYPE_NONE, 0);
+	signals[LIBRARY_ADDTO_PLAYLIST_AND_PLAY] = g_signal_new ("library-addto-playlist-and-play",
+	                                                           G_TYPE_FROM_CLASS (gobject_class),
+	                                                           G_SIGNAL_RUN_LAST,
+	                                                           G_STRUCT_OFFSET (PraghaLibraryPaneClass, library_addto_playlist_and_play),
+	                                                           NULL, NULL,
+	                                                           g_cclosure_marshal_VOID__VOID,
+	                                                           G_TYPE_NONE, 0);	                                                             
 }
 
 PraghaLibraryPane *
