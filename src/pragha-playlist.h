@@ -104,14 +104,21 @@ void
 pragha_playlist_append_mobj_and_play(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);
 void
 pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list);
+
 gboolean
-pragha_mobj_list_already_has_title_of_artist(GList *list,
-					     const gchar *title,
-					     const gchar *artist);
+pragha_mobj_list_already_has_title_of_artist (GList       *list,
+                                              const gchar *title,
+                                              const gchar *artist);
+
 gboolean
-pragha_playlist_already_has_title_of_artist(PraghaPlaylist *cplaylist,
-					    const gchar *title,
-					    const gchar *artist);
+pragha_playlist_already_has_title_of_artist (PraghaPlaylist *cplaylist,
+                                             const gchar    *title,
+                                             const gchar    *artist);
+
+gboolean
+pragha_playlist_select_title_of_artist (PraghaPlaylist *cplaylist,
+                                        const gchar    *title,
+                                        const gchar    *artist);
 
 GList *pragha_playlist_get_mobj_list(PraghaPlaylist* cplaylist);
 GList *pragha_playlist_get_selection_mobj_list(PraghaPlaylist* cplaylist);

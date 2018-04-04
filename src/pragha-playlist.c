@@ -2285,9 +2285,9 @@ pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list)
 /* Test if the song is already in the mobj list */
 
 gboolean
-pragha_mobj_list_already_has_title_of_artist(GList *list,
-					     const gchar *title,
-					     const gchar *artist)
+pragha_mobj_list_already_has_title_of_artist (GList       *list,
+                                              const gchar *title,
+                                              const gchar *artist)
 {
 	PraghaMusicobject *mobj = NULL;
 	GList *i;
@@ -2304,9 +2304,9 @@ pragha_mobj_list_already_has_title_of_artist(GList *list,
 /* Test if the song is already in the playlist.*/
 
 gboolean
-pragha_playlist_already_has_title_of_artist(PraghaPlaylist *cplaylist,
-					    const gchar *title,
-					    const gchar *artist)
+pragha_playlist_already_has_title_of_artist (PraghaPlaylist *cplaylist,
+                                             const gchar    *title,
+                                             const gchar    *artist)
 {
 	GtkTreeModel *model = cplaylist->model;
 	GtkTreeIter iter;
@@ -2326,6 +2326,37 @@ pragha_playlist_already_has_title_of_artist(PraghaPlaylist *cplaylist,
 
 	return FALSE;
 }
+
+gboolean
+pragha_playlist_select_title_of_artist (PraghaPlaylist *cplaylist,
+                                        const gchar    *title,
+                                        const gchar    *artist)
+{
+	GtkTreeModel *model = cplaylist->model;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	PraghaMusicobject *mobj = NULL;
+	gboolean ret;
+
+	ret = gtk_tree_model_get_iter_first (model, &iter);
+	while (ret) {
+		gtk_tree_model_get (model, &iter, P_MOBJ_PTR, &mobj, -1);
+
+		if((0 == g_ascii_strcasecmp(pragha_musicobject_get_title(mobj), title)) &&
+		   (0 == g_ascii_strcasecmp(pragha_musicobject_get_artist(mobj), artist)))
+		{
+			path = gtk_tree_model_get_path(model, &iter);
+			pragha_playlist_select_path (cplaylist, path, TRUE);
+			gtk_tree_path_free(path);
+			return TRUE;
+		}
+
+		ret = gtk_tree_model_iter_next(model, &iter);
+	}
+
+	return FALSE;
+}
+
 
 /* Clear sort in the current playlist */
 

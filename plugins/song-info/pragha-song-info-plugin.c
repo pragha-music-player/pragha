@@ -299,7 +299,7 @@ pragha_songinfo_pane_append (PraghaSonginfoPane *pane,
                              PraghaSongInfoPlugin *plugin)
 {
 	PraghaPlaylist *playlist;
-	const gchar *provider = NULL;
+	const gchar *provider = NULL, *title = NULL, *artist = NULL;
 
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
 
@@ -310,8 +310,12 @@ pragha_songinfo_pane_append (PraghaSonginfoPane *pane,
 	}
 	else
 	{
+		title = pragha_musicobject_get_title (mobj);
+		artist = pragha_musicobject_get_artist (mobj);
 		playlist = pragha_application_get_playlist (priv->pragha);
-		pragha_playlist_append_single_song (playlist, g_object_ref(mobj));
+		if (!pragha_playlist_already_has_title_of_artist (playlist, title, artist))
+			pragha_playlist_append_single_song (playlist, g_object_ref(mobj));
+		pragha_playlist_select_title_of_artist (playlist, title, artist);
 	}
 }
 
