@@ -26,6 +26,7 @@
 #include <glib-object.h>
 
 #include <glyr/cache.h>
+#include "pragha-song-info-cache.h"
 #include "pragha-song-info-pane.h"
 
 #include "src/pragha.h"
@@ -48,6 +49,8 @@ PRAGHA_PLUGIN_REGISTER_PUBLIC_HEADER (PRAGHA_TYPE_SONG_INFO_PLUGIN,
                                       pragha_song_info_plugin)
 
 PraghaApplication  *pragha_songinfo_plugin_get_application (PraghaSongInfoPlugin *plugin);
+
+PraghaInfoCache    *pragha_songinfo_plugin_get_cache_info  (PraghaSongInfoPlugin *plugin);
 GlyrDatabase       *pragha_songinfo_plugin_get_cache       (PraghaSongInfoPlugin *plugin);
 PraghaSonginfoPane *pragha_songinfo_plugin_get_pane        (PraghaSongInfoPlugin *plugin);
 

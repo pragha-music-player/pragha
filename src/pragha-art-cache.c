@@ -88,6 +88,10 @@ pragha_art_cache_get (void)
 	return cache;
 }
 
+/*
+ * Album art cache.
+ */
+
 static gchar *
 pragha_art_cache_build_album_path (PraghaArtCache *cache, const gchar *artist, const gchar *album)
 {
@@ -148,6 +152,10 @@ pragha_art_cache_put_album (PraghaArtCache *cache, const gchar *artist, const gc
 	g_free (path);
 	g_object_unref (pixbuf);
 }
+
+/*
+ * Artist art cache.
+ */
 
 static gchar *
 pragha_art_cache_build_artist_path (PraghaArtCache *cache, const gchar *artist)

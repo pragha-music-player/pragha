@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -158,4 +158,36 @@ pragha_update_musicobject_change_tag(PraghaMusicobject *mobj, gint changed, Prag
 	if (changed & TAG_COMMENT_CHANGED) {
 		pragha_musicobject_set_comment(mobj, pragha_musicobject_get_comment(nmobj));
 	}
+}
+
+PraghaMusicobject *
+pragha_database_get_artist_and_title_song (PraghaDatabase *cdbase,
+                                           const gchar    *artist,
+                                           const gchar    *title)
+{
+	PraghaMusicobject *mobj = NULL;
+	gint location_id = 0;
+
+	const gchar *sql =
+		"SELECT LOCATION.id "
+		"FROM TRACK, ARTIST, PROVIDER, LOCATION "
+		"WHERE ARTIST.id = TRACK.artist "
+		"AND LOCATION.id = TRACK.location "
+		"AND TRACK.provider = PROVIDER.id AND PROVIDER.visible <> 0 "
+		"AND TRACK.title = ? COLLATE NOCASE "
+		"AND ARTIST.name = ? COLLATE NOCASE "
+		"ORDER BY RANDOM() LIMIT 1;";
+
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cdbase, sql);
+	pragha_prepared_statement_bind_string (statement, 1, title);
+	pragha_prepared_statement_bind_string (statement, 2, artist);
+
+	if (pragha_prepared_statement_step (statement)) {
+		location_id = pragha_prepared_statement_get_int (statement, 0);
+		mobj = new_musicobject_from_db (cdbase, location_id);
+	}
+
+	pragha_prepared_statement_free (statement);
+
+	return mobj;
 }

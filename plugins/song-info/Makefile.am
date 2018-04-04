@@ -8,6 +8,8 @@ AM_CPPFLAGS = \
 plugin_LTLIBRARIES = libsong-info.la
 
 libsong_info_la_SOURCES =						\
+	pragha-song-info-cache.c					\
+	pragha-song-info-cache.h					\
 	pragha-song-info-plugin.c					\
 	pragha-song-info-plugin.h					\
 	pragha-song-info-dialog.c					\

@@ -89,6 +89,44 @@ GtkActionEntry songinfo_pane_context_aentries[] = {
  * Public Api
  */
 
+GtkWidget *
+pragha_songinfo_pane_row_new (PraghaMusicobject *mobj)
+{
+	GtkWidget *row, *box, *icon, *label;
+	const gchar *provider = NULL, *title = NULL, *artist = NULL;
+	gchar *song_name = NULL;
+
+	title = pragha_musicobject_get_title (mobj);
+	artist = pragha_musicobject_get_artist (mobj);
+	provider = pragha_musicobject_get_provider (mobj);
+
+	if (string_is_empty(provider))
+		icon = gtk_image_new_from_icon_name ("edit-find-symbolic", GTK_ICON_SIZE_MENU);
+	else
+		icon = gtk_image_new_from_icon_name ("media-playback-start-symbolic", GTK_ICON_SIZE_MENU);
+
+	row = gtk_list_box_row_new ();
+
+	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	gtk_box_pack_start(GTK_BOX(box), icon, FALSE, FALSE, 6);
+
+	song_name = g_strdup_printf ("%s - %s", title, artist);
+	label = gtk_label_new (song_name);
+	gtk_label_set_ellipsize (GTK_LABEL(label), PANGO_ELLIPSIZE_END);
+	gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+	gtk_widget_set_halign (label, GTK_ALIGN_START);
+	gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 0);
+
+	gtk_container_add(GTK_CONTAINER(row), box);
+	gtk_widget_show_all (row);
+
+	g_object_set_data_full (G_OBJECT(row), "SONG", mobj, g_object_unref);
+
+	g_free (song_name);
+
+	return row;
+}
+
 void
 pragha_songinfo_pane_set_title (PraghaSonginfoPane *pane,
                                 const gchar        *title)

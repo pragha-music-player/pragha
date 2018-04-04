@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -32,9 +32,26 @@
 #define TAG_YEAR_CHANGED    1<<5
 #define TAG_COMMENT_CHANGED 1<<6
 
-PraghaMusicobject* new_musicobject_from_file(const gchar *file, const gchar *provider);
-PraghaMusicobject* new_musicobject_from_db(PraghaDatabase *cdbase, gint location_id);
-PraghaMusicobject* new_musicobject_from_location(const gchar *uri, const gchar *name);
-void pragha_update_musicobject_change_tag(PraghaMusicobject *mobj, gint changed, PraghaMusicobject *nmobj);
+PraghaMusicobject *
+new_musicobject_from_file                 (const gchar *file,
+                                           const gchar *provider);
+
+PraghaMusicobject *
+new_musicobject_from_db                   (PraghaDatabase *cdbase,
+                                           gint location_id);
+
+PraghaMusicobject *
+new_musicobject_from_location             (const gchar *uri,
+                                           const gchar *name);
+
+PraghaMusicobject *
+pragha_database_get_artist_and_title_song (PraghaDatabase *cdbase,
+                                           const gchar    *artist,
+                                           const gchar    *title);
+
+void
+pragha_update_musicobject_change_tag      (PraghaMusicobject *mobj,
+                                           gint               changed,
+                                           PraghaMusicobject *nmobj);
 
 #endif /* PRAGHA_MUSICOBJECT_MGMT_H */

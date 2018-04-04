@@ -64,6 +64,7 @@ struct _PraghaSongInfoPluginPrivate {
 	PraghaSonginfoPane *pane;
 
 	GlyrDatabase       *cache_db;
+	PraghaInfoCache    *cache_info;
 
 	gboolean            download_album_art;
 	GtkWidget          *download_album_art_w;
@@ -214,9 +215,9 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 {
 	PraghaBackend *backend;
 	PraghaMusicobject *mobj;
-	const gchar *artist = NULL;
-	const gchar *title = NULL;
-	const gchar *filename = NULL;
+	GList *list = NULL, *l = NULL;
+	const gchar *artist = NULL, *title = NULL, *filename = NULL;
+	gchar *provider = NULL;
 	GLYR_GET_TYPE view_type = GLYR_GET_UNKNOWN;
 
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
@@ -241,6 +242,25 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 	cancel_pane_search (plugin);
 
 	view_type = pragha_songinfo_pane_get_default_view (priv->pane);
+	if (view_type == GLYR_GET_SIMILAR_SONGS)
+	{
+		if (pragha_info_cache_contains_similar_songs (priv->cache_info, title, artist))
+		{
+			list = pragha_info_cache_get_similar_songs (priv->cache_info,
+			                                            title, artist,
+			                                            &provider);
+
+			for (l = list ; l != NULL ; l = l->next) {
+				pragha_songinfo_pane_append_song_row (priv->pane,
+					pragha_songinfo_pane_row_new ((PraghaMusicobject *)l->data));
+			}
+
+			pragha_songinfo_pane_set_title (priv->pane, title);
+			pragha_songinfo_pane_set_text (priv->pane, "", provider);
+
+			return;
+		}
+	}
 	priv->pane_search = pragha_songinfo_plugin_get_info_to_pane (plugin, view_type, artist, title, filename);
 }
 
@@ -339,6 +359,14 @@ pragha_songinfo_pane_visibility_changed (PraghaPreferences *preferences, GParamS
 /*
  * Public api
  */
+
+PraghaInfoCache *
+pragha_songinfo_plugin_get_cache_info (PraghaSongInfoPlugin *plugin)
+{
+	PraghaSongInfoPluginPrivate *priv = plugin->priv;
+
+	return priv->cache_info;
+}
 
 GlyrDatabase *
 pragha_songinfo_plugin_get_cache (PraghaSongInfoPlugin *plugin)
@@ -481,6 +509,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->cache_db = glyr_db_init (cache_folder);
 	g_free (cache_folder);
 
+	priv->cache_info = pragha_info_cache_get();
+
 	/* Attach Playlist popup menu*/
 	priv->action_group_playlist = gtk_action_group_new ("PraghaGlyrPlaylistActions");
 	gtk_action_group_set_translation_domain (priv->action_group_playlist, GETTEXT_PACKAGE);
@@ -569,6 +599,8 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	pragha_sidebar_remove_plugin (sidebar, GTK_WIDGET(priv->pane));
 
 	pragha_songinfo_plugin_remove_setting (plugin);
+
+	g_object_unref (priv->cache_info);
 
 	glyr_db_destroy (priv->cache_db);
 
