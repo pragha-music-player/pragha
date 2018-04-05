@@ -80,6 +80,24 @@ pragha_info_cache_get_song_lyrics        (PraghaInfoCache *cache,
                                           const gchar     *title,
                                           const gchar     *artist,
                                           gchar          **provider);
+gboolean
+pragha_info_cache_contains_artist_bio    (PraghaInfoCache *cache,
+                                          const gchar     *artist);
+
+gboolean
+pragha_info_cache_contains_ini_artist_bio(PraghaInfoCache *cache,
+                                          const gchar     *artist);
+
+gchar *
+pragha_info_cache_get_artist_bio         (PraghaInfoCache *cache,
+                                          const gchar     *artist,
+                                          gchar          **provider);
+
+void
+pragha_info_cache_save_artist_bio        (PraghaInfoCache *cache,
+                                          const gchar     *artist,
+                                          const gchar     *provider,
+                                          const gchar     *bio);
 
 G_END_DECLS
 

@@ -142,7 +142,6 @@ pragha_songinfo_plugin_get_info_to_dialog (PraghaSongInfoPlugin *plugin,
 {
 	PraghaApplication *pragha;
 	GtkWidget *window;
-	GlyrDatabase *cache_db;
 	glyr_struct *glyr_info;
 
 	glyr_info = g_slice_new0 (glyr_struct);
@@ -164,11 +163,6 @@ pragha_songinfo_plugin_get_info_to_dialog (PraghaSongInfoPlugin *plugin,
 		default:
 			break;
 	}
-
-	cache_db = pragha_songinfo_plugin_get_cache (plugin);
-
-	glyr_opt_lookup_db (&glyr_info->query, cache_db);
-	glyr_opt_db_autowrite (&glyr_info->query, TRUE);
 
 	glyr_info->plugin = plugin;
 

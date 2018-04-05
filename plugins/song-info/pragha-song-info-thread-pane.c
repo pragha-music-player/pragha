@@ -109,11 +109,11 @@ glyr_finished_successfully_pane (glyr_struct *glyr_info)
 	GlyrMemCache *it = NULL;
 	GList *list = NULL, *l = NULL;
 
+	cache = pragha_songinfo_plugin_get_cache_info (glyr_info->plugin);
 	pane = pragha_songinfo_plugin_get_pane (glyr_info->plugin);
 
 	switch (glyr_info->head->type) {
 		case GLYR_TYPE_LYRICS:
-			cache = pragha_songinfo_plugin_get_cache_info (glyr_info->plugin);
 			pragha_info_cache_save_song_lyrics (cache,
 			                                    glyr_info->query.title,
 			                                    glyr_info->query.artist,
@@ -123,6 +123,10 @@ glyr_finished_successfully_pane (glyr_struct *glyr_info)
 			pragha_songinfo_pane_set_text (pane, glyr_info->head->data, glyr_info->head->prov);
 			break;
 		case GLYR_TYPE_ARTIST_BIO:
+			pragha_info_cache_save_artist_bio (cache,
+			                                   glyr_info->query.artist,
+			                                   glyr_info->head->prov,
+			                                   glyr_info->head->data);
 			pragha_songinfo_pane_set_title (pane, glyr_info->query.artist);
 			pragha_songinfo_pane_set_text (pane, glyr_info->head->data, glyr_info->head->prov);
 			break;
@@ -133,7 +137,6 @@ glyr_finished_successfully_pane (glyr_struct *glyr_info)
 			}
 			g_object_unref (cdbase);
 
-			cache = pragha_songinfo_plugin_get_cache_info (glyr_info->plugin);
 			pragha_info_cache_save_similar_songs (cache,
 			                                      glyr_info->query.title,
 			                                      glyr_info->query.artist,
@@ -144,7 +147,6 @@ glyr_finished_successfully_pane (glyr_struct *glyr_info)
 				pragha_songinfo_pane_append_song_row (pane,
 					pragha_songinfo_pane_row_new ((PraghaMusicobject *)l->data));
 			}
-
 			g_list_free (list);
 
 			pragha_songinfo_pane_set_title (pane, glyr_info->query.title);
@@ -244,7 +246,6 @@ pragha_songinfo_plugin_get_info_to_pane (PraghaSongInfoPlugin *plugin,
                                          const gchar          *filename)
 {
 	PraghaSonginfoPane *pane;
-	GlyrDatabase *cache_db;
 	glyr_struct *glyr_info;
 	GCancellable *cancellable;
 
@@ -279,11 +280,6 @@ pragha_songinfo_plugin_get_info_to_pane (PraghaSongInfoPlugin *plugin,
 		default:
 			break;
 	}
-
-	cache_db = pragha_songinfo_plugin_get_cache (plugin);
-
-	glyr_opt_lookup_db (&glyr_info->query, cache_db);
-	glyr_opt_db_autowrite (&glyr_info->query, TRUE);
 
 	glyr_info->filename = g_strdup(filename);
 	glyr_info->plugin = plugin;

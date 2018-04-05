@@ -63,7 +63,6 @@ struct _PraghaSongInfoPluginPrivate {
 
 	PraghaSonginfoPane *pane;
 
-	GlyrDatabase       *cache_db;
 	PraghaInfoCache    *cache_info;
 
 	gboolean            download_album_art;
@@ -217,7 +216,7 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 	PraghaMusicobject *mobj;
 	GList *list = NULL, *l = NULL;
 	const gchar *artist = NULL, *title = NULL, *filename = NULL;
-	gchar *lyrics = NULL, *provider = NULL;
+	gchar *artist_bio = NULL, *lyrics = NULL, *provider = NULL;
 	GLYR_GET_TYPE view_type = GLYR_GET_UNKNOWN;
 
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
@@ -242,40 +241,49 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 	cancel_pane_search (plugin);
 
 	view_type = pragha_songinfo_pane_get_default_view (priv->pane);
-	if (view_type == GLYR_GET_SIMILAR_SONGS)
-	{
-		if (pragha_info_cache_contains_similar_songs (priv->cache_info, title, artist))
-		{
-			list = pragha_info_cache_get_similar_songs (priv->cache_info,
-			                                            title, artist,
-			                                            &provider);
+	switch (view_type) {
+		case GLYR_GET_ARTIST_BIO:
+			if (pragha_info_cache_contains_artist_bio (priv->cache_info, artist))
+			{
+				artist_bio = pragha_info_cache_get_artist_bio (priv->cache_info,
+				                                               artist, &provider);
 
-			for (l = list ; l != NULL ; l = l->next) {
-				pragha_songinfo_pane_append_song_row (priv->pane,
-					pragha_songinfo_pane_row_new ((PraghaMusicobject *)l->data));
+				pragha_songinfo_pane_set_title (priv->pane, artist);
+				pragha_songinfo_pane_set_text (priv->pane, artist_bio, provider);
+				g_free (artist_bio);
+				return;
 			}
-
-			pragha_songinfo_pane_set_title (priv->pane, title);
-			pragha_songinfo_pane_set_text (priv->pane, "", provider);
-
-			return;
-		}
+			break;
+		case GLYR_GET_LYRICS:
+			if (pragha_info_cache_contains_song_lyrics (priv->cache_info, title, artist))
+			{
+				lyrics = pragha_info_cache_get_song_lyrics (priv->cache_info,
+				                                            title, artist,
+				                                            &provider);
+				pragha_songinfo_pane_set_title (priv->pane, title);
+				pragha_songinfo_pane_set_text (priv->pane, lyrics, provider);
+				g_free (lyrics);
+				return;
+			}
+			break;
+		case GLYR_GET_SIMILAR_SONGS:
+			if (pragha_info_cache_contains_similar_songs (priv->cache_info, title, artist))
+			{
+				list = pragha_info_cache_get_similar_songs (priv->cache_info,
+				                                            title, artist,
+				                                            &provider);
+				for (l = list ; l != NULL ; l = l->next) {
+					pragha_songinfo_pane_append_song_row (priv->pane,
+						pragha_songinfo_pane_row_new ((PraghaMusicobject *)l->data));
+				}
+				pragha_songinfo_pane_set_title (priv->pane, title);
+				pragha_songinfo_pane_set_text (priv->pane, "", provider);
+				return;
+			}
+			break;
+		default:
+			break;
 	}
-	else if (view_type == GLYR_GET_LYRICS)
-	{
-		if (pragha_info_cache_contains_song_lyrics (priv->cache_info, title, artist))
-		{
-			lyrics = pragha_info_cache_get_song_lyrics (priv->cache_info,
-			                                            title, artist,
-			                                            &provider);
-
-			pragha_songinfo_pane_set_title (priv->pane, title);
-			pragha_songinfo_pane_set_text (priv->pane, lyrics, provider);
-			g_free (lyrics);
-			return;
-		}
-	}
-
 	priv->pane_search = pragha_songinfo_plugin_get_info_to_pane (plugin, view_type, artist, title, filename);
 }
 
@@ -381,14 +389,6 @@ pragha_songinfo_plugin_get_cache_info (PraghaSongInfoPlugin *plugin)
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
 
 	return priv->cache_info;
-}
-
-GlyrDatabase *
-pragha_songinfo_plugin_get_cache (PraghaSongInfoPlugin *plugin)
-{
-	PraghaSongInfoPluginPrivate *priv = plugin->priv;
-
-	return priv->cache_db;
 }
 
 PraghaSonginfoPane *
@@ -507,7 +507,6 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	PraghaPreferences *preferences;
 	PraghaPlaylist *playlist;
 	PraghaSidebar *sidebar;
-	gchar *cache_folder = NULL;
 
 	PraghaSongInfoPlugin *plugin = PRAGHA_SONG_INFO_PLUGIN (activatable);
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
@@ -517,12 +516,6 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
 	glyr_init ();
-
-	cache_folder = g_build_path (G_DIR_SEPARATOR_S, g_get_user_cache_dir (), "pragha", NULL);
-
-	g_mkdir_with_parents (cache_folder, S_IRWXU);
-	priv->cache_db = glyr_db_init (cache_folder);
-	g_free (cache_folder);
 
 	priv->cache_info = pragha_info_cache_get();
 
@@ -616,8 +609,6 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	pragha_songinfo_plugin_remove_setting (plugin);
 
 	g_object_unref (priv->cache_info);
-
-	glyr_db_destroy (priv->cache_db);
 
 	glyr_cleanup ();
 
