@@ -63,6 +63,24 @@ pragha_info_cache_save_similar_songs     (PraghaInfoCache *cache,
                                           const gchar     *provider,
                                           GList           *mlist);
 
+gboolean
+pragha_info_cache_contains_song_lyrics   (PraghaInfoCache *cache,
+                                          const gchar     *title,
+                                          const gchar     *artist);
+
+void
+pragha_info_cache_save_song_lyrics       (PraghaInfoCache *cache,
+                                          const gchar     *title,
+                                          const gchar     *artist,
+                                          const gchar     *provider,
+                                          const gchar     *lyrics);
+
+gchar *
+pragha_info_cache_get_song_lyrics        (PraghaInfoCache *cache,
+                                          const gchar     *title,
+                                          const gchar     *artist,
+                                          gchar          **provider);
+
 G_END_DECLS
 
 #endif /* PRAGHA_INFO_CACHE_H */

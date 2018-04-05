@@ -167,7 +167,7 @@ dnl Check libpsuop
 JSON_GLIB_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
 XDT_CHECK_OPTIONAL_PACKAGE([JSON_GLIB],
-                           [json-glib-1.0], [1.4.0],
+                           [json-glib-1.0], [1.0.0],
                            [json-glib-1.0],
                            [json-glib-1.0 library], [yes])
 else

@@ -113,6 +113,12 @@ glyr_finished_successfully_pane (glyr_struct *glyr_info)
 
 	switch (glyr_info->head->type) {
 		case GLYR_TYPE_LYRICS:
+			cache = pragha_songinfo_plugin_get_cache_info (glyr_info->plugin);
+			pragha_info_cache_save_song_lyrics (cache,
+			                                    glyr_info->query.title,
+			                                    glyr_info->query.artist,
+			                                    glyr_info->head->prov,
+			                                    glyr_info->head->data);
 			pragha_songinfo_pane_set_title (pane, glyr_info->query.title);
 			pragha_songinfo_pane_set_text (pane, glyr_info->head->data, glyr_info->head->prov);
 			break;

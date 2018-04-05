@@ -217,7 +217,7 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 	PraghaMusicobject *mobj;
 	GList *list = NULL, *l = NULL;
 	const gchar *artist = NULL, *title = NULL, *filename = NULL;
-	gchar *provider = NULL;
+	gchar *lyrics = NULL, *provider = NULL;
 	GLYR_GET_TYPE view_type = GLYR_GET_UNKNOWN;
 
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
@@ -261,6 +261,21 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 			return;
 		}
 	}
+	else if (view_type == GLYR_GET_LYRICS)
+	{
+		if (pragha_info_cache_contains_song_lyrics (priv->cache_info, title, artist))
+		{
+			lyrics = pragha_info_cache_get_song_lyrics (priv->cache_info,
+			                                            title, artist,
+			                                            &provider);
+
+			pragha_songinfo_pane_set_title (priv->pane, title);
+			pragha_songinfo_pane_set_text (priv->pane, lyrics, provider);
+			g_free (lyrics);
+			return;
+		}
+	}
+
 	priv->pane_search = pragha_songinfo_plugin_get_info_to_pane (plugin, view_type, artist, title, filename);
 }
 

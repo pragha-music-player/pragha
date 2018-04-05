@@ -114,13 +114,13 @@ pragha_info_cache_build_similar_songs_path (PraghaInfoCache *cache, const gchar 
 {
 	gchar *title_escaped = pragha_escape_slashes (title);
 	gchar *artist_escaped = pragha_escape_slashes (artist);
-	gchar *result = g_strdup_printf ("%s%s%s-%s.similar", cache->cache_dir, G_DIR_SEPARATOR_S, title_escaped, artist_escaped);
+	gchar *result = g_strdup_printf ("%s%s%s-%s.similar", cache->cache_dir, G_DIR_SEPARATOR_S, title_escaped, title_escaped);
 	g_free (title_escaped);
 	g_free (artist_escaped);
 	return result;
 }
 
-gchar *
+static gchar *
 pragha_info_cache_get_similar_songs_uri (PraghaInfoCache *cache, const gchar *title, const gchar *artist)
 {
 	gchar *path = pragha_info_cache_build_similar_songs_path (cache, title, artist);
@@ -235,15 +235,16 @@ pragha_info_cache_save_similar_songs (PraghaInfoCache *cache,
 	gint i = 0;
 
 	key_file = g_key_file_new ();
-	length = g_list_length (mlist);
 
-	g_key_file_set_integer (key_file, "Similar-Songs", "NumberOfEntries", length);
+	g_key_file_set_string (key_file, "Songs", "Title", title);
+	g_key_file_set_string (key_file, "Songs", "Artist", artist);
 
 	time = g_get_real_time ();
 	g_key_file_set_int64 (key_file, "Similar-Songs", "SavedTime", time);
 
-	g_key_file_set_string (key_file, "Similar-Songs", "Title", title);
-	g_key_file_set_string (key_file, "Similar-Songs", "Artist", artist);
+	length = g_list_length (mlist);
+	g_key_file_set_integer (key_file, "Similar-Songs", "NumberOfEntries", length);
+
 	g_key_file_set_string (key_file, "Similar-Songs", "Provider", provider);
 
 	for (list = mlist; list != NULL; list = list->next) {
@@ -274,3 +275,157 @@ pragha_info_cache_save_similar_songs (PraghaInfoCache *cache,
 	g_key_file_free (key_file);
 }
 
+/*
+ * Lyrics cache.
+ */
+
+static gchar *
+pragha_info_cache_build_lyrics_path (PraghaInfoCache *cache, const gchar *title, const gchar *artist)
+{
+	gchar *title_escaped = pragha_escape_slashes (title);
+	gchar *artist_escaped = pragha_escape_slashes (artist);
+	gchar *result = g_strdup_printf ("%s%s%s-%s.lyrics.txt", cache->cache_dir, G_DIR_SEPARATOR_S, artist_escaped, title_escaped);
+	g_free (title_escaped);
+	g_free (artist_escaped);
+	return result;
+}
+
+static gchar *
+pragha_info_cache_get_lyrics_uri (PraghaInfoCache *cache, const gchar *title, const gchar *artist)
+{
+	gchar *path = pragha_info_cache_build_lyrics_path (cache, title, artist);
+
+	if (g_file_test (path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
+		g_free (path);
+		return NULL;
+	}
+
+	return path;
+}
+
+gboolean
+pragha_info_cache_contains_song_lyrics (PraghaInfoCache *cache, const gchar *title, const gchar *artist)
+{
+	gchar *path = pragha_info_cache_get_lyrics_uri (cache, title, artist);
+
+	if (path) {
+		g_free (path);
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+static gchar *
+pragha_info_cache_build_ini_lyrics_path (PraghaInfoCache *cache, const gchar *title, const gchar *artist)
+{
+	gchar *title_escaped = pragha_escape_slashes (title);
+	gchar *artist_escaped = pragha_escape_slashes (artist);
+	gchar *result = g_strdup_printf ("%s%s%s-%s.lyrics", cache->cache_dir, G_DIR_SEPARATOR_S, artist_escaped, title_escaped);
+	g_free (title_escaped);
+	g_free (artist_escaped);
+	return result;
+}
+
+gchar *
+pragha_info_cache_get_ini_lyrics_uri (PraghaInfoCache *cache, const gchar *title, const gchar *artist)
+{
+	gchar *path = pragha_info_cache_build_ini_lyrics_path (cache, title, artist);
+
+	if (g_file_test (path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
+		g_free (path);
+		return NULL;
+	}
+
+	return path;
+}
+
+gboolean
+pragha_info_cache_contains_ini_song_lyrics (PraghaInfoCache *cache, const gchar *title, const gchar *artist)
+{
+	gchar *path = pragha_info_cache_get_ini_lyrics_uri (cache, title, artist);
+
+	if (path) {
+		g_free (path);
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+gchar *
+pragha_info_cache_get_song_lyrics (PraghaInfoCache *cache,
+                                   const gchar     *title,
+                                   const gchar     *artist,
+                                   gchar          **provider)
+{
+	GKeyFile *key_file;
+	GError *error = NULL;
+	gchar *path = NULL, *lyrics = NULL;
+
+	path = pragha_info_cache_get_lyrics_uri (cache, title, artist);
+	if (!path)
+		return NULL;
+
+	if (!g_file_get_contents (path, &lyrics, NULL, &error)) {
+		g_warning ("Error loading lyrics file: %s", error->message);
+		g_free (path);
+		return NULL;
+	}
+
+	path = pragha_info_cache_get_ini_lyrics_uri (cache, title, artist);
+	if (path) {
+		key_file = g_key_file_new ();
+
+		if (!g_key_file_load_from_file (key_file, path, G_KEY_FILE_NONE, &error)) {
+			if (!g_error_matches (error, G_FILE_ERROR, G_FILE_ERROR_NOENT))
+				g_warning ("Error loading key file: %s", error->message);
+			g_error_free (error);
+			g_free (path);
+			return NULL;
+		}
+
+		*provider = g_key_file_get_string (key_file, "Lyrics", "Provider", NULL);
+
+		g_key_file_free (key_file);
+		g_free (path);
+	}
+
+	return lyrics;
+}
+
+void
+pragha_info_cache_save_song_lyrics (PraghaInfoCache *cache,
+                                    const gchar     *title,
+                                    const gchar     *artist,
+                                    const gchar     *provider,
+                                    const gchar     *lyrics)
+{
+	GKeyFile *key_file = NULL;
+	GError *error = NULL;
+	gchar *key_path = NULL, *lyrics_path = NULL;
+	gint64 time = 0;
+
+	lyrics_path = pragha_info_cache_build_lyrics_path (cache, title, artist);
+	if (!g_file_set_contents (lyrics_path, lyrics, -1, &error)) {
+		g_warning ("Error saving lyrics file: %s", error->message);
+		g_free (lyrics_path);
+		return;
+	}
+
+	key_file = g_key_file_new ();
+
+	g_key_file_set_string (key_file, "Song", "Title", title);
+	g_key_file_set_string (key_file, "Song", "Artist", artist);
+
+	time = g_get_real_time ();
+	g_key_file_set_int64 (key_file, "Lyrics", "SavedTime", time);
+	g_key_file_set_string (key_file, "Lyrics", "Provider", provider);
+
+	key_path = pragha_info_cache_build_ini_lyrics_path (cache, title, artist);
+	if (!g_key_file_save_to_file (key_file, key_path, &error))
+		g_warning ("Error saving key file: %s", error->message);
+	g_free (key_path);
+
+	g_key_file_free (key_file);
+}
