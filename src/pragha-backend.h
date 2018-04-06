@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2010-2017 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2010-2018 matias <mati86dl@gmail.com>                   */
 /* Copyright (C) 2012-2013 Pavel Vasin                                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
@@ -53,6 +53,7 @@ typedef struct {
 	void (*prepare_source) (PraghaBackend *backend);
 	void (*clean_source) (PraghaBackend *backend);
 	void (*tick) (PraghaBackend *backend);
+	void (*half_played) (PraghaBackend *backend);
 	void (*seeked) (PraghaBackend *backend);
 	void (*buffering) (PraghaBackend *backend, gint percent);
 	void (*download_done) (PraghaBackend *backend, gchar *filename);

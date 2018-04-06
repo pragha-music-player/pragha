@@ -521,6 +521,73 @@ pragha_koel_plugin_cache_provider (PraghaKoelPlugin *plugin)
 	g_free (request);
 }
 
+static void
+pragha_koel_plugin_increase_playcount_done (SoupSession *session,
+                                            SoupMessage *msg,
+                                            gpointer     user_data)
+{
+	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
+		g_critical("KOEL ERROR Response: %s", msg->response_body->data);
+}
+
+static gchar *
+pragha_koel_plugin_get_song_id (const gchar *server, const gchar *raw_uri)
+{
+	GRegex *regex = NULL;
+	gchar *song_id = NULL, *regex_text = NULL;
+
+	regex_text = g_strdup_printf ("%s/api/", server);
+	regex = g_regex_new (regex_text,
+	                     G_REGEX_MULTILINE | G_REGEX_RAW, 0, NULL);
+	song_id = g_regex_replace_literal (regex, raw_uri, -1, 0, "", 0, NULL);
+	g_regex_unref(regex);
+	g_free (regex_text);
+
+	return song_id;
+}
+
+static void
+pragha_koel_plugin_increase_playcount (PraghaKoelPlugin *plugin, const gchar *filename)
+{
+	JsonBuilder *builder;
+	JsonGenerator *generator;
+	SoupSession *session;
+	SoupMessage *msg;
+	gchar *query = NULL, *request = NULL, *song_id = NULL, *data = NULL;
+	gsize length;
+
+	PraghaKoelPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Koel server plugin %s", G_STRFUNC);
+
+	if (!priv->token)
+		return;
+
+	song_id = pragha_koel_plugin_get_song_id (priv->server, filename);
+
+	builder = json_builder_new ();
+	json_builder_begin_object (builder);
+	json_builder_set_member_name (builder, "song");
+	json_builder_add_string_value (builder, song_id);
+	json_builder_end_object (builder);
+
+	generator = json_generator_new ();
+	json_generator_set_root (generator, json_builder_get_root (builder));
+	data = json_generator_to_data (generator, &length);
+
+	query = g_strdup_printf("%s/api/interaction/play?jwt-token=%s", priv->server, priv->token);
+	session = soup_session_new ();
+	msg = soup_message_new (SOUP_METHOD_POST, query);
+	soup_message_headers_append (msg->request_headers, "Accept", "application/json");
+	soup_message_set_request (msg, "application/json", SOUP_MEMORY_COPY, data, length);
+	soup_session_queue_message (session, msg,
+	                            pragha_koel_plugin_increase_playcount_done, plugin);
+
+	g_free (query);
+	g_free (request);
+	g_free (song_id);
+}
+
 /*
  * Koel Settings
  */
@@ -898,6 +965,21 @@ pragha_koel_plugin_download_done (PraghaBackend       *backend,
 	pragha_song_cache_put_location (priv->cache, location, filename);
 }
 
+static void
+pragha_koel_plugin_half_played (PraghaBackend    *backend,
+                                PraghaKoelPlugin *plugin)
+{
+	PraghaMusicobject *mobj;
+	const gchar *filename = NULL;
+
+	mobj = pragha_backend_get_musicobject (backend);
+	if (!pragha_musicobject_is_koel_file (mobj))
+		return;
+
+	filename = pragha_musicobject_get_file (mobj);
+	pragha_koel_plugin_increase_playcount (plugin, filename);
+}
+
 /*
  * Plugin.
  */
@@ -968,6 +1050,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                  G_CALLBACK(pragha_koel_plugin_prepare_source), plugin);
 	g_signal_connect (backend, "download-done",
 	                  G_CALLBACK(pragha_koel_plugin_download_done), plugin);
+	g_signal_connect (backend, "half-played",
+	                  G_CALLBACK(pragha_koel_plugin_half_played), plugin);
 
 	/* Append setting */
 

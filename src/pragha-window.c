@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -445,8 +445,8 @@ pragha_window_new (PraghaApplication *pragha)
 	PraghaToolbar *toolbar;
 	GtkWidget *menubar, *pane1, *pane2, *infobox;
 	GtkWidget *playlist_statusbar_vbox, *vbox_main;
-	GtkWidget *menu_button;
-	GtkBuilder *song_box, *menu_ui;
+	GtkWidget *song_box, *menu_button;
+	GtkBuilder *menu_ui;
 	GtkCssProvider *css_provider;
 	GIcon *icon = NULL;
 	GError *error = NULL;

@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2016 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -1581,7 +1581,7 @@ simple_library_search_activate_handler (GtkEntry          *entry,
 	const gchar *filter_entry = NULL;
 
 	if (!pragha_preferences_get_instant_search(clibrary->preferences))
-		return;
+		return FALSE;
 
 	if (clibrary->filter_entry != NULL) {
 		g_free (clibrary->filter_entry);

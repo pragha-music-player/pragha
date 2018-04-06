@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2010-2017 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2010-2018 matias <mati86dl@gmail.com>                   */
 /* Copyright (C) 2012-2013 Pavel Vasin                                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
@@ -70,6 +70,7 @@ struct PraghaBackendPrivate {
 	GstElement        *equalizer;
 
 	guint              timer;
+	guint              cont_playback;
 
 	gboolean           is_live;
 	gboolean           can_seek;
@@ -105,6 +106,7 @@ enum {
 	SIGNAL_PREPARE_SOURCE,
 	SIGNAL_CLEAN_SOURCE,
 	SIGNAL_TICK,
+	SIGNAL_HALF_PLAYED,
 	SIGNAL_SEEKED,
 	SIGNAL_BUFFERING,
 	SIGNAL_DOWNLOAD_DONE,
@@ -122,8 +124,16 @@ static gboolean
 emit_tick_cb (gpointer user_data)
 {
 	PraghaBackend *backend = user_data;
+	PraghaBackendPrivate *priv = backend->priv;
 
 	g_signal_emit (backend, signals[SIGNAL_TICK], 0);
+
+	/*
+	 *TODO: Has to be half more 1 second.
+	 */
+	priv->cont_playback++;
+	if (priv->cont_playback == 120)
+		g_signal_emit (backend, signals[SIGNAL_HALF_PLAYED], 0);
 
 	return TRUE;
 }
@@ -748,6 +758,7 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, Pra
 					priv->timer = g_timeout_add_seconds (1, emit_tick_cb, backend);
 				if (priv->local_storage && priv->download_timeid == 0)
 					priv->download_timeid = g_timeout_add_seconds (1, pragha_backend_parse_local_storage_buffering, backend);
+				priv->cont_playback = 0;
 				pragha_backend_set_state (backend, ST_PLAYING);
 			}
 			break;
@@ -762,7 +773,7 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, Pra
 					g_source_remove(priv->download_timeid);
 					priv->download_timeid = 0;
 				}
-
+				priv->cont_playback = 0;
 				pragha_backend_set_state (backend, ST_PAUSED);
 			}
 			break;
@@ -775,6 +786,7 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, Pra
 				priv->emitted_error = FALSE;
 				g_clear_error(&priv->error);
 				priv->seeking = FALSE;
+				priv->cont_playback = 0;
 			}
 		case GST_STATE_NULL: {
 			if (priv->timer > 0) {
@@ -1078,6 +1090,15 @@ pragha_backend_class_init (PraghaBackendClass *klass)
 		              G_TYPE_FROM_CLASS (gobject_class),
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (PraghaBackendClass, seeked),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
+
+	signals[SIGNAL_HALF_PLAYED] =
+		g_signal_new ("half-played",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaBackendClass, half_played),
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__VOID,
 		              G_TYPE_NONE, 0);
