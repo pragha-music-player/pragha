@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -22,11 +22,22 @@
 
 G_BEGIN_DECLS
 
-
+typedef struct _PraghaHeader        PraghaHeader;
 typedef struct _PraghaTrackProgress PraghaTrackProgress;
 typedef struct _PraghaContainer     PraghaContainer;
 typedef struct _PraghaToolbarButton PraghaToolbarButton;
 typedef struct _PraghaToggleButton  PraghaToggleButton;
+
+PraghaHeader *pragha_header_new (void);
+void
+pragha_header_set_icon_name (PraghaHeader *header,
+                             const gchar  *icon_name);
+void
+pragha_header_set_title (PraghaHeader *header,
+                         const gchar  *title);
+void
+pragha_header_set_subtitle (PraghaHeader *header,
+                            const gchar  *subtitle);
 
 gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon);
 

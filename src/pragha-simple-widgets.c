@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -22,6 +22,122 @@
 #else
 #include <glib/gi18n.h>
 #endif
+
+/*
+ * PraghaHeader:
+ */
+#define PRAGHA_TYPE_HEADER (pragha_header_get_type())
+#define PRAGHA_HEADER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_HEADER, PraghaHeader))
+#define PRAGHA_HEADER_CONST(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_HEADER, PraghaHeader const))
+#define PRAGHA_HEADER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PRAGHA_TYPE_HEADER, PraghaHeaderClass))
+#define PRAGHA_IS_HEADER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_HEADER))
+#define PRAGHA_IS_HEADER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_HEADER))
+#define PRAGHA_HEADER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_HEADER, PraghaHeaderClass))
+
+typedef struct _PraghaHeaderClass PraghaHeaderClass;
+
+struct _PraghaHeaderClass {
+	GtkBoxClass parent_class;
+};
+struct _PraghaHeader {
+	GtkBox    _parent;
+
+	GtkWidget *image;
+	GtkWidget *title;
+	GtkWidget *subtitle;
+};
+G_DEFINE_TYPE(PraghaHeader, pragha_header, GTK_TYPE_BOX)
+
+void
+pragha_header_set_icon_name (PraghaHeader *header,
+                             const gchar  *icon_name)
+{
+	GdkPixbuf *icon;
+	gint width = 1, height = 1;
+
+	gtk_icon_size_lookup (GTK_ICON_SIZE_DIALOG, &width, &height);
+	icon = gtk_icon_theme_load_icon (gtk_icon_theme_get_default (),
+	                                 icon_name ? icon_name : "dialog-information",
+	                                 width,
+	                                 GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
+	gtk_image_set_from_pixbuf (GTK_IMAGE(header->image), icon);
+	g_object_unref (icon);
+}
+
+void
+pragha_header_set_title (PraghaHeader *header,
+                         const gchar  *title)
+{
+	gchar *markup = NULL;
+	markup = g_markup_printf_escaped("<span size='large' weight='bold'>%s</span>", title);
+	gtk_label_set_markup(GTK_LABEL(header->title), markup);
+	g_free(markup);
+}
+
+void
+pragha_header_set_subtitle (PraghaHeader *header,
+                         const gchar  *subtitle)
+{
+	gchar *markup = NULL;
+	markup = g_markup_printf_escaped ("<span size='large'>%s</span>", subtitle);
+	gtk_label_set_markup (GTK_LABEL(header->subtitle), markup);
+	g_free(markup);
+}
+
+static void
+pragha_header_class_init (PraghaHeaderClass *class)
+{
+}
+
+static void
+pragha_header_init (PraghaHeader *header)
+{
+	GtkWidget *hbox, *vbox;
+	GtkWidget *title, *subtitle;
+	GtkWidget *separator;
+
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
+	gtk_container_set_border_width(GTK_CONTAINER(hbox), 6);
+
+	header->image = gtk_image_new ();
+
+	title = gtk_label_new (NULL);
+	gtk_label_set_line_wrap(GTK_LABEL(title), TRUE);
+	gtk_widget_set_halign (title, GTK_ALIGN_START);
+	g_object_set (title, "xalign", 0.0, NULL);
+	header->title = title;
+
+	subtitle = gtk_label_new (NULL);
+	gtk_label_set_line_wrap (GTK_LABEL(subtitle), TRUE);
+	gtk_widget_set_halign (subtitle, GTK_ALIGN_START);
+	g_object_set (subtitle, "xalign", 0.0, NULL);
+	header->subtitle = subtitle;
+
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+	gtk_widget_set_valign (vbox, GTK_ALIGN_CENTER);
+	gtk_box_pack_start(GTK_BOX(vbox), title, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), subtitle, FALSE, FALSE, 0);
+
+	gtk_box_pack_start(GTK_BOX(hbox), header->image, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox), vbox, TRUE, TRUE, 0);
+
+	separator = gtk_separator_new (GTK_ORIENTATION_VERTICAL);
+
+	gtk_orientable_set_orientation (GTK_ORIENTABLE (header), GTK_ORIENTATION_VERTICAL);
+	gtk_box_pack_start (GTK_BOX(header), hbox, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX(header), separator, FALSE, FALSE, 0);
+
+	gtk_style_context_add_class (gtk_widget_get_style_context (GTK_WIDGET(header)),
+	                             "view");
+	gtk_style_context_add_class (gtk_widget_get_style_context (GTK_WIDGET(header)),
+	                             "XfceHeading");
+}
+
+PraghaHeader *
+pragha_header_new (void)
+{
+	return g_object_new (PRAGHA_TYPE_HEADER, NULL);
+}
 
 /* Create a new haeder widget to use in preferences.
  * Based in Midori Web Browser. Copyright (C) 2007 Christian Dywan. */
