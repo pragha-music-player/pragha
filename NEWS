@@ -1,7 +1,22 @@
 ==============================================================
-Overview of changes between Pragha 1.3.91 and 1.3.90
+Overview of changes between Pragha 1.3.91.1 and 1.3.90
 ==============================================================
 
+V1.3.91.1
+News:
+	Save lyrics and artist bio ans similar songs in user cache as files.
+	 - These are easily editable by the user.
+	Implement increse play count to Koel.
+	Various improvements to the tag editor dialog.
+	 - Add a header that highlights the main tags.
+	 - Update the header as you edit the tags.
+	 - Hides the check buttons and shows them when the tag is modified.
+	 - When you demarcate the check, restore the original tag.
+
+Bug Fixes:
+	Fix plugins on last tarball due to an internal development patch. Issue #135
+
+V1.3.91
 News:
 	New Koel plugin that allow play music from this service.
 	Implements cache purge limited by size. 1GB by default.
