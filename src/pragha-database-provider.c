@@ -86,9 +86,9 @@ pragha_provider_remove (PraghaDatabaseProvider *provider,
 	if ((provider_id = pragha_database_find_provider (priv->database, name)) == 0)
 		return;
 
-	/* Delete all tracks of provider */
+	/* Delete all entries from PLAYLIST_TRACKS which match provider */
 
-	sql = "DELETE FROM PROVIDER WHERE id = ?";
+	sql = "DELETE FROM PLAYLIST_TRACKS WHERE file IN (SELECT name FROM location WHERE id IN (SELECT location FROM TRACK WHERE provider = ?))";
 	statement = pragha_database_create_statement (priv->database, sql);
 	pragha_prepared_statement_bind_int (statement, 1, provider_id);
 	pragha_prepared_statement_step (statement);
@@ -109,10 +109,11 @@ pragha_provider_remove (PraghaDatabaseProvider *provider,
 	pragha_prepared_statement_step (statement);
 	pragha_prepared_statement_free (statement);
 
-	/* Delete all entries from PLAYLIST_TRACKS which match given dir */
+	/* Delete Provider */
 
-	sql = "DELETE FROM PLAYLIST_TRACKS WHERE file NOT IN (SELECT name FROM LOCATION)";
+	sql = "DELETE FROM PROVIDER WHERE id = ?";
 	statement = pragha_database_create_statement (priv->database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, provider_id);
 	pragha_prepared_statement_step (statement);
 	pragha_prepared_statement_free (statement);
 

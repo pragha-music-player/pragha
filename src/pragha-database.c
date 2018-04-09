@@ -942,6 +942,7 @@ pragha_database_flush_stale_entries (PraghaDatabase *database)
 	pragha_database_exec_query (database, "DELETE FROM GENRE WHERE id NOT IN (SELECT genre FROM TRACK);");
 	pragha_database_exec_query (database, "DELETE FROM YEAR WHERE id NOT IN (SELECT year FROM TRACK);");
 	pragha_database_exec_query (database, "DELETE FROM COMMENT WHERE id NOT IN (SELECT comment FROM TRACK);");
+	pragha_database_exec_query (database, "DELETE FROM PLAYLIST WHERE id NOT IN (SELECT playlist FROM PLAYLIST_TRACKS)");
 }
 
 static gint
