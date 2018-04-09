@@ -71,6 +71,7 @@ struct PraghaBackendPrivate {
 
 	guint              timer;
 	guint              cont_playback;
+	guint              half_time_flag;
 
 	gboolean           is_live;
 	gboolean           can_seek;
@@ -128,11 +129,8 @@ emit_tick_cb (gpointer user_data)
 
 	g_signal_emit (backend, signals[SIGNAL_TICK], 0);
 
-	/*
-	 *TODO: Has to be half more 1 second.
-	 */
 	priv->cont_playback++;
-	if (priv->cont_playback == 120)
+	if (!priv->is_live && priv->cont_playback == priv->half_time_flag)
 		g_signal_emit (backend, signals[SIGNAL_HALF_PLAYED], 0);
 
 	return TRUE;
@@ -740,6 +738,17 @@ pragha_backend_evaluate_if_can_seek(PraghaBackend *backend)
 }
 
 static void
+pragha_backend_evaluate_half_time_playback (PraghaBackend *backend)
+{
+	gint length = 0;
+	PraghaBackendPrivate *priv = backend->priv;
+
+	length = GST_TIME_AS_SECONDS(pragha_backend_get_current_length(backend));
+
+	priv->half_time_flag = ((length / 2) > 240) ? 241 : (length / 2)+1;
+}
+
+static void
 pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, PraghaBackend *backend)
 {
 	PraghaBackendPrivate *priv = backend->priv;
@@ -753,6 +762,7 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, Pra
 		case GST_STATE_PLAYING: {
 			if (priv->target_state == GST_STATE_PLAYING) {
 				pragha_backend_evaluate_if_can_seek(backend);
+				pragha_backend_evaluate_half_time_playback(backend);
 
 				if (priv->timer == 0)
 					priv->timer = g_timeout_add_seconds (1, emit_tick_cb, backend);

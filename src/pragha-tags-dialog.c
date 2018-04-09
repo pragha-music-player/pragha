@@ -99,8 +99,10 @@ pragha_tags_dialog_get_title (const gchar *title, const gchar *file)
 	gchar *stitle = NULL;
 	if (string_is_not_empty(title))
 		stitle = g_strdup (title);
-	else
+	else if (string_is_not_empty(file))
 		stitle = get_display_filename (file, FALSE);
+	else
+		stitle = g_strdup (_("Unknown"));
 	return stitle;
 }
 
