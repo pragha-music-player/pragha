@@ -781,8 +781,9 @@ pragha_mtp_plugin_device_added (PraghaDeviceClient *device_client,
 {
 	LIBMTP_raw_device_t *device_list, *raw_device = NULL;
 	LIBMTP_mtpdevice_t *mtp_device;
-	gint busnum = 0, devnum = 0, numdevs = 0;
-	gint i = 0;
+	LIBMTP_devicestorage_t *storage;
+	gint busnum = 0, devnum = 0, numdevs = 0, i = 0;
+	guint64 freeSpace = 0;
 
 	PraghaMtpPlugin *plugin = user_data;
 	PraghaMtpPluginPrivate *priv = plugin->priv;
@@ -821,8 +822,17 @@ pragha_mtp_plugin_device_added (PraghaDeviceClient *device_client,
 
 	mtp_device = LIBMTP_Open_Raw_Device_Uncached (raw_device);
 	if (!LIBMTP_Get_Storage (mtp_device, LIBMTP_STORAGE_SORTBY_FREESPACE)) {
-	    LIBMTP_Dump_Errorstack (mtp_device);
-	    LIBMTP_Clear_Errorstack (mtp_device);
+		LIBMTP_Dump_Errorstack (mtp_device);
+		LIBMTP_Clear_Errorstack (mtp_device);
+	}
+
+	for (storage = mtp_device->storage; storage != 0; storage = storage->next) {
+		freeSpace += storage->FreeSpaceInBytes;
+	}
+
+	if (!freeSpace) {
+		LIBMTP_Release_Device (mtp_device);
+		return;
 	}
 
 	/* Hook device */
@@ -865,7 +875,7 @@ pragha_mtp_plugin_device_removed (PraghaDeviceClient *device_client,
 	}
 
 	busnum = g_udev_device_get_property_as_uint64(u_device, "BUSNUM");
-	devnum = g_udev_device_get_property_as_uint64(u_device, "DEVNUM");
+	devnum = pragha_gudev_get_property_as_int (u_device, "DEVNUM", 10);
 
 	if (busnum == priv->bus_hooked && devnum == priv->device_hooked)
 	{
