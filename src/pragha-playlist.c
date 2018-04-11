@@ -3364,113 +3364,115 @@ init_current_playlist_columns(PraghaPlaylist* cplaylist)
 	const gchar *col_name;
 	GtkTreeViewColumn *col, *last;
 	GList *list = NULL, *i;
-	GSList *j, *widths;
-	gint k = 0;
-	gint *col_widths, icon_size;
+	GSList *slist = NULL, *j, *widths;
+	gint *col_widths, icon_size, k = 0;
 	gsize cnt = 0, cnt2 = 0, isize;
 
-	columns = pragha_preferences_get_string_list(cplaylist->preferences,
-						     GROUP_PLAYLIST,
-						     KEY_PLAYLIST_COLUMNS,
-						     &cnt);
+	columns =
+		pragha_preferences_get_string_list (cplaylist->preferences,
+		                                    GROUP_PLAYLIST,
+		                                    KEY_PLAYLIST_COLUMNS,
+		                                    &cnt);
+
 	if (columns && cnt > 0) {
-		for (isize=0; isize < cnt; isize++) {
+		for (isize = 0; isize < cnt; isize++) {
 			cplaylist->columns =
-				g_slist_append(cplaylist->columns,
-					       g_strdup(columns[isize]));
+				g_slist_append (cplaylist->columns,
+				                g_strdup(columns[isize]));
 		}
 		g_strfreev(columns);
 	}
 	else {
 		cplaylist->columns =
-			g_slist_append(cplaylist->columns,
-				       g_strdup(P_TITLE_STR));
+			g_slist_append (cplaylist->columns,
+			                g_strdup(P_TITLE_STR));
 		cplaylist->columns =
 			g_slist_append(cplaylist->columns,
 				       g_strdup(P_ARTIST_STR));
 		cplaylist->columns =
-			g_slist_append(cplaylist->columns,
-				       g_strdup(P_ALBUM_STR));
+			g_slist_append (cplaylist->columns,
+			                g_strdup(P_ALBUM_STR));
 		cplaylist->columns =
-			g_slist_append(cplaylist->columns,
-				       g_strdup(P_LENGTH_STR));
+			g_slist_append (cplaylist->columns,
+			                g_strdup(P_LENGTH_STR));
 	}
 
-	col_widths = pragha_preferences_get_integer_list(cplaylist->preferences,
-							 GROUP_PLAYLIST,
-							 KEY_PLAYLIST_COLUMN_WIDTHS,
-							 &cnt);
+	col_widths =
+		pragha_preferences_get_integer_list (cplaylist->preferences,
+		                                     GROUP_PLAYLIST,
+		                                     KEY_PLAYLIST_COLUMN_WIDTHS,
+		                                     &cnt);
 	if (col_widths) {
 		for (isize = 0; isize < cnt; isize++) {
 			cplaylist->column_widths =
-				g_slist_append(cplaylist->column_widths,
-					       GINT_TO_POINTER(col_widths[isize]));
+				g_slist_append (cplaylist->column_widths,
+				                GINT_TO_POINTER(col_widths[isize]));
 		}
 		g_free(col_widths);
 	}
 	else {
-		for (isize=0; isize < 4; isize++) {
+		for (isize = 0; isize < 4; isize++) {
 			cplaylist->column_widths =
-				g_slist_append(cplaylist->column_widths,
-				       GINT_TO_POINTER(DEFAULT_PLAYLIST_COL_WIDTH));
+				g_slist_append (cplaylist->column_widths,
+				                GINT_TO_POINTER(DEFAULT_PLAYLIST_COL_WIDTH));
 		}
 	}
 
 	/* Set the visible columns widths and order */
+
 	last = NULL;
 	if (cplaylist->columns) {
-		list = cplaylist->columns;
-		cnt = g_slist_length(list);
+		slist = cplaylist->columns;
+		cnt = g_slist_length(slist);
 		cnt2 = g_slist_length(cplaylist->column_widths);
-		
-		for (j=list, k=0; j != NULL; j = j->next) {
+
+		for (j = slist, k = 0; j != NULL; j = j->next) {
 			col = playlist_tree_view_get_column_from_name(cplaylist, j->data);
-			if(col){
+			if (col) {
 				gtk_tree_view_column_set_visible(col, TRUE);
 				gtk_tree_view_column_set_fixed_width(col, DEFAULT_PLAYLIST_COL_WIDTH);
-				
-				if(k < cnt2)
+
+				if (k < cnt2)
 					widths = g_slist_nth(cplaylist->column_widths, k++);
 				else
-					widths = g_slist_append(widths, DEFAULT_PLAYLIST_COL_WIDTH);
-					
+					widths = g_slist_append (widths, GINT_TO_POINTER(DEFAULT_PLAYLIST_COL_WIDTH));
+
 				gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
-				
+
 				if (GPOINTER_TO_INT(widths->data) > COL_WIDTH_THRESH)
 					gtk_tree_view_column_set_fixed_width(col, GPOINTER_TO_INT(widths->data));
-				
-				
-				if ( col != last) {
-				  gtk_tree_view_move_column_after(GTK_TREE_VIEW(cplaylist->view), col, last);
-				  last = col;
+
+				if (col != last) {
+					gtk_tree_view_move_column_after(GTK_TREE_VIEW(cplaylist->view), col, last);
+					last = col;
 				}
-				
 			}
 		}
 	}
-	/* Set the invisible columns */
-	list = gtk_tree_view_get_columns(GTK_TREE_VIEW(cplaylist->view));
 
+	/* Set the invisible columns */
+
+	list = gtk_tree_view_get_columns (GTK_TREE_VIEW(cplaylist->view));
 	if (list) {
-		for (i=list; i != NULL; i = i->next) {
+		for (i = list; i != NULL; i = i->next) {
 			col = i->data;
 			col_name = gtk_tree_view_column_get_title(col);
-			if (!is_present_str_list(col_name,
-						cplaylist->columns)) {
+			if (!is_present_str_list (col_name, cplaylist->columns))
 				gtk_tree_view_column_set_visible(col, FALSE);
-			}
 		}
 		g_list_free(list);
 	}
+
 	/* Always show queue and status pixbuf colum */
+
 	icon_size = get_playlist_icon_size ();
 	col = playlist_tree_view_get_column_from_id (cplaylist, -1);
 	last = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),0);
 	gtk_tree_view_move_column_after(GTK_TREE_VIEW(cplaylist->view),col, last);
-	gtk_tree_view_move_column_after(GTK_TREE_VIEW(cplaylist->view), last,col);
+	gtk_tree_view_move_column_after(GTK_TREE_VIEW(cplaylist->view), last, col);
 	gtk_tree_view_column_set_visible(col, TRUE);
 	gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
-	gtk_tree_view_column_set_fixed_width (col, 2*icon_size);
+	gtk_tree_view_column_set_fixed_width (col, 2*icon_size+2);
 }
 
 static GtkWidget*
@@ -3651,7 +3653,6 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 	GtkWidget *state_pixbuf;
-	GtkWidget *col_button;
 	gint icon_size = 0;
 
 	state_pixbuf = gtk_image_new_from_icon_name ("audio-volume-high", GTK_ICON_SIZE_MENU);
@@ -3745,7 +3746,6 @@ create_current_playlist_view (PraghaPlaylist *cplaylist)
 	GtkTreeSelection *selection;
 	GtkTreeModel *model;
 	GtkTreeSortable *sortable;
-	const GBindingFlags binding_flags = G_BINDING_SYNC_CREATE;
 
 	/* Create the tree store */
 
@@ -4243,7 +4243,6 @@ pragha_playlist_save_preferences(PraghaPlaylist* cplaylist)
 	const gchar *col_name;
 	gchar **columns;
 	gint cnt = 0, i = 0, *col_widths;
-	GSList *list;
 	GList *cols, *j;
 
 	/* Save list of columns visible in current playlist */
@@ -4253,15 +4252,13 @@ pragha_playlist_save_preferences(PraghaPlaylist* cplaylist)
 	if (cols) {
 		col_widths = g_new0(gint, cnt);
 		columns = g_new0(gchar *, cnt);
-		for (j=cols, i=0; j != NULL; j = j->next) {
+		for (j = cols, i=0; j != NULL; j = j->next) {
 			col = j->data;
 			col_name = gtk_tree_view_column_get_title(col);
-			if (is_present_str_list(col_name,
-						cplaylist->columns)) {
-				columns[i] = col_name;
-				col_widths[i++] =
-					gtk_tree_view_column_get_width(col);
-			}	
+			if (is_present_str_list(col_name, cplaylist->columns)) {
+				columns[i] = g_strdup(col_name);
+				col_widths[i++] = gtk_tree_view_column_get_width(col);
+			}
 		}
 		pragha_preferences_set_string_list (cplaylist->preferences,
 		                                    GROUP_PLAYLIST,
@@ -4273,9 +4270,9 @@ pragha_playlist_save_preferences(PraghaPlaylist* cplaylist)
 		                                     KEY_PLAYLIST_COLUMN_WIDTHS,
 		                                     col_widths,
 		                                     i);
+		g_strfreev(columns);
 		g_list_free(cols);
 		g_free(col_widths);
-		g_free(columns);
 	}
 }
 
