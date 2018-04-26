@@ -427,6 +427,7 @@ pragha_info_cache_save_song_lyrics (PraghaInfoCache *cache,
 	g_free (key_path);
 
 	g_key_file_free (key_file);
+	g_free (lyrics_path);
 }
 
 /*

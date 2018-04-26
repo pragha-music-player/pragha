@@ -551,6 +551,7 @@ pragha_koel_plugin_increase_playcount (PraghaKoelPlugin *plugin, const gchar *fi
 {
 	JsonBuilder *builder;
 	JsonGenerator *generator;
+	JsonNode *node;
 	SoupSession *session;
 	SoupMessage *msg;
 	gchar *query = NULL, *request = NULL, *song_id = NULL, *data = NULL;
@@ -572,7 +573,8 @@ pragha_koel_plugin_increase_playcount (PraghaKoelPlugin *plugin, const gchar *fi
 	json_builder_end_object (builder);
 
 	generator = json_generator_new ();
-	json_generator_set_root (generator, json_builder_get_root (builder));
+	node = json_builder_get_root (builder);
+	json_generator_set_root (generator, node);
 	data = json_generator_to_data (generator, &length);
 
 	query = g_strdup_printf("%s/api/interaction/play?jwt-token=%s", priv->server, priv->token);
@@ -585,6 +587,7 @@ pragha_koel_plugin_increase_playcount (PraghaKoelPlugin *plugin, const gchar *fi
 
 	g_object_unref (generator);
 	g_object_unref (builder);
+	json_node_free (node);
 	g_free (query);
 	g_free (request);
 	g_free (song_id);
@@ -820,6 +823,7 @@ pragha_koel_plugin_authenticate (PraghaKoelPlugin *plugin)
 {
 	JsonBuilder *builder;
 	JsonGenerator *generator;
+	JsonNode *node;
 	SoupSession *session;
 	SoupMessage *msg;
 	const gchar *server = NULL, *username = NULL, *password = NULL;
@@ -856,7 +860,8 @@ pragha_koel_plugin_authenticate (PraghaKoelPlugin *plugin)
 	json_builder_end_object (builder);
 
 	generator = json_generator_new ();
-	json_generator_set_root (generator, json_builder_get_root (builder));
+	node = json_builder_get_root (builder);
+	json_generator_set_root (generator, node);
 	data = json_generator_to_data (generator, &length);
 
 	query = g_strdup_printf("%s/api/me", server);
@@ -870,6 +875,7 @@ pragha_koel_plugin_authenticate (PraghaKoelPlugin *plugin)
 
 	g_object_unref (generator);
 	g_object_unref (builder);
+	json_node_free (node);
 	g_free (query);
 	g_free (request);
 	g_free (data);

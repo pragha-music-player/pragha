@@ -3207,6 +3207,11 @@ pragha_library_pane_finalize (GObject *object)
 	if (library->pixbuf_genre)
 		g_object_unref (library->pixbuf_genre);
 
+	if (library->filter_entry != NULL) {
+		g_free (library->filter_entry);
+		library->filter_entry = NULL;
+	}
+
 	g_object_unref (library->cdbase);
 	g_object_unref (library->preferences);
 	g_object_unref (library->library_store);
