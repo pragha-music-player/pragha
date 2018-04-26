@@ -170,6 +170,7 @@ pragha_song_cache_put_location (PraghaSongCache *cache, const gchar *location, c
 		pragha_prepared_statement_free (statement);
 		return;
 	}
+	pragha_prepared_statement_free (statement);
 
 	/* TODO: Do it async... */
 	file = g_file_new_for_path (filename);
@@ -195,6 +196,8 @@ pragha_song_cache_put_location (PraghaSongCache *cache, const gchar *location, c
 	/* Clean cache if necessary. */
 	pragha_song_cache_purge (cache);
 
+	g_object_unref(file);
+	g_object_unref(destination);
 	g_free (file_basename);
 	g_free (dest_filename);
 }

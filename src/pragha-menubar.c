@@ -1287,6 +1287,7 @@ pragha_menubar_append_submenu (PraghaApplication  *pragha,
 	g_menu_insert_item (section, -1, menu_item);
 
 	g_object_unref (menu_item);
+	g_object_unref (builder);
 }
 
 void

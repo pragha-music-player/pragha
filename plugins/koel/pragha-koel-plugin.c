@@ -583,9 +583,12 @@ pragha_koel_plugin_increase_playcount (PraghaKoelPlugin *plugin, const gchar *fi
 	soup_session_queue_message (session, msg,
 	                            pragha_koel_plugin_increase_playcount_done, plugin);
 
+	g_object_unref (generator);
+	g_object_unref (builder);
 	g_free (query);
 	g_free (request);
 	g_free (song_id);
+	g_free (data);
 }
 
 /*
@@ -865,8 +868,11 @@ pragha_koel_plugin_authenticate (PraghaKoelPlugin *plugin)
 	soup_session_queue_message (session, msg,
 	                            pragha_koel_get_auth_done, plugin);
 
+	g_object_unref (generator);
+	g_object_unref (builder);
 	g_free (query);
 	g_free (request);
+	g_free (data);
 }
 
 static void

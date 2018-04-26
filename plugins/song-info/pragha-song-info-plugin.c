@@ -251,6 +251,7 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 				pragha_songinfo_pane_set_title (priv->pane, artist);
 				pragha_songinfo_pane_set_text (priv->pane, artist_bio, provider);
 				g_free (artist_bio);
+				g_free (provider);
 				return;
 			}
 			break;
@@ -263,6 +264,7 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 				pragha_songinfo_pane_set_title (priv->pane, title);
 				pragha_songinfo_pane_set_text (priv->pane, lyrics, provider);
 				g_free (lyrics);
+				g_free (provider);
 				return;
 			}
 			break;
@@ -278,6 +280,7 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 				}
 				pragha_songinfo_pane_set_title (priv->pane, title);
 				pragha_songinfo_pane_set_text (priv->pane, "", provider);
+				g_free (provider);
 				return;
 			}
 			break;

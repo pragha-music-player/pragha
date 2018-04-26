@@ -65,6 +65,7 @@ glyr_append_mboj_list (PraghaDatabase *cdbase, GlyrMemCache *it, GList *list)
 		pragha_musicobject_set_title (mobj, title);
 		pragha_musicobject_set_artist (mobj, artist);
 	}
+	g_strfreev (tags);
 
 	return g_list_append (list, mobj);
 }

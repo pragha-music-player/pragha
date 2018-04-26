@@ -903,6 +903,11 @@ pragha_backend_finalize (GObject *object)
 	if (priv->error)
 		g_error_free (priv->error);
 
+	if (priv->temp_location != NULL) {
+		g_free(priv->temp_location);
+		priv->temp_location = NULL;
+	}
+
 	CDEBUG(DBG_BACKEND, "Pipeline destruction complete");
 
 	G_OBJECT_CLASS (pragha_backend_parent_class)->finalize (object);

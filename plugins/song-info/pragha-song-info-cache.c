@@ -361,7 +361,7 @@ pragha_info_cache_get_song_lyrics (PraghaInfoCache *cache,
 {
 	GKeyFile *key_file;
 	GError *error = NULL;
-	gchar *path = NULL, *lyrics = NULL;
+	gchar *path = NULL, *ini_path = NULL, *lyrics = NULL;
 
 	path = pragha_info_cache_get_lyrics_uri (cache, title, artist);
 	if (!path)
@@ -373,23 +373,22 @@ pragha_info_cache_get_song_lyrics (PraghaInfoCache *cache,
 		return NULL;
 	}
 
-	path = pragha_info_cache_get_ini_lyrics_uri (cache, title, artist);
-	if (path) {
+	ini_path = pragha_info_cache_get_ini_lyrics_uri (cache, title, artist);
+	if (ini_path) {
 		key_file = g_key_file_new ();
-
-		if (!g_key_file_load_from_file (key_file, path, G_KEY_FILE_NONE, &error)) {
+		if (!g_key_file_load_from_file (key_file, ini_path, G_KEY_FILE_NONE, &error)) {
 			if (!g_error_matches (error, G_FILE_ERROR, G_FILE_ERROR_NOENT))
 				g_warning ("Error loading key file: %s", error->message);
 			g_error_free (error);
-			g_free (path);
-			return NULL;
 		}
-
-		*provider = g_key_file_get_string (key_file, "Lyrics", "Provider", NULL);
-
+		else {
+			*provider = g_key_file_get_string (key_file, "Lyrics", "Provider", NULL);
+		}
 		g_key_file_free (key_file);
-		g_free (path);
 	}
+
+	g_free (path);
+	g_free (ini_path);
 
 	return lyrics;
 }
@@ -564,7 +563,9 @@ pragha_info_cache_save_artist_bio (PraghaInfoCache *cache,
 	key_path = pragha_info_cache_build_ini_artist_bio_path (cache, artist);
 	if (!g_key_file_save_to_file (key_file, key_path, &error))
 		g_warning ("Error saving key file: %s", error->message);
+
 	g_free (key_path);
+	g_free (bio_path);
 
 	g_key_file_free (key_file);
 }

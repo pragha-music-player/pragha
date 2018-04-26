@@ -3366,7 +3366,7 @@ init_current_playlist_columns(PraghaPlaylist* cplaylist)
 	GList *list = NULL, *i;
 	GSList *slist = NULL, *j, *widths;
 	gint *col_widths, icon_size, k = 0;
-	gsize cnt = 0, cnt2 = 0, isize;
+	gsize cnt = 0, isize;
 
 	columns =
 		pragha_preferences_get_string_list (cplaylist->preferences,
@@ -3423,8 +3423,7 @@ init_current_playlist_columns(PraghaPlaylist* cplaylist)
 	last = NULL;
 	if (cplaylist->columns) {
 		slist = cplaylist->columns;
-		cnt = g_slist_length(slist);
-		cnt2 = g_slist_length(cplaylist->column_widths);
+		cnt = g_slist_length(cplaylist->column_widths);
 
 		for (j = slist, k = 0; j != NULL; j = j->next) {
 			col = playlist_tree_view_get_column_from_name(cplaylist, j->data);
@@ -3432,7 +3431,7 @@ init_current_playlist_columns(PraghaPlaylist* cplaylist)
 				gtk_tree_view_column_set_visible(col, TRUE);
 				gtk_tree_view_column_set_fixed_width(col, DEFAULT_PLAYLIST_COL_WIDTH);
 
-				if (k < cnt2)
+				if (k < cnt)
 					widths = g_slist_nth(cplaylist->column_widths, k++);
 				else
 					widths = g_slist_append (widths, GINT_TO_POINTER(DEFAULT_PLAYLIST_COL_WIDTH));
