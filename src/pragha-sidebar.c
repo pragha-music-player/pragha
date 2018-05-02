@@ -111,6 +111,7 @@ pragha_sidebar_style_position (PraghaSidebar *sidebar, GtkPositionType position)
  * Internal Calbacks.
  */
 
+#if !GTK_CHECK_VERSION (3, 22, 0)
 static void
 pragha_sidebar_menu_position (GtkMenu  *menu,
                               gint     *x,
@@ -144,6 +145,7 @@ pragha_sidebar_menu_position (GtkMenu  *menu,
 
 	*push_in = TRUE;
 }
+#endif
 
 static void
 pragha_sidebar_close_button_cb (GtkWidget *widget, PraghaSidebar *sidebar)
@@ -166,19 +168,30 @@ pragha_sidebar_right_click_cb(GtkWidget *widget,
 
 	switch(event->button) {
 		case 3:
+#if GTK_CHECK_VERSION (3, 22, 0)
+			gtk_menu_popup_at_pointer (GTK_MENU(sidebar->popup_menu),
+			                           (const GdkEvent *)event);
+#else
 			gtk_menu_popup(GTK_MENU(sidebar->popup_menu),
 			               NULL, NULL, NULL, NULL,
 			               event->button, event->time);
+#endif
 			ret = TRUE;
 			break;
 		case 1:
 			if (widget == sidebar->menu_button) {
+#if GTK_CHECK_VERSION (3, 22, 0)
+				gtk_menu_popup_at_widget (GTK_MENU(sidebar->popup_menu), widget,
+				                          GDK_GRAVITY_SOUTH_WEST, GDK_GRAVITY_NORTH_WEST,
+				                          (const GdkEvent *)event);
+#else
 				gtk_menu_popup(GTK_MENU(sidebar->popup_menu),
 				                NULL, NULL,
 				                (GtkMenuPositionFunc) pragha_sidebar_menu_position,
 				                widget,
 				                0,
 				                gtk_get_current_event_time());
+#endif
 				ret = TRUE;
 			}
 			break;
@@ -193,18 +206,24 @@ pragha_sidebar_right_click_cb(GtkWidget *widget,
  * Construction:
  **/
 
-void
+static void
 pragha_sidebar_set_tiny_button (GtkWidget *button)
 {
 	GtkCssProvider *provider;
 	provider = gtk_css_provider_new ();
 	gtk_css_provider_load_from_data (provider,
 	                                 "#s-tiny-button {\n"
+#if GTK_CHECK_VERSION (3, 14, 0)
+	                                 " margin : 0px;\n"
+	                                 " min-width: 10px; \n"
+	                                 " min-height: 10px; \n"
+#else
 	                                 " -GtkButton-default-border : 0px;\n"
 	                                 " -GtkButton-default-outside-border : 0px;\n"
 	                                 " -GtkButton-inner-border: 0px;\n"
 	                                 " -GtkWidget-focus-line-width: 0px;\n"
 	                                 " -GtkWidget-focus-padding: 0px;\n"
+#endif
 	                                 " padding: 1px;}",
 	                                 -1, NULL);
 	gtk_style_context_add_provider (gtk_widget_get_style_context (button),
@@ -214,7 +233,7 @@ pragha_sidebar_set_tiny_button (GtkWidget *button)
 	g_object_unref (provider);
 }
 
-GtkWidget *
+static GtkWidget *
 praga_sidebar_menu_button_new (PraghaSidebar *sidebar)
 {
 	GtkWidget *button, *hbox, *arrow;
@@ -245,7 +264,7 @@ praga_sidebar_menu_button_new (PraghaSidebar *sidebar)
 	return button;
 }
 
-GtkWidget *
+static GtkWidget *
 pragha_sidebar_close_button_new(PraghaSidebar *sidebar)
 {
 	GtkWidget *button;
@@ -266,6 +285,7 @@ pragha_sidebar_close_button_new(PraghaSidebar *sidebar)
 	gtk_button_set_focus_on_click (GTK_BUTTON (button), FALSE);
 #endif
 	pragha_sidebar_set_tiny_button (button);
+	gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
 
 	icon = g_themed_icon_new_from_names ((gchar **)fallback_icons, -1);
 	gtk_button_set_image (GTK_BUTTON (button),
