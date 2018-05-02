@@ -198,7 +198,7 @@ exists:
 }
 
 static void
-cancel_pane_search (PraghaSongInfoPlugin *plugin)
+pragha_song_info_cancel_pane_search (PraghaSongInfoPlugin *plugin)
 {
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
 
@@ -238,7 +238,8 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 	if (string_is_empty(artist) || string_is_empty(title))
 		return;
 
-	cancel_pane_search (plugin);
+	pragha_song_info_cancel_pane_search (plugin);
+	pragha_songinfo_pane_clear_list (priv->pane);
 
 	view_type = pragha_songinfo_pane_get_default_view (priv->pane);
 	switch (view_type) {
@@ -315,7 +316,7 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 	PraghaSongInfoPlugin *plugin = user_data;
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
 
-	cancel_pane_search (plugin);
+	pragha_song_info_cancel_pane_search (plugin);
 
 	state = pragha_backend_get_state (backend);
 
