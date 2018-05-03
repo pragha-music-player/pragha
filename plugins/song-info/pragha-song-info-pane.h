@@ -38,6 +38,7 @@ typedef struct {
 	GtkScrolledWindowClass __parent__;
 	void (*type_changed)   (PraghaSonginfoPane *pane);
 	void (*append)         (PraghaSonginfoPane *pane, PraghaMusicobject *mobj);
+	void (*append_all)     (PraghaSonginfoPane *pane);
 } PraghaSonginfoPaneClass;
 
 GtkWidget *         pragha_songinfo_pane_row_new               (PraghaMusicobject *mobj);
@@ -54,6 +55,8 @@ void                pragha_songinfo_pane_append_song_row       (PraghaSonginfoPa
 
 void                pragha_songinfo_pane_clear_text            (PraghaSonginfoPane *pane);
 void                pragha_songinfo_pane_clear_list            (PraghaSonginfoPane *pane);
+
+GList              *pragha_songinfo_get_mobj_list              (PraghaSonginfoPane *pane);
 
 GtkWidget          *pragha_songinfo_pane_get_pane_title        (PraghaSonginfoPane *pane);
 GtkMenu            *pragha_songinfo_pane_get_popup_menu        (PraghaSonginfoPane *pane);

@@ -42,6 +42,7 @@ struct _PraghaSonginfoPane {
 
 	/* List widget */
 	GtkWidget         *list_view;
+	GtkWidget         *append_button;
 
 	/* Info that show thde pane */
 	GLYR_GET_TYPE      info_type;
@@ -56,6 +57,7 @@ G_DEFINE_TYPE(PraghaSonginfoPane, pragha_songinfo_pane, GTK_TYPE_SCROLLED_WINDOW
 enum {
 	SIGNAL_TYPE_CHANGED,
 	SIGNAL_APPEND,
+	SIGNAL_APPEND_ALL,
 	LAST_SIGNAL
 };
 static int signals[LAST_SIGNAL] = { 0 };
@@ -164,6 +166,7 @@ pragha_songinfo_pane_append_song_row (PraghaSonginfoPane *pane,
 {
 	gtk_list_box_insert (GTK_LIST_BOX(pane->list_view), row, 0);
 	gtk_widget_show (GTK_WIDGET(pane->list_view));
+	gtk_widget_show (GTK_WIDGET(pane->append_button));
 }
 
 void
@@ -193,6 +196,30 @@ pragha_songinfo_pane_clear_list (PraghaSonginfoPane *pane)
 	g_list_free(list);
 
 	gtk_widget_hide (GTK_WIDGET(pane->list_view));
+	gtk_widget_hide (GTK_WIDGET(pane->append_button));
+}
+
+GList *
+pragha_songinfo_get_mobj_list (PraghaSonginfoPane *pane)
+{
+	PraghaMusicobject *mobj;
+	GList *mlist = NULL, *list, *l;
+	GtkWidget *row;
+	const gchar *provider = NULL;
+
+	list = gtk_container_get_children (GTK_CONTAINER(pane->list_view));
+	l = list;
+	while (l != NULL) {
+		row = l->data;
+		mobj = g_object_get_data (G_OBJECT(row), "SONG");
+		provider = pragha_musicobject_get_provider (mobj);
+		if (string_is_not_empty(provider))
+			mlist = g_list_append (mlist, mobj);
+		l = g_list_next(l);
+	}
+	g_list_free (list);
+
+	return mlist;
 }
 
 GtkWidget *
@@ -237,6 +264,12 @@ pragha_song_info_row_activated (GtkListBox         *box,
 	g_signal_emit (pane, signals[SIGNAL_APPEND], 0, mobj);
 }
 
+static void
+pragha_song_info_append_songs (GtkButton          *button,
+                               PraghaSonginfoPane *pane)
+{
+	g_signal_emit (pane, signals[SIGNAL_APPEND_ALL], 0);
+}
 
 static void
 song_list_header_func (GtkListBoxRow *row,
@@ -306,6 +339,37 @@ pragha_songinfo_pane_show_similar_action (GtkAction *action, PraghaSonginfoPane 
 	g_signal_emit (pane, signals[SIGNAL_TYPE_CHANGED], 0);
 }
 
+void
+pragha_koel_plugin_set_tiny_button (GtkWidget *button)
+{
+	GtkCssProvider *provider;
+	GtkStyleContext *context;
+
+	provider = gtk_css_provider_new ();
+	gtk_css_provider_load_from_data (provider,
+	                                 ".tiny-button {\n"
+#if GTK_CHECK_VERSION (3, 14, 0)
+	                                 " margin : 0px;\n"
+	                                 " min-width: 14px; \n"
+	                                 " min-height: 12px; \n"
+#else
+	                                 " -GtkButton-default-border : 0px;\n"
+	                                 " -GtkButton-default-outside-border : 0px;\n"
+	                                 " -GtkButton-inner-border: 0px;\n"
+	                                 " -GtkWidget-focus-line-width: 0px;\n"
+	                                 " -GtkWidget-focus-padding: 0px;\n"
+#endif
+	                                 " padding: 1px;}",
+	                                 -1, NULL);
+
+	context = gtk_widget_get_style_context (button);
+	gtk_style_context_add_provider (context,
+	                                GTK_STYLE_PROVIDER (provider),
+	                                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+	gtk_style_context_add_class (context, "tiny-button");
+	g_object_unref (provider);
+}
 /* Construction */
 
 static GtkUIManager *
@@ -351,7 +415,7 @@ pragha_songinfo_pane_finalize (GObject *object)
 static void
 pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
 {
-	GtkWidget *box, *label, *view, *list;
+	GtkWidget *box, *lbox, *label, *append_button, *icon, *view, *list;
 	GtkTextBuffer *buffer;
 	PangoAttrList *attrs;
 	GtkStyleContext *context;
@@ -364,12 +428,25 @@ pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
 	gtk_widget_set_halign (label, GTK_ALIGN_START);
 	gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 	gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 
 	attrs = pango_attr_list_new ();
 	pango_attr_list_insert (attrs, pango_attr_weight_new (PANGO_WEIGHT_BOLD));
 	pango_attr_list_insert (attrs, pango_attr_scale_new (PANGO_SCALE_X_LARGE));
 	gtk_label_set_attributes (GTK_LABEL (label), attrs);
 	pango_attr_list_unref (attrs);
+
+	lbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	context = gtk_widget_get_style_context (lbox);
+	gtk_style_context_add_class (context, "linked");
+
+	append_button = gtk_button_new ();
+	pragha_koel_plugin_set_tiny_button (append_button);
+	gtk_widget_set_tooltip_text (append_button, _("_Add to current playlist"));
+	gtk_widget_set_valign (append_button, GTK_ALIGN_CENTER);
+	icon = gtk_image_new_from_icon_name ("list-add", GTK_ICON_SIZE_MENU);
+	gtk_image_set_pixel_size (GTK_IMAGE(icon), 12);
+	gtk_button_set_image(GTK_BUTTON(append_button), icon);
 
 	view = gtk_text_view_new ();
 	gtk_text_view_set_editable (GTK_TEXT_VIEW (view), FALSE);
@@ -401,7 +478,10 @@ pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
 	gtk_list_box_set_sort_func (GTK_LIST_BOX (list),
 	                            song_list_sort_func, list, NULL);
 
-	gtk_box_pack_start (GTK_BOX(box), GTK_WIDGET(label), FALSE, FALSE, 2);
+	gtk_box_pack_start (GTK_BOX(lbox), GTK_WIDGET(label), FALSE, FALSE, 4);
+	gtk_box_pack_start (GTK_BOX(lbox), GTK_WIDGET(append_button), FALSE, FALSE, 4);
+
+	gtk_box_pack_start (GTK_BOX(box), GTK_WIDGET(lbox), FALSE, FALSE, 2);
 	gtk_box_pack_start (GTK_BOX(box), GTK_WIDGET(list), FALSE, FALSE, 2);
 	gtk_box_pack_start (GTK_BOX(box), GTK_WIDGET(view), FALSE, FALSE, 2);
 	gtk_container_add (GTK_CONTAINER (pane), box);
@@ -414,11 +494,14 @@ pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
 
 	g_signal_connect (list, "row-activated",
 	                  G_CALLBACK(pragha_song_info_row_activated), pane);
+	g_signal_connect (append_button, "clicked",
+	                  G_CALLBACK(pragha_song_info_append_songs), pane);
 
 	pane->context_menu = pragha_songinfo_pane_context_menu_new(pane);
 	pane->title = label;
 	pane->text_view = view;
 	pane->list_view = list;
+	pane->append_button = append_button;
 	pane->info_type = GLYR_GET_LYRICS;
 }
 
@@ -447,6 +530,15 @@ pragha_songinfo_pane_class_init (PraghaSonginfoPaneClass *klass)
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__POINTER,
 		              G_TYPE_NONE, 1, G_TYPE_POINTER);
+
+	signals[SIGNAL_APPEND_ALL] =
+		g_signal_new ("append-all",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaSonginfoPaneClass, append_all),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
 }
 
 PraghaSonginfoPane *
