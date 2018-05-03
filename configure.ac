@@ -6,7 +6,7 @@ dnl
 dnl Version information
 m4_define([pragha_version_major], [1])
 m4_define([pragha_version_minor], [3])
-m4_define([pragha_version_micro], [91.1])
+m4_define([pragha_version_micro], [92])
 
 m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
 
@@ -70,7 +70,7 @@ LT_PREREQ([2.2.6])
 LT_INIT([disable-static])
 
 dnl Check for i18n support
-XDT_I18N([bg ca_ES cs da de es el fr hu id it ja ko_KR lt nl no pl pt pt_BR ru sk sv tr uk vi zh_CN])
+XDT_I18N([ar bg ca_ES cs da de es el fr hu id it ja ko_KR lt nl no pl pt pt_BR ru sk sv tr uk vi zh_CN])
 
 dnl Check tools required
 AC_CHECK_PROG([HAVE_EXO_CSOURCE], [exo-csource], [yes])

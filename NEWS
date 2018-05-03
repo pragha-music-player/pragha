@@ -1,5 +1,40 @@
 ==============================================================
-Overview of changes between Pragha 1.3.91.1 and 1.3.90
+Overview of changes between Pragha 1.3.92 and 1.3.91.1
+==============================================================
+
+V1.3.92
+News:
+	Some improvements the recommendations panel
+	 - New button to append all recommendations
+	 - Can queue the songs with the Q key.
+
+Bug Fixes:
+	Fix some memory leaks.
+	Fix some deprecation warnings.. Issue #136
+	Fix issue #139 "Similar songs" always shown.
+	Mitigate a lot of warnings introduced on pull request #131
+	Ignore phones that are charging without mtp support (Android Default)
+	Handle correctly when disconnect the phone cable.
+
+Updates Translations:
+	New Arabic translations thanks to wissam.
+	Update Bulgarian translation thanks to Любомир Василев.
+	Update Danish translation thanks to scootergrisen.
+	Update German translation thanks to Ettore Atalan and Vinzenz Vietzke.
+	Update Catalan translation thanks to Robert Antoni Buj Gelonch.
+	Update Spanish translation thanks to Josué Aquino.
+	Update French translation thanks to sda2b.
+	Update Indonesian translation thanks to zk.
+	Update Korean translation thanks to smallsnail.
+	Update Polish translation thanks to Eryk Andrzejewski and nunoho emailsy.
+	Update Portuguese translation thanks to Sérgio Marques.
+	Update Portuguese (Brazil) translation thanks to carlo giusepe tadei valente sasaki.
+	Update Russian translation thanks to Kyrill Detinov.
+	Update Slovak translation thanks to Dušan Kazik.
+	Update Chinese (China) translation thanks to Mingcong Bai.
+
+==============================================================
+OTHERS RELEASES:
 ==============================================================
 
 V1.3.91.1
@@ -84,7 +119,7 @@ Updates Translations:
 	A lot of updated translations. Thank you very much to all.
 
 ==============================================================
-OTHERS REALESES:
+OLD RELEASES:
 ==============================================================
 
 V1.3.3
