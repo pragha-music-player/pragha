@@ -1527,7 +1527,8 @@ pragha_playlist_queue_handler (PraghaPlaylist *cplaylist)
 
 /* Toglle queue state of selection on current playlist. */
 
-void toggle_queue_selected_current_playlist (PraghaPlaylist *cplaylist)
+void
+pragha_playlist_toggle_queue_selected (PraghaPlaylist *cplaylist)
 {
 	GtkTreeModel *model;
 	GtkTreeRowReference *ref;

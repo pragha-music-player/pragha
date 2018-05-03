@@ -95,7 +95,7 @@ void update_current_playlist_view_playback_state_cb (PraghaBackend *backend, GPa
 PraghaMusicobject * current_playlist_mobj_at_path(GtkTreePath *path,
 						  PraghaPlaylist *cplaylist);
 
-void toggle_queue_selected_current_playlist (PraghaPlaylist *cplaylist);
+void pragha_playlist_toggle_queue_selected (PraghaPlaylist *cplaylist);
 
 void pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed, PraghaMusicobject *nmobj);
 void

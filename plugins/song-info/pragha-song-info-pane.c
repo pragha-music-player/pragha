@@ -58,6 +58,7 @@ enum {
 	SIGNAL_TYPE_CHANGED,
 	SIGNAL_APPEND,
 	SIGNAL_APPEND_ALL,
+	SIGNAL_QUEUE,
 	LAST_SIGNAL
 };
 static int signals[LAST_SIGNAL] = { 0 };
@@ -262,6 +263,26 @@ pragha_song_info_row_activated (GtkListBox         *box,
 		return;
 
 	g_signal_emit (pane, signals[SIGNAL_APPEND], 0, mobj);
+}
+
+static gboolean
+pragha_song_info_row_key_press (GtkWidget          *widget,
+                                GdkEventKey        *event,
+                                PraghaSonginfoPane *pane)
+{
+	GtkListBoxRow *row;
+	PraghaMusicobject *mobj = NULL;
+	if (event->keyval != GDK_KEY_q && event->keyval != GDK_KEY_Q)
+		return FALSE;
+
+	row = gtk_list_box_get_selected_row (GTK_LIST_BOX (pane->list_view));
+	mobj = g_object_get_data (G_OBJECT(row), "SONG");
+	if (mobj == NULL)
+		return FALSE;
+
+	g_signal_emit (pane, signals[SIGNAL_QUEUE], 0, mobj);
+
+	return TRUE;
 }
 
 static void
@@ -494,6 +515,8 @@ pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
 
 	g_signal_connect (list, "row-activated",
 	                  G_CALLBACK(pragha_song_info_row_activated), pane);
+	g_signal_connect (list, "key-press-event",
+	                  G_CALLBACK(pragha_song_info_row_key_press), pane);
 	g_signal_connect (append_button, "clicked",
 	                  G_CALLBACK(pragha_song_info_append_songs), pane);
 
@@ -539,6 +562,15 @@ pragha_songinfo_pane_class_init (PraghaSonginfoPaneClass *klass)
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__VOID,
 		              G_TYPE_NONE, 0);
+
+	signals[SIGNAL_QUEUE] =
+		g_signal_new ("queue",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaSonginfoPaneClass, queue),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__POINTER,
+		              G_TYPE_NONE, 1, G_TYPE_POINTER);
 }
 
 PraghaSonginfoPane *

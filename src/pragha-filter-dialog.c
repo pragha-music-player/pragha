@@ -82,7 +82,7 @@ pragha_filter_dialog_key_press (GtkWidget *fliter_view,
 			gtk_tree_path_free (list->data);
 			g_list_free (list);
 
-			toggle_queue_selected_current_playlist (fdialog->cplaylist);
+			pragha_playlist_toggle_queue_selected (fdialog->cplaylist);
 		}
 		return TRUE;
 	}
@@ -267,7 +267,7 @@ pragha_filter_dialog_response(GtkDialog *dialog,
 			gtk_tree_path_free (list->data);
 			g_list_free (list);
 		}
-		toggle_queue_selected_current_playlist (fdialog->cplaylist);
+		pragha_playlist_toggle_queue_selected (fdialog->cplaylist);
 		break;
 	case GTK_RESPONSE_APPLY:
 		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(fdialog->filter_view));

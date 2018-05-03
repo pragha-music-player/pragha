@@ -39,6 +39,7 @@ typedef struct {
 	void (*type_changed)   (PraghaSonginfoPane *pane);
 	void (*append)         (PraghaSonginfoPane *pane, PraghaMusicobject *mobj);
 	void (*append_all)     (PraghaSonginfoPane *pane);
+	void (*queue)          (PraghaSonginfoPane *pane, PraghaMusicobject *mobj);
 } PraghaSonginfoPaneClass;
 
 GtkWidget *         pragha_songinfo_pane_row_new               (PraghaMusicobject *mobj);

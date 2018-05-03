@@ -368,6 +368,29 @@ pragha_songinfo_pane_append (PraghaSonginfoPane *pane,
 }
 
 static void
+pragha_songinfo_pane_queue (PraghaSonginfoPane *pane,
+                            PraghaMusicobject *mobj,
+                            PraghaSongInfoPlugin *plugin)
+{
+	PraghaPlaylist *playlist;
+	const gchar *provider = NULL, *title = NULL, *artist = NULL;
+
+	PraghaSongInfoPluginPrivate *priv = plugin->priv;
+
+	provider = pragha_musicobject_get_provider (mobj);
+	if (string_is_empty(provider))
+		return;
+
+	title = pragha_musicobject_get_title (mobj);
+	artist = pragha_musicobject_get_artist (mobj);
+	playlist = pragha_application_get_playlist (priv->pragha);
+	if (!pragha_playlist_already_has_title_of_artist (playlist, title, artist))
+		pragha_playlist_append_single_song (playlist, g_object_ref(mobj));
+	pragha_playlist_select_title_of_artist (playlist, title, artist);
+	pragha_playlist_toggle_queue_selected (playlist);
+}
+
+static void
 pragha_songinfo_pane_append_all (PraghaSonginfoPane   *pane,
                                  PraghaSongInfoPlugin *plugin)
 {
@@ -587,6 +610,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                  G_CALLBACK(pragha_songinfo_pane_append), plugin);
 	g_signal_connect (G_OBJECT(priv->pane), "append-all",
 	                  G_CALLBACK(pragha_songinfo_pane_append_all), plugin);
+	g_signal_connect (G_OBJECT(priv->pane), "queue",
+	                  G_CALLBACK(pragha_songinfo_pane_queue), plugin);
 
 	/* Default values */
 
