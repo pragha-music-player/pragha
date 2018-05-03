@@ -449,7 +449,7 @@ pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
 	gtk_widget_set_halign (label, GTK_ALIGN_START);
 	gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 	gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
-	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
+	g_object_set (label, "xalign", 0.0, NULL);
 
 	attrs = pango_attr_list_new ();
 	pango_attr_list_insert (attrs, pango_attr_weight_new (PANGO_WEIGHT_BOLD));
