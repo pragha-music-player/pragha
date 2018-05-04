@@ -16,6 +16,8 @@
 
 const char *HTML_ESCAPE[] = {
 	"&amp;", "&",
+	"&lt;", "<",
+	"&gt;", ">",
 	"&quot;","\"",
 	"&ndash;","-",
 	NULL

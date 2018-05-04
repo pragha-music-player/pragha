@@ -1310,6 +1310,7 @@ pragha_lastfm_now_playing_thread (gpointer data)
 	LFMList *list = NULL;
 	LASTFM_TRACK_INFO *ntrack = NULL;
 	gchar *title = NULL, *artist = NULL, *album = NULL;
+	gchar *utitle = NULL, *uartist = NULL, *ualbum = NULL;
 	gint track_no, length, changed = 0, rv;
 
 	PraghaLastfmPlugin *plugin = data;
@@ -1340,11 +1341,14 @@ pragha_lastfm_now_playing_thread (gpointer data)
 		/* Fist check lastfm response, and compare tags. */
 		if (list != NULL) {
 			ntrack = list->data;
-			if (ntrack->name && !g_strrstr(ntrack->name, ";&#") && g_ascii_strcasecmp(title, ntrack->name))
+			utitle = pragha_unescape_html_utf75(ntrack->name);
+			uartist = pragha_unescape_html_utf75(ntrack->artist);
+			ualbum = pragha_unescape_html_utf75(ntrack->album);
+			if (utitle && !g_strrstr(utitle, ";&#") && g_ascii_strcasecmp(title, utitle))
 				changed |= TAG_TITLE_CHANGED;
-			if (ntrack->artist && !g_strrstr(ntrack->artist, ";&#") && g_ascii_strcasecmp(artist, ntrack->artist))
+			if (uartist && !g_strrstr(uartist, ";&#") && g_ascii_strcasecmp(artist, uartist))
 				changed |= TAG_ARTIST_CHANGED;
-			if (ntrack->album && !g_strrstr(ntrack->album, ";&#") && g_ascii_strcasecmp(album, ntrack->album))
+			if (ualbum && !g_strrstr(ualbum, ";&#") && g_ascii_strcasecmp(album, ualbum))
 				changed |= TAG_ALBUM_CHANGED;
 		}
 
@@ -1354,11 +1358,11 @@ pragha_lastfm_now_playing_thread (gpointer data)
 				g_object_unref (priv->updated_mobj);
 			priv->updated_mobj = pragha_musicobject_dup (priv->current_mobj);
 			if (changed & TAG_TITLE_CHANGED)
-				pragha_musicobject_set_title (priv->updated_mobj, ntrack->name);
+				pragha_musicobject_set_title (priv->updated_mobj, utitle);
 			if (changed & TAG_ARTIST_CHANGED)
-				pragha_musicobject_set_artist (priv->updated_mobj, ntrack->artist);
+				pragha_musicobject_set_artist (priv->updated_mobj, uartist);
 			if (changed & TAG_ALBUM_CHANGED)
-				pragha_musicobject_set_album (priv->updated_mobj, ntrack->album);
+				pragha_musicobject_set_album (priv->updated_mobj, ualbum);
 			g_mutex_unlock (&priv->data_mutex);
 
 			g_idle_add (pragha_lastfm_show_corrrection_button, plugin);
@@ -1369,6 +1373,10 @@ pragha_lastfm_now_playing_thread (gpointer data)
 	g_free(title);
 	g_free(artist);
 	g_free(album);
+
+	g_free(utitle);
+	g_free(uartist);
+	g_free(ualbum);
 
 	if (rv != LASTFM_STATUS_OK)
 		return _("Update current song on Last.fm failed.");

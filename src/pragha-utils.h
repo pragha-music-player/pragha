@@ -27,6 +27,8 @@
 #define string_is_empty(s) (!(s) || !(s)[0])
 #define string_is_not_empty(s) (s && (s)[0])
 
+gchar *pragha_unescape_html_utf75 (const gchar *str);
+
 gchar *e2_utf8_ndup (const gchar *str, glong num);
 gsize levenshtein_strcmp(const gchar * s, const gchar * t);
 gsize levenshtein_safe_strcmp(const gchar * s, const gchar * t);
