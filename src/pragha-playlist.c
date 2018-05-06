@@ -1786,15 +1786,15 @@ current_playlist_key_press (GtkWidget *win, GdkEventKey *event, PraghaPlaylist *
 	gint n_select = 0;
 	gboolean is_queue = FALSE;
 
-	/* Special case some shortcuts 
+	/* Special case some shortcuts */
+
 	if (event->state != 0) {
-		if ((event->state & GDK_CONTROL_MASK)
-		    && event->keyval == GDK_KEY_a) {
-			gtk_tree_selection_select_all
-				(playlist->priv->selection);
+		if (event->state & GDK_MOD1_MASK && event->keyval == GDK_KEY_Return) {
+			pragha_playlist_edit_tags (NULL, cplaylist);
 			return TRUE;
 		}
-	}*/
+	}
+
 	/* If we have modifiers, and either Ctrl, Mod1 (Alt), or any
 	 * of Mod3 to Mod5 (Mod2 is num-lock...) are pressed, we
 	 * let Gtk+ handle the key */
@@ -1805,6 +1805,7 @@ current_playlist_key_press (GtkWidget *win, GdkEventKey *event, PraghaPlaylist *
 			|| (event->state & GDK_MOD4_MASK)
 			|| (event->state & GDK_MOD5_MASK)))
 		return FALSE;
+
 	if (event->keyval == GDK_KEY_Delete){
 		pragha_playlist_remove_selection(cplaylist);
 		return TRUE;
