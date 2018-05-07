@@ -447,7 +447,7 @@ pragha_database_add_playlist_track (PraghaDatabase *database, gint playlist_id, 
 void
 pragha_database_delete_playlist_track (PraghaDatabase *database, gint playlist_id, const gchar *file)
 {
-	const gchar *sql = "DELETE FROM PLAYLIST_TRACKS (file, playlist) VALUES (?, ?)";
+	const gchar *sql = "DELETE FROM PLAYLIST_TRACKS WHERE file = ? AND playlist = ?";
 	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
 	pragha_prepared_statement_bind_string (statement, 1, file);
 	pragha_prepared_statement_bind_int (statement, 2, playlist_id);

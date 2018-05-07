@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2010-2017 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2010-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -41,6 +41,7 @@ void pragha_backend_tags_changed          (PraghaBackend *backend, gint changed,
 void pragha_playback_show_current_album_art (GObject *object, PraghaApplication *pragha);
 void pragha_playback_edit_current_track   (PraghaApplication *pragha);
 
-void pragha_playback_seek_fraction (GObject *object, gdouble fraction, PraghaApplication *pragha);
+void pragha_playback_seek_fraction        (GObject *object, gdouble fraction, PraghaApplication *pragha);
+void pragha_playback_toogle_favorite      (GObject *object, PraghaApplication *pragha);
 
 #endif /* PRAGHA_PLAYBACK_H */

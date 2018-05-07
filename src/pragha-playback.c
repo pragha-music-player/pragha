@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2010-2012 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2010-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -24,6 +24,7 @@
 #include "pragha-tags-dialog.h"
 #include "pragha-tagger.h"
 #include "pragha-musicobject-mgmt.h"
+#include "pragha-favorites.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha.h"
@@ -184,6 +185,7 @@ pragha_playback_set_playlist_track (PraghaPlaylist *playlist, PraghaMusicobject 
 {
 	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
+	PraghaFavorites *favorites;
 
 	CDEBUG(DBG_BACKEND, "Set track activated on playlist");
 
@@ -205,6 +207,12 @@ pragha_playback_set_playlist_track (PraghaPlaylist *playlist, PraghaMusicobject 
 
 	/* Update album art */
 	pragha_playback_update_current_album_art (pragha, mobj);
+
+	/* Set favorites icon */
+	favorites = pragha_favorites_get ();
+	if (pragha_favorites_contains_song(favorites, mobj))
+		pragha_toolbar_set_favorite_icon (toolbar, TRUE);
+	g_object_unref (favorites);
 }
 
 void
@@ -407,4 +415,31 @@ pragha_playback_seek_fraction (GObject *object, gdouble fraction, PraghaApplicat
 		seek = length;
 
 	pragha_backend_seek (backend, seek);
+}
+
+void
+pragha_playback_toogle_favorite (GObject *object, PraghaApplication *pragha)
+{
+	PraghaBackend *backend = NULL;
+	PraghaToolbar *toolbar = NULL;
+	PraghaFavorites *favorites = NULL;
+	PraghaMusicobject *mobj = NULL;
+
+	backend = pragha_application_get_backend (pragha);
+	if (pragha_backend_get_state (backend) != ST_PLAYING)
+		return;
+
+	toolbar = pragha_application_get_toolbar (pragha);
+
+	favorites = pragha_favorites_get ();
+	mobj = pragha_backend_get_musicobject (backend);
+	if (pragha_favorites_contains_song(favorites, mobj)) {
+		pragha_favorites_remove_song (favorites, mobj);
+		pragha_toolbar_set_favorite_icon (toolbar, FALSE);
+	}
+	else {
+		pragha_favorites_put_song (favorites, mobj);
+		pragha_toolbar_set_favorite_icon (toolbar, TRUE);
+	}
+	g_object_unref (favorites);
 }

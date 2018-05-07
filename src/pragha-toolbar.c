@@ -38,8 +38,6 @@
 static void pragha_toolbar_set_remaning_mode (PraghaToolbar *toolbar, gboolean remaning_mode);
 gboolean    pragha_toolbar_get_remaning_mode (PraghaToolbar *toolbar);
 
-static void pragha_toolbar_plugin_set_favorites_icon (GtkButton *button, gboolean love);
-
 struct _PraghaToolbar {
 	GtkHeaderBar   __parent__;
 
@@ -84,6 +82,7 @@ enum
 	ALBUM_ART_ACTIVATED,
 	TRACK_INFO_ACTIVATED,
 	TRACK_PROGRESS_ACTIVATED,
+	TRACK_FAVORITE_TOGGLE,
 	UNFULL_ACTIVATED,
 	TRACK_TIME_ACTIVATED,
 	LAST_SIGNAL
@@ -161,9 +160,6 @@ pragha_toolbar_set_title (PraghaToolbar *toolbar, PraghaMusicobject *mobj)
 
 	gtk_label_set_markup(GTK_LABEL(toolbar->now_playing_label), str);
 
-	if (pragha_favorites_contains_song(toolbar->favorites, mobj))
-		pragha_toolbar_plugin_set_favorites_icon (GTK_BUTTON(toolbar->favorites_button), TRUE);
-
 	g_free(str_title);
 	g_free(str);
 }
@@ -176,7 +172,7 @@ pragha_toolbar_unset_song_info(PraghaToolbar *toolbar)
 	gtk_label_set_markup(GTK_LABEL(toolbar->track_time_label),    "<small>00:00</small>");
 
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), 0);
-	pragha_toolbar_plugin_set_favorites_icon (GTK_BUTTON(toolbar->favorites_button), FALSE);
+	pragha_toolbar_set_favorite_icon (toolbar, FALSE);
 
 	pragha_album_art_set_path(toolbar->albumart, NULL);
 }
@@ -194,6 +190,33 @@ void
 pragha_toolbar_set_image_album_art (PraghaToolbar *toolbar, const gchar *uri)
 {
 	pragha_album_art_set_path (toolbar->albumart, uri);
+}
+
+void
+pragha_toolbar_set_favorite_icon (PraghaToolbar *toolbar, gboolean love)
+{
+	GtkWidget *image;
+	GIcon *icon = NULL;
+
+ 	const gchar *love_icons[] = {
+		"favorite",
+		"starred",
+		"starred-symbolic",
+		NULL,
+	};
+ 	const gchar *unlove_icons[] = {
+		"not-favorite",
+		"not-starred",
+		"non-starred",
+		"not-starred-symbolic",
+		"non-starred-symbolic",
+		NULL,
+	};
+
+	icon = g_themed_icon_new_from_names (love ? (gchar **)love_icons : (gchar **)unlove_icons, -1);
+	image = gtk_image_new_from_gicon (icon, GTK_ICON_SIZE_MENU);
+	gtk_image_set_pixel_size (GTK_IMAGE(image), 12);
+	gtk_button_set_image (GTK_BUTTON (toolbar->favorites_button), image);
 }
 
 /* Grab focus on current playlist when press Up or Down and move between controls with Left or Right */
@@ -429,7 +452,6 @@ pragha_toolbar_add_extra_button (PraghaToolbar *toolbar, GtkWidget *widget)
 	gtk_container_add(GTK_CONTAINER(toolbar->extra_button_box), widget);
 }
 
-
 const gchar*
 pragha_toolbar_get_progress_text(PraghaToolbar *toolbar)
 {
@@ -453,37 +475,9 @@ pragha_toolbar_get_album_art(PraghaToolbar *toolbar)
  */
 
 static void
-pragha_toolbar_plugin_set_favorites_icon (GtkButton *button, gboolean love)
-{
-	GtkWidget *image;
-	GIcon *icon = NULL;
-
- 	const gchar *love_icons[] = {
-		"favorite",
-		"starred",
-		"starred-symbolic",
-		NULL,
-	};
- 	const gchar *unlove_icons[] = {
-		"not-favorite",
-		"not-starred",
-		"non-starred",
-		"not-starred-symbolic",
-		"non-starred-symbolic",
-		NULL,
-	};
-
-	icon = g_themed_icon_new_from_names (love ? (gchar **)love_icons : (gchar **)unlove_icons, -1);
-	image = gtk_image_new_from_gicon (icon, GTK_ICON_SIZE_MENU);
-	gtk_image_set_pixel_size (GTK_IMAGE(image), 12);
-	gtk_button_set_image (GTK_BUTTON (button), image);
-}
-
-static void
 pragha_toolbar_favorites_clicked (GtkButton *button, PraghaToolbar *toolbar)
 {
-	pragha_toolbar_plugin_set_favorites_icon (button, TRUE);
-
+	g_signal_emit (toolbar, signals[TRACK_FAVORITE_TOGGLE], 0);
 }
 
 GtkWidget *
@@ -561,7 +555,7 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	favorites_button = gtk_button_new ();
 	gtk_button_set_relief(GTK_BUTTON(favorites_button), GTK_RELIEF_NONE);
 	pragha_hig_set_tiny_button (favorites_button);
-	pragha_toolbar_plugin_set_favorites_icon (GTK_BUTTON(favorites_button), FALSE);
+	pragha_toolbar_set_favorite_icon (toolbar, FALSE);
 	g_signal_connect (G_OBJECT(favorites_button), "clicked",
 	                  G_CALLBACK(pragha_toolbar_favorites_clicked), toolbar);
 
@@ -764,62 +758,78 @@ pragha_toolbar_class_init (PraghaToolbarClass *klass)
 	/*
 	 * Signals:
 	 */
-	signals[PREV_ACTIVATED] = g_signal_new ("prev",
-	                                        G_TYPE_FROM_CLASS (gobject_class),
-	                                        G_SIGNAL_RUN_LAST,
-	                                        G_STRUCT_OFFSET (PraghaToolbarClass, prev),
-	                                        NULL, NULL,
-	                                        g_cclosure_marshal_VOID__VOID,
-	                                        G_TYPE_NONE, 0);
-	signals[PLAY_ACTIVATED] = g_signal_new ("play",
-	                                        G_TYPE_FROM_CLASS (gobject_class),
-	                                        G_SIGNAL_RUN_LAST,
-	                                        G_STRUCT_OFFSET (PraghaToolbarClass, play),
-	                                        NULL, NULL,
-	                                        g_cclosure_marshal_VOID__VOID,
-	                                        G_TYPE_NONE, 0);
-	signals[STOP_ACTIVATED] = g_signal_new ("stop",
-	                                        G_TYPE_FROM_CLASS (gobject_class),
-	                                        G_SIGNAL_RUN_LAST,
-	                                        G_STRUCT_OFFSET (PraghaToolbarClass, stop),
-	                                        NULL, NULL,
-	                                        g_cclosure_marshal_VOID__VOID,
-	                                        G_TYPE_NONE, 0);
-	signals[NEXT_ACTIVATED] = g_signal_new ("next",
-	                                        G_TYPE_FROM_CLASS (gobject_class),
-	                                        G_SIGNAL_RUN_LAST,
-	                                        G_STRUCT_OFFSET (PraghaToolbarClass, next),
-	                                        NULL, NULL,
-	                                        g_cclosure_marshal_VOID__VOID,
-	                                        G_TYPE_NONE, 0);
-	signals[ALBUM_ART_ACTIVATED] = g_signal_new ("album-art-activated",
-	                                             G_TYPE_FROM_CLASS (gobject_class),
-	                                             G_SIGNAL_RUN_LAST,
-	                                             G_STRUCT_OFFSET (PraghaToolbarClass, album_art_activated),
-	                                             NULL, NULL,
-	                                             g_cclosure_marshal_VOID__VOID,
-	                                             G_TYPE_NONE, 0);
-	signals[TRACK_INFO_ACTIVATED] = g_signal_new ("track-info-activated",
-	                                              G_TYPE_FROM_CLASS (gobject_class),
-	                                              G_SIGNAL_RUN_LAST,
-	                                              G_STRUCT_OFFSET (PraghaToolbarClass, track_info_activated),
-	                                              NULL, NULL,
-	                                              g_cclosure_marshal_VOID__VOID,
-	                                              G_TYPE_NONE, 0);
-	signals[TRACK_PROGRESS_ACTIVATED] = g_signal_new ("track-progress-activated",
-	                                                  G_TYPE_FROM_CLASS (gobject_class),
-	                                                  G_SIGNAL_RUN_LAST,
-	                                                  G_STRUCT_OFFSET (PraghaToolbarClass, track_progress_activated),
-	                                                  NULL, NULL,
-	                                                  g_cclosure_marshal_VOID__DOUBLE,
-	                                                  G_TYPE_NONE, 1, G_TYPE_DOUBLE);
-	signals[UNFULL_ACTIVATED] = g_signal_new ("unfull-activated",
-	                                          G_TYPE_FROM_CLASS (gobject_class),
-	                                          G_SIGNAL_RUN_LAST,
-	                                          G_STRUCT_OFFSET (PraghaToolbarClass, unfull),
-	                                          NULL, NULL,
-	                                          g_cclosure_marshal_VOID__VOID,
-	                                          G_TYPE_NONE, 0);
+	signals[PREV_ACTIVATED] =
+		g_signal_new ("prev",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaToolbarClass, prev),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
+	signals[PLAY_ACTIVATED] =
+		g_signal_new ("play",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaToolbarClass, play),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
+	signals[STOP_ACTIVATED] =
+		g_signal_new ("stop",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaToolbarClass, stop),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
+	signals[NEXT_ACTIVATED] =
+		g_signal_new ("next",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaToolbarClass, next),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
+	signals[ALBUM_ART_ACTIVATED] =
+		g_signal_new ("album-art-activated",
+		             G_TYPE_FROM_CLASS (gobject_class),
+		             G_SIGNAL_RUN_LAST,
+		             G_STRUCT_OFFSET (PraghaToolbarClass, album_art_activated),
+		             NULL, NULL,
+		             g_cclosure_marshal_VOID__VOID,
+		             G_TYPE_NONE, 0);
+	signals[TRACK_INFO_ACTIVATED] =
+		g_signal_new ("track-info-activated",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaToolbarClass, track_info_activated),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
+	signals[TRACK_PROGRESS_ACTIVATED] =
+		g_signal_new ("track-progress-activated",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaToolbarClass, track_progress_activated),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__DOUBLE,
+		              G_TYPE_NONE, 1, G_TYPE_DOUBLE);
+	signals[TRACK_FAVORITE_TOGGLE] =
+		g_signal_new ("favorite-toggle",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaToolbarClass, favorite_toggle),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
+	signals[UNFULL_ACTIVATED] =
+		g_signal_new ("unfull-activated",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaToolbarClass, unfull),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
 }
 
 static void

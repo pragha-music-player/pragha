@@ -106,13 +106,19 @@ pragha_favorites_get (void)
 void
 pragha_favorites_put_song (PraghaFavorites *favorites, PraghaMusicobject *mobj)
 {
+	gint playlist_id = 0;
+	playlist_id = pragha_database_find_playlist (favorites->cdbase, _("Favorites"));
+	pragha_database_add_playlist_track (favorites->cdbase, playlist_id, pragha_musicobject_get_file(mobj));
 	g_signal_emit (favorites, signals[SIGNAL_SONG_ADDED], 0, mobj);
 	return;
 }
 
 void
-pragha_favorites_put_remove (PraghaFavorites *favorites, PraghaMusicobject *mobj)
+pragha_favorites_remove_song (PraghaFavorites *favorites, PraghaMusicobject *mobj)
 {
+	gint playlist_id = 0;
+	playlist_id = pragha_database_find_playlist (favorites->cdbase, _("Favorites"));
+	pragha_database_delete_playlist_track (favorites->cdbase, playlist_id, pragha_musicobject_get_file(mobj));
 	g_signal_emit (favorites, signals[SIGNAL_SONG_REMOVED], 0, mobj);
 	return;
 }

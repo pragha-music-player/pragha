@@ -1148,6 +1148,8 @@ pragha_application_startup (GApplication *application)
 	                          G_CALLBACK(pragha_playback_edit_current_track), pragha);
 	g_signal_connect (toolbar, "track-progress-activated",
 	                  G_CALLBACK(pragha_playback_seek_fraction), pragha);
+	g_signal_connect (toolbar, "favorite-toggle",
+	                  G_CALLBACK(pragha_playback_toogle_favorite), pragha);
 
 	playlist = pragha->playlist;
 	g_signal_connect (playlist, "playlist-set-track",

@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -44,11 +44,13 @@ typedef struct {
 	void (*album_art_activated) (PraghaToolbar *toolbar);
 	void (*track_info_activated) (PraghaToolbar *toolbar);
 	void (*track_progress_activated) (PraghaToolbar *toolbar, gdouble fraction);
+	void (*favorite_toggle) (PraghaToolbar *toolbar);
 	void (*unfull) (PraghaToolbar *toolbar);
 } PraghaToolbarClass;
 
 void pragha_toolbar_set_title               (PraghaToolbar *toolbar, PraghaMusicobject *mobj);
 void pragha_toolbar_set_image_album_art     (PraghaToolbar *toolbar, const gchar *uri);
+void pragha_toolbar_set_favorite_icon       (PraghaToolbar *toolbar, gboolean love);
 void pragha_toolbar_update_progress         (PraghaToolbar *toolbar, gint length, gint progress);
 
 void pragha_toolbar_update_buffering_cb      (PraghaBackend *backend, gint percent, gpointer user_data);
