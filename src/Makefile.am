@@ -34,6 +34,8 @@ pragha_SOURCES = \
 	pragha-dnd.h \
 	pragha-equalizer-dialog.c \
 	pragha-equalizer-dialog.h \
+	pragha-favorites.c \
+	pragha-favorites.h \
 	pragha-file-utils.c \
 	pragha-file-utils.h \
 	pragha-filter-dialog.c \

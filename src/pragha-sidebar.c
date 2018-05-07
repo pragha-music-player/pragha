@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2013 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2018 matias <mati86dl@gmail.com>                        */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -16,6 +16,7 @@
 /*************************************************************************/
 
 #include "pragha-sidebar.h"
+#include "pragha-hig.h"
 
 struct _PraghaSidebar {
 	GtkBox     __parent__;
@@ -206,33 +207,6 @@ pragha_sidebar_right_click_cb(GtkWidget *widget,
  * Construction:
  **/
 
-static void
-pragha_sidebar_set_tiny_button (GtkWidget *button)
-{
-	GtkCssProvider *provider;
-	provider = gtk_css_provider_new ();
-	gtk_css_provider_load_from_data (provider,
-	                                 "#s-tiny-button {\n"
-#if GTK_CHECK_VERSION (3, 14, 0)
-	                                 " margin : 0px;\n"
-	                                 " min-width: 10px; \n"
-	                                 " min-height: 10px; \n"
-#else
-	                                 " -GtkButton-default-border : 0px;\n"
-	                                 " -GtkButton-default-outside-border : 0px;\n"
-	                                 " -GtkButton-inner-border: 0px;\n"
-	                                 " -GtkWidget-focus-line-width: 0px;\n"
-	                                 " -GtkWidget-focus-padding: 0px;\n"
-#endif
-	                                 " padding: 1px;}",
-	                                 -1, NULL);
-	gtk_style_context_add_provider (gtk_widget_get_style_context (button),
-	                                GTK_STYLE_PROVIDER (provider),
-	                                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-	gtk_widget_set_name (button, "s-tiny-button");
-	g_object_unref (provider);
-}
-
 static GtkWidget *
 praga_sidebar_menu_button_new (PraghaSidebar *sidebar)
 {
@@ -284,7 +258,7 @@ pragha_sidebar_close_button_new(PraghaSidebar *sidebar)
 #else
 	gtk_button_set_focus_on_click (GTK_BUTTON (button), FALSE);
 #endif
-	pragha_sidebar_set_tiny_button (button);
+	pragha_hig_set_tiny_button (button);
 	gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
 
 	icon = g_themed_icon_new_from_names ((gchar **)fallback_icons, -1);

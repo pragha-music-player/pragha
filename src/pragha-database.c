@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2017 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
 /* Copyright (C) 2012-2013 Pavel Vasin                                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify	 */
@@ -419,10 +419,35 @@ pragha_database_add_new_playlist (PraghaDatabase *database, const gchar *playlis
 	return pragha_database_find_playlist (database, playlist);
 }
 
+gboolean
+pragha_database_playlist_has_track (PraghaDatabase *database, gint playlist_id, const gchar *file)
+{
+	gint count = 0;
+	const gchar *sql = "SELECT COUNT() FROM PLAYLIST_TRACKS WHERE playlist = ? AND file = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, playlist_id);
+	pragha_prepared_statement_bind_string (statement, 2, file);
+	if (pragha_prepared_statement_step (statement))
+		count = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+	return count > 0;
+}
+
 void
 pragha_database_add_playlist_track (PraghaDatabase *database, gint playlist_id, const gchar *file)
 {
 	const gchar *sql = "INSERT INTO PLAYLIST_TRACKS (file, playlist) VALUES (?, ?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, file);
+	pragha_prepared_statement_bind_int (statement, 2, playlist_id);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+}
+
+void
+pragha_database_delete_playlist_track (PraghaDatabase *database, gint playlist_id, const gchar *file)
+{
+	const gchar *sql = "DELETE FROM PLAYLIST_TRACKS (file, playlist) VALUES (?, ?)";
 	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
 	pragha_prepared_statement_bind_string (statement, 1, file);
 	pragha_prepared_statement_bind_int (statement, 2, playlist_id);

@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2012-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2012-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -28,6 +28,33 @@ gtk_label_set_attribute_bold(GtkLabel *label)
 	gtk_label_set_attributes(label, Bold);
 
 	pango_attr_list_unref(Bold);
+}
+
+void
+pragha_hig_set_tiny_button (GtkWidget *button)
+{
+	GtkCssProvider *provider;
+	provider = gtk_css_provider_new ();
+	gtk_css_provider_load_from_data (provider,
+	                                 "#s-tiny-button {\n"
+#if GTK_CHECK_VERSION (3, 14, 0)
+	                                 " margin : 0px;\n"
+	                                 " min-width: 10px; \n"
+	                                 " min-height: 10px; \n"
+#else
+	                                 " -GtkButton-default-border : 0px;\n"
+	                                 " -GtkButton-default-outside-border : 0px;\n"
+	                                 " -GtkButton-inner-border: 0px;\n"
+	                                 " -GtkWidget-focus-line-width: 0px;\n"
+	                                 " -GtkWidget-focus-padding: 0px;\n"
+#endif
+	                                 " padding: 0px;}",
+	                                 -1, NULL);
+	gtk_style_context_add_provider (gtk_widget_get_style_context (button),
+	                                GTK_STYLE_PROVIDER (provider),
+	                                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	gtk_widget_set_name (button, "s-tiny-button");
+	g_object_unref (provider);
 }
 
 GtkWidget *

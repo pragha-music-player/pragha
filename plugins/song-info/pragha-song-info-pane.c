@@ -29,6 +29,7 @@
 
 #include "pragha-song-info-pane.h"
 
+#include "src/pragha-hig.h"
 #include "src/pragha-utils.h"
 
 struct _PraghaSonginfoPane {
@@ -360,37 +361,6 @@ pragha_songinfo_pane_show_similar_action (GtkAction *action, PraghaSonginfoPane 
 	g_signal_emit (pane, signals[SIGNAL_TYPE_CHANGED], 0);
 }
 
-void
-pragha_koel_plugin_set_tiny_button (GtkWidget *button)
-{
-	GtkCssProvider *provider;
-	GtkStyleContext *context;
-
-	provider = gtk_css_provider_new ();
-	gtk_css_provider_load_from_data (provider,
-	                                 ".tiny-button {\n"
-#if GTK_CHECK_VERSION (3, 14, 0)
-	                                 " margin : 0px;\n"
-	                                 " min-width: 14px; \n"
-	                                 " min-height: 12px; \n"
-#else
-	                                 " -GtkButton-default-border : 0px;\n"
-	                                 " -GtkButton-default-outside-border : 0px;\n"
-	                                 " -GtkButton-inner-border: 0px;\n"
-	                                 " -GtkWidget-focus-line-width: 0px;\n"
-	                                 " -GtkWidget-focus-padding: 0px;\n"
-#endif
-	                                 " padding: 1px;}",
-	                                 -1, NULL);
-
-	context = gtk_widget_get_style_context (button);
-	gtk_style_context_add_provider (context,
-	                                GTK_STYLE_PROVIDER (provider),
-	                                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
-	gtk_style_context_add_class (context, "tiny-button");
-	g_object_unref (provider);
-}
 /* Construction */
 
 static GtkUIManager *
@@ -462,7 +432,7 @@ pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
 	gtk_style_context_add_class (context, "linked");
 
 	append_button = gtk_button_new ();
-	pragha_koel_plugin_set_tiny_button (append_button);
+	pragha_hig_set_tiny_button (append_button);
 	gtk_widget_set_tooltip_text (append_button, _("_Add to current playlist"));
 	gtk_widget_set_valign (append_button, GTK_ALIGN_CENTER);
 	icon = gtk_image_new_from_icon_name ("list-add", GTK_ICON_SIZE_MENU);

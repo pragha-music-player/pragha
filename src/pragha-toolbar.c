@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -31,18 +31,20 @@
 #include <gdk/gdkkeysyms.h>
 
 #include "pragha-simple-widgets.h"
+#include "pragha-favorites.h"
+#include "pragha-hig.h"
 #include "pragha-utils.h"
-
-static void pragha_toolbar_finalize (GObject *object);
 
 static void pragha_toolbar_set_remaning_mode (PraghaToolbar *toolbar, gboolean remaning_mode);
 gboolean    pragha_toolbar_get_remaning_mode (PraghaToolbar *toolbar);
 
+static void pragha_toolbar_plugin_set_favorites_icon (GtkButton *button, gboolean love);
 
 struct _PraghaToolbar {
 	GtkHeaderBar   __parent__;
 
 	PraghaAlbumArt *albumart;
+	PraghaFavorites *favorites;
 
 	GtkWidget      *track_progress_bar;
 
@@ -52,7 +54,9 @@ struct _PraghaToolbar {
 	PraghaToolbarButton *next_button;
 	PraghaToolbarButton *unfull_button;
 	GtkWidget      *vol_button;
+
 	GtkWidget      *extra_button_box;
+	GtkWidget      *favorites_button;
 
 	GtkWidget      *track_length_label;
 	GtkWidget      *track_time_label;
@@ -157,6 +161,9 @@ pragha_toolbar_set_title (PraghaToolbar *toolbar, PraghaMusicobject *mobj)
 
 	gtk_label_set_markup(GTK_LABEL(toolbar->now_playing_label), str);
 
+	if (pragha_favorites_contains_song(toolbar->favorites, mobj))
+		pragha_toolbar_plugin_set_favorites_icon (GTK_BUTTON(toolbar->favorites_button), TRUE);
+
 	g_free(str_title);
 	g_free(str);
 }
@@ -169,6 +176,7 @@ pragha_toolbar_unset_song_info(PraghaToolbar *toolbar)
 	gtk_label_set_markup(GTK_LABEL(toolbar->track_time_label),    "<small>00:00</small>");
 
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), 0);
+	pragha_toolbar_plugin_set_favorites_icon (GTK_BUTTON(toolbar->favorites_button), FALSE);
 
 	pragha_album_art_set_path(toolbar->albumart, NULL);
 }
@@ -444,6 +452,40 @@ pragha_toolbar_get_album_art(PraghaToolbar *toolbar)
  * Pragha toolbar creation and destruction.
  */
 
+static void
+pragha_toolbar_plugin_set_favorites_icon (GtkButton *button, gboolean love)
+{
+	GtkWidget *image;
+	GIcon *icon = NULL;
+
+ 	const gchar *love_icons[] = {
+		"favorite",
+		"starred",
+		"starred-symbolic",
+		NULL,
+	};
+ 	const gchar *unlove_icons[] = {
+		"not-favorite",
+		"not-starred",
+		"non-starred",
+		"not-starred-symbolic",
+		"non-starred-symbolic",
+		NULL,
+	};
+
+	icon = g_themed_icon_new_from_names (love ? (gchar **)love_icons : (gchar **)unlove_icons, -1);
+	image = gtk_image_new_from_gicon (icon, GTK_ICON_SIZE_MENU);
+	gtk_image_set_pixel_size (GTK_IMAGE(image), 12);
+	gtk_button_set_image (GTK_BUTTON (button), image);
+}
+
+static void
+pragha_toolbar_favorites_clicked (GtkButton *button, PraghaToolbar *toolbar)
+{
+	pragha_toolbar_plugin_set_favorites_icon (button, TRUE);
+
+}
+
 GtkWidget *
 pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 {
@@ -451,7 +493,7 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	PraghaAlbumArt *albumart;
 	PraghaContainer *box;
 	GtkWidget *hbox, *vbox, *top_hbox, *botton_hbox;
-	GtkWidget *album_art_frame,*title, *title_event_box, *extention_box;
+	GtkWidget *album_art_frame,*title, *title_event_box, *favorites_button, *extention_box;
 	GtkWidget *progress_bar, *progress_bar_event_box, *time_label, *length_label, *length_event_box;
 
 	const GBindingFlags binding_flags =
@@ -514,6 +556,15 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 
 	gtk_container_add (GTK_CONTAINER(title_event_box), title);
 
+	/* Favorites button */
+
+	favorites_button = gtk_button_new ();
+	gtk_button_set_relief(GTK_BUTTON(favorites_button), GTK_RELIEF_NONE);
+	pragha_hig_set_tiny_button (favorites_button);
+	pragha_toolbar_plugin_set_favorites_icon (GTK_BUTTON(favorites_button), FALSE);
+	g_signal_connect (G_OBJECT(favorites_button), "clicked",
+	                  G_CALLBACK(pragha_toolbar_favorites_clicked), toolbar);
+
 	/* The extentions box. */
 	
 	extention_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
@@ -523,6 +574,9 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	gtk_box_pack_start (GTK_BOX(top_hbox),
 	                    GTK_WIDGET(title_event_box),
 	                    TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX(top_hbox),
+	                    GTK_WIDGET(favorites_button),
+	                    FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(top_hbox),
 	                    GTK_WIDGET(extention_box),
 	                    FALSE, FALSE, 0);
@@ -582,6 +636,7 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	toolbar->now_playing_label  = title;
 	toolbar->track_time_label   = time_label;
 	toolbar->track_length_label = length_label;
+	toolbar->favorites_button   = favorites_button;
 	toolbar->extention_box      = extention_box;
 
 	gtk_box_pack_start(GTK_BOX(hbox), vbox, TRUE, TRUE, 2);
@@ -667,6 +722,23 @@ pragha_toolbar_get_property (GObject *object, guint property_id, GValue *value, 
 }
 
 static void
+pragha_toolbar_finalize (GObject *object)
+{
+	(*G_OBJECT_CLASS (pragha_toolbar_parent_class)->finalize) (object);
+}
+
+static void
+pragha_toolbar_dispose (GObject *object)
+{
+	PraghaToolbar *toolbar = PRAGHA_TOOLBAR (object);
+	if (toolbar->favorites) {
+		g_object_unref(toolbar->favorites);
+		toolbar->favorites = NULL;
+	}
+	(*G_OBJECT_CLASS (pragha_toolbar_parent_class)->dispose) (object);
+}
+
+static void
 pragha_toolbar_class_init (PraghaToolbarClass *klass)
 {
 	GObjectClass  *gobject_class;
@@ -675,6 +747,7 @@ pragha_toolbar_class_init (PraghaToolbarClass *klass)
 	gobject_class->set_property = pragha_toolbar_set_property;
 	gobject_class->get_property = pragha_toolbar_get_property;
 	gobject_class->finalize = pragha_toolbar_finalize;
+	gobject_class->dispose = pragha_toolbar_dispose;
 
 	/*
 	 * Properties:
@@ -762,6 +835,10 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	preferences = pragha_preferences_get();
+
+	/* Instanced */
+
+	toolbar->favorites = pragha_favorites_get ();
 
 	/* Setup Left control buttons */
 
@@ -880,12 +957,6 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	gtk_widget_show(GTK_WIDGET(toolbar));
 
 	g_object_unref(preferences);
-}
-
-static void
-pragha_toolbar_finalize (GObject *object)
-{
-	(*G_OBJECT_CLASS (pragha_toolbar_parent_class)->finalize) (object);
 }
 
 PraghaToolbar *

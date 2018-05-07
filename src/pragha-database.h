@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2017 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
 /* Copyright (C) 2012-2013 Pavel Vasin                                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify	 */
@@ -131,6 +131,12 @@ pragha_database_add_new_playlist (PraghaDatabase *database, const gchar *playlis
 
 void
 pragha_database_add_playlist_track (PraghaDatabase *database, gint playlist_id, const gchar *file);
+
+gboolean
+pragha_database_playlist_has_track (PraghaDatabase *database, gint playlist_id, const gchar *file);
+
+void
+pragha_database_delete_playlist_track (PraghaDatabase *database, gint playlist_id, const gchar *file);
 
 gint
 pragha_database_add_new_radio (PraghaDatabase *database, const gchar *radio);
