@@ -74,6 +74,7 @@ struct _PraghaLibraryPane {
 	gchar             *filter_entry;
 	guint              filter_id;
 	gboolean           filter_active;
+	guint              pulse_id;
 
 	/* Fixbuf used on library tree. */
 	GdkPixbuf         *pixbuf_artist;
@@ -1327,8 +1328,11 @@ pragha_library_pane_set_all_visible_func (GtkTreeModel *model,
 	PraghaLibraryPane *library = data;
 	if (library->filter_entry != NULL)
 		return TRUE;
+
 	/* Have to give control to GTK periodically ... */
-	pragha_process_gtk_events ();
+	if (gtk_tree_path_get_depth (path) == 2)
+		pragha_process_gtk_events ();
+
 	gtk_tree_store_set (GTK_TREE_STORE(model), iter,
 	                    L_MACH, FALSE, L_VISIBILE, TRUE, -1);
 	return FALSE;
@@ -1402,6 +1406,10 @@ pragha_libary_pane_filter_tree_func (GtkTreeModel *model,
 
 	if (library->filter_entry == NULL)
 		return TRUE;
+
+	/* Have to give control to GTK periodically ... */
+	if (gtk_tree_path_get_depth (path) == 2)
+		pragha_process_gtk_events ();
 
 	/* Mark node and its parents visible if search entry matches.
 	   If search entry doesn't match, check if _any_ ancestor has
@@ -1508,10 +1516,21 @@ pragha_library_pane_show_all (PraghaLibraryPane *library)
 }
 
 static gboolean
+pragha_search_entry_pulse_it (PraghaLibraryPane *library)
+{
+	gtk_entry_progress_pulse (GTK_ENTRY(library->search_entry));
+	library->pulse_id = g_timeout_add (250, (GSourceFunc)pragha_search_entry_pulse_it, library);
+	return G_SOURCE_REMOVE;
+}
+
+static gboolean
 pragha_library_pane_do_refilter (PraghaLibraryPane *clibrary)
 {
 	gchar *needle = NULL;
 	gboolean ret = FALSE;
+
+	gtk_entry_set_progress_pulse_step (GTK_ENTRY(clibrary->search_entry), 0.1);
+	pragha_search_entry_pulse_it (clibrary);
 
 	if (clibrary->filter_active == TRUE)
 		return TRUE;
@@ -1533,10 +1552,13 @@ pragha_library_pane_do_refilter (PraghaLibraryPane *clibrary)
 	clibrary->filter_active = FALSE;
 
 	/* If changed the needle search again. */
-	if (g_ascii_strcasecmp(needle, clibrary->filter_entry))
+	if (needle && g_ascii_strcasecmp(needle, clibrary->filter_entry))
 		ret = TRUE;
 
 	g_free(needle);
+
+	gtk_entry_set_progress_fraction (clibrary->search_entry, 0);
+	g_source_remove (clibrary->pulse_id);
 
 	return ret;
 }
