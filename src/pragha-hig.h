@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2012-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2012-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -20,7 +20,9 @@
 
 #include <gtk/gtk.h>
 
-void gtk_label_set_attribute_bold(GtkLabel *label);
+void       gtk_label_set_attribute_bold                    (GtkLabel *label);
+
+void       pragha_hig_set_tiny_button                      (GtkWidget *button);
 
 GtkWidget *pragha_hig_workarea_table_add_section_title     (GtkWidget *table, guint *row, const char *section_title);
 void       pragha_hig_workarea_table_add_wide_control      (GtkWidget *table, guint *row, GtkWidget *widget);
