@@ -418,7 +418,7 @@ add_child_node_folder(GtkTreeModel *model,
 
 	/* Insert the new folder after the last subdirectory by order */
 	gtk_tree_store_insert_before (GTK_TREE_STORE(model), iter, p_iter, valid ? &l_iter : NULL);
-	gtk_tree_store_set (GTK_TREE_STORE(model), iter,L_PIXBUF, clibrary->pixbuf_dir,
+	gtk_tree_store_set (GTK_TREE_STORE(model), iter, L_PIXBUF, clibrary->pixbuf_dir,
 	                    L_NODE_DATA, node_data,
 	                    L_NODE_BOLD, PANGO_WEIGHT_NORMAL,
 	                    L_NODE_TYPE, NODE_FOLDER,
@@ -1041,12 +1041,13 @@ library_tree_button_press_cb (GtkWidget *widget,
                               GdkEventButton *event,
                               PraghaLibraryPane *library)
 {
-	GtkWidget *popup_menu;
+	GtkWidget *popup_menu, *menuitem;
 	GtkTreeModel *model;
 	GtkTreePath *path;
 	GtkTreeIter iter;
 	GtkTreeSelection *selection;
-	gboolean many_selected = FALSE;
+	gboolean many_selected = FALSE, sensitive = TRUE;
+	gchar *node_data = NULL;
 	LibraryNodeType node_type;
 	gint n_select = 0;
 
@@ -1115,6 +1116,17 @@ library_tree_button_press_cb (GtkWidget *widget,
 			{
 				popup_menu = gtk_ui_manager_get_widget (library->library_tree_context_menu,
 				                                        "/PlaylistPopup");
+				gtk_tree_model_get (model, &iter, L_NODE_DATA, &node_data, -1);
+				if (g_ascii_strcasecmp(_("Favorites"), node_data) == 0)
+					sensitive = FALSE;
+				g_free (node_data);
+
+				menuitem = gtk_ui_manager_get_widget (library->library_tree_context_menu,
+				                                      "/PlaylistPopup/Rename");
+				gtk_widget_set_sensitive (GTK_WIDGET(menuitem), sensitive);
+				menuitem = gtk_ui_manager_get_widget (library->library_tree_context_menu,
+				                                      "/PlaylistPopup/Delete");
+				gtk_widget_set_sensitive (GTK_WIDGET(menuitem), sensitive);
 			}
 			else if (node_type == NODE_RADIO)
 			{
@@ -1557,7 +1569,7 @@ pragha_library_pane_do_refilter (PraghaLibraryPane *clibrary)
 
 	g_free(needle);
 
-	gtk_entry_set_progress_fraction (clibrary->search_entry, 0);
+	gtk_entry_set_progress_fraction (GTK_ENTRY(clibrary->search_entry), 0);
 	g_source_remove (clibrary->pulse_id);
 
 	return ret;

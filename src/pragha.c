@@ -1069,6 +1069,7 @@ pragha_application_startup (GApplication *application)
 	PraghaPlaylist *playlist;
 	const gchar *version = NULL;
 	const gchar *desktop = NULL;
+	gint playlist_id = 0;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
@@ -1090,6 +1091,9 @@ pragha_application_startup (GApplication *application)
 	if (string_is_not_empty (version) && (g_ascii_strcasecmp (version, "1.3.90") < 0)) {
 		pragha_database_compatibilize_version (pragha->cdbase);
 	}
+	playlist_id = pragha_database_find_playlist (pragha->cdbase, _("Favorites"));
+	if (playlist_id == 0)
+		pragha_database_add_new_playlist (pragha->cdbase, _("Favorites"));
 
 	pragha->provider = pragha_database_provider_get ();
 	g_signal_connect (pragha->provider, "want-upgrade",

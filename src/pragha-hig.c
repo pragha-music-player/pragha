@@ -37,17 +37,11 @@ pragha_hig_set_tiny_button (GtkWidget *button)
 	provider = gtk_css_provider_new ();
 	gtk_css_provider_load_from_data (provider,
 	                                 "#s-tiny-button {\n"
-#if GTK_CHECK_VERSION (3, 14, 0)
-	                                 " margin : 0px;\n"
+#if GTK_CHECK_VERSION (3, 20, 0)
 	                                 " min-width: 10px; \n"
 	                                 " min-height: 10px; \n"
-#else
-	                                 " -GtkButton-default-border : 0px;\n"
-	                                 " -GtkButton-default-outside-border : 0px;\n"
-	                                 " -GtkButton-inner-border: 0px;\n"
-	                                 " -GtkWidget-focus-line-width: 0px;\n"
-	                                 " -GtkWidget-focus-padding: 0px;\n"
 #endif
+	                                 " margin : 0px;\n"
 	                                 " padding: 0px;}",
 	                                 -1, NULL);
 	gtk_style_context_add_provider (gtk_widget_get_style_context (button),

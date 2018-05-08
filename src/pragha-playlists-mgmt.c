@@ -1344,9 +1344,10 @@ update_playlist_changes_save_selection_popup_playlist (PraghaPlaylist *cplaylist
 	menuitem = gtk_separator_menu_item_new ();
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
-	const gchar *sql = "SELECT name FROM PLAYLIST WHERE name != ? ORDER BY name COLLATE NOCASE";
+	const gchar *sql = "SELECT name FROM PLAYLIST WHERE name != ? AND name != ? ORDER BY name COLLATE NOCASE";
 	PraghaPreparedStatement *statement = pragha_database_create_statement (pragha_playlist_get_database(cplaylist), sql);
 	pragha_prepared_statement_bind_string (statement, 1, SAVE_PLAYLIST_STATE);
+	pragha_prepared_statement_bind_string (statement, 2, _("Favorites"));
 
 	while (pragha_prepared_statement_step (statement)) {
 		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
@@ -1380,9 +1381,10 @@ update_playlist_changes_save_playlist_popup_playlist (PraghaPlaylist *cplaylist)
 	menuitem = gtk_separator_menu_item_new ();
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
-	const gchar *sql = "SELECT name FROM PLAYLIST WHERE name != ? ORDER BY name COLLATE NOCASE";
+	const gchar *sql = "SELECT name FROM PLAYLIST WHERE name != ? AND name != ? ORDER BY name COLLATE NOCASE";
 	PraghaPreparedStatement *statement = pragha_database_create_statement (pragha_playlist_get_database(cplaylist), sql);
 	pragha_prepared_statement_bind_string (statement, 1, SAVE_PLAYLIST_STATE);
+	pragha_prepared_statement_bind_string (statement, 2, _("Favorites"));
 
 	while (pragha_prepared_statement_step (statement)) {
 		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
