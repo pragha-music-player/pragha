@@ -37,6 +37,7 @@
 #include "src/pragha-utils.h"
 #include "src/pragha-menubar.h"
 #include "src/pragha-musicobject.h"
+#include "src/pragha-favorites.h"
 #include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-plugins-engine.h"
 #include "src/pragha-statusicon.h"
@@ -63,6 +64,8 @@
 
 struct _PraghaLastfmPluginPrivate {
 	PraghaApplication        *pragha;
+
+	PraghaFavorites          *favorites;
 
 	/* Last session status. */
 	LASTFM_SESSION           *session_id;
@@ -135,18 +138,21 @@ typedef struct {
 } PraghaLastfmAsyncData;
 
 static PraghaLastfmAsyncData *
-pragha_lastfm_async_data_new (PraghaLastfmPlugin *plugin)
+pragha_lastfm_async_data_new (PraghaLastfmPlugin *plugin, PraghaMusicobject *mobj)
 {
 	PraghaBackend *backend;
 	PraghaLastfmAsyncData *data;
 
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	backend = pragha_application_get_backend (priv->pragha);
-
 	data = g_slice_new (PraghaLastfmAsyncData);
 	data->plugin = plugin;
-	data->mobj = pragha_musicobject_dup (pragha_backend_get_musicobject (backend));
+	if (mobj)  {
+		backend = pragha_application_get_backend (priv->pragha);
+		data->mobj = pragha_musicobject_dup (pragha_backend_get_musicobject (backend));
+	}
+	else
+		data->mobj = pragha_musicobject_dup (mobj);
 
 	return data;
 }
@@ -165,15 +171,9 @@ pragha_lastfm_async_data_free (PraghaLastfmAsyncData *data)
 static void lastfm_add_favorites_action                 (GtkAction *action, PraghaLastfmPlugin *plugin);
 static void lastfm_get_similar_action                   (GtkAction *action, PraghaLastfmPlugin *plugin);
 static void lastfm_import_xspf_action                   (GtkAction *action, PraghaLastfmPlugin *plugin);
-static void lastfm_track_love_action                    (GtkAction *action, PraghaLastfmPlugin *plugin);
-static void lastfm_track_unlove_action                  (GtkAction *action, PraghaLastfmPlugin *plugin);
 
 static const GtkActionEntry main_menu_actions [] = {
 	{"Lastfm", NULL, N_("_Lastfm")},
-	{"Love track", NULL, N_("Love track"),
-	 "", "Love track", G_CALLBACK(lastfm_track_love_action)},
-	{"Unlove track", NULL, N_("Unlove track"),
-	 "", "Unlove track", G_CALLBACK(lastfm_track_unlove_action)},
 	{"Import a XSPF playlist", NULL, N_("Import a XSPF playlist"),
 	 "", "Import a XSPF playlist", G_CALLBACK(lastfm_import_xspf_action)},
 	{"Add favorites", NULL, N_("Add favorites"),
@@ -187,9 +187,6 @@ static const gchar *main_menu_xml = "<ui>						\
 		<menu action=\"ToolsMenu\">						\
 			<placeholder name=\"pragha-plugins-placeholder\">		\
 				<menu action=\"Lastfm\">				\
-					<menuitem action=\"Love track\"/>		\
-					<menuitem action=\"Unlove track\"/>		\
-					<separator/>					\
 					<menuitem action=\"Import a XSPF playlist\"/>	\
 					<menuitem action=\"Add favorites\"/>		\
 					<menuitem action=\"Add similar\"/>		\
@@ -206,14 +203,8 @@ static const gchar *main_menu_xml = "<ui>						\
  */
 
 static void lastfm_get_similar_current_playlist_action  (GtkAction *action, PraghaLastfmPlugin *plugin);
-static void lastfm_track_current_playlist_love_action   (GtkAction *action, PraghaLastfmPlugin *plugin);
-static void lastfm_track_current_playlist_unlove_action (GtkAction *action, PraghaLastfmPlugin *plugin);
 
 static const GtkActionEntry playlist_actions [] = {
-	{"Love track", NULL, N_("Love track"),
-	 "", "Love track", G_CALLBACK(lastfm_track_current_playlist_love_action)},
-	{"Unlove track", NULL, N_("Unlove track"),
-	 "", "Unlove track", G_CALLBACK(lastfm_track_current_playlist_unlove_action)},
 	{"Add similar", NULL, N_("Add similar"),
 	 "", "Add similar", G_CALLBACK(lastfm_get_similar_current_playlist_action)},
 };
@@ -222,9 +213,6 @@ static const gchar *playlist_xml = "<ui>						\
 	<popup name=\"SelectionPopup\">		   					\
 	<menu action=\"ToolsMenu\">							\
 		<placeholder name=\"pragha-plugins-placeholder\">			\
-			<menuitem action=\"Love track\"/>				\
-			<menuitem action=\"Unlove track\"/>				\
-			<separator/>							\
 			<menuitem action=\"Add similar\"/>				\
 			<separator/>							\
 		</placeholder>								\
@@ -244,16 +232,8 @@ static void pragha_gmenu_lastfm_get_similar_action      (GSimpleAction *action,
 static void pragha_gmenu_lastfm_import_xspf_action      (GSimpleAction *action,
                                                          GVariant      *parameter,
                                                          gpointer       user_data);
-static void pragha_gmenu_lastfm_track_love_action       (GSimpleAction *action,
-                                                         GVariant      *parameter,
-                                                         gpointer       user_data);
-static void pragha_gmenu_lastfm_track_unlove_action     (GSimpleAction *action,
-                                                         GVariant      *parameter,
-                                                         gpointer       user_data);
 
 static GActionEntry lastfm_entries[] = {
-	{ "lastfm-love",       pragha_gmenu_lastfm_track_love_action,    NULL, NULL, NULL },
-	{ "lastfm-unlove",     pragha_gmenu_lastfm_track_unlove_action,  NULL, NULL, NULL },
 	{ "lastfm-import",     pragha_gmenu_lastfm_import_xspf_action,   NULL, NULL, NULL },
 	{ "lastfm-favorities", pragha_gmenu_lastfm_add_favorites_action, NULL, NULL, NULL },
 	{ "lastfm-similar",    pragha_gmenu_lastfm_get_similar_action,   NULL, NULL, NULL }
@@ -386,22 +366,15 @@ pragha_lastfm_update_menu_actions (PraghaLastfmPlugin *plugin)
 	state = pragha_backend_get_state (backend);
 
 	gboolean playing    = (state != ST_STOPPED);
-	gboolean logged     = (priv->status == LASTFM_STATUS_OK);
 	gboolean lfm_inited = (priv->session_id != NULL);
 	gboolean has_user   = (lfm_inited && priv->has_user);
 
-	pragha_action_group_set_sensitive (priv->action_group_main_menu, "Love track", playing && logged);
-	pragha_action_group_set_sensitive (priv->action_group_main_menu, "Unlove track", playing && logged);
 	pragha_action_group_set_sensitive (priv->action_group_main_menu, "Add favorites", has_user);
 	pragha_action_group_set_sensitive (priv->action_group_main_menu, "Add similar", playing && lfm_inited);
 
-	pragha_action_group_set_sensitive (priv->action_group_playlist, "Love track", logged);
-	pragha_action_group_set_sensitive (priv->action_group_playlist, "Unlove track", logged);
 	pragha_action_group_set_sensitive (priv->action_group_playlist, "Add similar", lfm_inited);
 
 	window = GTK_WINDOW(pragha_application_get_window(priv->pragha));
-	pragha_menubar_set_enable_action (window, "lastfm-love", playing && logged);
-	pragha_menubar_set_enable_action (window, "lastfm-unlove", playing && logged);
 	pragha_menubar_set_enable_action (window, "lastfm-favorities", has_user);
 	pragha_menubar_set_enable_action (window, "lastfm-similar", playing && lfm_inited);
 }
@@ -648,79 +621,6 @@ do_lastfm_unlove_mobj (PraghaLastfmPlugin *plugin, const gchar *title, const gch
 		return _("Unlove song on Last.fm failed.");
 	else
 		return NULL;
-}
-
-
-/* Functions related to current playlist. */
-
-gpointer
-do_lastfm_current_playlist_love (gpointer data)
-{
-	PraghaPlaylist *playlist;
-	PraghaMusicobject *mobj = NULL;
-	const gchar *title, *artist;
-
-	PraghaLastfmPlugin *plugin = data;
-	PraghaLastfmPluginPrivate *priv = plugin->priv;
-
-	playlist = pragha_application_get_playlist (priv->pragha);
-	mobj = pragha_playlist_get_selected_musicobject (playlist);
-
-	title = pragha_musicobject_get_title(mobj);
-	artist = pragha_musicobject_get_artist(mobj);
-
-	return do_lastfm_love_mobj (plugin, title, artist);
-}
-
-static void
-lastfm_track_current_playlist_love_action (GtkAction *action, PraghaLastfmPlugin *plugin)
-{
-	CDEBUG(DBG_PLUGIN, "Love handler to current playlist");
-
-	PraghaLastfmPluginPrivate *priv = plugin->priv;
-	if (priv->status != LASTFM_STATUS_OK) {
-		pragha_lastfm_no_connection_advice ();
-		return;
-	}
-
-	pragha_async_launch (do_lastfm_current_playlist_love,
-	                     pragha_async_set_idle_message,
-	                     plugin);
-}
-
-gpointer
-do_lastfm_current_playlist_unlove (gpointer data)
-{
-	PraghaPlaylist *playlist;
-	PraghaMusicobject *mobj = NULL;
-	const gchar *title, *artist;
-
-	PraghaLastfmPlugin *plugin = data;
-	PraghaLastfmPluginPrivate *priv = plugin->priv;
-
-	playlist = pragha_application_get_playlist (priv->pragha);
-	mobj = pragha_playlist_get_selected_musicobject (playlist);
-
-	title = pragha_musicobject_get_title(mobj);
-	artist = pragha_musicobject_get_artist(mobj);
-
-	return do_lastfm_unlove_mobj (plugin, title, artist);
-}
-
-static void
-lastfm_track_current_playlist_unlove_action (GtkAction *action, PraghaLastfmPlugin *plugin)
-{
-	CDEBUG(DBG_PLUGIN, "Unlove Handler to current playlist");
-
-	PraghaLastfmPluginPrivate *priv = plugin->priv;
-	if (priv->status != LASTFM_STATUS_OK) {
-		pragha_lastfm_no_connection_advice ();
-		return;
-	}
-
-	pragha_async_launch (do_lastfm_current_playlist_unlove,
-	                     pragha_async_set_idle_message,
-	                     plugin);
 }
 
 static gboolean
@@ -1058,7 +958,7 @@ lastfm_get_similar_action (GtkAction *action, PraghaLastfmPlugin *plugin)
 	set_watch_cursor (pragha_application_get_window(priv->pragha));
 	pragha_async_launch (do_lastfm_get_similar_action,
 	                     append_mobj_list_current_playlist_idle,
-	                     pragha_lastfm_async_data_new (plugin));
+	                     pragha_lastfm_async_data_new (plugin, NULL));
 }
 
 static gpointer
@@ -1079,29 +979,6 @@ do_lastfm_current_song_love (gpointer data)
 	pragha_lastfm_async_data_free(lastfm_async_data);
 
 	return msg_data;
-}
-
-static void
-lastfm_track_love_action (GtkAction *action, PraghaLastfmPlugin *plugin)
-{
-	PraghaBackend *backend;
-
-	PraghaLastfmPluginPrivate *priv = plugin->priv;
-
-	CDEBUG(DBG_PLUGIN, "Love Handler");
-
-	backend = pragha_application_get_backend (priv->pragha);
-	if (pragha_backend_get_state (backend) == ST_STOPPED)
-		return;
-
-	if (priv->status != LASTFM_STATUS_OK) {
-		pragha_lastfm_no_connection_advice ();
-		return;
-	}
-
-	pragha_async_launch (do_lastfm_current_song_love,
-	                     pragha_async_set_idle_message,
-	                     pragha_lastfm_async_data_new (plugin));
 }
 
 static gpointer
@@ -1125,17 +1002,33 @@ do_lastfm_current_song_unlove (gpointer data)
 }
 
 static void
-lastfm_track_unlove_action (GtkAction *action, PraghaLastfmPlugin *plugin)
+pragha_lastfm_plugin_favorites_song_added (PraghaFavorites    *favorites,
+                                           PraghaMusicobject  *mobj,
+                                           PraghaLastfmPlugin *plugin)
 {
-	PraghaBackend *backend;
-
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	CDEBUG(DBG_PLUGIN, "Unlove Handler");
+	CDEBUG(DBG_PLUGIN, "Lastfm: Love Handler");
 
-	backend = pragha_application_get_backend (priv->pragha);
-	if (pragha_backend_get_state (backend) == ST_STOPPED)
+	if (priv->status != LASTFM_STATUS_OK) {
+		pragha_lastfm_no_connection_advice ();
 		return;
+	}
+
+	pragha_async_launch (do_lastfm_current_song_love,
+	                     pragha_async_set_idle_message,
+	                     pragha_lastfm_async_data_new (plugin, mobj));
+
+}
+
+static void
+pragha_lastfm_plugin_favorites_song_removed (PraghaFavorites    *favorites,
+                                             PraghaMusicobject  *mobj,
+                                             PraghaLastfmPlugin *plugin)
+{
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Lastfm: Unlove Handler");
 
 	if (priv->status != LASTFM_STATUS_OK) {
 		pragha_lastfm_no_connection_advice ();
@@ -1144,7 +1037,7 @@ lastfm_track_unlove_action (GtkAction *action, PraghaLastfmPlugin *plugin)
 
 	pragha_async_launch (do_lastfm_current_song_unlove,
 	                     pragha_async_set_idle_message,
-	                     pragha_lastfm_async_data_new (plugin));
+	                     pragha_lastfm_async_data_new (plugin, mobj));
 }
 
 /*
@@ -1173,22 +1066,6 @@ pragha_gmenu_lastfm_import_xspf_action (GSimpleAction *action,
                                         gpointer       user_data)
 {
 	lastfm_import_xspf_action (NULL, PRAGHA_LASTFM_PLUGIN(user_data));
-}
-
-static void
-pragha_gmenu_lastfm_track_love_action (GSimpleAction *action,
-                                       GVariant      *parameter,
-                                       gpointer       user_data)
-{
-	lastfm_track_love_action (NULL, PRAGHA_LASTFM_PLUGIN(user_data));
-}
-
-static void
-pragha_gmenu_lastfm_track_unlove_action (GSimpleAction *action,
-                                         GVariant      *parameter,
-                                         gpointer       user_data)
-{
-	lastfm_track_unlove_action (NULL, PRAGHA_LASTFM_PLUGIN(user_data));
 }
 
 /*
@@ -1515,8 +1392,6 @@ pragha_menubar_append_lastfm (PraghaLastfmPlugin *plugin)
 	                                                                priv->action_group_main_menu,
 	                                                                main_menu_xml);
 
-	pragha_action_group_set_sensitive (priv->action_group_main_menu, "Love track", FALSE);
-	pragha_action_group_set_sensitive (priv->action_group_main_menu, "Unlove track", FALSE);
 	pragha_action_group_set_sensitive (priv->action_group_main_menu, "Add favorites", FALSE);
 	pragha_action_group_set_sensitive (priv->action_group_main_menu, "Add similar", FALSE);
 
@@ -1550,8 +1425,6 @@ pragha_menubar_append_lastfm (PraghaLastfmPlugin *plugin)
 	                                 plugin);
 
 	window = GTK_WINDOW(pragha_application_get_window(priv->pragha));
-	pragha_menubar_set_enable_action (window, "lastfm-love", FALSE);
-	pragha_menubar_set_enable_action (window, "lastfm-unlove", FALSE);
 	pragha_menubar_set_enable_action (window, "lastfm-favorities", FALSE);
 	pragha_menubar_set_enable_action (window, "lastfm-similar", FALSE);
 }
@@ -1849,6 +1722,10 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
+	/* Favororites */
+
+	priv->favorites = pragha_favorites_get ();
+
 	/* Init plugin flags */
 
 	priv->session_id = NULL;
@@ -1885,6 +1762,13 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	g_signal_connect (pragha_application_get_backend (priv->pragha), "notify::state",
 	                  G_CALLBACK (backend_changed_state_cb), plugin);
+
+	/* Favorites handler */
+
+	g_signal_connect (priv->favorites, "song-added",
+	                  G_CALLBACK(pragha_lastfm_plugin_favorites_song_added), plugin);
+	g_signal_connect (priv->favorites, "song-removed",
+	                  G_CALLBACK(pragha_lastfm_plugin_favorites_song_removed), plugin);
 }
 
 static void
@@ -1896,6 +1780,10 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	gchar *plugin_group = NULL;
 
 	CDEBUG(DBG_PLUGIN, "Lastfm plugin %s", G_STRFUNC);
+
+	/* Favorites */
+
+	g_object_unref (priv->favorites);
 
 	/* Disconnect playback signals */
 
