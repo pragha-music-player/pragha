@@ -41,6 +41,7 @@
 #include "pragha-koel-plugin.h"
 
 #include "src/pragha.h"
+#include "src/pragha-favorites.h"
 #include "src/pragha-utils.h"
 #include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-music-enum.h"
@@ -61,6 +62,7 @@ typedef struct _PraghaKoelPluginPrivate PraghaKoelPluginPrivate;
 struct _PraghaKoelPluginPrivate {
 	PraghaApplication          *pragha;
 	PraghaSongCache            *cache;
+	PraghaFavorites            *favorites;
 
 	GCancellable               *cancellable;
 
@@ -109,6 +111,9 @@ pragha_koel_plugin_set_need_upgrade (PraghaKoelPlugin *plugin, gboolean upgrade)
 static gboolean
 pragha_koel_plugin_need_upgrade (PraghaKoelPlugin *plugin);
 
+static gboolean
+pragha_musicobject_is_koel_file (PraghaMusicobject *mobj);
+
 /*
  * Menu actions
  */
@@ -152,6 +157,22 @@ static const gchar *main_menu_xml = "<ui>								\
 </ui>";
 
 /* Helpers */
+
+static gchar *
+pragha_koel_plugin_get_song_id (const gchar *server, const gchar *raw_uri)
+{
+	GRegex *regex = NULL;
+	gchar *song_id = NULL, *regex_text = NULL;
+
+	regex_text = g_strdup_printf ("%s/api/", server);
+	regex = g_regex_new (regex_text,
+	                     G_REGEX_MULTILINE | G_REGEX_RAW, 0, NULL);
+	song_id = g_regex_replace_literal (regex, raw_uri, -1, 0, "", 0, NULL);
+	g_regex_unref(regex);
+	g_free (regex_text);
+
+	return song_id;
+}
 
 static void
 pragha_koel_plugin_add_track_db (gpointer key,
@@ -521,6 +542,9 @@ pragha_koel_plugin_cache_provider (PraghaKoelPlugin *plugin)
 	g_free (request);
 }
 
+/*
+ * Playcount.
+ */
 static void
 pragha_koel_plugin_increase_playcount_done (SoupSession *session,
                                             SoupMessage *msg,
@@ -528,22 +552,6 @@ pragha_koel_plugin_increase_playcount_done (SoupSession *session,
 {
 	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
 		g_critical("KOEL ERROR Response: %s", msg->response_body->data);
-}
-
-static gchar *
-pragha_koel_plugin_get_song_id (const gchar *server, const gchar *raw_uri)
-{
-	GRegex *regex = NULL;
-	gchar *song_id = NULL, *regex_text = NULL;
-
-	regex_text = g_strdup_printf ("%s/api/", server);
-	regex = g_regex_new (regex_text,
-	                     G_REGEX_MULTILINE | G_REGEX_RAW, 0, NULL);
-	song_id = g_regex_replace_literal (regex, raw_uri, -1, 0, "", 0, NULL);
-	g_regex_unref(regex);
-	g_free (regex_text);
-
-	return song_id;
 }
 
 static void
@@ -592,6 +600,98 @@ pragha_koel_plugin_increase_playcount (PraghaKoelPlugin *plugin, const gchar *fi
 	g_free (request);
 	g_free (song_id);
 	g_free (data);
+}
+
+/*
+ * Interactions.
+ */
+static void
+pragha_koel_plugin_interaction_like_done (SoupSession *session,
+                                          SoupMessage *msg,
+                                          gpointer     user_data)
+{
+	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
+		g_critical("KOEL ERROR Response: %s", msg->response_body->data);
+}
+
+static void
+pragha_koel_plugin_interaction_like_launch (PraghaKoelPlugin *plugin,
+                                            const gchar      *filename,
+                                            gboolean          like)
+{
+	JsonBuilder *builder;
+	JsonGenerator *generator;
+	JsonNode *node;
+	SoupSession *session;
+	SoupMessage *msg;
+	gchar *query = NULL, *request = NULL, *song_id = NULL, *data = NULL;
+	gsize length;
+
+	PraghaKoelPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Koel server plugin %s", G_STRFUNC);
+
+	if (!priv->token)
+		return;
+
+	song_id = pragha_koel_plugin_get_song_id (priv->server, filename);
+
+	builder = json_builder_new ();
+	json_builder_begin_object (builder);
+	json_builder_set_member_name (builder, "songs");
+	json_builder_begin_array(builder);
+	json_builder_add_string_value (builder, song_id);
+	json_builder_end_array(builder);
+	json_builder_end_object (builder);
+
+	generator = json_generator_new ();
+	node = json_builder_get_root (builder);
+	json_generator_set_root (generator, node);
+	data = json_generator_to_data (generator, &length);
+
+	if (like)
+		query = g_strdup_printf("%s/api/interaction/batch/like?jwt-token=%s", priv->server, priv->token);
+	else
+		query = g_strdup_printf("%s/api/interaction/batch/unlike?jwt-token=%s", priv->server, priv->token);
+
+	session = soup_session_new ();
+	msg = soup_message_new (SOUP_METHOD_POST, query);
+	soup_message_headers_append (msg->request_headers, "Accept", "application/json");
+	soup_message_set_request (msg, "application/json", SOUP_MEMORY_COPY, data, length);
+	soup_session_queue_message (session, msg,
+	                            pragha_koel_plugin_interaction_like_done, plugin);
+
+	g_object_unref (generator);
+	g_object_unref (builder);
+	json_node_free (node);
+	g_free (query);
+	g_free (request);
+	g_free (song_id);
+	g_free (data);
+}
+
+static void
+pragha_koel_plugin_favorites_song_added (PraghaFavorites   *favorites,
+                                         PraghaMusicobject *mobj,
+                                         PraghaKoelPlugin  *plugin)
+{
+	const gchar *file = NULL;
+	if (!pragha_musicobject_is_koel_file (mobj))
+		return;
+	file  = pragha_musicobject_get_file (mobj);
+	pragha_koel_plugin_interaction_like_launch (plugin, file, TRUE);
+}
+
+static void
+pragha_koel_plugin_favorites_song_removed (PraghaFavorites   *favorites,
+                                           PraghaMusicobject *mobj,
+                                           PraghaKoelPlugin  *plugin)
+{
+	const gchar *file = NULL;
+	if (!pragha_musicobject_is_koel_file (mobj))
+		return;
+	file  = pragha_musicobject_get_file (mobj);
+	pragha_koel_plugin_interaction_like_launch (plugin, file, FALSE);
 }
 
 /*
@@ -1016,6 +1116,10 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	priv->cache = pragha_song_cache_get ();
 
+	/* Favororites */
+
+	priv->favorites = pragha_favorites_get ();
+
 	/* Temp tables.*/
 
 	priv->tracks_table = g_hash_table_new_full (g_str_hash,
@@ -1065,6 +1169,13 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	g_signal_connect (backend, "half-played",
 	                  G_CALLBACK(pragha_koel_plugin_half_played), plugin);
 
+	/* Favorites handler */
+
+	g_signal_connect (priv->favorites, "song-added",
+	                  G_CALLBACK(pragha_koel_plugin_favorites_song_added), plugin);
+	g_signal_connect (priv->favorites, "song-removed",
+	                  G_CALLBACK(pragha_koel_plugin_favorites_song_removed), plugin);
+
 	/* Append setting */
 
 	pragha_koel_plugin_append_setting (plugin);
@@ -1091,6 +1202,10 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	g_hash_table_destroy (priv->tracks_table);
 	g_object_unref (priv->cache);
+
+	/* Favorites */
+
+	g_object_unref (priv->favorites);
 
 	/* If user disable the plugin (Pragha not shutdown) */
 

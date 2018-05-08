@@ -31,7 +31,6 @@
 #include <gdk/gdkkeysyms.h>
 
 #include "pragha-simple-widgets.h"
-#include "pragha-favorites.h"
 #include "pragha-hig.h"
 #include "pragha-utils.h"
 
@@ -42,7 +41,6 @@ struct _PraghaToolbar {
 	GtkHeaderBar   __parent__;
 
 	PraghaAlbumArt *albumart;
-	PraghaFavorites *favorites;
 
 	GtkWidget      *track_progress_bar;
 
@@ -555,7 +553,6 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	favorites_button = gtk_button_new ();
 	gtk_button_set_relief(GTK_BUTTON(favorites_button), GTK_RELIEF_NONE);
 	pragha_hig_set_tiny_button (favorites_button);
-	pragha_toolbar_set_favorite_icon (toolbar, FALSE);
 	g_signal_connect (G_OBJECT(favorites_button), "clicked",
 	                  G_CALLBACK(pragha_toolbar_favorites_clicked), toolbar);
 
@@ -632,6 +629,8 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	toolbar->track_length_label = length_label;
 	toolbar->favorites_button   = favorites_button;
 	toolbar->extention_box      = extention_box;
+
+	pragha_toolbar_set_favorite_icon (toolbar, FALSE);
 
 	gtk_box_pack_start(GTK_BOX(hbox), vbox, TRUE, TRUE, 2);
 
@@ -724,11 +723,6 @@ pragha_toolbar_finalize (GObject *object)
 static void
 pragha_toolbar_dispose (GObject *object)
 {
-	PraghaToolbar *toolbar = PRAGHA_TOOLBAR (object);
-	if (toolbar->favorites) {
-		g_object_unref(toolbar->favorites);
-		toolbar->favorites = NULL;
-	}
 	(*G_OBJECT_CLASS (pragha_toolbar_parent_class)->dispose) (object);
 }
 
@@ -845,10 +839,6 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	preferences = pragha_preferences_get();
-
-	/* Instanced */
-
-	toolbar->favorites = pragha_favorites_get ();
 
 	/* Setup Left control buttons */
 
