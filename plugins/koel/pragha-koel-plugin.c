@@ -675,11 +675,20 @@ pragha_koel_plugin_favorites_song_added (PraghaFavorites   *favorites,
                                          PraghaMusicobject *mobj,
                                          PraghaKoelPlugin  *plugin)
 {
+	PraghaDatabase *database;
 	const gchar *file = NULL;
+	gint playlist_id = 0;
+
 	if (!pragha_musicobject_is_koel_file (mobj))
 		return;
 	file  = pragha_musicobject_get_file (mobj);
+
 	pragha_koel_plugin_interaction_like_launch (plugin, file, TRUE);
+
+	database = pragha_database_get ();
+	playlist_id = pragha_database_find_playlist (database, _("Favorites on Koel"));
+	pragha_database_add_playlist_track (database, playlist_id, file);
+	g_object_unref (database);
 }
 
 static void
@@ -687,11 +696,19 @@ pragha_koel_plugin_favorites_song_removed (PraghaFavorites   *favorites,
                                            PraghaMusicobject *mobj,
                                            PraghaKoelPlugin  *plugin)
 {
+	PraghaDatabase *database;
 	const gchar *file = NULL;
+	gint playlist_id = 0;
+
 	if (!pragha_musicobject_is_koel_file (mobj))
 		return;
 	file  = pragha_musicobject_get_file (mobj);
 	pragha_koel_plugin_interaction_like_launch (plugin, file, FALSE);
+
+	database = pragha_database_get ();
+	playlist_id = pragha_database_find_playlist (database, _("Favorites on Koel"));
+	pragha_database_delete_playlist_track (database, playlist_id, file);
+	g_object_unref (database);
 }
 
 /*
