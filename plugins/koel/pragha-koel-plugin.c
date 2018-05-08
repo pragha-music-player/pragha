@@ -493,6 +493,7 @@ pragha_koel_plugin_cache_provider_done (SoupSession *session,
 
 		if (G_LIKELY(liked)) {
 			pragha_playlist_database_update_playlist (database, _("Favorites on Koel"), liked);
+			pragha_playlist_database_insert_playlist (database, _("Favorites"), liked);
 			g_list_free_full (liked, g_object_unref);
 		}
 

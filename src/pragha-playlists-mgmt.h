@@ -49,6 +49,8 @@ void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, PraghaPla
 
 void
 pragha_playlist_database_update_playlist (PraghaDatabase *cdbase, const gchar *playlist, GList *mlist);
+void
+pragha_playlist_database_insert_playlist (PraghaDatabase *cdbase, const gchar *playlist, GList *mlist);
 
 void pragha_playlist_save_selection (PraghaPlaylist *playlist, const gchar *name);
 void pragha_playlist_save_playlist  (PraghaPlaylist *playlist, const gchar *name);

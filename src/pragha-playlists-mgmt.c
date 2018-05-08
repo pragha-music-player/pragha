@@ -1173,6 +1173,35 @@ pragha_playlist_database_update_playlist (PraghaDatabase *cdbase, const gchar *p
 	pragha_database_commit_transaction (cdbase);
 }
 
+void
+pragha_playlist_database_insert_playlist (PraghaDatabase *cdbase, const gchar *playlist, GList *mlist)
+{
+	GList *i;
+	const gchar *filename = NULL;
+	gint playlist_id;
+
+	if (string_is_empty(playlist)) {
+		g_warning("Playlist name is NULL");
+		return;
+	}
+
+	playlist_id = pragha_database_find_playlist (cdbase, playlist);
+	if (playlist_id == 0)
+		playlist_id = pragha_database_add_new_playlist (cdbase, playlist);
+
+	pragha_database_begin_transaction (cdbase);
+	if (mlist != NULL)
+	{
+		for (i = mlist; i != NULL; i = i->next)
+		{
+			filename = pragha_musicobject_get_file (PRAGHA_MUSICOBJECT(i->data));
+			if (!pragha_database_playlist_has_track (cdbase, playlist_id, filename))
+				pragha_database_add_playlist_track (cdbase, playlist_id, filename);
+		}
+	}
+	pragha_database_commit_transaction (cdbase);
+}
+
 
 gchar *
 new_radio (PraghaPlaylist *playlist,
