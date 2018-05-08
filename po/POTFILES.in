@@ -5,6 +5,7 @@ src/info-bar-import-music.c
 src/pragha-background-task-bar.c
 src/pragha-cmdline.c
 src/pragha-equalizer-dialog.c
+src/pragha-favorites.c
 src/pragha-filter-dialog.c
 src/pragha-library-pane.c
 src/pragha-menubar.c
