@@ -1010,6 +1010,9 @@ pragha_lastfm_plugin_favorites_song_added (PraghaFavorites    *favorites,
 
 	CDEBUG(DBG_PLUGIN, "Lastfm: Love Handler");
 
+	if (!priv->has_user || !priv->has_pass)
+		return;
+
 	if (priv->status != LASTFM_STATUS_OK) {
 		pragha_lastfm_no_connection_advice ();
 		return;
@@ -1029,6 +1032,9 @@ pragha_lastfm_plugin_favorites_song_removed (PraghaFavorites    *favorites,
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	CDEBUG(DBG_PLUGIN, "Lastfm: Unlove Handler");
+
+	if (!priv->has_user || !priv->has_pass)
+		return;
 
 	if (priv->status != LASTFM_STATUS_OK) {
 		pragha_lastfm_no_connection_advice ();
