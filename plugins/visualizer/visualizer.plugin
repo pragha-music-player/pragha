@@ -1,0 +1,8 @@
+[Plugin]
+Module=visualizer
+Name=Audio visualizer
+Description=A audio visualizer plugin
+Authors=Matias De lellis <mati86dl@gmail.com>
+Copyright=Copyright © 2018 Matias De lellis
+Website=https://github.com/matiasdelellis/pragha
+Help=https://github.com/matiasdelellis/pragha

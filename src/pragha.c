@@ -82,6 +82,7 @@ struct _PraghaApplication {
 	GtkWidget         *pane1;
 	GtkWidget         *pane2;
 	PraghaSidebar     *sidebar1;
+	GtkWidget         *main_stack;
 	PraghaSidebar     *sidebar2;
 	PraghaLibraryPane *library;
 	PraghaPlaylist    *playlist;
@@ -887,6 +888,12 @@ pragha_application_get_first_sidebar (PraghaApplication *pragha)
 	return pragha->sidebar1;
 }
 
+GtkWidget *
+pragha_application_get_main_stack (PraghaApplication *pragha)
+{
+	return pragha->main_stack;
+}
+
 PraghaSidebar *
 pragha_application_get_second_sidebar (PraghaApplication *pragha)
 {
@@ -982,6 +989,7 @@ pragha_application_construct_window (PraghaApplication *pragha)
 	pragha->toolbar = pragha_toolbar_new ();
 	pragha->infobox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 	pragha->pane1 = gtk_paned_new (GTK_ORIENTATION_HORIZONTAL);
+	pragha->main_stack = gtk_stack_new ();
 	pragha->pane2 = gtk_paned_new (GTK_ORIENTATION_HORIZONTAL);
 	pragha->sidebar1 = pragha_sidebar_new ();
 	pragha->sidebar2 = pragha_sidebar_new ();

@@ -153,6 +153,8 @@ static const gchar *main_menu_xml = "<ui>					\
 			<menuitem action=\"Search in playlist\"/>		\
 		</menu>								\
 		<menu action=\"ViewMenu\">					\
+			<placeholder name=\"pragha-view-placeholder\"/> 	\
+			<separator/>						\
 			<menuitem action=\"Fullscreen\"/>			\
 			<separator/>						\
 			<menuitem action=\"Lateral panel1\"/>		\

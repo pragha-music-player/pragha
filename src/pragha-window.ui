@@ -102,6 +102,9 @@
       </item>
     </section>
     <section>
+      <section>
+        <section id="pragha-view-placeholder"/>
+      </section>
       <item>
         <attribute name='label' translatable='yes'>Show lateral _panel</attribute>
         <attribute name='action'>win.sidebar1</attribute>

@@ -11,7 +11,8 @@ plugininclude_HEADERS = pragha-plugin-macros.h
 
 SUBDIRS =              \
 	mpris2             \
-	gnome-media-keys
+	gnome-media-keys \
+	visualizer
 
 if HAVE_LIBGLYR
 SUBDIRS += song-info

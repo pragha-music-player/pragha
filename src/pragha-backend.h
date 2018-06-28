@@ -60,6 +60,7 @@ typedef struct {
 	void (*finished) (PraghaBackend *backend);
 	void (*error) (PraghaBackend *backend, const GError *error);
 	void (*tags_changed) (PraghaBackend *backend, gint changed);
+	void (*spectrum) (PraghaBackend *backend, gpointer value);
 } PraghaBackendClass;
 
 gboolean           pragha_backend_can_seek             (PraghaBackend *backend);
@@ -91,6 +92,9 @@ PraghaMusicobject *pragha_backend_get_musicobject      (PraghaBackend *backend);
 GstElement        *pragha_backend_get_equalizer        (PraghaBackend *backend);
 void               pragha_backend_update_equalizer     (PraghaBackend *backend, const gdouble *bands);
 GstElement        *pragha_backend_get_preamp           (PraghaBackend *backend);
+
+void               pragha_backend_enable_spectrum      (PraghaBackend *backend);
+void               pragha_backend_disable_spectrum     (PraghaBackend *backend);
 
 PraghaBackend     *pragha_backend_new                  (void);
 

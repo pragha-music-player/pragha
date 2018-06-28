@@ -350,6 +350,7 @@ AC_CONFIG_FILES([plugins/dlna/Makefile])
 AC_CONFIG_FILES([plugins/dlna-renderer/Makefile])
 AC_CONFIG_FILES([plugins/cdrom/Makefile])
 AC_CONFIG_FILES([plugins/lastfm/Makefile])
+AC_CONFIG_FILES([plugins/visualizer/Makefile])
 fi
 AC_OUTPUT
 

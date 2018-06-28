@@ -64,6 +64,7 @@ struct PraghaBackendPrivate {
 	PraghaPreferences *preferences;
 	PraghaArtCache    *art_cache;
 
+	GstElement        *audiobin;
 	GstElement        *pipeline;
 	GstElement        *audio_sink;
 	GstElement        *preamp;
@@ -114,6 +115,7 @@ enum {
 	SIGNAL_FINISHED,
 	SIGNAL_ERROR,
 	SIGNAL_TAGS_CHANGED,
+	SIGNAL_SPECTRUM,
 	LAST_SIGNAL
 };
 
@@ -821,6 +823,21 @@ pragha_backend_message_error (GstBus *bus, GstMessage *msg, PraghaBackend *backe
 }
 
 static void
+pragha_backend_message_element (GstBus *bus, GstMessage *msg, PraghaBackend *backend)
+{
+	const GstStructure *gstr;
+	const GValue *magnitudes;
+
+	if (!g_ascii_strcasecmp (GST_OBJECT_NAME(msg->src), "spectrum"))
+	{
+		gstr = gst_message_get_structure(msg);
+		magnitudes = gst_structure_get_value (gstr, "magnitude");
+
+		g_signal_emit (backend, signals[SIGNAL_SPECTRUM], 0, magnitudes);
+	}
+}
+
+static void
 pragha_backend_message_eos (GstBus *bus, GstMessage *msg, PraghaBackend *backend)
 {
 	g_signal_emit (backend, signals[SIGNAL_FINISHED], 0);
@@ -961,6 +978,43 @@ pragha_backend_init_equalizer_preset (PraghaBackend *backend)
 		pragha_backend_update_equalizer (backend, saved_bands);
 		g_free (saved_bands);
 	}
+}
+
+void
+pragha_backend_enable_spectrum (PraghaBackend *backend)
+{
+	GstElement *spectrum;
+
+	PraghaBackendPrivate *priv = backend->priv;
+
+	spectrum = gst_element_factory_make ("spectrum", "spectrum");
+	g_object_set (G_OBJECT (spectrum), "bands", 128, "threshold", -80,
+	             "interval", 150000000, "post-messages", TRUE, NULL);
+
+	gst_bin_add (GST_BIN(priv->audiobin), spectrum);
+
+	gst_element_unlink (priv->equalizer, priv->audio_sink);
+
+	gst_element_link (priv->equalizer, spectrum);
+	gst_element_link (spectrum, priv->audio_sink);
+
+	gst_element_sync_state_with_parent (spectrum);
+}
+
+void
+pragha_backend_disable_spectrum (PraghaBackend *backend)
+{
+	GstElement *spectrum;
+
+	PraghaBackendPrivate *priv = backend->priv;
+
+	spectrum = gst_bin_get_by_name (GST_BIN(priv->audiobin), "spectrum");
+	gst_element_unlink (priv->equalizer, spectrum);
+	gst_element_unlink (spectrum, priv->audio_sink);
+
+	gst_element_link (priv->equalizer, priv->audio_sink);
+
+	gst_bin_remove (GST_BIN(priv->audiobin), spectrum);
 }
 
 #ifndef G_OS_WIN32
@@ -1163,6 +1217,15 @@ pragha_backend_class_init (PraghaBackendClass *klass)
 		              g_cclosure_marshal_VOID__INT,
 		              G_TYPE_NONE, 1, G_TYPE_INT);
 
+	signals[SIGNAL_SPECTRUM] =
+		g_signal_new ("spectrum",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaBackendClass, spectrum),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__POINTER,
+		              G_TYPE_NONE, 1, G_TYPE_POINTER);
+
 	g_type_class_add_private (klass, sizeof (PraghaBackendPrivate));
 }
 
@@ -1198,6 +1261,7 @@ pragha_backend_init (PraghaBackend *backend)
 	#else
 	priv->audio_sink = gst_element_factory_make ("directsoundsink", "audio-sink");
 	#endif
+	g_object_set (G_OBJECT (priv->audio_sink), "sync", TRUE, NULL);
 
 	if (priv->audio_sink != NULL) {
 		const gchar *audio_device_pref = pragha_preferences_get_audio_device (priv->preferences);
@@ -1226,6 +1290,7 @@ pragha_backend_init (PraghaBackend *backend)
 			gst_object_unref (pad);
 
 			g_object_set (priv->pipeline, "audio-sink", bin, NULL);
+			priv->audiobin = bin;
 		} else {
 			g_warning ("Failed to create the 10bands equalizer element. Not use it.");
 
@@ -1250,6 +1315,7 @@ pragha_backend_init (PraghaBackend *backend)
 
 	GstBus *bus = gst_pipeline_get_bus (GST_PIPELINE (priv->pipeline));
 	gst_bus_add_signal_watch (bus);
+	g_signal_connect (bus, "message::element", G_CALLBACK (pragha_backend_message_element), backend);
 	g_signal_connect (bus, "message::error", G_CALLBACK (pragha_backend_message_error), backend);
 	g_signal_connect (bus, "message::eos", G_CALLBACK (pragha_backend_message_eos), backend);
 	g_signal_connect (bus, "message::state-changed", G_CALLBACK (pragha_backend_message_state_changed), backend);

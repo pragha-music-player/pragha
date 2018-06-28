@@ -82,6 +82,7 @@ PreferencesDialog *pragha_application_get_preferences_dialog (PraghaApplication 
 
 PraghaToolbar     *pragha_application_get_toolbar         (PraghaApplication *pragha);
 PraghaSidebar     *pragha_application_get_first_sidebar   (PraghaApplication *pragha);
+GtkWidget         *pragha_application_get_main_stack      (PraghaApplication *pragha);
 PraghaSidebar     *pragha_application_get_second_sidebar  (PraghaApplication *pragha);
 PraghaStatusbar   *pragha_application_get_statusbar       (PraghaApplication *pragha);
 PraghaStatusIcon  *pragha_application_get_status_icon     (PraghaApplication *pragha);

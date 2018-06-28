@@ -444,7 +444,7 @@ pragha_window_new (PraghaApplication *pragha)
 	PraghaStatusbar *statusbar;
 	PraghaToolbar *toolbar;
 	GtkWidget *menubar, *pane1, *pane2, *infobox;
-	GtkWidget *playlist_statusbar_vbox, *vbox_main;
+	GtkWidget *main_stack, *playlist_statusbar_vbox, *vbox_main;
 	GtkWidget *song_box, *menu_button;
 	GtkBuilder *menu_ui;
 	GtkCssProvider *css_provider;
@@ -475,6 +475,7 @@ pragha_window_new (PraghaApplication *pragha)
 	playlist  = pragha_application_get_playlist (pragha);
 	library   = pragha_application_get_library (pragha);
 	sidebar1  = pragha_application_get_first_sidebar (pragha);
+	main_stack= pragha_application_get_main_stack (pragha);
 	sidebar2  = pragha_application_get_second_sidebar (pragha);
 	statusbar = pragha_application_get_statusbar (pragha);
 	toolbar   = pragha_application_get_toolbar (pragha);
@@ -534,12 +535,14 @@ pragha_window_new (PraghaApplication *pragha)
 	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), GTK_WIDGET(statusbar),
 	                    FALSE, FALSE, 0);
 
+	gtk_stack_add_named (GTK_STACK(main_stack), playlist_statusbar_vbox, "playlist");
+
 	/* Pack widgets: [Sidebar1][ Playlist ]
 	 *               [        ][Status Bar]
 	 */
 
 	gtk_paned_pack1 (GTK_PANED (pane1), GTK_WIDGET(sidebar1), FALSE, TRUE);
-	gtk_paned_pack2 (GTK_PANED (pane1), playlist_statusbar_vbox, TRUE, FALSE);
+	gtk_paned_pack2 (GTK_PANED (pane1), main_stack, TRUE, FALSE);
 
 	gtk_paned_set_position (GTK_PANED (pane1),
 		pragha_preferences_get_sidebar_size (preferences));
@@ -568,6 +571,7 @@ pragha_window_new (PraghaApplication *pragha)
 	if (pragha_preferences_get_system_titlebar (preferences))
 		gtk_box_pack_start (GTK_BOX(vbox_main), GTK_WIDGET(toolbar),
 		                    FALSE, FALSE, 0);
+
 	gtk_box_pack_start (GTK_BOX(vbox_main), infobox,
 	                    FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(vbox_main), pane2,
@@ -625,6 +629,7 @@ pragha_window_new (PraghaApplication *pragha)
 	gtk_widget_show (GTK_WIDGET(toolbar));
 	gtk_widget_show (infobox);
 	gtk_widget_show (pane1);
+	gtk_widget_show (main_stack);
 	gtk_widget_show (pane2);
 
 	gtk_widget_show(playlist_statusbar_vbox);
