@@ -55,7 +55,6 @@ PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_VISUALIZER_PLUGIN,
 static void
 visualizer_action (GtkAction *action, PraghaVisualizerPlugin *plugin)
 {
-	PraghaBackend *backend;
 	GtkWidget *main_stack;
 	gboolean visualizer;
 
@@ -204,7 +203,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	g_signal_connect (backend, "spectrum",
 	                 G_CALLBACK(pragha_visualizer_plugin_update_spectrum), plugin);
 
-	gtk_widget_show_all (priv->visualizer);
+	gtk_widget_show_all (GTK_WIDGET(priv->visualizer));
 }
 
 static void

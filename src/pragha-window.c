@@ -524,25 +524,29 @@ pragha_window_new (PraghaApplication *pragha)
 		                        GTK_WIN_POS_CENTER);
 	}
 
-	/* Pack widgets: [ Playlist ]
-	 *               [Status Bar]
+	/* Pack widgets: [MAIN STACK]
+	 *               [ Playlist ]
+	 */
+	gtk_stack_add_named (GTK_STACK(main_stack), GTK_WIDGET(playlist), "playlist");
+
+	/* Pack widgets: [ MainStack/Playlist ]
+	 *               [     Status Bar     ]
 	 */
 
 	playlist_statusbar_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
-	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), GTK_WIDGET(playlist),
+	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), GTK_WIDGET(main_stack),
 	                    TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), GTK_WIDGET(statusbar),
 	                    FALSE, FALSE, 0);
 
-	gtk_stack_add_named (GTK_STACK(main_stack), playlist_statusbar_vbox, "playlist");
 
-	/* Pack widgets: [Sidebar1][ Playlist ]
+	/* Pack widgets: [Sidebar1][Main Stack]
 	 *               [        ][Status Bar]
 	 */
 
 	gtk_paned_pack1 (GTK_PANED (pane1), GTK_WIDGET(sidebar1), FALSE, TRUE);
-	gtk_paned_pack2 (GTK_PANED (pane1), main_stack, TRUE, FALSE);
+	gtk_paned_pack2 (GTK_PANED (pane1), playlist_statusbar_vbox, TRUE, FALSE);
 
 	gtk_paned_set_position (GTK_PANED (pane1),
 		pragha_preferences_get_sidebar_size (preferences));
@@ -575,7 +579,7 @@ pragha_window_new (PraghaApplication *pragha)
 	gtk_box_pack_start (GTK_BOX(vbox_main), infobox,
 	                    FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(vbox_main), pane2,
-	                    TRUE, TRUE, 2);
+	                    TRUE, TRUE, 0);
 
 	g_object_bind_property (preferences, "show-menubar",
 	                        menubar, "visible",
