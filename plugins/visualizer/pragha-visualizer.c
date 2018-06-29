@@ -172,9 +172,22 @@ pragha_visualizer_size_allocate (GtkWidget *widget, GdkRectangle *allocation, gp
 }
 
 static void
+pragha_visualizer_dispose (GObject *object)
+{
+	PraghaVisualizer *visualizer = PRAGHA_VISUALIZER (object);
+
+	if (visualizer->particles) {
+		g_list_free_full (visualizer->particles, g_object_unref);
+		visualizer->particles = NULL;
+	}
+	G_OBJECT_CLASS (pragha_visualizer_parent_class)->dispose (object);
+}
+
+static void
 pragha_visualizer_class_init (PraghaVisualizerClass *class)
 {
-
+	GObjectClass *gobject_class = G_OBJECT_CLASS (class);
+	gobject_class->dispose = pragha_visualizer_dispose;
 }
 
 static void
