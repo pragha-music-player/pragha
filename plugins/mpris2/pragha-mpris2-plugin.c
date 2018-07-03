@@ -1579,7 +1579,9 @@ static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
 	PraghaBackend *backend;
+	PraghaPlaylist *playlist;
 	PraghaArtCache *art_cache;
+	PraghaPreferences *preferences;
 	gint i;
 
 	PraghaMpris2Plugin *plugin = PRAGHA_MPRIS2_PLUGIN (activatable);
@@ -1595,9 +1597,15 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 		                                     priv->registration_object_ids[i]);
 	}
 
+	preferences = pragha_application_get_preferences (priv->pragha);
+	g_signal_handlers_disconnect_by_func (preferences, any_notify_cb, plugin);
+
 	backend = pragha_application_get_backend (priv->pragha);
 	g_signal_handlers_disconnect_by_func (backend, seeked_cb, plugin);
 	g_signal_handlers_disconnect_by_func (backend, any_notify_cb, plugin);
+
+	playlist = pragha_application_get_playlist (priv->pragha);
+	g_signal_handlers_disconnect_by_func (playlist, playlist_any_notify_cb, plugin);
 
 	art_cache = pragha_application_get_art_cache (priv->pragha);
 	g_signal_handlers_disconnect_by_func (art_cache, pragha_art_cache_changed_handler, plugin);
