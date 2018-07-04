@@ -77,7 +77,7 @@ visualizer_action (GtkAction *action, PraghaVisualizerPlugin *plugin)
 static const
 GtkToggleActionEntry main_menu_actions [] = {
 	{"Visualizer", NULL, N_("_Visualizer"),
-	 "<Control>V", "Switch between playlist and visualizer", G_CALLBACK(visualizer_action),
+	 "<Control>T", "Switch between playlist and visualizer", G_CALLBACK(visualizer_action),
 	FALSE}
 };
 
