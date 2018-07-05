@@ -169,6 +169,9 @@ pragha_particle_draw (PraghaParticle *particle, cairo_t *cr)
 	cairo_rotate (cr, particle->rotation);
 	cairo_scale (cr, particle->smoothedScale * particle->level, particle->smoothedScale * particle->level);
 
+	cairo_rectangle (cr, -1.5, -0.5, 3.0, 1.0);
+	cairo_clip (cr);
+
 	cairo_move_to (cr, particle->size * 0.5, 0.0);
 	cairo_line_to (cr, particle->size * -0.5, 0.0);
 
@@ -176,6 +179,8 @@ pragha_particle_draw (PraghaParticle *particle, cairo_t *cr)
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
 	gdk_cairo_set_source_rgba (cr, color);
 	cairo_stroke (cr);
+
+	cairo_reset_clip(cr);
 
 	cairo_restore (cr);
 

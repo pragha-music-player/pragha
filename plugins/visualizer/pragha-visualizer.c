@@ -59,6 +59,8 @@ struct _PraghaVisualizer {
 
 	guint           width;
 	guint           height;
+
+	guint           tick_id;
 };
 
 G_DEFINE_TYPE(PraghaVisualizer, pragha_visualizer, GTK_TYPE_BOX)
@@ -117,6 +119,9 @@ pragha_visualizer_widget_draw (GtkWidget *widget, cairo_t *cr, gpointer user_dat
 
 	PraghaVisualizer *visualizer = PRAGHA_VISUALIZER (user_data);
 
+	cairo_set_tolerance (cr, 1.0);
+	cairo_set_antialias (cr, CAIRO_ANTIALIAS_FAST);
+
 	cairo_rectangle (cr, 0, 0, visualizer->width, visualizer->height);
 	cairo_fill (cr);
 
@@ -137,8 +142,9 @@ pragha_visualizer_widget_draw (GtkWidget *widget, cairo_t *cr, gpointer user_dat
 
 #ifdef SYNCRONIZED
 static gboolean
-pragha_visualizer_drawing_tick (GtkWidget *widget, GdkFrameClock *clock, gpointer user_data)
+pragha_visualizer_drawing_tick (gpointer user_data)
 {
+	GtkWidget *widget = GTK_WIDGET (user_data);
 #ifdef DRAW_DEBUG
 	tick_i++;
 #endif
@@ -207,7 +213,7 @@ pragha_visualizer_init (PraghaVisualizer *visualizer)
 	                  G_CALLBACK (pragha_visualizer_widget_draw), visualizer);
 
 #ifdef SYNCRONIZED
-	gtk_widget_add_tick_callback(drawing_area, pragha_visualizer_drawing_tick, 0, 0);
+	visualizer->tick_id = g_timeout_add (75, pragha_visualizer_drawing_tick, drawing_area);
 #endif
 
 	for (i = 0 ; i < 128 ; i++) {

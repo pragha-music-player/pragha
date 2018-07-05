@@ -989,7 +989,7 @@ pragha_backend_enable_spectrum (PraghaBackend *backend)
 
 	spectrum = gst_element_factory_make ("spectrum", "spectrum");
 	g_object_set (G_OBJECT (spectrum), "bands", 128, "threshold", -80,
-	             "interval", 150000000, "post-messages", TRUE, NULL);
+	             "interval", 100000000, "post-messages", TRUE, NULL);
 
 	gst_bin_add (GST_BIN(priv->audiobin), spectrum);
 
