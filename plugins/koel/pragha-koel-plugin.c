@@ -360,6 +360,32 @@ pragha_koel_plugin_json_array_get_name (JsonArray *jarray,
 
 	return object_name;
 }
+
+static gint64
+pragha_koel_plugin_json_array_get_int_member (JsonArray   *jarray,
+                                              gint64       jid,
+                                              const gchar *tag)
+{
+	JsonObject *json_object;
+	gint64 object_id = 0, integer_tag = 0;
+	GList *l_node = NULL;
+	GList *l_nodes = json_array_get_elements (jarray);
+	for (l_node = l_nodes; l_node != NULL; l_node = g_list_next(l_node))
+	{
+		json_object = json_node_get_object ((JsonNode *)l_node->data);
+		object_id = json_object_get_int_member(json_object, "id");
+		if (jid == object_id)
+		{
+			if (json_object_has_member(json_object, tag))
+				integer_tag = json_object_get_int_member(json_object, tag);
+			break;
+		}
+	}
+	g_list_free(l_nodes);
+
+	return integer_tag;
+}
+
 static void
 pragha_koel_plugin_cache_provider_done (SoupSession *session,
                                         SoupMessage *msg,
@@ -412,6 +438,7 @@ pragha_koel_plugin_cache_provider_done (SoupSession *session,
 
 		const gchar *artist = pragha_koel_plugin_json_array_get_name (artists_array, artist_id);
 		const gchar *album = pragha_koel_plugin_json_array_get_name (albums_array, album_id);
+		guint64 album_year = pragha_koel_plugin_json_array_get_int_member (albums_array, album_id, "year");
 		gchar *url = g_strdup_printf("%s/api/%s", priv->server, song_id);
 
 		mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
@@ -422,6 +449,7 @@ pragha_koel_plugin_cache_provider_done (SoupSession *session,
 		                     "title", title != NULL ? title : "",
 		                     "artist", artist != NULL ? artist : "",
 		                     "album", album != NULL ? album : "",
+		                     "year", (gint)album_year,
 		                     "length", (gint)length,
 		                     NULL);
 
