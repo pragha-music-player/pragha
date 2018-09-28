@@ -198,6 +198,7 @@ gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon_name)
 /*
  * PraghaContainer: An extension of GtkContainer to expand their default size.
  */
+#if !GTK_CHECK_VERSION (3, 22, 0)
 #define PRAGHA_TYPE_CONTAINER (pragha_container_get_type())
 #define PRAGHA_CONTAINER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_CONTAINER, PraghaContainer))
 #define PRAGHA_CONTAINER_CONST(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_CONTAINER, PraghaContainer const))
@@ -224,7 +225,7 @@ pragha_container_get_preferred_width (GtkWidget *widget,
 	if (minimum)
 		*minimum = 140;
 	if (natural)
-		*natural = 1600;
+		*natural = 1800;
 }
 
 static void
@@ -247,6 +248,7 @@ pragha_container_new (void)
 {
 	return g_object_new (PRAGHA_TYPE_CONTAINER, NULL);
 }
+#endif
 
 /*
  * PraghaToolbarButton
