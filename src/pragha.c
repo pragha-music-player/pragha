@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2016 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -1380,7 +1380,6 @@ pragha_application_new ()
 	return g_object_new (PRAGHA_TYPE_APPLICATION,
 	                     "application-id", "org.pragha",
 	                     "flags", G_APPLICATION_HANDLES_COMMAND_LINE | G_APPLICATION_HANDLES_OPEN,
-	                     "register-session", TRUE,
 	                     NULL);
 }
 

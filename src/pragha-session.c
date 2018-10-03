@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2016 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -27,7 +27,7 @@
 
 #include "pragha.h"
 
-#if HAVE_LIBXFCE4UI && !GTK_CHECK_VERSION (3, 21, 3)
+#ifdef HAVE_LIBXFCE4UI
 void
 pragha_init_session_support(PraghaApplication *pragha)
 {
@@ -45,6 +45,10 @@ pragha_init_session_support(PraghaApplication *pragha)
 	if(!xfce_sm_client_connect (client, &error)) {
 		g_warning ("Failed to connect to session manager: %s", error->message);
 		g_error_free (error);
+
+		// As fallback register DBUS session..
+		g_warning ("As fallback try to use dbus session manager");
+		g_object_set (GTK_APPLICATION(pragha), "register-session", TRUE, NULL);
 	}
 }
 #else
@@ -60,5 +64,7 @@ pragha_init_session_support(PraghaApplication *pragha)
 	role = g_strdup_printf ("Pragha-%p-%d-%d", window, (gint) getpid (), (gint) time (NULL));
 	gtk_window_set_role (GTK_WINDOW (window), role);
 	g_free (role);
+
+	g_object_set (GTK_APPLICATION(pragha), "register-session", TRUE, NULL);
 }
 #endif
