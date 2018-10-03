@@ -248,6 +248,23 @@ pragha_songinfo_pane_get_default_view (PraghaSonginfoPane *pane)
 	return pane->info_type;
 }
 
+void
+pragha_songinfo_pane_set_default_view (PraghaSonginfoPane *pane, GLYR_GET_TYPE view_type)
+{
+	switch(view_type) {
+		case GLYR_GET_ARTIST_BIO:
+			pragha_songinfo_pane_show_artist_info_action (NULL, pane);
+			break;
+		case GLYR_GET_SIMILAR_SONGS:
+			pragha_songinfo_pane_show_similar_action (NULL, pane);
+			break;
+		case GLYR_GET_LYRICS:
+		default:
+			pragha_songinfo_pane_show_lyrics_action (NULL, pane);
+			break;
+	}
+}
+
 /*
  * Private
  */

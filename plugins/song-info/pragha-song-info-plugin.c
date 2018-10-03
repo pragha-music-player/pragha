@@ -560,6 +560,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	PraghaPreferences *preferences;
 	PraghaPlaylist *playlist;
 	PraghaSidebar *sidebar;
+	GLYR_GET_TYPE view_type = GLYR_GET_LYRICS;
+	gchar *plugin_group = NULL;
 
 	PraghaSongInfoPlugin *plugin = PRAGHA_SONG_INFO_PLUGIN (activatable);
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
@@ -600,6 +602,11 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	backend_changed_state_cb (pragha_application_get_backend (priv->pragha), NULL, plugin);
 
 	preferences = pragha_application_get_preferences (priv->pragha);
+
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "song-info");
+	view_type = pragha_preferences_get_integer (preferences, plugin_group, "default-view");
+	pragha_songinfo_pane_set_default_view (priv->pane, view_type);
+	g_free (plugin_group);
 
 	g_signal_connect (G_OBJECT(preferences), "notify::secondary-lateral-panel",
 	                  G_CALLBACK(pragha_songinfo_pane_visibility_changed), plugin);
@@ -655,6 +662,9 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	                                      plugin);
 
 	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "song-info");
+	pragha_preferences_set_integer (preferences, plugin_group, "default-view",
+			pragha_songinfo_pane_get_default_view (priv->pane));
+
 	if (!pragha_plugins_engine_is_shutdown(pragha_application_get_plugins_engine(priv->pragha))) {
 		pragha_preferences_remove_group (preferences, plugin_group);
 	}

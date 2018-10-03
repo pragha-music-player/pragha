@@ -63,6 +63,7 @@ GtkWidget          *pragha_songinfo_pane_get_pane_title        (PraghaSonginfoPa
 GtkMenu            *pragha_songinfo_pane_get_popup_menu        (PraghaSonginfoPane *pane);
 GtkUIManager       *pragha_songinfo_pane_get_pane_context_menu (PraghaSonginfoPane *pane);
 GLYR_GET_TYPE       pragha_songinfo_pane_get_default_view      (PraghaSonginfoPane *pane);
+void                pragha_songinfo_pane_set_default_view      (PraghaSonginfoPane *pane, GLYR_GET_TYPE view_type);
 
 PraghaSonginfoPane *pragha_songinfo_pane_new                   (void);
 
