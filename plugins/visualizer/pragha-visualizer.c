@@ -182,6 +182,13 @@ pragha_visualizer_dispose (GObject *object)
 {
 	PraghaVisualizer *visualizer = PRAGHA_VISUALIZER (object);
 
+#ifdef SYNCRONIZED
+	if (visualizer->tick_id) {
+		g_source_remove (visualizer->tick_id);
+		visualizer->tick_id = 0;
+	}
+#endif
+
 	if (visualizer->particles) {
 		g_list_free_full (visualizer->particles, g_object_unref);
 		visualizer->particles = NULL;
