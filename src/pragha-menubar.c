@@ -670,7 +670,7 @@ static void community_action(GtkAction *action, PraghaApplication *pragha)
 
 static void wiki_action(GtkAction *action, PraghaApplication *pragha)
 {
-	const gchar *uri = "http://pragha-music-player.github.io/wiki";
+	const gchar *uri = "https://github.com/pragha-music-player/pragha/wiki/Welcome-to-the-Pragha-Wiki";
 	open_url(uri, pragha_application_get_window(pragha));
 }
 
