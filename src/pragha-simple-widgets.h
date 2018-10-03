@@ -39,8 +39,6 @@ void
 pragha_header_set_subtitle (PraghaHeader *header,
                             const gchar  *subtitle);
 
-gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon);
-
 #if !GTK_CHECK_VERSION (3, 22, 0)
 PraghaContainer     *pragha_container_new      (void);
 #endif

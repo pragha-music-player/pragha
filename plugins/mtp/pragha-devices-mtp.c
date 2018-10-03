@@ -438,7 +438,8 @@ pragha_mtp_action_disconnect_device (GtkAction *action, PraghaMtpPlugin *plugin)
 static void
 pragha_mtp_action_show_device_info (GtkAction *action, PraghaMtpPlugin *plugin)
 {
-	GtkWidget *dialog, *header, *table, *label;
+	PraghaHeader *header;
+	GtkWidget *dialog, *table, *label;
 	LIBMTP_devicestorage_t *storage;
 	gchar *storage_size = NULL;
 	gchar *storage_free = NULL;
@@ -453,7 +454,9 @@ pragha_mtp_action_show_device_info (GtkAction *action, PraghaMtpPlugin *plugin)
 	                                      _("_Ok"), GTK_RESPONSE_OK,
 	                                      NULL);
 
-	header = sokoke_xfce_header_new (priv->friend_name, "multimedia-player");
+	header = pragha_header_new ();
+	pragha_header_set_title (header, priv->friend_name);
+	pragha_header_set_icon_name (header, "multimedia-player");
 
 	table = pragha_hig_workarea_table_new ();
 
@@ -477,7 +480,7 @@ pragha_mtp_action_show_device_info (GtkAction *action, PraghaMtpPlugin *plugin)
 		g_free (storage_string);
 	}
 
-	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), header, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), GTK_WIDGET(header), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), table, TRUE, TRUE, 0);
 
 	g_signal_connect (G_OBJECT(dialog), "response",

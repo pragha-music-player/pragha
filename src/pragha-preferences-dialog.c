@@ -1300,8 +1300,8 @@ PreferencesDialog *
 pragha_preferences_dialog_new (GtkWidget *parent)
 {
 	PreferencesDialog *dialog;
-	GtkWidget *header, *pref_notebook;
-
+	PraghaHeader *header;
+	GtkWidget *pref_notebook;
 	GtkWidget *audio_vbox, *appearance_vbox, *library_vbox, *general_vbox, *desktop_vbox;
 	GtkWidget *label_appearance, *label_library, *label_general;
 	#ifdef HAVE_LIBPEAS
@@ -1376,11 +1376,13 @@ pragha_preferences_dialog_new (GtkWidget *parent)
 
 	/* Add to dialog */
 
-	header = sokoke_xfce_header_new (_("Preferences of Pragha"), "pragha");
+	header = pragha_header_new ();
+	pragha_header_set_title (header, _("Preferences of Pragha"));
+	pragha_header_set_icon_name (header, "pragha");
 
-	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog->widget))), header, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog->widget))), GTK_WIDGET(header), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog->widget))), pref_notebook, TRUE, TRUE, 0);
-	gtk_widget_show_all (header);
+	gtk_widget_show_all (GTK_WIDGET(header));
 	gtk_widget_show (pref_notebook);
 
 	/* Setup signal handlers */

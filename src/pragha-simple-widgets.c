@@ -43,6 +43,8 @@ struct _PraghaHeader {
 	GtkBox    _parent;
 
 	GtkWidget *image;
+
+	GtkWidget *vbox;
 	GtkWidget *title;
 	GtkWidget *subtitle;
 };
@@ -76,9 +78,21 @@ pragha_header_set_title (PraghaHeader *header,
 
 void
 pragha_header_set_subtitle (PraghaHeader *header,
-                         const gchar  *subtitle)
+                            const gchar  *subtitle)
 {
+	GtkWidget *subtitlew = NULL;
 	gchar *markup = NULL;
+
+	if (!header->subtitle) {
+		subtitlew = gtk_label_new (NULL);
+		gtk_label_set_line_wrap (GTK_LABEL(subtitlew), TRUE);
+		gtk_widget_set_halign (subtitlew, GTK_ALIGN_START);
+		g_object_set (subtitlew, "xalign", 0.0, NULL);
+		gtk_box_pack_start(GTK_BOX(header->vbox), subtitlew, FALSE, FALSE, 0);
+		gtk_widget_show (GTK_WIDGET(subtitlew));
+		header->subtitle = subtitlew;
+	}
+
 	markup = g_markup_printf_escaped ("<span size='large'>%s</span>", subtitle);
 	gtk_label_set_markup (GTK_LABEL(header->subtitle), markup);
 	g_free(markup);
@@ -93,7 +107,7 @@ static void
 pragha_header_init (PraghaHeader *header)
 {
 	GtkWidget *hbox, *vbox;
-	GtkWidget *title, *subtitle;
+	GtkWidget *title;
 	GtkWidget *separator;
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
@@ -107,17 +121,12 @@ pragha_header_init (PraghaHeader *header)
 	g_object_set (title, "xalign", 0.0, NULL);
 	header->title = title;
 
-	subtitle = gtk_label_new (NULL);
-	gtk_label_set_line_wrap (GTK_LABEL(subtitle), TRUE);
-	gtk_widget_set_halign (subtitle, GTK_ALIGN_START);
-	g_object_set (subtitle, "xalign", 0.0, NULL);
-	header->subtitle = subtitle;
-
 	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 	gtk_widget_set_valign (vbox, GTK_ALIGN_CENTER);
-	gtk_box_pack_start(GTK_BOX(vbox), title, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(vbox), subtitle, FALSE, FALSE, 0);
+	header->vbox = vbox;
 
+	gtk_box_pack_start(GTK_BOX(vbox), title, FALSE, FALSE, 0);
+	
 	gtk_box_pack_start(GTK_BOX(hbox), header->image, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), vbox, TRUE, TRUE, 0);
 
@@ -138,62 +147,6 @@ pragha_header_new (void)
 {
 	return g_object_new (PRAGHA_TYPE_HEADER, NULL);
 }
-
-/* Create a new haeder widget to use in preferences.
- * Based in Midori Web Browser. Copyright (C) 2007 Christian Dywan. */
-
-gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon_name)
-{
-	GtkWidget* xfce_heading;
-	GtkWidget* hbox;
-	GtkWidget* vbox;
-	GdkPixbuf* icon;
-	GtkWidget* image;
-	GtkWidget* label;
-	GtkWidget* separator;
-	gchar* markup;
-	gint width = 1, height = 1;
-
-	xfce_heading = gtk_event_box_new();
-
-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
-	gtk_container_set_border_width(GTK_CONTAINER(hbox), 6);
-
-	gtk_icon_size_lookup (GTK_ICON_SIZE_DIALOG, &width, &height);
-	icon = gtk_icon_theme_load_icon (gtk_icon_theme_get_default (),
-	                                 icon_name ? icon_name : "dialog-information",
-	                                 width,
-	                                 GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
-	image = gtk_image_new_from_pixbuf (GDK_PIXBUF(icon));
-	g_object_unref (icon);
-
-	label = gtk_label_new(NULL);
-	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
-	gtk_widget_set_halign (label, GTK_ALIGN_START);
-
-	markup = g_strdup_printf("<span size='large' weight='bold'>%s</span>", header);
-	gtk_label_set_markup(GTK_LABEL(label), markup);
-	g_free(markup);
-
-	gtk_style_context_add_class (gtk_widget_get_style_context (xfce_heading),
-	                             "view");
-	gtk_style_context_add_class (gtk_widget_get_style_context (xfce_heading),
-	                             "XfceHeading");
-
-	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
-
-	gtk_container_add(GTK_CONTAINER(xfce_heading), hbox);
-
-	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-	gtk_box_pack_start (GTK_BOX (vbox), xfce_heading, FALSE, FALSE, 0);
-
-	separator = gtk_separator_new (GTK_ORIENTATION_VERTICAL);
-	gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, FALSE, 0);
-
-	return vbox;
-}
-
 
 /*
  * PraghaContainer: An extension of GtkContainer to expand their default size.
