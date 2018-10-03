@@ -53,7 +53,8 @@ pragha_show_related_text_info_dialog (GtkWidget   *widget,
                                       const gchar *subtitle_header,
                                       const gchar *text)
 {
-	GtkWidget *dialog, *vbox, *header, *view, *scrolled;
+	PraghaHeader *header;
+	GtkWidget *dialog, *vbox, *view, *scrolled;
 	GtkTextBuffer *buffer;
 
 	view = gtk_text_view_new ();
@@ -85,10 +86,12 @@ pragha_show_related_text_info_dialog (GtkWidget   *widget,
 
 	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, 350);
 
-	header = sokoke_xfce_header_new (subtitle_header, NULL);
+	header = pragha_header_new ();
+	pragha_header_set_title (header, subtitle_header);
+	pragha_header_set_icon_name (header, "media-optical");
 
 	vbox = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
-	gtk_box_pack_start (GTK_BOX(vbox), header, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX(vbox), GTK_WIDGET(header), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(vbox), scrolled, TRUE, TRUE, 0);
 
 	g_signal_connect (G_OBJECT(dialog), "response",
