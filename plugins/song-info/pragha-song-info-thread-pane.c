@@ -51,6 +51,7 @@ glyr_append_mboj_list (PraghaDatabase *cdbase, GlyrMemCache *it, GList *list)
 {
 	PraghaMusicobject *mobj = NULL;
 	gchar *title, *artist, *url;
+	gchar *utitle = NULL, *uartist = NULL;
 	gchar **tags;
 
 	tags = g_strsplit (it->data, "\n", 4);
@@ -58,13 +59,23 @@ glyr_append_mboj_list (PraghaDatabase *cdbase, GlyrMemCache *it, GList *list)
 	artist = tags[1];
 	url = tags[3];
 
-	mobj = pragha_database_get_artist_and_title_song (cdbase, artist, title);
+	if (string_is_empty(title) || string_is_empty(artist))
+		return list;
+
+	utitle = pragha_unescape_html_utf75(title);
+	uartist = pragha_unescape_html_utf75(artist);
+
+	mobj = pragha_database_get_artist_and_title_song (cdbase, uartist, utitle);
 	if (mobj == NULL) {
 		mobj = pragha_musicobject_new ();
 		pragha_musicobject_set_file (mobj, url);
-		pragha_musicobject_set_title (mobj, title);
-		pragha_musicobject_set_artist (mobj, artist);
+		pragha_musicobject_set_title (mobj, utitle);
+		pragha_musicobject_set_artist (mobj, uartist);
 	}
+
+	g_free(utitle);
+	g_free(uartist);
+
 	g_strfreev (tags);
 
 	return g_list_append (list, mobj);
