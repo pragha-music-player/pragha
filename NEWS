@@ -1,5 +1,44 @@
 ==============================================================
-Overview of changes between Pragha 1.3.92 and 1.3.91.1
+Overview of changes between Pragha 1.3.99 and 1.3.92
+==============================================================
+
+V1.3.90
+News:
+	First implementation of Favorites as a playlist.
+	Sync favorites with Koel and Last.Fm.
+	New Visualizer plugin. Just thanks to Koel for the idea.
+
+Other Changes:
+	Use Alt+Return shortcut to edit the selected song.
+	Add progress indicator to the search entry while it works.
+	Remember last pane used on song info plugin.
+	Allows to customize the styles to the distro packagers.
+
+Bug Fixes:
+	Restore X11 session support. As fallback try to use dbus session manager.
+	Fix bad encoding on lastfm responses. Issue #93
+	Fix encoding on similar song pane.
+	Import Year from Koel if available.
+	Fix typo in autogen.sh. Thanks to acharjyanisankh.
+	Misc deprecation fixes and remove old code.
+
+Updates Translations:
+	Update Danish translation thanks to scootergrisen.
+	Update Ukranian translation thanks to Koljan1970.
+	Update Dutch translation thanks to Vistaus.
+	Update French translation thanks to rptx.
+	Update Czech translation thanks to anespor.
+	Update Turkish translation thanks to Celonfix.
+	Update Russian translation thanks to Kyrill Detinov.
+	Update Chinese (China) translation thanks to Mingcong Bai.
+	Update Indonesian translation thanks to zk.
+	Update Catalan translation thanks to Robert Antoni Buj Gelonch.
+	Update Bulgarian translation thanks to Любомир Василев.
+	Update Lithuanian translation thanks to Moo.
+
+
+==============================================================
+OTHERS RELEASES:
 ==============================================================
 
 V1.3.92
@@ -32,10 +71,6 @@ Updates Translations:
 	Update Russian translation thanks to Kyrill Detinov.
 	Update Slovak translation thanks to Dušan Kazik.
 	Update Chinese (China) translation thanks to Mingcong Bai.
-
-==============================================================
-OTHERS RELEASES:
-==============================================================
 
 V1.3.91.1
 News:
