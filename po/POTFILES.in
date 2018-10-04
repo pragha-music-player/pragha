@@ -52,3 +52,4 @@ plugins/song-info/pragha-song-info-plugin.c
 plugins/song-info/pragha-song-info-thread-dialog.c
 plugins/song-info/pragha-song-info-thread-pane.c
 plugins/tunein/pragha-tunein-plugin.c
+plugins/visualizer/pragha-visualizer-plugin.c
