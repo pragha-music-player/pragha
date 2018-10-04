@@ -211,6 +211,8 @@ pragha_toolbar_set_favorite_icon (PraghaToolbar *toolbar, gboolean love)
 		NULL,
 	};
 
+	gtk_widget_set_tooltip_text (GTK_WIDGET(toolbar->favorites_button),
+	                             love ? _("Remove from Favorites") : _("Add to Favorites"));
 	icon = g_themed_icon_new_from_names (love ? (gchar **)love_icons : (gchar **)unlove_icons, -1);
 	image = gtk_image_new_from_gicon (icon, GTK_ICON_SIZE_MENU);
 	gtk_image_set_pixel_size (GTK_IMAGE(image), 12);
