@@ -53,6 +53,7 @@ PraghaApplication  *pragha_songinfo_plugin_get_application (PraghaSongInfoPlugin
 PraghaInfoCache    *pragha_songinfo_plugin_get_cache_info  (PraghaSongInfoPlugin *plugin);
 GlyrDatabase       *pragha_songinfo_plugin_get_cache       (PraghaSongInfoPlugin *plugin);
 PraghaSonginfoPane *pragha_songinfo_plugin_get_pane        (PraghaSongInfoPlugin *plugin);
+void                pragha_songinfo_plugin_init_glyr_query (gpointer data);
 
 G_END_DECLS
 
