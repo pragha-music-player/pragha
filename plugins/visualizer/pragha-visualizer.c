@@ -82,7 +82,7 @@ pragha_visualizer_set_magnitudes (PraghaVisualizer *visualizer, GValue *magnitud
 		particle = l->data;
 		mag = gst_value_list_get_value (magnitudes, i);
 		if (mag != NULL)
-			dmag = 85.0 + g_value_get_float (mag);
+			dmag = 80.0 + g_value_get_float (mag);
 		else
 			dmag = 0.0;
 

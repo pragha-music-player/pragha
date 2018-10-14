@@ -34,12 +34,12 @@
 const gdouble SMOOTHING = 0.5;
 const gdouble SCALE_MIN = 5.0;
 const gdouble SCALE_MAX =  80.0;
-const gdouble SPEED_MIN = 0.2;
-const gdouble SPEED_MAX = 1.0;
+const gdouble SPEED_MIN = 0.3;
+const gdouble SPEED_MAX = 1.5;
 const gdouble ALPHA_MIN = 0.8;
 const gdouble ALPHA_MAX = 0.9;
-const gdouble SPIN_MIN = 0.001;
-const gdouble SPIN_MAX = 0.005;
+const gdouble SPIN_MIN = 0.002;
+const gdouble SPIN_MAX = 0.010;
 const gdouble SIZE_MIN = 0.5;
 const gdouble SIZE_MAX = 1.25;
 
