@@ -1091,6 +1091,10 @@ pragha_lastfm_scrobble_thread (gpointer data)
 	CDEBUG(DBG_PLUGIN, "Scrobbler thread");
 
 	g_mutex_lock (&priv->data_mutex);
+	if (priv->playback_started == 0) {
+		g_mutex_unlock (&priv->data_mutex);
+		return _("Last.fm submission failed");
+	}
 	g_object_get (priv->current_mobj,
 	              "title",    &title,
 	              "artist",   &artist,
