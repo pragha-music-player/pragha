@@ -1114,6 +1114,10 @@ pragha_lastfm_scrobble_thread (gpointer data)
 	g_free(artist);
 	g_free(album);
 
+	g_mutex_lock (&priv->data_mutex);
+	priv->playback_started = 0;
+	g_mutex_unlock (&priv->data_mutex);
+
 	if (rv != LASTFM_STATUS_OK)
 		return _("Last.fm submission failed");
 	else
@@ -1200,17 +1204,17 @@ pragha_lastfm_now_playing_thread (gpointer data)
 			utitle = pragha_unescape_html_utf75(ntrack->name);
 			uartist = pragha_unescape_html_utf75(ntrack->artist);
 			ualbum = pragha_unescape_html_utf75(ntrack->album);
-			if (utitle && !g_strrstr(utitle, ";&#") && g_ascii_strcasecmp(title, utitle))
+			if (utitle && g_ascii_strcasecmp(title, utitle))
 				changed |= TAG_TITLE_CHANGED;
-			if (uartist && !g_strrstr(uartist, ";&#") && g_ascii_strcasecmp(artist, uartist))
+			if (uartist && g_ascii_strcasecmp(artist, uartist))
 				changed |= TAG_ARTIST_CHANGED;
-			if (ualbum && !g_strrstr(ualbum, ";&#") && g_ascii_strcasecmp(album, ualbum))
+			if (ualbum && g_ascii_strcasecmp(album, ualbum))
 				changed |= TAG_ALBUM_CHANGED;
 		}
 
 		if (changed) {
 			g_mutex_lock (&priv->data_mutex);
-			if (priv->updated_mobj)
+			if (priv->updated_mobj) 
 				g_object_unref (priv->updated_mobj);
 			priv->updated_mobj = pragha_musicobject_dup (priv->current_mobj);
 			if (changed & TAG_TITLE_CHANGED)
@@ -1258,12 +1262,22 @@ pragha_lastfm_now_playing_handler (gpointer data)
 	mobj = pragha_backend_get_musicobject (backend);
 
 	g_mutex_lock (&priv->data_mutex);
-	if (priv->current_mobj)
+	if (priv->current_mobj) {
 		g_object_unref (priv->current_mobj);
-	priv->current_mobj = pragha_musicobject_dup (mobj);
-	if (priv->updated_mobj)
+		priv->current_mobj = NULL;
+	}
+	if (priv->updated_mobj) {
 		g_object_unref (priv->updated_mobj);
-	priv->updated_mobj = NULL;
+		priv->updated_mobj = NULL;
+	}
+
+	if (priv->playback_started) {
+		g_critical ("Postposed update now_playing since a scrobble is pending");
+		g_mutex_unlock (&priv->data_mutex);
+		return G_SOURCE_CONTINUE;
+	}
+
+	priv->current_mobj = pragha_musicobject_dup (mobj);
 	time(&priv->playback_started);
 	g_mutex_unlock (&priv->data_mutex);
 
@@ -1272,7 +1286,7 @@ pragha_lastfm_now_playing_handler (gpointer data)
 	                     pragha_async_set_idle_message,
 	                     plugin);
 
-	return FALSE;
+	return G_SOURCE_REMOVE;
 }
 
 static gboolean
@@ -1287,14 +1301,14 @@ pragha_lastfm_scrobble_handler (gpointer data)
 
 	if (priv->status != LASTFM_STATUS_OK) {
 		pragha_lastfm_no_connection_advice ();
-		return FALSE;
+		return G_SOURCE_REMOVE;
 	}
 
 	pragha_async_launch (pragha_lastfm_scrobble_thread,
 	                     pragha_async_set_idle_message,
 	                     plugin);
 
-	return FALSE;
+	return G_SOURCE_REMOVE;
 }
 
 static void
@@ -1323,10 +1337,17 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 		g_source_remove (priv->update_timeout_id);
 		priv->update_timeout_id = 0;
 	}
+
 	if (priv->scrobble_timeout_id) {
 		g_source_remove (priv->scrobble_timeout_id);
 		priv->scrobble_timeout_id = 0;
 	}
+
+	g_mutex_lock (&priv->data_mutex);
+	if (priv->playback_started != 0) {
+		priv->playback_started = 0;
+	}
+	g_mutex_unlock (&priv->data_mutex);
 
 	if (state != ST_PLAYING) {
 		if (priv->ntag_lastfm_button)
