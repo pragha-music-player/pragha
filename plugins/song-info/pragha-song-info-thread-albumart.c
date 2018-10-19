@@ -102,7 +102,7 @@ pragha_songinfo_plugin_get_album_art (PraghaSongInfoPlugin *plugin,
 
 	glyr_info = g_slice_new0 (glyr_struct);
 
-	glyr_query_init(&glyr_info->query);
+	pragha_songinfo_plugin_init_glyr_query(&glyr_info->query);
 
 	glyr_opt_type (&glyr_info->query, GLYR_GET_COVERART);
 	glyr_opt_from (&glyr_info->query, "lastfm;musicbrainz");

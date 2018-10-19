@@ -67,6 +67,7 @@ struct _PraghaSongInfoPluginPrivate {
 
 	gboolean            download_album_art;
 	GtkWidget          *download_album_art_w;
+	GtkWidget          *proxy_w;
 
 	GtkActionGroup     *action_group_playlist;
 	guint               merge_id_playlist;
@@ -415,6 +416,21 @@ pragha_songinfo_pane_append_all (PraghaSonginfoPane   *pane,
 	g_list_free (mlist);
 }
 
+static gchar *
+pragha_songinfo_plugin_get_proxy (PraghaPreferences *preferences)
+{
+	gchar *plugin_group = NULL, *string = NULL;
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "song-info");
+
+	string = pragha_preferences_get_string (preferences,
+	                                        plugin_group,
+	                                        "Proxy");
+
+	g_free (plugin_group);
+
+	return string;
+}
+
 /*
  * Update handlers
  */
@@ -452,6 +468,23 @@ pragha_songinfo_plugin_get_pane (PraghaSongInfoPlugin *plugin)
 	return priv->pane;
 }
 
+void
+pragha_songinfo_plugin_init_glyr_query (gpointer data)
+{
+	PraghaPreferences *preferences;
+	gchar *proxy = NULL;
+	GlyrQuery *query = data;
+
+	preferences = pragha_preferences_get ();
+	proxy = pragha_songinfo_plugin_get_proxy (preferences);
+
+	glyr_query_init (query);
+	glyr_opt_proxy (query, proxy);
+
+	g_object_unref (preferences);
+	g_free (proxy);
+}
+
 PraghaApplication *
 pragha_songinfo_plugin_get_application (PraghaSongInfoPlugin *plugin)
 {
@@ -470,30 +503,43 @@ pragha_songinfo_preferences_dialog_response (GtkDialog            *dialog,
                                              PraghaSongInfoPlugin *plugin)
 {
 	PraghaPreferences *preferences;
-	gchar *plugin_group = NULL;
+	const gchar *entry_proxy = NULL;
+	gchar *plugin_group = NULL, *test_proxy = NULL;
 
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
+
+	preferences = pragha_preferences_get ();
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "song-info");
+
+	test_proxy = pragha_songinfo_plugin_get_proxy (preferences);
 
 	switch(response_id) {
 		case GTK_RESPONSE_CANCEL:
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(priv->download_album_art_w),
 			                              priv->download_album_art);
+			pragha_gtk_entry_set_text (GTK_ENTRY(priv->proxy_w), test_proxy);
 			break;
 		case GTK_RESPONSE_OK:
 			priv->download_album_art =
 				gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->download_album_art_w));
 
-			preferences = pragha_preferences_get ();
-			plugin_group = pragha_preferences_get_plugin_group_name(preferences, "song-info");
 			pragha_preferences_set_boolean (preferences,
 			                                plugin_group, "DownloadAlbumArt",
 			                                priv->download_album_art);
-			g_object_unref (preferences);
-			g_free (plugin_group);
+
+			entry_proxy = gtk_entry_get_text (GTK_ENTRY(priv->proxy_w));
+
+			if (g_strcmp0 (test_proxy, entry_proxy))
+				pragha_preferences_set_string (preferences, plugin_group, "Proxy", entry_proxy);
+
 			break;
 		default:
 			break;
 	}
+
+	g_object_unref (preferences);
+	g_free (plugin_group);
+	g_free (test_proxy);
 }
 
 static void
@@ -501,8 +547,8 @@ pragha_songinfo_plugin_append_setting (PraghaSongInfoPlugin *plugin)
 {
 	PreferencesDialog *dialog;
 	PraghaPreferences *preferences = NULL;
-	gchar *plugin_group = NULL;
-	GtkWidget *table, *download_album_art_w;
+	gchar *plugin_group = NULL, *proxy = NULL;
+	GtkWidget *table, *download_album_art_w, *proxy_label, *proxy_w;
 	guint row = 0;
 
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
@@ -515,6 +561,16 @@ pragha_songinfo_plugin_append_setting (PraghaSongInfoPlugin *plugin)
 	pragha_hig_workarea_table_add_wide_control (table, &row, download_album_art_w);
 
 	preferences = pragha_preferences_get ();
+	proxy_label = gtk_label_new (_("Proxy"));
+	proxy_w = gtk_entry_new ();
+	proxy = pragha_songinfo_plugin_get_proxy (preferences);
+	if (proxy)
+		gtk_entry_set_text (GTK_ENTRY(proxy_w), proxy);
+	gtk_entry_set_placeholder_text (GTK_ENTRY(proxy_w), "[protocol://][user:pass@]yourproxy.domain[:port]");
+	gtk_entry_set_activates_default (GTK_ENTRY(proxy_w), TRUE);
+
+	pragha_hig_workarea_table_add_row (table, &row, proxy_label, proxy_w);
+
 	plugin_group = pragha_preferences_get_plugin_group_name(preferences, "song-info");
 
 	priv->download_album_art =
@@ -524,6 +580,7 @@ pragha_songinfo_plugin_append_setting (PraghaSongInfoPlugin *plugin)
 
 	priv->setting_widget = table;
 	priv->download_album_art_w = download_album_art_w;
+	priv->proxy_w = proxy_w;
 
 	dialog = pragha_application_get_preferences_dialog (priv->pragha);
 	pragha_preferences_append_services_setting (dialog, table, FALSE);
@@ -534,6 +591,7 @@ pragha_songinfo_plugin_append_setting (PraghaSongInfoPlugin *plugin)
 
 	g_object_unref (G_OBJECT (preferences));
 	g_free (plugin_group);
+	g_free (proxy);
 }
 
 static void

@@ -146,7 +146,7 @@ pragha_songinfo_plugin_get_info_to_dialog (PraghaSongInfoPlugin *plugin,
 
 	glyr_info = g_slice_new0 (glyr_struct);
 
-	glyr_query_init (&glyr_info->query);
+	pragha_songinfo_plugin_init_glyr_query (&glyr_info->query);
 	glyr_opt_type (&glyr_info->query, type);
 
 	switch (type) {
