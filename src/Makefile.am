@@ -92,6 +92,8 @@ pragha_SOURCES = \
 	pragha-tags-dialog.h \
 	pragha-tags-mgmt.c \
 	pragha-tags-mgmt.h \
+	pragha-temp-provider.c \
+	pragha-temp-provider.h \
 	pragha-toolbar.c \
 	pragha-toolbar.h \
 	pragha-utils.c \
