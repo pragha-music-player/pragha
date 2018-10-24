@@ -30,6 +30,7 @@
 
 #include <gdk/gdkkeysyms.h>
 
+#include "pragha-background-task-bar.h"
 #include "pragha-simple-widgets.h"
 #include "pragha-hig.h"
 #include "pragha-utils.h"
@@ -49,6 +50,8 @@ struct _PraghaToolbar {
 	PraghaToolbarButton *stop_button;
 	PraghaToolbarButton *next_button;
 	PraghaToolbarButton *unfull_button;
+	
+	GtkWidget      *progress_button;
 	GtkWidget      *vol_button;
 
 	GtkWidget      *extra_button_box;
@@ -452,6 +455,12 @@ pragha_toolbar_add_extra_button (PraghaToolbar *toolbar, GtkWidget *widget)
 	gtk_container_add(GTK_CONTAINER(toolbar->extra_button_box), widget);
 }
 
+GtkWidget *
+pragha_toolbar_get_task_progress_button (PraghaToolbar *toolbar)
+{
+	return toolbar->progress_button;
+}
+
 const gchar*
 pragha_toolbar_get_progress_text(PraghaToolbar *toolbar)
 {
@@ -842,7 +851,7 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	PraghaToolbarButton *prev_button, *play_button, *stop_button, *next_button;
 	PraghaToolbarButton *unfull_button;
 	PraghaToggleButton *shuffle_button, *repeat_button;
-	GtkWidget *vol_button;
+	GtkWidget *vol_button, *progress_button;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
@@ -878,6 +887,9 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	gtk_widget_set_tooltip_text(GTK_WIDGET(unfull_button), _("Leave Fullscreen"));
 	toolbar->unfull_button = unfull_button;
 
+	progress_button = GTK_WIDGET(pragha_background_task_bar_new ());
+	toolbar->progress_button = progress_button;
+
 	shuffle_button = pragha_toggle_button_new ("media-playlist-shuffle");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(shuffle_button), _("Play songs in a random order"));
 
@@ -899,6 +911,7 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(repeat_button));
 	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(shuffle_button));
 	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(unfull_button));
+	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(progress_button));
 
 	/* Connect signals */
 
@@ -962,6 +975,7 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	gtk_widget_show(GTK_WIDGET(toolbar->extra_button_box));
 
 	gtk_widget_hide(GTK_WIDGET(toolbar->unfull_button));
+	gtk_widget_hide(GTK_WIDGET(toolbar->progress_button));
 
 	gtk_widget_show(GTK_WIDGET(toolbar));
 

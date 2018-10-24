@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2016 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2016-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -21,6 +21,16 @@
 #include <gtk/gtk.h>
 
 G_BEGIN_DECLS
+
+#define PRAGHA_TYPE_BACKGROUND_TASK_BAR (pragha_background_task_bar_get_type())
+#define PRAGHA_BACKGROUND_TASK_BAR(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_BACKGROUND_TASK_BAR, PraghaBackgroundTaskBar))
+#define PRAGHA_BACKGROUND_TASK_BAR_CONST(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_BACKGROUND_TASK_BAR, PraghaBackgroundTaskBar const))
+#define PRAGHA_BACKGROUND_TASK_BAR_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PRAGHA_TYPE_BACKGROUND_TASK_BAR, PraghaBackgroundTaskBarClass))
+#define PRAGHA_IS_BACKGROUND_TASK_BAR(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_BACKGROUND_TASK_BAR))
+#define PRAGHA_IS_BACKGROUND_TASK_BAR_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_BACKGROUND_TASK_BAR))
+#define PRAGHA_BACKGROUND_TASK_BAR_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_BACKGROUND_TASK_BAR, PraghaBackgroundTaskBarClass))
+
+GType pragha_background_task_bar_get_type (void);
 
 typedef struct _PraghaBackgroundTaskBar PraghaBackgroundTaskBar;
 

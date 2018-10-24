@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2016 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2016-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -14,6 +14,8 @@
 /* You should have received a copy of the GNU General Public License     */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
+
+#include "pragha-hig.h"
 
 #include "pragha-background-task-widget.h"
 
@@ -338,6 +340,7 @@ pragha_background_task_widget_init (PraghaBackgroundTaskWidget *taskwidget)
 	taskwidget->cancell_button = gtk_button_new ();
 	image = gtk_image_new_from_icon_name ("process-stop", GTK_ICON_SIZE_MENU);
 	gtk_button_set_relief (GTK_BUTTON (taskwidget->cancell_button), GTK_RELIEF_NONE);
+	pragha_hig_set_tiny_button (taskwidget->cancell_button);
 #if GTK_CHECK_VERSION (3, 20, 0)
 	gtk_widget_set_focus_on_click (GTK_WIDGET (taskwidget->cancell_button), FALSE);
 #else

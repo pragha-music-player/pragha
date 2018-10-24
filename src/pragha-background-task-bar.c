@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2016 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2016-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -24,41 +24,33 @@
 #include "pragha-background-task-widget.h"
 #include "pragha-background-task-bar.h"
 
-#define PRAGHA_TYPE_BACKGROUND_TASK_BAR (pragha_background_task_bar_get_type())
-#define PRAGHA_BACKGROUND_TASK_BAR(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_BACKGROUND_TASK_BAR, PraghaBackgroundTaskBar))
-#define PRAGHA_BACKGROUND_TASK_BAR_CONST(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_BACKGROUND_TASK_BAR, PraghaBackgroundTaskBar const))
-#define PRAGHA_BACKGROUND_TASK_BAR_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PRAGHA_TYPE_BACKGROUND_TASK_BAR, PraghaBackgroundTaskBarClass))
-#define PRAGHA_IS_BACKGROUND_TASK_BAR(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_BACKGROUND_TASK_BAR))
-#define PRAGHA_IS_BACKGROUND_TASK_BAR_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_BACKGROUND_TASK_BAR))
-#define PRAGHA_BACKGROUND_TASK_BAR_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_BACKGROUND_TASK_BAR, PraghaBackgroundTaskBarClass))
-
 typedef struct _PraghaBackgroundTaskBarClass PraghaBackgroundTaskBarClass;
 
 struct _PraghaBackgroundTaskBarClass {
-	GtkBoxClass parent_class;
+	GtkButtonClass parent_class;
 };
+
 struct _PraghaBackgroundTaskBar {
-	GtkBox    _parent;
+	GtkButton _parent;
 
-	GBinding *label_binding;
+	GBinding  *label_binding;
 
-	gint      task_count;
+	gint       task_count;
 
-	GtkWidget *popover;
-	GtkWidget *listbox;
-	GtkWidget *spinner;
-	GtkWidget *label;
+	GtkWidget  *popover;
+	GtkWidget  *listbox;
+	GtkWidget  *spinner;
 };
-G_DEFINE_TYPE(PraghaBackgroundTaskBar, pragha_background_task_bar, GTK_TYPE_BOX)
+
+G_DEFINE_TYPE(PraghaBackgroundTaskBar, pragha_background_task_bar, GTK_TYPE_BUTTON)
 
 static gboolean
-pragha_background_task_bar_button_press_event (GtkWidget	  *widget,
-                                               GdkEventButton *event,
-                                               GtkWidget      *wtaskbar)
+pragha_background_task_bar_clicked_event (GtkWidget	  *widget,
+                                          GtkWidget      *wtaskbar)
 {
 	PraghaBackgroundTaskBar *taskbar = PRAGHA_BACKGROUND_TASK_BAR(wtaskbar);
 
-	if (taskbar->task_count < 0)
+	if (taskbar->task_count <= 0)
 		return FALSE;
 
 	gtk_widget_show (GTK_WIDGET(taskbar->popover));
@@ -77,25 +69,17 @@ pragha_background_task_bar_class_init (PraghaBackgroundTaskBarClass *class)
 static void
 pragha_background_task_bar_init (PraghaBackgroundTaskBar *taskbar)
 {
-	GtkWidget *event_box, *hbox;
-
 	/* Main widget */
 
-	event_box = gtk_event_box_new ();
-	gtk_event_box_set_visible_window (GTK_EVENT_BOX(event_box), FALSE);
-	g_signal_connect (G_OBJECT (event_box), "button_press_event",
-	                  G_CALLBACK (pragha_background_task_bar_button_press_event), taskbar);
+	gtk_button_set_relief (GTK_BUTTON(taskbar), GTK_RELIEF_NONE);
 
-	gtk_container_add (GTK_CONTAINER(taskbar), GTK_WIDGET(event_box));
-
-	taskbar->label = gtk_label_new (_("There are background tasks working"));
 	taskbar->spinner = gtk_spinner_new ();
+	gtk_container_add (GTK_CONTAINER(taskbar), GTK_WIDGET(taskbar->spinner));
 
-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-	gtk_box_pack_start (GTK_BOX(hbox), taskbar->label, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX(hbox), taskbar->spinner, FALSE, FALSE, 0);
+	gtk_widget_set_tooltip_text (GTK_WIDGET(taskbar), _("There are background tasks working"));
 
-	gtk_container_add(GTK_CONTAINER(event_box), GTK_WIDGET(hbox));
+	g_signal_connect (G_OBJECT (taskbar), "clicked",
+	                  G_CALLBACK (pragha_background_task_bar_clicked_event), taskbar);
 
 	/* Popover */
 
@@ -110,6 +94,8 @@ pragha_background_task_bar_init (PraghaBackgroundTaskBar *taskbar)
 
 	gtk_container_add (GTK_CONTAINER(taskbar->popover), taskbar->listbox);
 
+	/* Show properly.. */
+
 	gtk_widget_show_all(GTK_WIDGET(taskbar));
 	gtk_widget_hide(GTK_WIDGET(taskbar));
 }
@@ -121,7 +107,7 @@ pragha_background_task_bar_show_first_description (PraghaBackgroundTaskBar *task
 	row = gtk_list_box_get_row_at_index (GTK_LIST_BOX(taskbar->listbox), 0);
 	taskbar->label_binding =
 		g_object_bind_property (PRAGHA_BACKGROUND_TASK_WIDGET (row), "description",
-		                        taskbar->label, "label",
+		                        taskbar, "tooltip-text",
 		                        G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL);
 }
 
@@ -133,7 +119,7 @@ pragha_background_task_bar_show_generic_description (PraghaBackgroundTaskBar *ta
 		taskbar->label_binding = NULL;
 	}
 
-	gtk_label_set_markup (GTK_LABEL(taskbar->label), _("There are background tasks working"));
+	gtk_widget_set_tooltip_text (GTK_WIDGET(taskbar), _("There are background tasks working"));
 }
 
 void
