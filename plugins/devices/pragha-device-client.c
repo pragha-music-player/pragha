@@ -89,6 +89,23 @@ pragha_gudev_dialog_new (GtkWidget *parent, const gchar *title, const gchar *ico
 	return dialog;
 }
 
+/* Helper */
+
+gint
+pragha_gudev_get_property_as_int (GUdevDevice *device,
+                                  const gchar *property,
+                                  gint         base)
+{
+	const char *strvalue;
+
+	strvalue = g_udev_device_get_property (device, property);
+	if (strvalue == NULL) {
+		return 0;
+	}
+
+	return strtol (strvalue, NULL, base);
+}
+
 /* Identify devices.*/
 
 static gint

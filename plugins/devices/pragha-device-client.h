@@ -72,6 +72,11 @@ pragha_gudev_dialog_new (GtkWidget *parent, const gchar *title, const gchar *ico
                          const gchar *primary_text, const gchar *secondary_text,
                          const gchar *first_button_text, gint first_button_response);
 
+gint
+pragha_gudev_get_property_as_int (GUdevDevice *device,
+                                  const gchar *property,
+                                  gint         base);
+
 /* Create a new instance of PraghaDeviceClient* */
 
 PraghaDeviceClient *pragha_device_client_get          (void);

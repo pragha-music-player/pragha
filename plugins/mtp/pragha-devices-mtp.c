@@ -63,8 +63,8 @@ typedef struct _PraghaMtpPluginPrivate PraghaMtpPluginPrivate;
 struct _PraghaMtpPluginPrivate {
 	PraghaApplication  *pragha;
 
-	guint64             bus_hooked;
-	guint64             device_hooked;
+	gint                bus_hooked;
+	gint                device_hooked;
 	GUdevDevice        *u_device;
 	LIBMTP_mtpdevice_t *mtp_device;
 
@@ -212,6 +212,97 @@ pragha_mtp_cache_insert_track (PraghaMtpPlugin *plugin, PraghaMusicobject *mobj)
 	g_hash_table_insert (priv->tracks_table,
 	                     g_strdup(file),
 	                     mobj);
+}
+
+static void
+pragha_mtp_plugin_cache_storage_recursive (LIBMTP_mtpdevice_t *device,
+                                           guint               storageid,
+                                           gint                leaf,
+                                           PraghaMtpPlugin    *plugin)
+{
+	PraghaMusicobject *mobj = NULL;
+	LIBMTP_file_t *folders = NULL, *lfolder = NULL, *audios = NULL, *laudio = NULL;
+	LIBMTP_file_t *files, *file, *tmp;
+	gboolean nomedia = FALSE;
+
+	files = LIBMTP_Get_Files_And_Folders (device,
+	                                      storageid,
+	                                      leaf);
+
+	if (files == NULL)
+		return;
+
+	file = files;
+	while (file != NULL)
+	{
+		if (file->filetype == LIBMTP_FILETYPE_FOLDER)
+		{
+			if (folders == NULL)
+				folders = lfolder = file;
+			else {
+				lfolder->next = file;
+				lfolder = lfolder->next;
+			}
+		}
+		else if (LIBMTP_FILETYPE_IS_AUDIO(file->filetype))
+		{
+			if (audios == NULL)
+				audios = laudio = file;
+			else {
+				laudio->next = file;
+				laudio = laudio->next;
+			}
+		}
+		else {
+			if (g_ascii_strcasecmp(file->filename, ".nomedia") == 0) {
+				nomedia = TRUE;
+				break;
+			}
+		}
+
+		pragha_process_gtk_events ();
+
+		file = file->next;
+	}
+
+	if (nomedia == FALSE)
+	{
+		/* Add folders recursively */
+		file = folders;
+		while (file != NULL) {
+			pragha_mtp_plugin_cache_storage_recursive (device, storageid, file->item_id, plugin);
+			pragha_process_gtk_events ();
+			file = file->next;
+		}
+
+		/* Add music files */
+		file = audios;
+		while (file != NULL)
+		{
+			LIBMTP_track_t *track;
+			track = LIBMTP_Get_Trackmetadata(device, file->item_id);
+			if (G_LIKELY(track))
+			{
+				mobj = pragha_musicobject_new_from_mtp_track (track);
+				if (G_LIKELY(mobj))
+				{
+					pragha_mtp_cache_insert_track (plugin, mobj);
+				}
+				LIBMTP_destroy_track_t(track);
+			}
+			pragha_process_gtk_events ();
+			file = file->next;
+		}
+	}
+
+	/* Clean memory. */
+	file = files;
+	while (file != NULL)
+	{
+		tmp = file;
+		file = file->next;
+		LIBMTP_destroy_file_t(tmp);
+	}
 }
 
 /*
@@ -474,41 +565,17 @@ pragha_mtp_plugin_remove_menu_action (PraghaMtpPlugin *plugin)
 	                             "mtp-sudmenu");
 }
 
-static int
-progressfunc (uint64_t const sent, uint64_t const total, void const *const data)
-{
-	/* Have to give control to GTK periodically ... */
-	pragha_process_gtk_events ();
-
-	return 0;
-}
-
 static void
 pragha_mtp_plugin_cache_tracks (PraghaMtpPlugin *plugin)
 {
-	LIBMTP_track_t *tracks, *track, *tmp;
-	PraghaMusicobject *mobj = NULL;
+	LIBMTP_devicestorage_t *storage;
 
 	PraghaMtpPluginPrivate *priv = plugin->priv;
 
-	tracks = LIBMTP_Get_Tracklisting_With_Callback (priv->mtp_device, progressfunc, NULL); // Slow!.
-
-	if (!tracks)
-		return;
-
-	track = tracks;
-	while (track != NULL) {
-		mobj = pragha_musicobject_new_from_mtp_track (track);
-		if (G_LIKELY(mobj))
-			pragha_mtp_cache_insert_track (plugin, mobj);
-
-		tmp = track;
-		track = track->next;
-		LIBMTP_destroy_track_t(tmp);
-
-		/* Have to give control to GTK periodically ... */
-		pragha_process_gtk_events ();
+	for (storage = priv->mtp_device->storage; storage != 0; storage = storage->next) {
+		pragha_mtp_plugin_cache_storage_recursive (priv->mtp_device, storage->id, 0xffffffff, plugin);
 	}
+
 }
 
 static void
@@ -541,10 +608,16 @@ pragha_mtp_detected_ask_action_response (GtkWidget *dialog,
 	switch (response)
 	{
 		case PRAGHA_DEVICE_RESPONSE_PLAY:
+			gtk_widget_set_sensitive (dialog, FALSE);
+			set_watch_cursor (dialog);
+			pragha_mtp_plugin_cache_tracks (plugin);
+			pragha_mtp_plugin_append_menu_action (plugin);
+			remove_watch_cursor(dialog);
 			pragha_mtp_plugin_append_cache (plugin);
 			break;
 		case PRAGHA_DEVICE_RESPONSE_NONE:
 		default:
+			pragha_mtp_clear_hook_device (plugin);
 			break;
 	}
 	gtk_widget_destroy (dialog);
@@ -572,10 +645,9 @@ pragha_mtp_plugin_device_added (PraghaDeviceClient *device_client,
 {
 	LIBMTP_raw_device_t *device_list, *raw_device = NULL;
 	LIBMTP_mtpdevice_t *mtp_device;
-	guint64 busnum = 0;
-	guint64 devnum = 0;
-	gint numdevs = 0;
-	gint i = 0;
+	LIBMTP_devicestorage_t *storage;
+	gint busnum = 0, devnum = 0, numdevs = 0, i = 0;
+	guint64 freeSpace = 0;
 
 	PraghaMtpPlugin *plugin = user_data;
 	PraghaMtpPluginPrivate *priv = plugin->priv;
@@ -591,8 +663,8 @@ pragha_mtp_plugin_device_added (PraghaDeviceClient *device_client,
 	if (LIBMTP_Detect_Raw_Devices (&device_list, &numdevs) != LIBMTP_ERROR_NONE)
 		return;
 
-	busnum = g_udev_device_get_property_as_uint64 (u_device, "BUSNUM");
-	devnum = g_udev_device_get_property_as_uint64 (u_device, "DEVNUM");
+	busnum = g_udev_device_get_property_as_int (u_device, "BUSNUM");
+	devnum = pragha_gudev_get_property_as_int (u_device, "DEVNUM", 10);
 
 	for (i = 0; i < numdevs; i++) {
 		if (device_list[i].bus_location == busnum &&
@@ -613,8 +685,20 @@ pragha_mtp_plugin_device_added (PraghaDeviceClient *device_client,
 
 	/* Get device and reorder by free space. */
 
-	mtp_device = LIBMTP_Open_Raw_Device(raw_device); // Slow!.
-	LIBMTP_Get_Storage (mtp_device, LIBMTP_STORAGE_SORTBY_FREESPACE);
+	mtp_device = LIBMTP_Open_Raw_Device_Uncached (raw_device);
+	if (!LIBMTP_Get_Storage (mtp_device, LIBMTP_STORAGE_SORTBY_FREESPACE)) {
+		LIBMTP_Dump_Errorstack (mtp_device);
+		LIBMTP_Clear_Errorstack (mtp_device);
+	}
+
+	for (storage = mtp_device->storage; storage != 0; storage = storage->next) {
+		freeSpace += storage->FreeSpaceInBytes;
+	}
+
+	if (!freeSpace) {
+		LIBMTP_Release_Device (mtp_device);
+		return;
+	}
 
 	/* Hook device */
 
@@ -623,10 +707,7 @@ pragha_mtp_plugin_device_added (PraghaDeviceClient *device_client,
 	priv->u_device = g_object_ref (u_device);
 	priv->mtp_device = mtp_device;
 
-	pragha_mtp_plugin_cache_tracks (plugin);
-
 	pragha_mtp_detected_ask_action (plugin);
-	pragha_mtp_plugin_append_menu_action (plugin);
 
 	g_free (device_list);
 }
@@ -638,8 +719,7 @@ pragha_mtp_plugin_device_removed (PraghaDeviceClient *device_client,
                                   gpointer            user_data)
 {
 	PraghaMusicEnum *enum_map = NULL;
-	guint64 busnum = 0;
-	guint64 devnum = 0;
+	gint busnum = 0, devnum = 0;
 
 	PraghaMtpPlugin *plugin = user_data;
 	PraghaMtpPluginPrivate *priv = plugin->priv;
@@ -647,8 +727,8 @@ pragha_mtp_plugin_device_removed (PraghaDeviceClient *device_client,
 	if (device_type != PRAGHA_DEVICE_MTP)
 		return;
 
-	busnum = g_udev_device_get_property_as_uint64(u_device, "BUSNUM");
-	devnum = g_udev_device_get_property_as_uint64(u_device, "DEVNUM");
+	busnum = g_udev_device_get_property_as_int (u_device, "BUSNUM");
+	devnum = pragha_gudev_get_property_as_int (u_device, "DEVNUM", 10);
 
 	if (busnum == priv->bus_hooked && devnum == priv->device_hooked) {
 		pragha_mtp_plugin_remove_menu_action (plugin);
