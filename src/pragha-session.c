@@ -25,6 +25,8 @@
 #include <libxfce4ui/libxfce4ui.h>
 #endif
 
+#include <gdk/gdkx.h>
+
 #include "pragha.h"
 
 #if HAVE_LIBXFCE4UI

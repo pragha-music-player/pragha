@@ -1473,7 +1473,7 @@ static const gchar *menu_ui = \
 		NEW_ACCEL_ITEM("Jump to playing song",                 "&lt;Control&gt;J",     "win", "jump-song") \
 		SEPARATOR \
 		NEW_ACCEL_ITEM     ("Show lateral _panel",             "F9",                   "win", "sidebar1") \
-		NEW_ACCEL_ITEM     ("Show secondary lateral panel",    "&lt;Control&gt;F9",    "win", "sidebar2") \
+		NEW_ACCEL_ITEM     ("Show secondary lateral panel",    "&lt;Shift&gt;F9",      "win", "sidebar2") \
 		NEW_ACCEL_ITEM     ("Show menubar",                    "&lt;Control&gt;M",     "win", "menubar") \
 		NEW_ITEM           ("Show status bar",                                         "win", "status-bar") \
 		SEPARATOR \
