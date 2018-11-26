@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -45,20 +45,29 @@ pragha_init_session_support(PraghaApplication *pragha)
 {
 	XfceSMClient *client;
 	GError *error = NULL;
- 
-	client =  xfce_sm_client_get ();
-	xfce_sm_client_set_priority (client, XFCE_SM_CLIENT_PRIORITY_DEFAULT);
-	xfce_sm_client_set_restart_style (client, XFCE_SM_CLIENT_RESTART_NORMAL);
-	xfce_sm_client_set_desktop_file(client, DESKTOPENTRY);
 
-	g_signal_connect (G_OBJECT (client), "quit",
-	                  G_CALLBACK (pragha_session_quit), pragha);
-	g_signal_connect (G_OBJECT (client), "save-state",
-	                  G_CALLBACK (pragha_session_save_state), pragha);
+ 	if (GDK_IS_X11_DISPLAY (gdk_display_get_default ())) {
+		client =  xfce_sm_client_get ();
+		xfce_sm_client_set_priority (client, XFCE_SM_CLIENT_PRIORITY_DEFAULT);
+		xfce_sm_client_set_restart_style (client, XFCE_SM_CLIENT_RESTART_NORMAL);
+		xfce_sm_client_set_desktop_file(client, DESKTOPENTRY);
 
-	if(!xfce_sm_client_connect (client, &error)) {
-		g_warning ("Failed to connect to session manager: %s", error->message);
-		g_error_free (error);
+		g_signal_connect (G_OBJECT (client), "quit",
+		                  G_CALLBACK (pragha_session_quit), pragha);
+		g_signal_connect (G_OBJECT (client), "save-state",
+		                  G_CALLBACK (pragha_session_save_state), pragha);
+
+		if(!xfce_sm_client_connect (client, &error)) {
+			g_warning ("Failed to connect to session manager: %s", error->message);
+			g_error_free (error);
+
+			// As fallback register DBUS session..
+			g_warning ("As fallback try to use dbus session manager");
+			g_object_set (GTK_APPLICATION(pragha), "register-session", TRUE, NULL);
+		}
+	}
+	else {
+		g_object_set (GTK_APPLICATION(pragha), "register-session", TRUE, NULL);		
 	}
 }
 #else
@@ -74,12 +83,15 @@ pragha_init_session_support(PraghaApplication *pragha)
 	GtkWidget *window;
 	gchar *role;
 
-	window = pragha_application_get_window (pragha);
+ 	if (GDK_IS_X11_DISPLAY (gdk_display_get_default ())) {
+		window = pragha_application_get_window (pragha);
+		/* set a unique role on each window (for session management) */
+		role = g_strdup_printf ("Pragha-%p-%d-%d", window, (gint) getpid (), (gint) time (NULL));
+		gtk_window_set_role (GTK_WINDOW (window), role);
+		g_free (role);
+	}
 
-	/* set a unique role on each window (for session management) */
-	role = g_strdup_printf ("Pragha-%p-%d-%d", window, (gint) getpid (), (gint) time (NULL));
-	gtk_window_set_role (GTK_WINDOW (window), role);
-	g_free (role);
+	g_object_set (GTK_APPLICATION(pragha), "register-session", TRUE, NULL);
 }
 #endif
 #endif
