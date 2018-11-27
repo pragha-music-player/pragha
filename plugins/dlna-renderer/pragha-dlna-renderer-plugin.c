@@ -252,7 +252,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	registry = grl_registry_get_default ();
 #ifdef HAVE_GRILO3
-	if (!grl_registry_activate_plugin_by_id (registry, "grl-dleyna", &error)) {
+	if (!grl_registry_load_all_plugins (registry, FALSE, &error) ||
+	    !grl_registry_activate_plugin_by_id (registry, "grl-dleyna", &error)) {
 #endif
 #ifdef HAVE_GRILO2
 	if (!grl_registry_load_plugin_by_id (registry, "grl-dleyna", &error)) {
