@@ -180,6 +180,8 @@ XDT_CHECK_OPTIONAL_PACKAGE([GRILO2],
                            [grilo-0.2], [0.2.11],
                            [grilo-0.2],
                            [grilo-0.2 library], [yes])
+else
+AM_CONDITIONAL([HAVE_GRILO2], 0)
 fi
 else
 AM_CONDITIONAL([HAVE_GRILO3], 0)
