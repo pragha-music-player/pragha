@@ -67,7 +67,6 @@ pragha_dlna_plugin_append_track (PraghaDlnaPlugin  *plugin,
                                  gint               id)
 {
 	RygelMusicItem *item = NULL;
-	RygelMediaObject *object;
 	gchar *uri = NULL, *u_title = NULL, *item_id = NULL, *content_type = NULL;
 	const gchar *file = NULL, *title = NULL;
 	gboolean uncertain;
@@ -84,24 +83,27 @@ pragha_dlna_plugin_append_track (PraghaDlnaPlugin  *plugin,
 	                             RYGEL_MUSIC_ITEM_UPNP_CLASS);
 
 	if (item != NULL) {
-		rygel_music_item_set_artist (item, pragha_musicobject_get_artist(mobj));
-		rygel_music_item_set_album (item, pragha_musicobject_get_album(mobj));
-		rygel_music_item_set_track_number (item, pragha_musicobject_get_track_no(mobj));
+		file = pragha_musicobject_get_file (mobj);
+
+		uri = g_filename_to_uri (file, NULL, NULL);
+		rygel_media_object_add_uri (RYGEL_MEDIA_OBJECT (item), uri);
+		g_free (uri);
 
 		rygel_audio_item_set_duration (RYGEL_AUDIO_ITEM(item), (glong)pragha_musicobject_get_length(mobj));
 
-		file = pragha_musicobject_get_file (mobj);
 		content_type = g_content_type_guess (file, NULL, 0, &uncertain);
-		rygel_media_item_set_mime_type (RYGEL_MEDIA_ITEM (item), content_type);
+		rygel_media_file_item_set_mime_type (RYGEL_MEDIA_FILE_ITEM (item), content_type);
 		g_free(content_type);
 
-		uri = g_filename_to_uri (file, NULL, NULL);
+		rygel_music_item_set_track_number (item, pragha_musicobject_get_track_no(mobj));
 
-		object = RYGEL_MEDIA_OBJECT (item);
-		gee_collection_add (GEE_COLLECTION (object->uris), uri);
-		g_free (uri);
+		rygel_audio_item_set_album (RYGEL_AUDIO_ITEM(item), pragha_musicobject_get_album(mobj));
+		rygel_audio_item_set_duration (RYGEL_AUDIO_ITEM(item), (glong)pragha_musicobject_get_length(mobj));
+		rygel_media_object_set_artist (RYGEL_MEDIA_OBJECT(item), pragha_musicobject_get_artist(mobj));
 
 		rygel_simple_container_add_child_item (priv->container, RYGEL_MEDIA_ITEM(item));
+
+		g_object_unref (item);
 	}
 
 	g_free(u_title);
