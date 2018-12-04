@@ -305,6 +305,7 @@ pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent)
 	dialog->enable = gtk_switch_new ();
 	gtk_switch_set_state (GTK_SWITCH(dialog->enable), TRUE);
 	gtk_widget_set_halign (GTK_WIDGET(dialog->enable), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (GTK_WIDGET(dialog->enable), GTK_ALIGN_CENTER);
 	g_object_set (G_OBJECT(dialog->enable), "margin", 4, NULL);
 	gtk_grid_attach (GTK_GRID(grid), GTK_WIDGET(dialog->enable),
 	                 0, 0, 1, 1);
