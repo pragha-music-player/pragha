@@ -29,10 +29,15 @@ PraghaMusicobject *
 new_musicobject_from_file(const gchar *file)
 {
 	PraghaMusicobject *mobj = NULL;
+	PraghaMediaType ftype = MEDIA_TYPE_UNKNOWN;
 	gchar *mime_type = NULL;
 	gboolean ret = FALSE;
 
 	CDEBUG(DBG_MOBJ, "Creating new musicobject from file: %s", file);
+
+	ftype = pragha_file_get_media_type (file);
+	if (ftype != MEDIA_TYPE_AUDIO)
+		return NULL;
 
 	mime_type = pragha_file_get_music_type(file);
 
