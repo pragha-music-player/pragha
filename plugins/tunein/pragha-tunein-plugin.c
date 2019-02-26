@@ -152,12 +152,13 @@ pragha_tunein_plugin_get_radio_done (SoupSession *session,
 
 	xml = tinycxml_parse ((gchar *)msg->response_body->data);
 	xi = xmlnode_get (xml, CCA{"opml", "body", "outline", NULL }, NULL, NULL);
+	for(;xi;xi= xi->next) {
+		type = tunein_helper_get_atribute (xi, "type");
+		if (g_ascii_strcasecmp(type, "audio") == 0)
+			break;
+	}
 
-	type = tunein_helper_get_atribute (xi, "type");
-	if (g_ascii_strcasecmp(type, "audio") != 0) {
-		statusbar = pragha_statusbar_get ();
-		pragha_statusbar_set_misc_text (statusbar, _("There was an error when searching radio on TuneIn"));
-		g_object_unref (statusbar);
+	if (xi == NULL) {
 		xmlnode_free(xml);
 		return;
 	}
