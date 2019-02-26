@@ -1,7 +1,50 @@
 ==============================================================
-Overview of changes between Pragha 1.3.3 and 1.3.2.2
+Overview of changes between Pragha 1.3.4 and 1.3.3
 ==============================================================
 
+V1.3.4
+Codename: "Cherry, cherry, cherry pick..."
+
+News:
+	Fixes some border, spacing and margin in all gui.
+	Various improvements to the tag editor dialog.
+
+Others Changes:
+	Implement emit CanNext/Prev/Play/Pause/Seek. Issue #123
+	Use Alt+Return shortcut to edit the selected song.
+	Some backport of improvents to MTP plugin
+	Allow build with grilo-0.2 and grilo-0.3.
+	Set user-agent and ssl strict ssl to gstreamer on internet music.
+	Fix second sidebar dont show with accel. Issue #73
+	Allow apply a custom css. Related to Issue #64, #87
+	Allows to customize the styles to the distro packagers.
+
+Bugs fixed:
+	Fix Incorrect Can* properties of the MPRIS Specification #123
+	Fix wrong Wiki address. Issue  #138
+	Fix segmentation fault when close deactivate mpris plugin.
+	Remove use-hint preferences that was removed..
+	Fix GtkDialog mapped without a transient parent..
+	Dont use keybinder plugin on wayland. Issue #118
+	Dont use X11 session on wayland.
+	Use same accel -Shift-F9- to show second sidebar that gnome-builder. Issue #73
+	Align to center the toolbar icons instead vertical fill. Issue #10
+	Fix toolbar shows 00:60 instead of 01:00. Issue #103
+	Remove custom invisible char of lastfm password
+	Update dlna-renderer plugin. Issue #94
+	Update dlna plugin to rygel 2.6.
+	Prefer non symbolic icons. Fix blured menu icon.. Issue #85
+	Avoid opening unknown files on Taglib.
+	Fix TuneIn when it offers many results.
+
+Updates Translations:
+	Nothing here since transifex dont use versions and change so much.
+
+==============================================================
+OTHERS REALESES:
+==============================================================
+
+V1.3.3
 Codename: "Just a preamp..."
 
 News:
@@ -28,10 +71,6 @@ Updates Translations:
 	Update Russian translation thanks to Lazy_Kent.
 	Update Bulgarian translation thanks to lyubomirv.
 	Update Swedish translation thanks to monotux.
-
-==============================================================
-OTHERS REALESES:
-==============================================================
 
 V1.3.2.2
 Codename: "Gtk 3.14: Que cunda el panico. haha. ;)"
