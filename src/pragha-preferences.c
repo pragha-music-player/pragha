@@ -53,7 +53,6 @@ struct _PraghaPreferencesPrivate
 	/* Playlist preferences. */
 	gboolean   shuffle;
 	gboolean   repeat;
-	gboolean   use_hint;
 	gboolean   restore_playlist;
 	/* Audio preferences. */
 	gchar     *audio_sink;
@@ -96,7 +95,6 @@ enum
 	PROP_LIBRARY_FUSE_FOLDERS,
 	PROP_SHUFFLE,
 	PROP_REPEAT,
-	PROP_USE_HINT,
 	PROP_RESTORE_PLAYLIST,
 	PROP_AUDIO_SINK,
 	PROP_AUDIO_DEVICE,
@@ -743,33 +741,6 @@ pragha_preferences_set_repeat (PraghaPreferences *preferences,
 	preferences->priv->repeat = repeat;
 
 	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_REPEAT]);
-}
-
-/**
- * pragha_preferences_get_use_hint:
- *
- */
-gboolean
-pragha_preferences_get_use_hint (PraghaPreferences *preferences)
-{
-	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), FALSE);
-
-	return preferences->priv->use_hint;
-}
-
-/**
- * pragha_preferences_set_use_hint:
- *
- */
-void
-pragha_preferences_set_use_hint (PraghaPreferences *preferences,
-                                 gboolean use_hint)
-{
-	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
-
-	preferences->priv->use_hint = use_hint;
-
-	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_USE_HINT]);
 }
 
 /**
@@ -1457,7 +1428,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 {
 	gchar *installed_version;
 	gboolean approximate_search, instant_search;
-	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
+	gboolean shuffle, repeat, restore_playlist, software_mixer;
 	gboolean lateral_panel, secondary_lateral_panel, show_album_art, show_status_bar, \
 		show_status_icon, show_menubar, system_titlebar, controls_below, remember_state;
 	gchar *album_art_pattern;
@@ -1574,18 +1545,6 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 	else {
 		pragha_preferences_set_repeat(preferences, repeat);
-	}
-
-	use_hint = g_key_file_get_boolean(priv->rc_keyfile,
-	                                  GROUP_GENERAL,
-	                                  KEY_USE_HINT,
-	                                  &error);
-	if (error) {
-		g_error_free(error);
-		error = NULL;
-	}
-	else {
-		pragha_preferences_set_use_hint(preferences, use_hint);
 	}
 
 	library_style = g_key_file_get_integer(priv->rc_keyfile,
@@ -1978,10 +1937,6 @@ pragha_preferences_finalize (GObject *object)
 	                       KEY_REPEAT,
 	                       priv->repeat);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_GENERAL,
-	                       KEY_USE_HINT,
-	                       priv->use_hint);
-	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_PLAYLIST,
 	                       KEY_SAVE_PLAYLIST,
 	                       priv->restore_playlist);
@@ -2148,9 +2103,6 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_REPEAT:
 			g_value_set_boolean (value, pragha_preferences_get_repeat(preferences));
 			break;
-		case PROP_USE_HINT:
-			g_value_set_boolean (value, pragha_preferences_get_use_hint(preferences));
-			break;
 		case PROP_RESTORE_PLAYLIST:
 			g_value_set_boolean (value, pragha_preferences_get_restore_playlist(preferences));
 			break;
@@ -2260,9 +2212,6 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_REPEAT:
 			pragha_preferences_set_repeat(preferences, g_value_get_boolean(value));
-			break;
-		case PROP_USE_HINT:
-			pragha_preferences_set_use_hint(preferences, g_value_get_boolean(value));
 			break;
 		case PROP_RESTORE_PLAYLIST:
 			pragha_preferences_set_restore_playlist(preferences, g_value_get_boolean(value));
@@ -2445,17 +2394,6 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		g_param_spec_boolean("repeat",
 		                     "Repeat",
 		                     "Repeat Preference",
-		                     FALSE,
-		                     PRAGHA_PREF_PARAMS);
-
-	/**
-	  * PraghaPreferences:use_hint:
-	  *
-	  */
-	gParamSpecs[PROP_USE_HINT] =
-		g_param_spec_boolean("use-hint",
-		                     "UseHint",
-		                     "Use hint Preference",
 		                     FALSE,
 		                     PRAGHA_PREF_PARAMS);
 

@@ -66,7 +66,6 @@ struct _PreferencesDialog {
 	GtkWidget *system_titlebar_w;
 #endif
 	GtkWidget *small_toolbar_w;
-	GtkWidget *use_hint_w;
 	GtkWidget *album_art_w;
 	GtkWidget *album_art_size_w;
 	GtkWidget *album_art_pattern_w;
@@ -346,9 +345,6 @@ pragha_preferences_dialog_restore_changes (PreferencesDialog *dialog)
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->small_toolbar_w), FALSE);
 
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->use_hint_w),
-		pragha_preferences_get_use_hint(dialog->preferences));
-
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(dialog->album_art_w),
 		pragha_preferences_get_show_album_art(dialog->preferences));
 
@@ -407,7 +403,7 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 	GSList *list, *library_dir = NULL, *folder_scanned = NULL;
 	gchar *window_state_sink = NULL;
 	const gchar *album_art_pattern;
-	gboolean show_album_art, instant_search, approximate_search, restore_playlist, add_recursively, use_hint;
+	gboolean show_album_art, instant_search, approximate_search, restore_playlist, add_recursively;
 	gboolean test_change, pref_setted, pref_toggled, library_locked;
 #if GTK_CHECK_VERSION (3, 12, 0)
 	gboolean system_titlebar;
@@ -562,9 +558,6 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 	add_recursively =
 		gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->add_recursively_w));
 	pragha_preferences_set_add_recursively(dialog->preferences, add_recursively);
-
-	use_hint = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->use_hint_w));
-	pragha_preferences_set_use_hint(dialog->preferences, use_hint);
 
 	show_album_art =
 		gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->album_art_w));
@@ -829,8 +822,6 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 				gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->window_state_combo_w), 3);
 		}
 	}
-	if (pragha_preferences_get_use_hint(dialog->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->use_hint_w), TRUE);
 
 	if (pragha_preferences_get_instant_search(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->instant_filter_w), TRUE);
@@ -1054,7 +1045,7 @@ pref_create_appearance_page(PreferencesDialog *dialog)
 #if GTK_CHECK_VERSION (3, 12, 0)
 	GtkWidget *system_titlebar;
 #endif
-	GtkWidget *use_hint, *album_art, *small_toolbar;
+	GtkWidget *album_art, *small_toolbar;
 	GtkWidget *album_art_pattern_label, *album_art_size, *album_art_size_label, *album_art_pattern;
 	guint row = 0;
 
@@ -1072,11 +1063,6 @@ pref_create_appearance_page(PreferencesDialog *dialog)
 
 	small_toolbar = gtk_check_button_new_with_label(_("Use small icons on the toolbars"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, small_toolbar);
-
-	pragha_hig_workarea_table_add_section_title(table, &row, _("Playlist"));
-
-	use_hint = gtk_check_button_new_with_label(_("Highlight rows on current playlist"));
-	pragha_hig_workarea_table_add_wide_control(table, &row, use_hint);
 
 	pragha_hig_workarea_table_add_section_title(table, &row, _("Controls"));
 
@@ -1103,7 +1089,6 @@ pref_create_appearance_page(PreferencesDialog *dialog)
 	dialog->system_titlebar_w = system_titlebar;
 #endif
 	dialog->small_toolbar_w = small_toolbar;
-	dialog->use_hint_w = use_hint;
 	dialog->album_art_w = album_art;
 	dialog->album_art_size_w = album_art_size;
 	dialog->album_art_pattern_w = album_art_pattern;

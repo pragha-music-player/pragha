@@ -63,7 +63,6 @@ struct _PraghaPreferencesClass
 #define KEY_CLOSE_TO_TRAY          "close_to_tray"
 #define KEY_INSTANT_SEARCH         "instant_filter"
 #define KEY_APPROXIMATE_SEARCH     "aproximate_search"
-#define KEY_USE_HINT               "use_hint"
 
 #define GROUP_PLAYLIST "Playlist"
 #define KEY_SAVE_PLAYLIST          "save_playlist"
@@ -288,12 +287,6 @@ pragha_preferences_set_repeat (PraghaPreferences *preferences,
                                gboolean repeat);
 gboolean
 pragha_preferences_get_repeat (PraghaPreferences *preferences);
-
-void
-pragha_preferences_set_use_hint (PraghaPreferences *preferences,
-                                 gboolean use_hint);
-gboolean
-pragha_preferences_get_use_hint (PraghaPreferences *preferences);
 
 void
 pragha_preferences_set_restore_playlist (PraghaPreferences *preferences,
