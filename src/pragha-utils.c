@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -207,6 +207,89 @@ pragha_unescape_html_utf75 (const gchar *str)
 	return s_unicode;
 }
 
+static gunichar
+stripped_char (gunichar ch)
+{
+	gunichar retval = 0;
+	GUnicodeType utype;
+	gunichar decomp[4];
+	gsize dlen;
+
+	utype = g_unichar_type (ch);
+
+	switch (utype) {
+	case G_UNICODE_CONTROL:
+	case G_UNICODE_FORMAT:
+	case G_UNICODE_UNASSIGNED:
+	case G_UNICODE_NON_SPACING_MARK:
+	case G_UNICODE_SPACING_MARK:
+	case G_UNICODE_ENCLOSING_MARK:
+		/* Ignore those */
+		break;
+	case G_UNICODE_PRIVATE_USE:
+	case G_UNICODE_SURROGATE:
+	case G_UNICODE_LOWERCASE_LETTER:
+	case G_UNICODE_MODIFIER_LETTER:
+	case G_UNICODE_OTHER_LETTER:
+	case G_UNICODE_TITLECASE_LETTER:
+	case G_UNICODE_UPPERCASE_LETTER:
+	case G_UNICODE_DECIMAL_NUMBER:
+	case G_UNICODE_LETTER_NUMBER:
+	case G_UNICODE_OTHER_NUMBER:
+	case G_UNICODE_CONNECT_PUNCTUATION:
+	case G_UNICODE_DASH_PUNCTUATION:
+	case G_UNICODE_CLOSE_PUNCTUATION:
+	case G_UNICODE_FINAL_PUNCTUATION:
+	case G_UNICODE_INITIAL_PUNCTUATION:
+	case G_UNICODE_OTHER_PUNCTUATION:
+	case G_UNICODE_OPEN_PUNCTUATION:
+	case G_UNICODE_CURRENCY_SYMBOL:
+	case G_UNICODE_MODIFIER_SYMBOL:
+	case G_UNICODE_MATH_SYMBOL:
+	case G_UNICODE_OTHER_SYMBOL:
+	case G_UNICODE_LINE_SEPARATOR:
+	case G_UNICODE_PARAGRAPH_SEPARATOR:
+	case G_UNICODE_SPACE_SEPARATOR:
+	default:
+		ch = g_unichar_tolower (ch);
+		dlen = g_unichar_fully_decompose (ch, FALSE, decomp, 4);
+		if (dlen > 0)
+			retval = decomp[0];
+	}
+
+	return retval;
+}
+
+static gchar *
+pragha_string_strip_utf8 (const gchar *string)
+{
+	GString *word = NULL;
+	const gchar *p;
+
+	if (string == NULL || *string == '\0')
+		return NULL;
+
+	for (p = string; *p != '\0'; p = g_utf8_next_char (p)) {
+		gunichar sc;
+
+		/* Make the char lower-case, remove its accentuation marks, and ignore it
+		 * if it is just unicode marks */
+		sc = stripped_char (g_utf8_get_char (p));
+		if (sc == 0)
+			continue;
+
+		/* If it is not alpha-num, it is separator between words */
+		if (!g_unichar_isalnum (sc)) {
+			continue;
+		}
+
+		g_string_append_unichar (word, sc);
+	}
+
+	return g_string_free(word, FALSE);
+}
+
+
 /**
 @brief duplicate utf8 string, truncated after @a num characters if the string is longer than that
 @param str the string to be duplicated
@@ -339,11 +422,23 @@ g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance)
 gchar *
 pragha_strstr_lv(gchar *haystack, gchar *needle, PraghaPreferences *preferences)
 {
-	gboolean aproximate_search;
-	aproximate_search = pragha_preferences_get_approximate_search(preferences);
+	gboolean aproximate_search = FALSE;
+	gchar *ret = NULL, *st_haystack = NULL, *st_needle = NULL;
 
-	return g_strstr_lv(haystack, needle,
-			   aproximate_search ? 1 : 0);
+	aproximate_search = pragha_preferences_get_approximate_search(preferences);
+	if (aproximate_search)
+	{
+		st_haystack = pragha_string_strip_utf8 (haystack);
+		st_needle = pragha_string_strip_utf8 (needle);
+		ret = g_strstr_lv(st_haystack, st_needle, 1);
+		g_free (st_haystack);
+		g_free (st_needle);
+	}
+	else {
+		ret = g_strstr_lv(haystack, needle, 0);
+	}
+
+	return ret;
 }
 
 /* Set and remove the watch cursor to suggest background work.*/
