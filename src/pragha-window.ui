@@ -214,5 +214,179 @@
       </item>
     </section>
   </menu>
+  <menu id="library-categories-menu">
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>_Add to current playlist</attribute>
+        <attribute name="icon">list-add</attribute>
+        <attribute name='action'>lib.append</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>_Replace current playlist</attribute>
+        <attribute name='action'>lib.replace</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Replace and _play</attribute>
+        <attribute name="icon">media-playback-start</attribute>
+        <attribute name='action'>lib.replace_play</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Add and play</attribute>
+        <attribute name="icon">media-playback-start</attribute>
+        <attribute name='action'>lib.append_play</attribute>
+      </item>
+    </section>
+  </menu>
+  <menu id="library-playlist-menu">
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>_Add to current playlist</attribute>
+        <attribute name="icon">list-add</attribute>
+        <attribute name='action'>lib.append</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>_Replace current playlist</attribute>
+        <attribute name='action'>lib.replace</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Replace and _play</attribute>
+        <attribute name="icon">media-playback-start</attribute>
+        <attribute name='action'>lib.replace_play</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Add and play</attribute>
+        <attribute name="icon">media-playback-start</attribute>
+        <attribute name='action'>lib.append_play</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>Rename</attribute>
+        <attribute name='action'>lib.rename</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Delete</attribute>
+        <attribute name='action'>lib.delete</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Export</attribute>
+        <attribute name='action'>lib.export</attribute>
+      </item>
+    </section>
+  </menu>
+  <menu id="library-radio-menu">
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>_Add to current playlist</attribute>
+        <attribute name="icon">list-add</attribute>
+        <attribute name='action'>lib.append</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>_Replace current playlist</attribute>
+        <attribute name='action'>lib.replace</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Replace and _play</attribute>
+        <attribute name="icon">media-playback-start</attribute>
+        <attribute name='action'>lib.replace_play</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Add and play</attribute>
+        <attribute name="icon">media-playback-start</attribute>
+        <attribute name='action'>lib.append_play</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>Rename</attribute>
+        <attribute name='action'>lib.rename</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Delete</attribute>
+        <attribute name='action'>lib.delete</attribute>
+      </item>
+    </section>
+  </menu>
+  <menu id="library-provider-menu">
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>_Add to current playlist</attribute>
+        <attribute name="icon">list-add</attribute>
+        <attribute name='action'>lib.append</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>_Replace current playlist</attribute>
+        <attribute name='action'>lib.replace</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Replace and _play</attribute>
+        <attribute name="icon">media-playback-start</attribute>
+        <attribute name='action'>lib.replace_play</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Add and play</attribute>
+        <attribute name="icon">media-playback-start</attribute>
+        <attribute name='action'>lib.append_play</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>_Rescan library</attribute>
+        <attribute name="icon">system-run</attribute>
+        <attribute name='action'>lib.rescan</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>_Update library</attribute>
+        <attribute name="icon">system-run</attribute>
+        <attribute name='action'>lib.update</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>_Remove library</attribute>
+        <attribute name="icon">system-run</attribute>
+        <attribute name='action'>lib.remove_lib</attribute>
+      </item>
+    </section>
+  </menu>
+  <menu id="library-music-menu">
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>_Add to current playlist</attribute>
+        <attribute name="icon">list-add</attribute>
+        <attribute name='action'>lib.append</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>_Replace current playlist</attribute>
+        <attribute name='action'>lib.replace</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Replace and _play</attribute>
+        <attribute name="icon">media-playback-start</attribute>
+        <attribute name='action'>lib.replace_play</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Add and play</attribute>
+        <attribute name="icon">media-playback-start</attribute>
+        <attribute name='action'>lib.append_play</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>Edit tags</attribute>
+        <attribute name='action'>lib.edit</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>Move to _trash</attribute>
+        <attribute name="icon">user-trash</attribute>
+        <attribute name='action'>lib.trash</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Delete from library</attribute>
+        <attribute name="icon">list-remove</attribute>
+        <attribute name='action'>lib.remove</attribute>
+      </item>
+    </section>
+  </menu>
 </interface>
 

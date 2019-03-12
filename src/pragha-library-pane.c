@@ -50,6 +50,8 @@
 #include "../win32/win32dep.h"
 #endif
 
+#include "pragha-window-ui.h"
+
 struct _PraghaLibraryPane {
 	GtkBox           __parent__;
 
@@ -85,7 +87,9 @@ struct _PraghaLibraryPane {
 
 	/* Menu */
 	GtkUIManager      *library_pane_context_menu;
-	GtkUIManager      *library_tree_context_menu;
+
+	GtkBuilder        *builder;
+	GSimpleActionGroup *actions;
 };
 
 enum
@@ -141,6 +145,157 @@ typedef enum {
 #define PRAGHA_BUTTON_DELETE_ALL _("Delete _All")
 
 /*
+ * Some prototypes
+ */
+
+static void pragha_library_pane_rename_item     (PraghaLibraryPane *library);
+static void pragha_library_pane_remove_item     (PraghaLibraryPane *library);
+static void pragha_library_pane_export_playlist (PraghaLibraryPane *library);
+static void pragha_library_pane_edit_tags       (PraghaLibraryPane *library);
+static void pragha_library_pane_delete_from_hdd (PraghaLibraryPane *library);
+static void pragha_library_pane_delete_from_db  (PraghaLibraryPane *library);
+static void pragha_library_pane_upgrade_library (PraghaLibraryPane *library);
+static void pragha_library_pane_update_library  (PraghaLibraryPane *library);
+static void pragha_library_pane_remove_library  (PraghaLibraryPane *library);
+
+/*
+ * Tree menu callbacks
+ */
+
+static void
+pragha_library_pane_append_action (GSimpleAction *action,
+                                   GVariant      *parameter,
+                                   gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	g_signal_emit (library, signals[LIBRARY_APPEND_PLAYLIST], 0);
+}
+
+static void
+pragha_library_pane_replace_action (GSimpleAction *action,
+                                    GVariant      *parameter,
+                                    gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	g_signal_emit (library, signals[LIBRARY_REPLACE_PLAYLIST], 0);
+}
+
+static void
+pragha_library_pane_replace_and_play_action (GSimpleAction *action,
+                                             GVariant      *parameter,
+                                             gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	g_signal_emit (library, signals[LIBRARY_ADDTO_PLAYLIST_AND_PLAY], 0);
+}
+
+static void
+pragha_library_pane_append_and_play_action (GSimpleAction *action,
+                                            GVariant      *parameter,
+                                            gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	g_signal_emit (library, signals[LIBRARY_REPLACE_PLAYLIST_AND_PLAY], 0);
+}
+
+static void
+pragha_library_pane_rename_action (GSimpleAction *action,
+                                   GVariant      *parameter,
+                                   gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	pragha_library_pane_rename_item (library);
+}
+
+static void
+pragha_library_pane_delete_action (GSimpleAction *action,
+                                   GVariant      *parameter,
+                                   gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	pragha_library_pane_delete_from_db  (library);
+}
+
+static void
+pragha_library_pane_export_action (GSimpleAction *action,
+                                   GVariant      *parameter,
+                                   gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	pragha_library_pane_export_playlist (library);
+}
+
+static void
+pragha_library_pane_edit_action (GSimpleAction *action,
+                                 GVariant      *parameter,
+                                 gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	pragha_library_pane_edit_tags (library);
+}
+
+static void
+pragha_library_pane_trash_action (GSimpleAction *action,
+                                  GVariant      *parameter,
+                                  gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	pragha_library_pane_delete_from_hdd (library);
+}
+
+static void
+pragha_library_pane_remove_action (GSimpleAction *action,
+                                   GVariant      *parameter,
+                                   gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	pragha_library_pane_remove_item (library);
+}
+
+static void
+pragha_library_pane_rescan_action (GSimpleAction *action,
+                                   GVariant      *parameter,
+                                   gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	pragha_library_pane_upgrade_library (library);
+}
+
+static void
+pragha_library_pane_update_action (GSimpleAction *action,
+                                   GVariant      *parameter,
+                                   gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	pragha_library_pane_update_library (library);
+}
+
+static void
+pragha_library_pane_remove_provider_action (GSimpleAction *action,
+                                            GVariant      *parameter,
+                                            gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	pragha_library_pane_remove_library (library);
+}
+
+static const GActionEntry library_menu_aentries[] = {
+	{ "append",       pragha_library_pane_append_action,           NULL, NULL, NULL },
+	{ "replace",      pragha_library_pane_replace_action,          NULL, NULL, NULL },
+	{ "replace_play", pragha_library_pane_replace_and_play_action, NULL, NULL, NULL },
+	{ "append_play",  pragha_library_pane_append_and_play_action,  NULL, NULL, NULL },
+	{ "rename",       pragha_library_pane_rename_action,           NULL, NULL, NULL },
+	{ "delete",       pragha_library_pane_delete_action,           NULL, NULL, NULL },
+	{ "export",       pragha_library_pane_export_action,           NULL, NULL, NULL },
+	{ "edit",         pragha_library_pane_edit_action,             NULL, NULL, NULL },
+	{ "trash",        pragha_library_pane_trash_action,            NULL, NULL, NULL },
+	{ "remove",       pragha_library_pane_remove_action,           NULL, NULL, NULL },
+	{ "rescan",       pragha_library_pane_rescan_action,           NULL, NULL, NULL },
+	{ "update",       pragha_library_pane_update_action,           NULL, NULL, NULL },
+	{ "remove_lib",   pragha_library_pane_remove_provider_action,  NULL, NULL, NULL }
+};
+
+/*
  * library_pane_context_menu calbacks
  */
 static void pragha_library_pane_expand_all_action                  (GtkAction *action, PraghaLibraryPane *library);
@@ -154,22 +309,6 @@ static void pragha_library_pane_set_genre_album_view_action        (GtkAction *a
 static void pragha_library_pane_set_genre_artist_action            (GtkAction *action, PraghaLibraryPane *library);
 static void pragha_library_pane_set_genre_artist_album_view_action (GtkAction *action, PraghaLibraryPane *library);
 
-/*
- * library_tree_context_menu calbacks
- */
-static void library_tree_add_to_playlist_action                    (GtkAction *action, PraghaLibraryPane *library);
-static void library_tree_replace_playlist_action                   (GtkAction *action, PraghaLibraryPane *library);
-static void library_tree_replace_and_play                          (GtkAction *action, PraghaLibraryPane *library);
-static void library_tree_add_and_play                          	   (GtkAction *action, PraghaLibraryPane *library);
-static void pragha_library_pane_rename_item_action                 (GtkAction *action, PraghaLibraryPane *library);
-static void pragha_library_pane_remove_item_action                 (GtkAction *action, PraghaLibraryPane *library);
-static void pragha_library_pane_export_playlist_action             (GtkAction *action, PraghaLibraryPane *library);
-static void pragha_library_pane_edit_tags_action                   (GtkAction *action, PraghaLibraryPane *library);
-static void pragha_library_pane_delete_from_hdd_action             (GtkAction *action, PraghaLibraryPane *library);
-static void pragha_library_pane_delete_from_db_action              (GtkAction *action, PraghaLibraryPane *library);
-static void pragha_library_pane_upgrade_library_action             (GtkAction *action, PraghaLibraryPane *library);
-static void pragha_library_pane_update_library_action              (GtkAction *action, PraghaLibraryPane *library);
-static void pragha_library_pane_remove_library_action             (GtkAction *action, PraghaLibraryPane *library);
 
 static void
 pragha_library_expand_categories(PraghaLibraryPane *clibrary);
@@ -223,114 +362,6 @@ GtkActionEntry library_pane_context_aentries[] = {
 	{"genre_artist_album", NULL, N_("Genre / Artist / Album"),
 	 "", "Genre / Artist / Album", G_CALLBACK(pragha_library_pane_set_genre_artist_album_view_action)}
 };
-
-gchar *library_tree_context_menu_xml = "<ui>		\
-	<popup name=\"CategoriesPopup\">			\
-	<menuitem action=\"Add to current playlist\"/>		\
-	<menuitem action=\"Replace current playlist\"/>		\
-	<menuitem action=\"Replace and play\"/>			\
-	<menuitem action=\"Add and play\"/>			\
-	</popup>						\
-	<popup name=\"PlaylistPopup\">				\
-	<menuitem action=\"Add to current playlist\"/>		\
-	<menuitem action=\"Replace current playlist\"/>		\
-	<menuitem action=\"Replace and play\"/>			\
-	<menuitem action=\"Add and play\"/>			\
-	<separator/>						\
-	<menuitem action=\"Rename\"/>				\
-	<menuitem action=\"Delete\"/>				\
-	<menuitem action=\"Export\"/>				\
-	</popup>						\
-	<popup name=\"RadioPopup\">				\
-	<menuitem action=\"Add to current playlist\"/>		\
-	<menuitem action=\"Replace current playlist\"/>		\
-	<menuitem action=\"Replace and play\"/>			\
-	<menuitem action=\"Add and play\"/>			\
-	<separator/>						\
-	<menuitem action=\"Rename\"/>				\
-	<menuitem action=\"Delete\"/>				\
-	</popup>						\
-	<popup name=\"ProviderPopup\">				\
-	<menuitem action=\"Add to current playlist\"/>		\
-	<menuitem action=\"Replace current playlist\"/>		\
-	<menuitem action=\"Replace and play\"/>			\
-	<menuitem action=\"Add and play\"/>			\
-	<separator/>						\
-	<menuitem action=\"Rescan library\"/>			\
-	<menuitem action=\"Update library\"/>			\
-	<menuitem action=\"Remove library\"/>			\
-	</popup>						\
-	<popup name=\"LibraryPopup\">				\
-	<menuitem action=\"Add to current playlist\"/>		\
-	<menuitem action=\"Replace current playlist\"/>		\
-	<menuitem action=\"Replace and play\"/>			\
-	<menuitem action=\"Add and play\"/>			\
-	<separator/>						\
-	<menuitem action=\"Edit tags\"/>			\
-	<separator/>						\
-	<menuitem action=\"Move to trash\"/>			\
-	<menuitem action=\"Delete from library\"/>		\
-	</popup>						\
-	</ui>";
-
-GtkActionEntry library_tree_context_aentries[] = {
-	/* Playlist and Radio tree */
-	{"Add to current playlist", "list-add", N_("_Add to current playlist"),
-	 "", "Add to current playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
-	{"Replace current playlist", NULL, N_("_Replace current playlist"),
-	 "", "Replace current playlist", G_CALLBACK(library_tree_replace_playlist_action)},
-	{"Replace and play", "media-playback-start", N_("Replace and _play"),
-	 "", "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
-	{"Add and play", "media-playback-start", N_("Add and _play"),
-	 "", "Add and play", G_CALLBACK(library_tree_add_and_play)},
-	{"Rename", NULL, N_("Rename"),
-	 "", "Rename", G_CALLBACK(pragha_library_pane_rename_item_action)},
-	{"Delete", "list-remove", N_("Delete"),
-	 "", "Delete", G_CALLBACK(pragha_library_pane_remove_item_action)},
-	{"Export", "document-save", N_("Export"),
-	 "", "Export", G_CALLBACK(pragha_library_pane_export_playlist_action)},
-	{"Edit tags", NULL, N_("Edit tags"),
-	 "", "Edit tags", G_CALLBACK(pragha_library_pane_edit_tags_action)},
-	{"Move to trash", "user-trash", N_("Move to _trash"),
-	 "", "Move to trash", G_CALLBACK(pragha_library_pane_delete_from_hdd_action)},
-	{"Delete from library", "list-remove", N_("Delete from library"),
-	 "", "Delete from library", G_CALLBACK(pragha_library_pane_delete_from_db_action)},
-	{"Rescan library", "system-run", N_("_Rescan library"),
-	 "", "Rescan library", G_CALLBACK(pragha_library_pane_upgrade_library_action)},
-	{"Update library", "system-run", N_("_Update library"),
-	 "", "Update library", G_CALLBACK(pragha_library_pane_update_library_action)},
-	{"Remove library", "system-run", N_("_Remove library"),
-	 "", "Remove library", G_CALLBACK(pragha_library_pane_remove_library_action)}
-
-};
-
-/*
- * library_tree_context_menu calbacks
- */
-
-static void
-library_tree_add_to_playlist_action(GtkAction *action, PraghaLibraryPane *library)
-{
-	g_signal_emit (library, signals[LIBRARY_APPEND_PLAYLIST], 0);
-}
-
-static void
-library_tree_replace_playlist_action(GtkAction *action, PraghaLibraryPane *library)
-{
-	g_signal_emit (library, signals[LIBRARY_REPLACE_PLAYLIST], 0);
-}
-
-static void
-library_tree_add_and_play(GtkAction *action, PraghaLibraryPane *library)
-{
-	g_signal_emit (library, signals[LIBRARY_ADDTO_PLAYLIST_AND_PLAY], 0);
-}
-
-static void
-library_tree_replace_and_play(GtkAction *action, PraghaLibraryPane *library)
-{
-	g_signal_emit (library, signals[LIBRARY_REPLACE_PLAYLIST_AND_PLAY], 0);
-}
 
 /* Returns TRUE if any of the childs of p_iter matches node_data. iter
  * and p_iter must be created outside this function */
@@ -992,7 +1023,8 @@ library_tree_row_activated_cb (GtkTreeView *library_tree,
 	}
 }
 
-static int library_tree_key_press (GtkWidget *win, GdkEventKey *event, PraghaLibraryPane *library)
+static int
+pragha_library_pane_tree_key_press (GtkWidget *win, GdkEventKey *event, PraghaLibraryPane *library)
 {
 	if (event->state != 0
 			&& ((event->state & GDK_CONTROL_MASK)
@@ -1002,7 +1034,7 @@ static int library_tree_key_press (GtkWidget *win, GdkEventKey *event, PraghaLib
 			|| (event->state & GDK_MOD5_MASK)))
 		return FALSE;
 	if (event->keyval == GDK_KEY_Delete){
-		pragha_library_pane_delete_from_db_action (NULL, library);
+		pragha_library_pane_delete_from_db (library);
 		return TRUE;
 	}
 	return FALSE;
@@ -1037,11 +1069,13 @@ pragha_library_pane_selection_func_false(GtkTreeSelection *selection,
 
 
 static gboolean
-library_tree_button_press_cb (GtkWidget *widget,
-                              GdkEventButton *event,
-                              PraghaLibraryPane *library)
+pragha_library_pane_tree_button_press_cb (GtkWidget         *widget,
+                                          GdkEventButton    *event,
+                                          PraghaLibraryPane *library)
 {
-	GtkWidget *popup_menu, *menuitem;
+	GtkWidget *popup_menu;
+	GMenu *menu;
+	GAction *action;
 	GtkTreeModel *model;
 	GtkTreePath *path;
 	GtkTreeIter iter;
@@ -1094,51 +1128,52 @@ library_tree_button_press_cb (GtkWidget *widget,
 			n_select = gtk_tree_selection_count_selected_rows(selection);
 			if (n_select > 1)
 			{
-				popup_menu = gtk_ui_manager_get_widget (library->library_tree_context_menu,
-				                                        "/CategoriesPopup");
+				menu = G_MENU (gtk_builder_get_object (library->builder, "library-categories-menu"));
+				popup_menu = gtk_menu_new_from_model (G_MENU_MODEL(menu));
 			}
 			else if (node_type == NODE_CATEGORY_PLAYLIST)
 			{
-				popup_menu = gtk_ui_manager_get_widget (library->library_tree_context_menu,
-				                                        "/CategoriesPopup");
+				menu = G_MENU (gtk_builder_get_object (library->builder, "library-categories-menu"));
+				popup_menu = gtk_menu_new_from_model (G_MENU_MODEL(menu));
 			}
 			else if (node_type == NODE_CATEGORY_RADIO)
 			{
-				popup_menu = gtk_ui_manager_get_widget (library->library_tree_context_menu,
-				                                        "/CategoriesPopup");
+				menu = G_MENU (gtk_builder_get_object (library->builder, "library-categories-menu"));
+				popup_menu = gtk_menu_new_from_model (G_MENU_MODEL(menu));
 			}
 			else if (node_type == NODE_CATEGORY_PROVIDER)
 			{
-				popup_menu = gtk_ui_manager_get_widget (library->library_tree_context_menu,
-				                                        "/ProviderPopup");
+				menu = G_MENU (gtk_builder_get_object (library->builder, "library-provider-menu"));
+				popup_menu = gtk_menu_new_from_model (G_MENU_MODEL(menu));
 			}
 			else if (node_type == NODE_PLAYLIST)
 			{
-				popup_menu = gtk_ui_manager_get_widget (library->library_tree_context_menu,
-				                                        "/PlaylistPopup");
+				menu = G_MENU (gtk_builder_get_object (library->builder, "library-playlist-menu"));
+				popup_menu = gtk_menu_new_from_model (G_MENU_MODEL(menu));
+
 				gtk_tree_model_get (model, &iter, L_NODE_DATA, &node_data, -1);
 				if (g_ascii_strcasecmp(_("Favorites"), node_data) == 0)
 					sensitive = FALSE;
 				g_free (node_data);
-
-				menuitem = gtk_ui_manager_get_widget (library->library_tree_context_menu,
-				                                      "/PlaylistPopup/Rename");
-				gtk_widget_set_sensitive (GTK_WIDGET(menuitem), sensitive);
-				menuitem = gtk_ui_manager_get_widget (library->library_tree_context_menu,
-				                                      "/PlaylistPopup/Delete");
-				gtk_widget_set_sensitive (GTK_WIDGET(menuitem), sensitive);
 			}
 			else if (node_type == NODE_RADIO)
 			{
-				popup_menu = gtk_ui_manager_get_widget (library->library_tree_context_menu,
-				                                        "/RadioPopup");
+				menu = G_MENU (gtk_builder_get_object (library->builder, "library-radio-menu"));
+				popup_menu = gtk_menu_new_from_model (G_MENU_MODEL(menu));
 			}
 			else
 			{
-				popup_menu = gtk_ui_manager_get_widget (library->library_tree_context_menu,
-				                                        "/LibraryPopup");
+				menu = G_MENU (gtk_builder_get_object (library->builder, "library-music-menu"));
+				popup_menu = gtk_menu_new_from_model (G_MENU_MODEL(menu));
 			}
 
+			action = g_action_map_lookup_action (G_ACTION_MAP (library->actions), "rename");
+			g_object_set (action, "enabled", sensitive, NULL);
+
+			action = g_action_map_lookup_action (G_ACTION_MAP (library->actions), "delete");
+			g_object_set (action, "enabled", sensitive, NULL);
+
+			gtk_widget_insert_action_group (popup_menu, "lib", G_ACTION_GROUP(library->actions));
 			gtk_menu_popup (GTK_MENU(popup_menu),
 			                NULL, NULL, NULL, NULL,
 			                event->button, event->time);
@@ -1154,7 +1189,7 @@ library_tree_button_press_cb (GtkWidget *widget,
 			many_selected = FALSE;
 			break;
 		}
-	gtk_tree_path_free(path);
+		gtk_tree_path_free(path);
 	}
 	else gtk_tree_selection_unselect_all(selection);
 
@@ -2298,7 +2333,7 @@ pragha_library_pane_get_mobj_list (PraghaLibraryPane *library)
 }
 
 static void
-pragha_library_pane_rename_item_action (GtkAction *action, PraghaLibraryPane *library)
+pragha_library_pane_rename_item (PraghaLibraryPane *library)
 {
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
@@ -2339,7 +2374,7 @@ pragha_library_pane_rename_item_action (GtkAction *action, PraghaLibraryPane *li
 }
 
 static void
-pragha_library_pane_remove_item_action (GtkAction *action, PraghaLibraryPane *library)
+pragha_library_pane_remove_item (PraghaLibraryPane *library)
 {
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
@@ -2384,7 +2419,7 @@ pragha_library_pane_remove_item_action (GtkAction *action, PraghaLibraryPane *li
 }
 
 static void
-pragha_library_pane_export_playlist_action (GtkAction *action, PraghaLibraryPane *library)
+pragha_library_pane_export_playlist (PraghaLibraryPane *library)
 {
 	GtkWidget *toplevel;
 	GIOChannel *chan = NULL;
@@ -2552,7 +2587,7 @@ no_change:
 }
 
 static void
-pragha_library_pane_edit_tags_action (GtkAction *action, PraghaLibraryPane *library)
+pragha_library_pane_edit_tags (PraghaLibraryPane *library)
 {
 	GtkWidget *dialog;
 	LibraryNodeType node_type = 0;
@@ -2643,7 +2678,7 @@ exit:
 }
 
 static void
-pragha_library_pane_delete_from_hdd_action (GtkAction *action, PraghaLibraryPane *library)
+pragha_library_pane_delete_from_hdd (PraghaLibraryPane *library)
 {
 	PraghaDatabaseProvider *provider;
 	GtkWidget *dialog;
@@ -2702,7 +2737,7 @@ pragha_library_pane_delete_from_hdd_action (GtkAction *action, PraghaLibraryPane
 }
 
 static void
-pragha_library_pane_delete_from_db_action (GtkAction *action, PraghaLibraryPane *library)
+pragha_library_pane_delete_from_db (PraghaLibraryPane *library)
 {
 	PraghaDatabaseProvider *provider;
 	GtkWidget *dialog;
@@ -2753,8 +2788,7 @@ pragha_library_pane_delete_from_db_action (GtkAction *action, PraghaLibraryPane 
 }
 
 static void
-pragha_library_pane_upgrade_library_action (GtkAction         *action,
-                                            PraghaLibraryPane *library)
+pragha_library_pane_upgrade_library (PraghaLibraryPane *library)
 {
 	PraghaDatabaseProvider *provider;
 	GtkTreeModel *model;
@@ -2786,8 +2820,7 @@ pragha_library_pane_upgrade_library_action (GtkAction         *action,
 }
 
 static void
-pragha_library_pane_update_library_action (GtkAction         *action,
-                                           PraghaLibraryPane *library)
+pragha_library_pane_update_library (PraghaLibraryPane *library)
 {
 	PraghaDatabaseProvider *provider;
 	GtkTreeModel *model;
@@ -2819,8 +2852,7 @@ pragha_library_pane_update_library_action (GtkAction         *action,
 }
 
 static void
-pragha_library_pane_remove_library_action (GtkAction         *action,
-                                           PraghaLibraryPane *library)
+pragha_library_pane_remove_library (PraghaLibraryPane *library)
 {
 	PraghaDatabaseProvider *provider;
 	GtkTreeModel *model;
@@ -2855,35 +2887,24 @@ pragha_library_pane_remove_library_action (GtkAction         *action,
 /* Construction menus of library pane */
 /**************************************/
 
-static GtkUIManager *
+static void
 pragha_library_tree_context_menu_new (PraghaLibraryPane *library)
 {
-	GtkUIManager *context_menu = NULL;
-	GtkActionGroup *context_actions;
 	GError *error = NULL;
 
-	context_actions = gtk_action_group_new("Library Tree Context Actions");
-	context_menu = gtk_ui_manager_new();
-
-	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
-
-	if (!gtk_ui_manager_add_ui_from_string (context_menu,
-	                                       library_tree_context_menu_xml,
-	                                       -1, &error)) {
-		g_critical ("Unable to create library tree context menu, err : %s",
-		            error->message);
+	library->builder = gtk_builder_new ();
+	gtk_builder_add_from_string (library->builder, pragha_window_ui, -1, &error);
+	if (error) {
+		g_print ("GtkBuilder error: %s", error->message);
+		g_error_free (error);
+		error = NULL;
 	}
 
-	gtk_action_group_add_actions (context_actions,
-	                              library_tree_context_aentries,
-	                              G_N_ELEMENTS(library_tree_context_aentries),
-	                              (gpointer) library);
-
-	gtk_ui_manager_insert_action_group (context_menu, context_actions, 0);
-
-	g_object_unref (context_actions);
-
-	return context_menu;
+	library->actions =  g_simple_action_group_new ();
+	g_action_map_add_action_entries (G_ACTION_MAP(library->actions),
+	                                 library_menu_aentries,
+	                                 G_N_ELEMENTS(library_menu_aentries),
+	                                 (gpointer)library);
 }
 
 static GtkUIManager *
@@ -3183,7 +3204,8 @@ pragha_library_pane_init (PraghaLibraryPane *library)
 	/* Create context menus */
 
 	library->library_pane_context_menu = pragha_library_pane_header_context_menu_new (library);
-	library->library_tree_context_menu = pragha_library_tree_context_menu_new (library);
+
+	pragha_library_tree_context_menu_new (library);
 
 	/* Init the rest of flags */
 
@@ -3205,11 +3227,11 @@ pragha_library_pane_init (PraghaLibraryPane *library)
 	g_signal_connect (G_OBJECT(library->library_tree), "row-activated",
 	                  G_CALLBACK(library_tree_row_activated_cb), library);
 	g_signal_connect (G_OBJECT(library->library_tree), "button-press-event",
-	                  G_CALLBACK(library_tree_button_press_cb), library);
+	                  G_CALLBACK(pragha_library_pane_tree_button_press_cb), library);
 	g_signal_connect (G_OBJECT(library->library_tree), "button-release-event",
 	                  G_CALLBACK(library_tree_button_release_cb), library);
 	g_signal_connect (G_OBJECT (library->library_tree), "key-press-event",
-	                  G_CALLBACK(library_tree_key_press), library);
+	                  G_CALLBACK(pragha_library_pane_tree_key_press), library);
 
 	g_signal_connect (library->cdbase, "PlaylistsChanged",
 	                  G_CALLBACK (update_library_playlist_changes), library);
@@ -3253,7 +3275,9 @@ pragha_library_pane_finalize (GObject *object)
 	g_slist_free (library->library_tree_nodes);
 
 	g_object_unref (library->library_pane_context_menu);
-	g_object_unref (library->library_tree_context_menu);
+
+	g_object_unref (library->builder);
+	g_object_unref (library->actions);
 
 	(*G_OBJECT_CLASS (pragha_library_pane_parent_class)->finalize) (object);
 }
@@ -3269,34 +3293,38 @@ pragha_library_pane_class_init (PraghaLibraryPaneClass *klass)
 	/*
 	 * Signals:
 	 */
-	signals[LIBRARY_APPEND_PLAYLIST] = g_signal_new ("library-append-playlist",
-	                                                 G_TYPE_FROM_CLASS (gobject_class),
-	                                                 G_SIGNAL_RUN_LAST,
-	                                                 G_STRUCT_OFFSET (PraghaLibraryPaneClass, library_append_playlist),
-	                                                 NULL, NULL,
-	                                                 g_cclosure_marshal_VOID__VOID,
-	                                                 G_TYPE_NONE, 0);
-	signals[LIBRARY_REPLACE_PLAYLIST] = g_signal_new ("library-replace-playlist",
-	                                                  G_TYPE_FROM_CLASS (gobject_class),
-	                                                  G_SIGNAL_RUN_LAST,
-	                                                  G_STRUCT_OFFSET (PraghaLibraryPaneClass, library_replace_playlist),
-	                                                  NULL, NULL,
-	                                                  g_cclosure_marshal_VOID__VOID,
-	                                                  G_TYPE_NONE, 0);
-	signals[LIBRARY_REPLACE_PLAYLIST_AND_PLAY] = g_signal_new ("library-replace-playlist-and-play",
-	                                                           G_TYPE_FROM_CLASS (gobject_class),
-	                                                           G_SIGNAL_RUN_LAST,
-	                                                           G_STRUCT_OFFSET (PraghaLibraryPaneClass, library_replace_playlist_and_play),
-	                                                           NULL, NULL,
-	                                                           g_cclosure_marshal_VOID__VOID,
-	                                                           G_TYPE_NONE, 0);
-	signals[LIBRARY_ADDTO_PLAYLIST_AND_PLAY] = g_signal_new ("library-addto-playlist-and-play",
-	                                                           G_TYPE_FROM_CLASS (gobject_class),
-	                                                           G_SIGNAL_RUN_LAST,
-	                                                           G_STRUCT_OFFSET (PraghaLibraryPaneClass, library_addto_playlist_and_play),
-	                                                           NULL, NULL,
-	                                                           g_cclosure_marshal_VOID__VOID,
-	                                                           G_TYPE_NONE, 0);	                                                             
+	signals[LIBRARY_APPEND_PLAYLIST] =
+		g_signal_new ("library-append-playlist",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaLibraryPaneClass, library_append_playlist),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
+	signals[LIBRARY_REPLACE_PLAYLIST] =
+		g_signal_new ("library-replace-playlist",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaLibraryPaneClass, library_replace_playlist),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
+	signals[LIBRARY_REPLACE_PLAYLIST_AND_PLAY] =
+		g_signal_new ("library-replace-playlist-and-play",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaLibraryPaneClass, library_replace_playlist_and_play),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
+	signals[LIBRARY_ADDTO_PLAYLIST_AND_PLAY] =
+		g_signal_new ("library-addto-playlist-and-play",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaLibraryPaneClass, library_addto_playlist_and_play),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
 }
 
 PraghaLibraryPane *
