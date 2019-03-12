@@ -1228,7 +1228,9 @@ pragha_backend_class_init (PraghaBackendClass *klass)
 static void
 pragha_backend_init (PraghaBackend *backend)
 {
-	PraghaBackendPrivate *priv = PRAGHA_BACKEND_GET_PRIVATE (backend);
+	PraghaBackendPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE (backend,
+	                                                          PRAGHA_TYPE_BACKEND,
+	                                                          PraghaBackendPrivate);
 
 	backend->priv = priv;
 
