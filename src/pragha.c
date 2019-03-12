@@ -1285,7 +1285,7 @@ PraghaApplication *
 pragha_application_new ()
 {
 	return g_object_new (PRAGHA_TYPE_APPLICATION,
-	                     "application-id", "org.pragha",
+	                     "application-id", "io.github.pragha_music_player",
 	                     "flags", G_APPLICATION_HANDLES_COMMAND_LINE | G_APPLICATION_HANDLES_OPEN,
 	                     NULL);
 }
