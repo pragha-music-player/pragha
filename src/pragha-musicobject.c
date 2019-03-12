@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2012-2015 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2012-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -16,8 +16,6 @@
 /*************************************************************************/
 
 #include "pragha-musicobject.h"
-
-G_DEFINE_TYPE(PraghaMusicobject, pragha_musicobject, G_TYPE_OBJECT)
 
 struct _PraghaMusicobjectPrivate
 {
@@ -37,6 +35,8 @@ struct _PraghaMusicobjectPrivate
 	gint channels;
 	gint samplerate;
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE(PraghaMusicobject, pragha_musicobject, G_TYPE_OBJECT)
 
 enum
 {
@@ -733,7 +733,6 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 	object_class->finalize = pragha_musicobject_finalize;
 	object_class->get_property = pragha_musicobject_get_property;
 	object_class->set_property = pragha_musicobject_set_property;
-	g_type_class_add_private(object_class, sizeof(PraghaMusicobjectPrivate));
 
 	/**
 	  * PraghaMusicobject:file:

@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2013 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2013-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -54,8 +54,6 @@ void pragha_tagger_add_location_id (PraghaTagger *tagger, gint location_id);
 void pragha_tagger_apply_changes   (PraghaTagger *tagger);
 
 PraghaTagger *pragha_tagger_new (void);
-
-GType pragha_tagger_get_type (void) G_GNUC_CONST;
 
 G_END_DECLS
 

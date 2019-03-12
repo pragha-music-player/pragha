@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2015-2017 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2015-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -21,12 +21,12 @@
 
 #include "pragha-database-provider.h"
 
-G_DEFINE_TYPE(PraghaDatabaseProvider, pragha_database_provider, G_TYPE_OBJECT)
-
 struct _PraghaDatabaseProviderPrivate
 {
 	PraghaDatabase *database;
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE(PraghaDatabaseProvider, pragha_database_provider, G_TYPE_OBJECT)
 
 enum {
 	SIGNAL_WANT_UPDATE,
@@ -502,8 +502,6 @@ pragha_database_provider_class_init (PraghaDatabaseProviderClass *klass)
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__VOID,
 		              G_TYPE_NONE, 0);
-
-	g_type_class_add_private(object_class, sizeof(PraghaDatabaseProviderPrivate));
 }
 
 static void

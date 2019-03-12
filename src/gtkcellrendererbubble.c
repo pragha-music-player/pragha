@@ -30,9 +30,9 @@ enum
   PROP_SHOW_BUBBLE,
 };
 
-G_DEFINE_TYPE (GtkCellRendererBubble,
-               gtk_cell_renderer_bubble,
-               GTK_TYPE_CELL_RENDERER_TEXT);
+G_DEFINE_TYPE_WITH_PRIVATE (GtkCellRendererBubble,
+                            gtk_cell_renderer_bubble,
+                            GTK_TYPE_CELL_RENDERER_TEXT);
 
 static void
 get_background_color (GtkStyleContext *context,
@@ -240,8 +240,6 @@ gtk_cell_renderer_bubble_class_init (GtkCellRendererBubbleClass *klass)
   object_class->finalize = gtk_cell_renderer_bubble_finalize;
   object_class->set_property = gtk_cell_renderer_bubble_set_property;
   object_class->get_property = gtk_cell_renderer_bubble_get_property;
-  
-  g_type_class_add_private (object_class, sizeof(GtkCellRendererBubblePrivate));
   
   g_object_class_install_property (object_class,
                                    PROP_SHOW_BUBBLE,

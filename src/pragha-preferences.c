@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2012-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2012-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -33,8 +33,6 @@
 #include "pragha-utils.h"
 #include "pragha-library-pane.h"
 #include "pragha-debug.h"
-
-G_DEFINE_TYPE(PraghaPreferences, pragha_preferences, G_TYPE_OBJECT)
 
 struct _PraghaPreferencesPrivate
 {
@@ -83,6 +81,8 @@ struct _PraghaPreferencesPrivate
 	/* Properties without backup. */
 	gboolean   lock_library;
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE(PraghaPreferences, pragha_preferences, G_TYPE_OBJECT)
 
 enum
 {
@@ -2273,7 +2273,6 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 	object_class->finalize = pragha_preferences_finalize;
 	object_class->get_property = pragha_preferences_get_property;
 	object_class->set_property = pragha_preferences_set_property;
-	g_type_class_add_private(object_class, sizeof(PraghaPreferencesPrivate));
 
 	/**
 	  * PraghaPreferences:instant_search:

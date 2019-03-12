@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2012-2015 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2012-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -22,6 +22,7 @@
 
 G_BEGIN_DECLS
 
+GType pragha_musicobject_get_type (void) G_GNUC_CONST;
 #define PRAGHA_TYPE_MUSICOBJECT (pragha_musicobject_get_type())
 #define PRAGHA_MUSICOBJECT(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_MUSICOBJECT, PraghaMusicobject))
 #define PRAGHA_MUSICOBJECT_CONST(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_MUSICOBJECT, PraghaMusicobject const))
@@ -62,15 +63,15 @@ typedef enum {
 
 #define PRAGHA_MUSICOBJECT_PARAM_STRING G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS
 
-PraghaMusicobject *pragha_musicobject_new (void);
+PraghaMusicobject *
+pragha_musicobject_new (void);
+
 PraghaMusicobject *
 pragha_musicobject_dup (PraghaMusicobject *musicobject);
 void
 pragha_musicobject_clean (PraghaMusicobject *musicobject);
 gint
 pragha_musicobject_compare (PraghaMusicobject *a, PraghaMusicobject *b);
-
-GType pragha_musicobject_get_type (void) G_GNUC_CONST;
 
 const gchar *
 pragha_musicobject_get_file (PraghaMusicobject *musicobject);

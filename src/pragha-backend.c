@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2010-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2010-2019 matias <mati86dl@gmail.com>                   */
 /* Copyright (C) 2012-2013 Pavel Vasin                                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
@@ -91,8 +91,6 @@ struct PraghaBackendPrivate {
 	PraghaMusicobject *mobj;
 };
 
-#define PRAGHA_BACKEND_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), PRAGHA_TYPE_BACKEND, PraghaBackendPrivate))
-
 enum {
 	PROP_0,
 	PROP_VOLUME,
@@ -121,7 +119,7 @@ enum {
 
 static int signals[LAST_SIGNAL] = { 0 };
 
-G_DEFINE_TYPE (PraghaBackend, pragha_backend, G_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_PRIVATE (PraghaBackend, pragha_backend, G_TYPE_OBJECT);
 
 static gboolean
 emit_tick_cb (gpointer user_data)
@@ -1225,8 +1223,6 @@ pragha_backend_class_init (PraghaBackendClass *klass)
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__POINTER,
 		              G_TYPE_NONE, 1, G_TYPE_POINTER);
-
-	g_type_class_add_private (klass, sizeof (PraghaBackendPrivate));
 }
 
 static void

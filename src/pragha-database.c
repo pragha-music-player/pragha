@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2019 matias <mati86dl@gmail.com>                   */
 /* Copyright (C) 2012-2013 Pavel Vasin                                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify	 */
@@ -31,14 +31,14 @@
 #include "pragha-utils.h"
 #include "pragha-debug.h"
 
-G_DEFINE_TYPE(PraghaDatabase, pragha_database, G_TYPE_OBJECT)
-
 struct _PraghaDatabasePrivate
 {
 	sqlite3 *sqlitedb;
 	GHashTable *statements_cache;
 	gboolean successfully;
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE (PraghaDatabase, pragha_database, G_TYPE_OBJECT)
 
 enum {
 	SIGNAL_PLAYLISTS_CHANGED,
@@ -1234,8 +1234,6 @@ pragha_database_class_init (PraghaDatabaseClass *klass)
 	                                                  NULL, NULL,
 	                                                  g_cclosure_marshal_VOID__VOID,
 	                                                  G_TYPE_NONE, 0);
-
-	g_type_class_add_private(object_class, sizeof(PraghaDatabasePrivate));
 }
 
 static void

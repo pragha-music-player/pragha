@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2010-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2010-2019 matias <mati86dl@gmail.com>                   */
 /* Copyright (C) 2012-2013 Pavel Vasin                                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */

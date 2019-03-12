@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2019 matias <mati86dl@gmail.com>                   */
 /* Copyright (C) 2012-2013 Pavel Vasin                                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify	 */
@@ -217,7 +217,6 @@ const gchar *
 pragha_database_get_last_error (PraghaDatabase *database);
 
 PraghaDatabase* pragha_database_get (void);
-GType pragha_database_get_type (void) G_GNUC_CONST;
 
 G_END_DECLS
 

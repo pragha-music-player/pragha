@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2013 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2013-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -23,8 +23,6 @@
 #include "pragha-library-pane.h"
 #include "pragha-tags-mgmt.h"
 
-G_DEFINE_TYPE(PraghaTagger, pragha_tagger, G_TYPE_OBJECT)
-
 struct _PraghaTaggerPrivate
 {
 	PraghaMusicobject *mobj;
@@ -35,6 +33,8 @@ struct _PraghaTaggerPrivate
 
 	PraghaDatabase    *cdbase;
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE(PraghaTagger, pragha_tagger, G_TYPE_OBJECT)
 
 void
 pragha_tagger_set_changes(PraghaTagger *tagger, PraghaMusicobject *mobj, gint changed)
@@ -129,8 +129,6 @@ pragha_tagger_class_init (PraghaTaggerClass *klass)
 	object_class = G_OBJECT_CLASS(klass);
 	object_class->dispose = pragha_tagger_dispose;
 	object_class->finalize = pragha_tagger_finalize;
-
-	g_type_class_add_private(object_class, sizeof(PraghaTaggerPrivate));
 }
 
 static void

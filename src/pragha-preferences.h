@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2012-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2012-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -23,6 +23,7 @@
 
 G_BEGIN_DECLS
 
+GType pragha_preferences_get_type (void) G_GNUC_CONST;
 #define PRAGHA_TYPE_PREFERENCES (pragha_preferences_get_type())
 #define PRAGHA_PREFERENCES(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_PREFERENCES, PraghaPreferences))
 #define PRAGHA_PREFERENCES_CONST(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_PREFERENCES, PraghaPreferences const))
@@ -128,8 +129,8 @@ struct _PraghaPreferencesClass
 #define ICONIFIED_STATE            "iconified"
 
 
-PraghaPreferences* pragha_preferences_get (void);
-GType pragha_preferences_get_type (void) G_GNUC_CONST;
+PraghaPreferences *
+pragha_preferences_get (void);
 
 /*
  * Generic api to accessing other preferences.
