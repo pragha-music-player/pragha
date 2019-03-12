@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2014-2018 Matias De lellis -->
+<!-- Copyright 2014-2019 Matias De lellis -->
 <component>
-  <id>io.github.pragha-music-player</id>
+  <id>io.github.pragha_music_player</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0+</project_license>
-  <name>Pragha Mucic Player</name>
+  <name>Pragha Music Player</name>
   <summary>Manage and listen to music</summary>
   <description>
     <p>
