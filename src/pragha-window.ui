@@ -157,4 +157,62 @@
       </item>
     </section>
   </menu>
+  <menu id="statusicon-menu">
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>About</attribute>
+        <attribute name="icon">help-about</attribute>
+        <attribute name='action'>syst.about</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>_Add files</attribute>
+        <attribute name="icon">document-open</attribute>
+        <attribute name='action'>syst.open</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Add _location</attribute>
+        <attribute name="icon">network-workgroup</attribute>
+        <attribute name='action'>syst.location</attribute>
+      </item>
+      <section id="pragha-systray-append-music"/>
+    </section>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>Previous track</attribute>
+        <attribute name="icon">media-skip-backward</attribute>
+        <attribute name='action'>syst.prev</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Play / Pause</attribute>
+        <attribute name="icon">media-playback-start</attribute>
+        <attribute name='action'>syst.play</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Stop</attribute>
+        <attribute name="icon">media-playback-stop</attribute>
+        <attribute name='action'>syst.stop</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Next track</attribute>
+        <attribute name="icon">media-skip-forward</attribute>
+        <attribute name='action'>syst.next</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>Edit track information</attribute>
+        <attribute name='action'>syst.edit</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>_Quit</attribute>
+        <attribute name="icon">application-exit</attribute>
+        <attribute name='action'>syst.quit</attribute>
+      </item>
+    </section>
+  </menu>
 </interface>
+

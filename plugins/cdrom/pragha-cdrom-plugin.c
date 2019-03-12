@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2015 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2019 matias <mati86dl@gmail.com>                   */
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
@@ -80,7 +80,6 @@ struct _PraghaCdromPluginPrivate {
 
 	GtkActionGroup    *action_group_main_menu;
 	guint              merge_id_main_menu;
-	guint              merge_id_syst_menu;
 };
 typedef struct _PraghaCdromPluginPrivate PraghaCdromPluginPrivate;
 
@@ -615,14 +614,6 @@ static const gchar *main_menu_xml = "<ui>							\
 	</menubar>														\
 </ui>";
 
-static const gchar *syst_menu_xml = "<ui>							\
-	<popup>															\
-	<placeholder name=\"pragha-append-music-placeholder\">			\
-		<menuitem action=\"Add Audio CD\"/>							\
-	</placeholder>													\
-	</popup>														\
-	</ui>";
-
 /*
  * Cdrom Settings
  */
@@ -799,19 +790,16 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                                                                priv->action_group_main_menu,
 	                                                                main_menu_xml);
 
-	/* Systray */
-
-	status_icon = pragha_application_get_status_icon(priv->pragha);
-	priv->merge_id_syst_menu = pragha_systray_append_plugin_action (status_icon,
-	                                                                priv->action_group_main_menu,
-	                                                                syst_menu_xml);
-	g_object_ref (priv->action_group_main_menu);
-
-	/* Gear Menu */
+	/* Systray and gear Menu*/
 
 	action = g_simple_action_new ("add-cdrom", NULL);
 	g_signal_connect (G_OBJECT (action), "activate",
 	                  G_CALLBACK (pragha_gmenu_add_cdrom_action), plugin);
+
+	item = g_menu_item_new (_("Add Audio _CD"), "syst.add-cdrom");
+	status_icon = pragha_application_get_status_icon(priv->pragha);
+	pragha_systray_append_action (status_icon, "pragha-systray-append-music", action, item);
+	g_object_unref (item);
 
 	item = g_menu_item_new (_("Add Audio _CD"), "win.add-cdrom");
 	pragha_menubar_append_action (priv->pragha, "pragha-plugins-append-music", action, item);
@@ -865,10 +853,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	priv->merge_id_main_menu = 0;
 
 	status_icon = pragha_application_get_status_icon(priv->pragha);
-	pragha_systray_remove_plugin_action (status_icon,
-	                                     priv->action_group_main_menu,
-	                                     priv->merge_id_syst_menu);
-	priv->merge_id_syst_menu = 0;
+	pragha_systray_remove_action (status_icon, "pragha-systray-append-music", "add-cdrom");
 
 	pragha_menubar_remove_action (priv->pragha, "pragha-plugins-append-music", "add-cdrom");
 

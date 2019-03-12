@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -31,22 +31,24 @@ typedef struct _PraghaApplication PraghaApplication;
 #define PRAGHA_IS_STATUS_ICON_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_STATUS_ICON))
 #define PRAGHA_STATUS_ICON_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_STATUS_ICON, PraghaStatusIconClass))
 
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 typedef struct {
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 	GtkStatusIconClass __parent__;
-} PraghaStatusIconClass;
 G_GNUC_END_IGNORE_DEPRECATIONS
+} PraghaStatusIconClass;
 
 typedef struct _PraghaStatusIcon PraghaStatusIcon;
 
-gint
-pragha_systray_append_plugin_action (PraghaStatusIcon *status_icon,
-                                     GtkActionGroup   *action_group,
-                                     const gchar      *menu_xml);
 void
-pragha_systray_remove_plugin_action (PraghaStatusIcon *status_icon,
-                                     GtkActionGroup   *action_group,
-                                     gint              merge_id);
+pragha_systray_append_action (PraghaStatusIcon *status_icon,
+                              const gchar      *placeholder,
+                              GSimpleAction    *action,
+                              GMenuItem        *item);
+
+void
+pragha_systray_remove_action (PraghaStatusIcon *status_icon,
+                              const gchar      *placeholder,
+                              const gchar      *action_name);
 
 PraghaStatusIcon *pragha_status_icon_new (PraghaApplication *pragha);
 
