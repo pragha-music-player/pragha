@@ -137,11 +137,10 @@ gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GErr
 
    /* 
     * Don't show error dialog if the playback of the currupted file 
-    * is not started by user explicitly 
+    * is not started by user explicitly otherwise play next track
     */
    if (pragha_playlist_get_implicit_track(playlist)) {
       pragha_playlist_go_next_track (playlist);
-      return;
    } else {
       gui_backend_error_show_dialog_cb (backend, error, pragha);
    }
