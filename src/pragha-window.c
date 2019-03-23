@@ -104,9 +104,8 @@ backend_error_dialog_response_cb (GtkDialog *dialog, gint response, PraghaApplic
 void
 gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, gpointer user_data)
 {
-	GtkWidget *dialog;
-
 	PraghaApplication *pragha = user_data;
+	GtkWidget *dialog;
 
 	const gchar *file = pragha_musicobject_get_file (pragha_backend_get_musicobject (backend));
 
@@ -135,6 +134,7 @@ gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GErr
 	playlist = pragha_application_get_playlist (pragha);
 
 	pragha_playlist_set_track_error (playlist, pragha_backend_get_error (backend));
+   pragha_playlist_go_next_track (playlist);
 }
 
 static gboolean
