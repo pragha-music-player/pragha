@@ -34,6 +34,7 @@
 #include "pragha-playlists-mgmt.h"
 #include "pragha-session.h"
 #include "pragha-utils.h"
+#include "pragha-playlist.h"
 
 /********************************/
 /* Externally visible functions */
@@ -105,6 +106,16 @@ void
 gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, gpointer user_data)
 {
 	PraghaApplication *pragha = user_data;
+   PraghaPlaylist *playlist = pragha_application_get_playlist (pragha);
+
+   /* 
+    * Don't show error dialog if the playback of the currupted file 
+    * is not started by user explicitly 
+    */
+   if (pragha_playlist_get_implicit_track(playlist)) {
+      return;
+   }
+
 	GtkWidget *dialog;
 
 	const gchar *file = pragha_musicobject_get_file (pragha_backend_get_musicobject (backend));

@@ -46,6 +46,7 @@
  * @view - The playlist tree view widget
  * @widget - The parent widget containing the view
  * @changing: If current platlist change is in progress
+ * @implicit_track: True when a track is not started explicitly by user
  * @no_tracks: Total no. of tracks in the current playlist
  * @unplayed_tracks: Total no. of tracks that haven't been played
  * @rand: To generate random numbers
@@ -83,6 +84,7 @@ struct _PraghaPlaylist {
 
 	gboolean             changing;
 	gboolean             dragging;
+   gboolean             implicit_track;
 	gint                 no_tracks;
 	GError              *track_error;
 
@@ -475,6 +477,8 @@ pragha_playlist_get_next_track (PraghaPlaylist *playlist)
 void
 pragha_playlist_go_prev_track (PraghaPlaylist *playlist)
 {
+   playlist->implicit_track = TRUE;
+
 	PraghaMusicobject *mobj = NULL;
 	mobj = pragha_playlist_get_prev_track (playlist);
 
@@ -485,6 +489,8 @@ pragha_playlist_go_prev_track (PraghaPlaylist *playlist)
 void
 pragha_playlist_go_any_track (PraghaPlaylist *playlist)
 {
+   playlist->implicit_track = FALSE;
+
 	PraghaMusicobject *mobj = NULL;
 	mobj = pragha_playlist_get_any_track (playlist);
 
@@ -494,6 +500,8 @@ pragha_playlist_go_any_track (PraghaPlaylist *playlist)
 void
 pragha_playlist_go_next_track (PraghaPlaylist *playlist)
 {
+   playlist->implicit_track = TRUE;
+
 	PraghaMusicobject *mobj = NULL;
 	mobj = pragha_playlist_get_next_track (playlist);
 
@@ -522,6 +530,7 @@ pragha_playlist_stopped_playback (PraghaPlaylist *playlist)
 		ret = gtk_tree_model_iter_next(playlist->model, &iter);
 	}
 	playlist->unplayed_tracks = playlist->no_tracks;
+   playlist->implicit_track = FALSE;
 
 	/* Remove old references */
 	if (playlist->rand_track_refs) {
@@ -3294,6 +3303,8 @@ pragha_playlist_restore_tracks (PraghaPlaylist *cplaylist)
 void
 pragha_playlist_init_playlist_state (PraghaPlaylist *cplaylist)
 {
+   cplaylist->implicit_track = FALSE;
+
 	gchar *ref = NULL;
 	GtkTreePath *path = NULL;
 
@@ -4091,6 +4102,12 @@ pragha_playlist_activate_unique_mobj(PraghaPlaylist* cplaylist, PraghaMusicobjec
 		pragha_playlist_activate_path(cplaylist, path);
 		gtk_tree_path_free (path);
 	}
+}
+
+gboolean 
+pragha_playlist_get_implicit_track (PraghaPlaylist* playlist)
+{
+   return playlist->implicit_track;
 }
 
 gint

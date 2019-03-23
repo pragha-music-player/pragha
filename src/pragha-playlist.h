@@ -132,6 +132,7 @@ gboolean pragha_playlist_propagate_event(PraghaPlaylist* cplaylist, GdkEventKey 
 void pragha_playlist_activate_path        (PraghaPlaylist* cplaylist, GtkTreePath *path);
 void pragha_playlist_activate_unique_mobj (PraghaPlaylist* cplaylist, PraghaMusicobject *mobj);
 
+gboolean pragha_playlist_get_implicit_track (PraghaPlaylist* playlist);
 gint pragha_playlist_get_no_tracks      (PraghaPlaylist *playlist);
 gint pragha_playlist_get_no_unplayed_tracks (PraghaPlaylist *playlist);
 

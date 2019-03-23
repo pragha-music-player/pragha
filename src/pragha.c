@@ -1128,8 +1128,8 @@ pragha_application_startup (GApplication *application)
 	g_signal_connect (pragha->backend, "tags-changed",
 	                  G_CALLBACK(pragha_backend_tags_changed), pragha);
 
-	//g_signal_connect (pragha->backend, "error",
-	 //                 G_CALLBACK(gui_backend_error_show_dialog_cb), pragha);
+	g_signal_connect (pragha->backend, "error",
+	                  G_CALLBACK(gui_backend_error_show_dialog_cb), pragha);
 	g_signal_connect (pragha->backend, "error",
 	                  G_CALLBACK(gui_backend_error_update_current_playlist_cb), pragha);
 	g_signal_connect (pragha->backend, "notify::state",
