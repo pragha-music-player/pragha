@@ -28,7 +28,7 @@ gboolean pragha_close_window        (GtkWidget *widget, GdkEvent *event, PraghaA
 void     pragha_destroy_window      (GtkWidget *widget, PraghaApplication *pragha);
 void     pragha_window_toggle_state (PraghaApplication *pragha, gboolean ignoreActivity);
 
-void     gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, gpointer user_data);
+void     gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error,  PraghaApplication *pragha);
 void     gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GError *error, PraghaApplication *pragha);
 
 void     pragha_window_unfullscreen          (GObject *object, PraghaApplication *pragha);
