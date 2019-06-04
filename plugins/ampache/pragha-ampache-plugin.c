@@ -426,6 +426,8 @@ pragha_ampache_get_songs_done (GObject      *object,
 	PraghaDatabaseProvider *provider;
 	PraghaStatusbar *statusbar;
 	PraghaMusicobject *mobj;
+	GNotification *notification;
+	GIcon *icon;
 	GError *wc_error = NULL;
 	xmlDocPtr doc;
 	xmlNodePtr node;
@@ -530,6 +532,15 @@ pragha_ampache_get_songs_done (GObject      *object,
 			pragha_ampache_save_cache (plugin);
 
 			/* Update done */
+
+			notification = g_notification_new (_("Ampache"));
+			g_notification_set_body (notification, _("Import finished"));
+			icon = g_themed_icon_new ("software-update-available");
+			g_notification_set_icon (notification, icon);
+			g_object_unref (icon);
+
+			g_application_send_notification (G_APPLICATION(priv->pragha), "import-finished", notification);
+			g_object_unref (notification);
 
 			pragha_provider_update_done (provider);
 

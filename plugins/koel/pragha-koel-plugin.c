@@ -395,9 +395,10 @@ pragha_koel_plugin_cache_provider_done (SoupSession *session,
 	PraghaDatabase *database;
 	PraghaDatabaseProvider *provider;
 	PraghaToolbar *toolbar;
-	GtkWidget *tasks_button;
 	PraghaMusicobject *mobj = NULL;
-
+	GtkWidget *tasks_button;
+	GNotification *notification;
+	GIcon *icon;
 	JsonParser *parser = NULL;
 	JsonNode *root, *albums_node, *artists_node, *songs_node, *interactions_node;
 	JsonObject *root_object;
@@ -543,6 +544,15 @@ pragha_koel_plugin_cache_provider_done (SoupSession *session,
 	toolbar = pragha_application_get_toolbar (priv->pragha);
 	tasks_button =  pragha_toolbar_get_task_progress_button (toolbar);
 	pragha_background_task_bar_remove_widget (PRAGHA_BACKGROUND_TASK_BAR(tasks_button), GTK_WIDGET(priv->task_widget));
+
+	notification = g_notification_new (_("Koel"));
+	g_notification_set_body (notification, _("Import finished"));
+	icon = g_themed_icon_new ("software-update-available");
+	g_notification_set_icon (notification, icon);
+	g_object_unref (icon);
+
+	g_application_send_notification (G_APPLICATION(priv->pragha), "import-finished", notification);
+	g_object_unref (notification);
 
 	pragha_provider_update_done (provider);
 }
