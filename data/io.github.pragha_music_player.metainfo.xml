@@ -79,9 +79,15 @@
   <url type="homepage">http://pragha-music-player.github.io</url>
   <url type="translate">https://www.transifex.com/projects/p/Pragha/</url>
   <screenshots>
-    <screenshot type="default">http://pragha-music-player.github.io/images/Pragha-Xfce-HIG.png</screenshot>
-    <screenshot>http://pragha-music-player.github.io/images/Pragha-Gnome3-HIG.png</screenshot>
-    <screenshot>http://pragha-music-player.github.io/images/Pragha-W7.jpg</screenshot>
+    <screenshot type="default">
+      <image>http://pragha-music-player.github.io/images/Pragha-Xfce-HIG.png</image>
+    </screenshot>
+    <screenshot>
+      <image>http://pragha-music-player.github.io/images/Pragha-Gnome3-HIG.png</image>
+    </screenshot>
+    <screenshot>
+      <image>http://pragha-music-player.github.io/images/Pragha-W7.jpg</image>
+    </screenshot>
   </screenshots>
   <translation type="gettext">pragha</translation>
   <update_contact>mati86dl_at_gmail.com</update_contact>
