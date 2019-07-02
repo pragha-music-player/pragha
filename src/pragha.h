@@ -81,6 +81,7 @@ PraghaLibraryPane *pragha_application_get_library         (PraghaApplication *pr
 PreferencesDialog *pragha_application_get_preferences_dialog (PraghaApplication *pragha);
 
 PraghaToolbar     *pragha_application_get_toolbar         (PraghaApplication *pragha);
+GtkWidget         *pragha_application_get_overlay         (PraghaApplication *pragha);
 PraghaSidebar     *pragha_application_get_first_sidebar   (PraghaApplication *pragha);
 GtkWidget         *pragha_application_get_main_stack      (PraghaApplication *pragha);
 PraghaSidebar     *pragha_application_get_second_sidebar  (PraghaApplication *pragha);

@@ -16,6 +16,10 @@ pragha_SOURCES = \
 	info-bar-import-music.c \
 	pragha-album-art.c \
 	pragha-album-art.h \
+	pragha-app-notification.c \
+	pragha-app-notification.h \
+	pragha-app-notification-container.c \
+	pragha-app-notification-container.h \
 	pragha-art-cache.c \
 	pragha-art-cache.h \
 	pragha-backend.c \

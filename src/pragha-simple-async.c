@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2012-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2012-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -17,7 +17,7 @@
 
 #include "pragha-simple-async.h"
 
-#include "pragha-statusbar.h"
+#include "pragha-app-notification.h"
 
 struct _AsyncSimple {
 	gpointer userdata;
@@ -33,16 +33,15 @@ struct _AsyncSimple {
 gboolean
 pragha_async_set_idle_message (gpointer user_data)
 {
-	PraghaStatusbar *statusbar;
+	PraghaAppNotification *notification;
 
 	const gchar *message = user_data;
 
 	if (message == NULL)
 		return FALSE;
 
-	statusbar = pragha_statusbar_get ();
-	pragha_statusbar_set_misc_text(statusbar, message);
-	g_object_unref(G_OBJECT(statusbar));
+	notification = pragha_app_notification_new (message, NULL);
+	pragha_app_notification_show (notification);
 
 	return FALSE;
 }

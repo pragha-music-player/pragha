@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -33,6 +33,7 @@
 #include <libpeas/peas.h>
 
 #include "src/pragha.h"
+#include "src/pragha-app-notification.h"
 #include "src/pragha-hig.h"
 #include "src/pragha-utils.h"
 #include "src/pragha-menubar.h"
@@ -384,9 +385,9 @@ pragha_lastfm_update_menu_actions (PraghaLastfmPlugin *plugin)
  */
 static void pragha_lastfm_no_connection_advice (void)
 {
-	PraghaStatusbar *statusbar = pragha_statusbar_get ();
-	pragha_statusbar_set_misc_text (statusbar, _("Unable to establish conection with Last.fm"));
-	g_object_unref (statusbar);
+	PraghaAppNotification *notification;
+	notification = pragha_app_notification_new ("Last.fm", _("Unable to establish conection with Last.fm"));
+	pragha_app_notification_show (notification);
 }
 
 /* Find a song with the artist and title independently of the album and adds it to the playlist */
@@ -626,8 +627,8 @@ do_lastfm_unlove_mobj (PraghaLastfmPlugin *plugin, const gchar *title, const gch
 static gboolean
 append_mobj_list_current_playlist_idle(gpointer user_data)
 {
+	PraghaAppNotification *notification;
 	PraghaPlaylist *playlist;
-	PraghaStatusbar *statusbar;
 	gchar *summary = NULL;
 	guint songs_added = 0;
 
@@ -670,10 +671,8 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 	}
 
 	if (summary != NULL) {
-		statusbar = pragha_statusbar_get ();
-		pragha_statusbar_set_misc_text (statusbar, summary);
-		g_object_unref (statusbar);
-		g_free(summary);
+		notification = pragha_app_notification_new ("Last.fm", summary);
+		pragha_app_notification_show (notification);
 	}
 
 	g_slice_free (AddMusicObjectListData, data);
@@ -765,8 +764,8 @@ lastfm_import_xspf_response (GtkDialog          *dialog,
                              gint                response,
                              PraghaLastfmPlugin *plugin)
 {
+	PraghaAppNotification *notification;
 	PraghaPlaylist *playlist;
-	PraghaStatusbar *statusbar;
 	XMLNode *xml = NULL, *xi, *xc, *xt;
 	gchar *contents, *summary;
 	gint try = 0, added = 0;
@@ -815,9 +814,8 @@ lastfm_import_xspf_response (GtkDialog          *dialog,
 
 	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
 
-	statusbar = pragha_statusbar_get ();
-	pragha_statusbar_set_misc_text (statusbar, summary);
-	g_object_unref (statusbar);
+	notification = pragha_app_notification_new ("Last.fm", summary);
+	pragha_app_notification_show (notification);
 
 	g_free(summary);
 

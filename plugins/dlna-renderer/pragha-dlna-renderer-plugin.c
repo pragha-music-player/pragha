@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2014 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2014-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -40,6 +40,7 @@
 #include "pragha-dlna-renderer-plugin.h"
 
 #include "src/pragha.h"
+#include "src/pragha-app-notification.h"
 #include "src/pragha-utils.h"
 #include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-playlist.h"
@@ -191,8 +192,8 @@ pragha_dlna_renderer_append_source (GList     *list,
 static void
 pragha_dlna_renderer_plugin_search_music (PraghaDlnaRendererPlugin *plugin)
 {
+	PraghaAppNotification *notification;
 	PraghaPlaylist *playlist;
-	PraghaStatusbar *statusbar;
 	GList *sources = NULL, *sources_iter;
 	GrlRegistry *registry;
 	GList *list = NULL;
@@ -208,8 +209,6 @@ pragha_dlna_renderer_plugin_search_music (PraghaDlnaRendererPlugin *plugin)
 			break;
 	}
 
-	statusbar = pragha_statusbar_get ();
-
 	if (list) {
 		playlist = pragha_application_get_playlist (plugin->priv->pragha);
 
@@ -218,14 +217,14 @@ pragha_dlna_renderer_plugin_search_music (PraghaDlnaRendererPlugin *plugin)
 
 		const gchar *server = grl_source_get_name (GRL_SOURCE(sources_iter->data));
 		gchar *msge = g_strdup_printf (_("Music of the %s server was added."), server);
-		pragha_statusbar_set_misc_text (statusbar, msge);
+		notification = pragha_app_notification_new (_("Search music on DLNA server"), msge);
+		pragha_app_notification_show (notification);
 		g_free (msge);
 	}
 	else {
-		pragha_statusbar_set_misc_text (statusbar, _("Could not find any DLNA server."));
+		notification = pragha_app_notification_new (_("Search music on DLNA server"), _("Could not find any DLNA server."));
+		pragha_app_notification_show (notification);
 	}
-
-	g_object_unref (statusbar);
 
 	g_list_free (sources);
 }

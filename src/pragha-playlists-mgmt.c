@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -38,6 +38,7 @@
 #include "xml_helper.h"
 #endif
 
+#include "pragha-app-notification.h"
 #include "pragha-hig.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
@@ -1001,12 +1002,12 @@ pragha_pl_parser_append_mobj_list_by_extension (GList *mlist, const gchar *file)
 
 void pragha_pl_parser_open_from_file_by_extension (const gchar *file, PraghaApplication *pragha)
 {
+	PraghaAppNotification *notification;
 	PraghaPlaylist *playlist;
 	GSList *list = NULL, *i = NULL;
 	GList *mlist = NULL;
 	gchar *summary;
 	gint try = 0, added = 0;
-	PraghaStatusbar *statusbar;
 	PraghaMusicobject *mobj;
 
 #ifdef HAVE_PLPARSER
@@ -1035,9 +1036,8 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, PraghaAppl
 
 	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
 
-	statusbar = pragha_statusbar_get ();
-	pragha_statusbar_set_misc_text (statusbar, summary);
-	g_object_unref (statusbar);
+	notification = pragha_app_notification_new (summary, NULL);
+	pragha_app_notification_show (notification);
 
 	g_free(summary);
 

@@ -38,10 +38,6 @@ pragha_statusbar_set_main_text (PraghaStatusbar *statusbar,
                                 const gchar     *text);
 
 void
-pragha_statusbar_set_misc_text (PraghaStatusbar *statusbar,
-                                const gchar     *text);
-
-void
 pragha_statusbar_add_widget(PraghaStatusbar *statusbar,
                             GtkWidget       *widget);
 

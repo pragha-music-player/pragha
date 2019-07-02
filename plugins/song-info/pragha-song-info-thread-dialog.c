@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -27,6 +27,7 @@
 #include "pragha-song-info-dialog.h"
 #include "pragha-song-info-pane.h"
 
+#include "src/pragha-app-notification.h"
 #include "src/pragha-simple-async.h"
 #include "src/pragha-utils.h"
 
@@ -74,20 +75,21 @@ glyr_finished_successfully (glyr_struct *glyr_info)
 static void
 glyr_finished_incorrectly(glyr_struct *glyr_info)
 {
-	PraghaStatusbar *statusbar = pragha_statusbar_get ();
+	PraghaAppNotification *notification;
 
 	switch (glyr_info->query.type) {
 		case GLYR_GET_LYRICS:
-			pragha_statusbar_set_misc_text (statusbar, _("Lyrics not found."));
+			notification = pragha_app_notification_new (_("Lyrics"), _("Lyrics not found."));
+			pragha_app_notification_show (notification);
 			break;
 		case GLYR_GET_ARTIST_BIO:
-			pragha_statusbar_set_misc_text (statusbar, _("Artist information not found."));
+			notification = pragha_app_notification_new (_("Artist info"), _("Artist information not found."));
+			pragha_app_notification_show (notification);
 			break;
 		case GLYR_GET_COVERART:
 		default:
 			break;
 	}
-	g_object_unref (statusbar);
 }
 
 /*

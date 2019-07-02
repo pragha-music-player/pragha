@@ -84,48 +84,6 @@ pragha_statusbar_set_main_text (PraghaStatusbar *statusbar,
 }
 
 /**
- * pragha_statusbar_clean_misc_text:
- * @statusbar : a #PraghaStatusbar instance.
- *
- * Clean the last misc text for @statusbar.
- **/
-static void
-pragha_statusbar_clean_misc_text(PraghaStatusbar *statusbar)
-{
-	gtk_statusbar_pop (GTK_STATUSBAR (statusbar), statusbar->misc_context_id);
-}
-
-gboolean
-pragha_statusbar_clean_misc_text_idle(gpointer data)
-{
-	PraghaStatusbar *statusbar = data;
-
-	pragha_statusbar_clean_misc_text(statusbar);
-
-	return FALSE;
-}
-
-/**
- * pragha_statusbar_set_misc_text:
- * @statusbar : a #PraghaStatusbar instance.
- * @text      : the misc text to be displayed in @statusbar.
- *
- * Sets up a new misc text for @statusbar.
- **/
-void
-pragha_statusbar_set_misc_text (PraghaStatusbar *statusbar,
-                                const gchar     *text)
-{
-	g_return_if_fail (PRAGHA_IS_STATUSBAR (statusbar));
-	g_return_if_fail (text != NULL);
-
-	pragha_statusbar_clean_misc_text(statusbar);
-	gtk_statusbar_push (GTK_STATUSBAR (statusbar), statusbar->misc_context_id, text);
-
-	g_timeout_add_seconds(5, pragha_statusbar_clean_misc_text_idle, statusbar);
-}
-
-/**
  * pragha_statusbar_add_widget:
  * @statusbar : a #PraghaStatusbar instance.
  * @wdget     : the widget to append in @statusbar.

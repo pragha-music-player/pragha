@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2014-2016 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2014-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -37,6 +37,7 @@
 #include <libpeas/peas.h>
 
 #include "src/pragha.h"
+#include "src/pragha-app-notification.h"
 #include "src/pragha-menubar.h"
 #include "src/pragha-playlist.h"
 #include "src/pragha-playlists-mgmt.h"
@@ -193,6 +194,7 @@ pragha_acoustid_plugin_get_metadata_done (SoupSession *session,
                                           gpointer     user_data)
 {
 	GtkWidget *dialog;
+	PraghaAppNotification *notification;
 	PraghaStatusbar *statusbar;
 	XMLNode *xml = NULL, *xi;
 	gchar *otitle = NULL, *oartist = NULL, *oalbum = NULL;
@@ -206,8 +208,11 @@ pragha_acoustid_plugin_get_metadata_done (SoupSession *session,
 	pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
 	g_object_unref(G_OBJECT(statusbar));
 
-	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
+	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code)) {
+		notification = pragha_app_notification_new ("AcoustID", _("There was an error when searching your tags on AcoustID"));
+		pragha_app_notification_show (notification);
 		return;
+	}
 
 	g_object_get (priv->mobj,
 	              "title", &otitle,
@@ -261,9 +266,8 @@ pragha_acoustid_plugin_get_metadata_done (SoupSession *session,
 		gtk_widget_show (dialog);
 	}
 	else {
-		statusbar = pragha_statusbar_get ();
-		pragha_statusbar_set_misc_text (statusbar, _("AcoustID not found any similar song"));
-		g_object_unref (statusbar);
+		notification = pragha_app_notification_new ("AcoustID", _("AcoustID not found any similar song"));
+		pragha_app_notification_show (notification);
 	}
 
 	g_free (otitle);
@@ -348,6 +352,7 @@ pragha_acoustid_get_fingerprint (const gchar *filename, gchar **fingerprint)
 static void
 pragha_acoustid_get_metadata_dialog (PraghaAcoustidPlugin *plugin)
 {
+	PraghaAppNotification *notification;
 	PraghaBackend *backend = NULL;
 	PraghaMusicobject *mobj = NULL;
 	PraghaStatusbar *statusbar;
@@ -379,8 +384,10 @@ pragha_acoustid_get_metadata_dialog (PraghaAcoustidPlugin *plugin)
 	else {
 		statusbar = pragha_statusbar_get ();
 		pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
-		pragha_statusbar_set_misc_text (statusbar, _("There was an error when searching your tags on AcoustID"));
 		g_object_unref (statusbar);
+
+		notification = pragha_app_notification_new ("AcoustID", _("There was an error when searching your tags on AcoustID"));
+		pragha_app_notification_show (notification);
 	}
 
 	g_free (fingerprint);

@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2014-2016 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2014-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -35,6 +35,7 @@
 #include <libpeas/peas.h>
 
 #include "src/pragha.h"
+#include "src/pragha-app-notification.h"
 #include "src/pragha-menubar.h"
 #include "src/pragha-playlist.h"
 #include "src/pragha-playlists-mgmt.h"
@@ -62,6 +63,7 @@ struct _PraghaTuneinPluginPrivate {
 	GtkActionGroup             *action_group_main_menu;
 	guint                       merge_id_main_menu;
 };
+
 typedef struct _PraghaTuneinPluginPrivate PraghaTuneinPluginPrivate;
 
 PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_TUNEIN_PLUGIN,
@@ -128,6 +130,7 @@ pragha_tunein_plugin_get_radio_done (SoupSession *session,
                                      SoupMessage *msg,
                                      gpointer     user_data)
 {
+	PraghaAppNotification *notification;
 	PraghaPlaylist *playlist;
 	PraghaStatusbar *statusbar;
 	PraghaDatabase *cdbase;
@@ -144,9 +147,8 @@ pragha_tunein_plugin_get_radio_done (SoupSession *session,
 	g_object_unref (statusbar);
 
 	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code)) {
-		statusbar = pragha_statusbar_get ();
-		pragha_statusbar_set_misc_text (statusbar, _("There was an error when searching radio on TuneIn"));
-		g_object_unref (statusbar);
+		notification = pragha_app_notification_new ("TuneIn", _("There was an error when searching radio on TuneIn"));
+		pragha_app_notification_show (notification);
 		return;
 	}
 
@@ -159,6 +161,8 @@ pragha_tunein_plugin_get_radio_done (SoupSession *session,
 	}
 
 	if (xi == NULL) {
+		notification = pragha_app_notification_new ("TuneIn", _("Radio was not found"));
+		pragha_app_notification_show (notification);
 		xmlnode_free(xml);
 		return;
 	}
@@ -167,9 +171,8 @@ pragha_tunein_plugin_get_radio_done (SoupSession *session,
 	url = tunein_helper_get_atribute (xi, "URL");
 
 	if (string_is_empty(name) || string_is_empty(url)) {
-		statusbar = pragha_statusbar_get ();
-		pragha_statusbar_set_misc_text (statusbar, _("There was an error when searching radio on TuneIn"));
-		g_object_unref (statusbar);
+		notification = pragha_app_notification_new ("TuneIn", _("There was an error when searching radio on TuneIn"));
+		pragha_app_notification_show (notification);
 		xmlnode_free(xml);
 		return;
 	}

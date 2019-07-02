@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -34,6 +34,7 @@
 #include "pragha-playlists-mgmt.h"
 #include "pragha-session.h"
 #include "pragha-utils.h"
+#include "pragha-app-notification-container.h"
 
 /********************************/
 /* Externally visible functions */
@@ -438,12 +439,13 @@ pragha_window_new (PraghaApplication *pragha)
 {
 	PraghaPreferences *preferences;
 	GtkWidget *window;
+	PraghaAppNotificationContainer *container;
 	PraghaPlaylist *playlist;
 	PraghaLibraryPane *library;
 	PraghaSidebar *sidebar1, *sidebar2;
 	PraghaStatusbar *statusbar;
 	PraghaToolbar *toolbar;
-	GtkWidget *menubar, *pane1, *pane2, *infobox;
+	GtkWidget *menubar, *overlay, *pane1, *pane2, *infobox;
 	GtkWidget *main_stack, *playlist_statusbar_vbox, *vbox_main;
 	GtkWidget *song_box, *menu_button;
 	GtkBuilder *menu_ui;
@@ -474,6 +476,7 @@ pragha_window_new (PraghaApplication *pragha)
 	window    = pragha_application_get_window (pragha);
 	playlist  = pragha_application_get_playlist (pragha);
 	library   = pragha_application_get_library (pragha);
+	overlay   = pragha_application_get_overlay (pragha);
 	sidebar1  = pragha_application_get_first_sidebar (pragha);
 	main_stack= pragha_application_get_main_stack (pragha);
 	sidebar2  = pragha_application_get_second_sidebar (pragha);
@@ -561,6 +564,8 @@ pragha_window_new (PraghaApplication *pragha)
 	gtk_paned_set_position (GTK_PANED (pane2),
 		pragha_preferences_get_secondary_sidebar_size (preferences));
 
+	gtk_container_add (GTK_CONTAINER (overlay), GTK_WIDGET (pane2));
+
 	/* Pack widgets: [            Menubar           ]
 	 *               [            Toolbar           ]
 	 *               [            Infobox           ]
@@ -570,16 +575,28 @@ pragha_window_new (PraghaApplication *pragha)
 
 	vbox_main = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
+	/* Add menubar */
 	gtk_box_pack_start (GTK_BOX(vbox_main), menubar,
 	                    FALSE, FALSE, 0);
+
+	/* If not CSD add toolbar */
 	if (pragha_preferences_get_system_titlebar (preferences))
 		gtk_box_pack_start (GTK_BOX(vbox_main), GTK_WIDGET(toolbar),
 		                    FALSE, FALSE, 0);
 
+	/* Add infobox */
 	gtk_box_pack_start (GTK_BOX(vbox_main), infobox,
 	                    FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX(vbox_main), pane2,
+
+	/* Append overlay that is the main widget. */
+	gtk_box_pack_start (GTK_BOX(vbox_main), overlay,
 	                    TRUE, TRUE, 0);
+
+	/* Add notification container within these overlay */
+	container = pragha_app_notification_container_get_default ();
+	gtk_overlay_add_overlay (GTK_OVERLAY (overlay), GTK_WIDGET (container));
+
+	/* Configure menubar visibility */
 
 	g_object_bind_property (preferences, "show-menubar",
 	                        menubar, "visible",
@@ -635,6 +652,7 @@ pragha_window_new (PraghaApplication *pragha)
 	gtk_widget_show (pane1);
 	gtk_widget_show (main_stack);
 	gtk_widget_show (pane2);
+	gtk_widget_show (overlay);
 
 	gtk_widget_show(playlist_statusbar_vbox);
 	gtk_widget_show_all (GTK_WIDGET(playlist));
