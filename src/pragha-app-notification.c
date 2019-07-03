@@ -53,15 +53,15 @@ pragha_app_notification_constructed (GObject *object)
 
 	G_OBJECT_CLASS (pragha_app_notification_parent_class)->constructed (object);
 
-	if (g_utf8_strlen(self->head_msg, -1))
+	if (self->head_msg) {
 		gtk_label_set_text (GTK_LABEL (self->head), self->head_msg);
-	else
-		gtk_widget_set_visible(GTK_WIDGET(self->head), FALSE);
+		gtk_widget_set_visible(GTK_WIDGET(self->head), TRUE);
+	}
 
-	if (g_utf8_strlen(self->body_msg, -1))
+	if (self->body_msg) {
 		gtk_label_set_text (GTK_LABEL (self->body), self->body_msg);
-	else
-		gtk_widget_set_visible(GTK_WIDGET(self->body), FALSE);
+		gtk_widget_set_visible(GTK_WIDGET(self->body), TRUE);
+	}
 }
 
 static void
@@ -187,6 +187,10 @@ pragha_app_notification_init (PraghaAppNotification *self)
 	                  "clicked",
 	                  G_CALLBACK (pragha_app_notification_close_button_clicked_cb),
 	                  self);
+
+	gtk_widget_show(GTK_WIDGET(self));
+	gtk_widget_show(GTK_WIDGET (self->grid));
+	gtk_widget_show_all(GTK_WIDGET (self->close_button));
 }
 
 static void

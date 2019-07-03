@@ -74,7 +74,11 @@ pragha_app_notification_container_add_notification (PraghaAppNotificationContain
 	g_assert (GTK_IS_WIDGET (notification));
 
 	gtk_container_add (GTK_CONTAINER (self->grid), notification);
-	gtk_widget_show_all (GTK_WIDGET (self));
+
+	gtk_widget_show (GTK_WIDGET (self));
+	gtk_widget_show (GTK_WIDGET (self->grid));
+	gtk_widget_show (GTK_WIDGET (notification));
+
 	gtk_revealer_set_reveal_child (GTK_REVEALER (self), TRUE);
 }
 
