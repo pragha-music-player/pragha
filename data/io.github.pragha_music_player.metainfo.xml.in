@@ -33,8 +33,9 @@
     <category>Audio</category>
   </categories>
   <keywords>
-    <keyword>audio</keyword>
-    <keyword>multimedia</keyword>
+    <_keyword>audio</_keyword>
+    <_keyword>multimedia</_keyword>
+    <_keyword>player</_keyword>
   </keywords>
   <url type="bugtracker">https://github.com/pragha-music-player/pragha/issues</url>
   <url type="donation">https://www.bountysource.com/teams/pragha-music-player</url>

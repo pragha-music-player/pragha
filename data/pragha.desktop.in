@@ -9,6 +9,7 @@ _Comment=Manage and listen your music
 Icon=pragha
 
 Categories=GTK;AudioVideo;Player;
+_Keywords=audio;multimedia;player;
 
 Exec=pragha %F
 TryExec=pragha
