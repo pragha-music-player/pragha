@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2013 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2013-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -38,7 +38,7 @@ void
 pragha_sidebar_attach_plugin (PraghaSidebar *sidebar,
                               GtkWidget     *widget,
                               GtkWidget     *title,
-                              GtkMenu       *popup_menu);
+                              GtkWidget     *popover);
 
 void
 pragha_sidebar_remove_plugin (PraghaSidebar *sidebar,

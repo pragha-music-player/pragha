@@ -631,7 +631,7 @@ pragha_window_new (PraghaApplication *pragha)
 	pragha_sidebar_attach_plugin (sidebar1,
 		                          pragha_library_pane_get_widget (library),
 		                          pragha_library_pane_get_pane_title (library),
-		                          pragha_library_pane_get_popup_menu (library));
+		                          pragha_library_pane_get_popover (library));
 
 	g_object_bind_property (preferences, "lateral-panel",
 	                        sidebar1, "visible",

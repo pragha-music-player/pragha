@@ -48,8 +48,12 @@ plugins/notify/pragha-notify-plugin.c
 plugins/koel/pragha-koel-plugin.c
 plugins/removable-media/pragha-devices-removable.c
 plugins/song-info/pragha-song-info-dialog.c
+plugins/song-info/pragha-song-info-pane.c
 plugins/song-info/pragha-song-info-plugin.c
 plugins/song-info/pragha-song-info-thread-dialog.c
 plugins/song-info/pragha-song-info-thread-pane.c
 plugins/tunein/pragha-tunein-plugin.c
 plugins/visualizer/pragha-visualizer-plugin.c
+
+[type: gettext/glade]plugins/lastfm/pragha-lastfm-menu.ui
+[type: gettext/glade]plugins/song-info/pragha-song-info.ui

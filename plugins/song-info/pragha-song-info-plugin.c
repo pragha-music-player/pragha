@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -651,7 +651,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	pragha_sidebar_attach_plugin (sidebar,
 		                          GTK_WIDGET (priv->pane),
 		                          pragha_songinfo_pane_get_pane_title (priv->pane),
-		                          pragha_songinfo_pane_get_popup_menu (priv->pane));
+		                          pragha_songinfo_pane_get_popover (priv->pane));
 
 	/* Connect signals */
 

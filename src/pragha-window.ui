@@ -214,6 +214,52 @@
       </item>
     </section>
   </menu>
+  <menu id="library-order-menu">
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>_Expand library</attribute>
+        <attribute name='action'>lib.expand</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>_Collapse library</attribute>
+        <attribute name='action'>lib.collapse</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>Folders structure</attribute>
+        <attribute name='action'>lib.folder</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Artist</attribute>
+        <attribute name='action'>lib.artist</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Album</attribute>
+        <attribute name='action'>lib.album</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Genre</attribute>
+        <attribute name='action'>lib.genre</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Artist / Album</attribute>
+        <attribute name='action'>lib.artist_album</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Genre / Album</attribute>
+        <attribute name='action'>lib.genre_album</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Genre / Artist</attribute>
+        <attribute name='action'>lib.genre_artist</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Genre / Artist / Album</attribute>
+        <attribute name='action'>lib.genre_artist_album</attribute>
+      </item>
+    </section>
+  </menu>
   <menu id="library-categories-menu">
     <section>
       <item>

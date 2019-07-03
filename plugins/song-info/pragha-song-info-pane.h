@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -60,8 +60,7 @@ void                pragha_songinfo_pane_clear_list            (PraghaSonginfoPa
 GList              *pragha_songinfo_get_mobj_list              (PraghaSonginfoPane *pane);
 
 GtkWidget          *pragha_songinfo_pane_get_pane_title        (PraghaSonginfoPane *pane);
-GtkMenu            *pragha_songinfo_pane_get_popup_menu        (PraghaSonginfoPane *pane);
-GtkUIManager       *pragha_songinfo_pane_get_pane_context_menu (PraghaSonginfoPane *pane);
+GtkWidget          *pragha_songinfo_pane_get_popover           (PraghaSonginfoPane *pane);
 GLYR_GET_TYPE       pragha_songinfo_pane_get_default_view      (PraghaSonginfoPane *pane);
 void                pragha_songinfo_pane_set_default_view      (PraghaSonginfoPane *pane, GLYR_GET_TYPE view_type);
 

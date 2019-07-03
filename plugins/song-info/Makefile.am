@@ -62,6 +62,17 @@ libsong_info_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
 libsong_info_la_LIBADD += $(LIBXFCE4UI_LIBS)
 endif
 
+pragha-song-info-ui.h: pragha-song-info.ui Makefile
+	$(AM_V_GEN) exo-csource --strip-comments --strip-content --static --name=pragha_song_info_ui $< > $@
+
 plugin_DATA = song-info.plugin
 
-EXTRA_DIST = $(plugin_DATA)
+EXTRA_DIST = \
+	$(plugin_DATA) \
+	pragha-song-info.ui
+
+DISTCLEANFILES = \
+	pragha-song-info-ui.h
+
+BUILT_SOURCES = \
+	pragha-song-info-ui.h

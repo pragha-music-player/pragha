@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -67,7 +67,7 @@ void     pragha_library_pane_init_view (PraghaLibraryPane *clibrary);
 
 GtkWidget         *pragha_library_pane_get_widget     (PraghaLibraryPane *librarypane);
 GtkWidget         *pragha_library_pane_get_pane_title (PraghaLibraryPane *library);
-GtkMenu           *pragha_library_pane_get_popup_menu (PraghaLibraryPane *library);
+GtkWidget         *pragha_library_pane_get_popover    (PraghaLibraryPane *library);
 
 GtkUIManager      *pragha_library_pane_get_pane_context_menu(PraghaLibraryPane *clibrary);
 

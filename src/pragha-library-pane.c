@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -86,8 +86,6 @@ struct _PraghaLibraryPane {
 	GdkPixbuf         *pixbuf_dir;
 
 	/* Menu */
-	GtkUIManager      *library_pane_context_menu;
-
 	GtkBuilder        *builder;
 	GSimpleActionGroup *actions;
 };
@@ -157,6 +155,100 @@ static void pragha_library_pane_delete_from_db  (PraghaLibraryPane *library);
 static void pragha_library_pane_upgrade_library (PraghaLibraryPane *library);
 static void pragha_library_pane_update_library  (PraghaLibraryPane *library);
 static void pragha_library_pane_remove_library  (PraghaLibraryPane *library);
+
+/*
+ * Order menu callbacks
+ */
+
+static void
+pragha_library_pane_expand_action (GSimpleAction *action,
+                                   GVariant      *parameter,
+                                   gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	gtk_tree_view_expand_all (GTK_TREE_VIEW(library->library_tree));
+}
+
+static void
+pragha_library_pane_collapse_action (GSimpleAction *action,
+                                     GVariant      *parameter,
+                                     gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	gtk_tree_view_collapse_all(GTK_TREE_VIEW(library->library_tree));
+}
+
+static void
+pragha_library_pane_folder_action (GSimpleAction *action,
+                                   GVariant      *parameter,
+                                   gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	pragha_preferences_set_library_style(library->preferences, FOLDERS);
+}
+
+static void
+pragha_library_pane_artist_action (GSimpleAction *action,
+                                   GVariant      *parameter,
+                                   gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	pragha_preferences_set_library_style(library->preferences, ARTIST);
+}
+
+static void
+pragha_library_pane_album_action (GSimpleAction *action,
+                                  GVariant      *parameter,
+                                  gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	pragha_preferences_set_library_style(library->preferences, ALBUM);
+}
+
+static void
+pragha_library_pane_genre_action (GSimpleAction *action,
+                                  GVariant      *parameter,
+                                  gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	pragha_preferences_set_library_style(library->preferences, GENRE);
+}
+
+static void
+pragha_library_pane_artist_album_action (GSimpleAction *action,
+                                         GVariant      *parameter,
+                                         gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	pragha_preferences_set_library_style(library->preferences, ARTIST_ALBUM);
+}
+
+static void
+pragha_library_pane_genre_album_action (GSimpleAction *action,
+                                        GVariant      *parameter,
+                                        gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	pragha_preferences_set_library_style(library->preferences, GENRE_ALBUM);
+}
+
+static void
+pragha_library_pane_genre_artist_action (GSimpleAction *action,
+                                         GVariant      *parameter,
+                                         gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	pragha_preferences_set_library_style(library->preferences, GENRE_ARTIST);
+}
+
+static void
+pragha_library_pane_genre_artist_album_action (GSimpleAction *action,
+                                               GVariant      *parameter,
+                                               gpointer       user_data)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
+	pragha_preferences_set_library_style(library->preferences, GENRE_ARTIST_ALBUM);
+}
 
 /*
  * Tree menu callbacks
@@ -280,34 +372,30 @@ pragha_library_pane_remove_provider_action (GSimpleAction *action,
 }
 
 static const GActionEntry library_menu_aentries[] = {
-	{ "append",       pragha_library_pane_append_action,           NULL, NULL, NULL },
-	{ "replace",      pragha_library_pane_replace_action,          NULL, NULL, NULL },
-	{ "replace_play", pragha_library_pane_replace_and_play_action, NULL, NULL, NULL },
-	{ "append_play",  pragha_library_pane_append_and_play_action,  NULL, NULL, NULL },
-	{ "rename",       pragha_library_pane_rename_action,           NULL, NULL, NULL },
-	{ "delete",       pragha_library_pane_delete_action,           NULL, NULL, NULL },
-	{ "export",       pragha_library_pane_export_action,           NULL, NULL, NULL },
-	{ "edit",         pragha_library_pane_edit_action,             NULL, NULL, NULL },
-	{ "trash",        pragha_library_pane_trash_action,            NULL, NULL, NULL },
-	{ "remove",       pragha_library_pane_remove_action,           NULL, NULL, NULL },
-	{ "rescan",       pragha_library_pane_rescan_action,           NULL, NULL, NULL },
-	{ "update",       pragha_library_pane_update_action,           NULL, NULL, NULL },
-	{ "remove_lib",   pragha_library_pane_remove_provider_action,  NULL, NULL, NULL }
+	{ "expand",             pragha_library_pane_expand_action,             NULL, NULL, NULL },
+	{ "collapse",           pragha_library_pane_collapse_action,           NULL, NULL, NULL },
+	{ "folder",             pragha_library_pane_folder_action,             NULL, NULL, NULL },
+	{ "artist",             pragha_library_pane_artist_action,             NULL, NULL, NULL },
+	{ "album",              pragha_library_pane_album_action,              NULL, NULL, NULL },
+	{ "genre",              pragha_library_pane_genre_action,              NULL, NULL, NULL },
+	{ "artist_album",       pragha_library_pane_artist_album_action,       NULL, NULL, NULL },
+	{ "genre_album",        pragha_library_pane_genre_album_action,        NULL, NULL, NULL },
+	{ "genre_artist",       pragha_library_pane_genre_artist_action,       NULL, NULL, NULL },
+	{ "genre_artist_album", pragha_library_pane_genre_artist_album_action, NULL, NULL, NULL },
+	{ "append",             pragha_library_pane_append_action,             NULL, NULL, NULL },
+	{ "replace",            pragha_library_pane_replace_action,            NULL, NULL, NULL },
+	{ "replace_play",       pragha_library_pane_replace_and_play_action,   NULL, NULL, NULL },
+	{ "append_play",        pragha_library_pane_append_and_play_action,    NULL, NULL, NULL },
+	{ "rename",             pragha_library_pane_rename_action,             NULL, NULL, NULL },
+	{ "delete",             pragha_library_pane_delete_action,             NULL, NULL, NULL },
+	{ "export",             pragha_library_pane_export_action,             NULL, NULL, NULL },
+	{ "edit",               pragha_library_pane_edit_action,               NULL, NULL, NULL },
+	{ "trash",              pragha_library_pane_trash_action,              NULL, NULL, NULL },
+	{ "remove",             pragha_library_pane_remove_action,             NULL, NULL, NULL },
+	{ "rescan",             pragha_library_pane_rescan_action,             NULL, NULL, NULL },
+	{ "update",             pragha_library_pane_update_action,             NULL, NULL, NULL },
+	{ "remove_lib",         pragha_library_pane_remove_provider_action,    NULL, NULL, NULL }
 };
-
-/*
- * library_pane_context_menu calbacks
- */
-static void pragha_library_pane_expand_all_action                  (GtkAction *action, PraghaLibraryPane *library);
-static void pragha_library_pane_collapse_all_action                (GtkAction *action, PraghaLibraryPane *library);
-static void pragha_library_pane_set_folders_view_action            (GtkAction *action, PraghaLibraryPane *library);
-static void pragha_library_pane_set_artist_view_action             (GtkAction *action, PraghaLibraryPane *library);
-static void pragha_library_pane_set_album_view_action              (GtkAction *action, PraghaLibraryPane *library);
-static void pragha_library_pane_set_genre_view_action              (GtkAction *action, PraghaLibraryPane *library);
-static void pragha_library_pane_set_artist_album_view_action       (GtkAction *action, PraghaLibraryPane *library);
-static void pragha_library_pane_set_genre_album_view_action        (GtkAction *action, PraghaLibraryPane *library);
-static void pragha_library_pane_set_genre_artist_action            (GtkAction *action, PraghaLibraryPane *library);
-static void pragha_library_pane_set_genre_artist_album_view_action (GtkAction *action, PraghaLibraryPane *library);
 
 
 static void
@@ -316,52 +404,6 @@ pragha_library_expand_categories(PraghaLibraryPane *clibrary);
 static gint
 get_library_icon_size (void);
 
-/*
- * Menus definitions
- *
- **/
-
-gchar *library_pane_context_menu_xml = "<ui>			\
-	<popup>							\
-	<menuitem action=\"Expand library\"/>			\
-	<menuitem action=\"Collapse library\"/>			\
-	<separator/>						\
-	<menuitem action=\"folders\"/>				\
-	<separator/>						\
-	<menuitem action=\"artist\"/>				\
-	<menuitem action=\"album\"/>				\
-	<menuitem action=\"genre\"/>				\
-	<separator/>						\
-	<menuitem action=\"artist_album\"/>			\
-	<menuitem action=\"genre_artist\"/>			\
-	<menuitem action=\"genre_album\"/>			\
-	<separator/>						\
-	<menuitem action=\"genre_artist_album\"/>		\
-	</popup>						\
-	</ui>";
-
-GtkActionEntry library_pane_context_aentries[] = {
-	{"Expand library", NULL, N_("_Expand library"),
-	 "", "Expand the library", G_CALLBACK(pragha_library_pane_expand_all_action)},
-	{"Collapse library", NULL, N_("_Collapse library"),
-	 "", "Collapse the library", G_CALLBACK(pragha_library_pane_collapse_all_action)},
-	{"folders", NULL, N_("Folders structure"),
-	 "", "Folders structure", G_CALLBACK(pragha_library_pane_set_folders_view_action)},
-	{"artist", NULL, N_("Artist"),
-	 "", "Artist", G_CALLBACK(pragha_library_pane_set_artist_view_action)},
-	{"album", NULL, N_("Album"),
-	 "", "Album", G_CALLBACK(pragha_library_pane_set_album_view_action)},
-	{"genre", NULL, N_("Genre"),
-	 "", "Genre", G_CALLBACK(pragha_library_pane_set_genre_view_action)},
-	{"artist_album", NULL, N_("Artist / Album"),
-	 "", "Artist / Album", G_CALLBACK(pragha_library_pane_set_artist_album_view_action)},
-	{"genre_album", NULL, N_("Genre / Album"),
-	 "", "Genre / Album", G_CALLBACK(pragha_library_pane_set_genre_album_view_action)},
-	{"genre_artist", NULL, N_("Genre / Artist"),
-	 "", "Genre / Artist", G_CALLBACK(pragha_library_pane_set_genre_artist_action)},
-	{"genre_artist_album", NULL, N_("Genre / Artist / Album"),
-	 "", "Genre / Artist / Album", G_CALLBACK(pragha_library_pane_set_genre_artist_album_view_action)}
-};
 
 /* Returns TRUE if any of the childs of p_iter matches node_data. iter
  * and p_iter must be created outside this function */
@@ -2233,73 +2275,6 @@ update_library_tracks_changes(PraghaDatabaseProvider *provider, PraghaLibraryPan
 	library_pane_view_reload(library);
 }
 
-/*************************************/
-/* All menu handlers of library pane */
-/*************************************/
-
-/*
- * library_pane_context_menu calbacks
- */
-
-static void
-pragha_library_pane_expand_all_action (GtkAction *action, PraghaLibraryPane *library)
-{
-	gtk_tree_view_expand_all(GTK_TREE_VIEW(library->library_tree));
-}
-
-static void
-pragha_library_pane_collapse_all_action (GtkAction *action, PraghaLibraryPane *library)
-{
-	gtk_tree_view_collapse_all(GTK_TREE_VIEW(library->library_tree));
-}
-
-static void
-pragha_library_pane_set_folders_view_action (GtkAction *action, PraghaLibraryPane *library)
-{
-	pragha_preferences_set_library_style(library->preferences, FOLDERS);
-}
-
-static void
-pragha_library_pane_set_artist_view_action (GtkAction *action, PraghaLibraryPane *library)
-{
-	pragha_preferences_set_library_style(library->preferences, ARTIST);
-}
-
-static void
-pragha_library_pane_set_album_view_action (GtkAction *action, PraghaLibraryPane *library)
-{
-	pragha_preferences_set_library_style(library->preferences, ALBUM);
-}
-
-static void
-pragha_library_pane_set_genre_view_action (GtkAction *action, PraghaLibraryPane *library)
-{
-	pragha_preferences_set_library_style(library->preferences, GENRE);
-}
-
-static void
-pragha_library_pane_set_artist_album_view_action (GtkAction *action, PraghaLibraryPane *library)
-{
-	pragha_preferences_set_library_style(library->preferences, ARTIST_ALBUM);
-}
-
-static void
-pragha_library_pane_set_genre_album_view_action (GtkAction *action, PraghaLibraryPane *library)
-{
-	pragha_preferences_set_library_style(library->preferences, GENRE_ALBUM);
-}
-
-static void
-pragha_library_pane_set_genre_artist_action (GtkAction *action, PraghaLibraryPane *library)
-{
-	pragha_preferences_set_library_style(library->preferences, GENRE_ARTIST);
-}
-
-static void
-pragha_library_pane_set_genre_artist_album_view_action (GtkAction *action, PraghaLibraryPane *library)
-{
-	pragha_preferences_set_library_style(library->preferences, GENRE_ARTIST_ALBUM);
-}
 
 /*
  * library_tree_context_menu calbacks
@@ -2907,36 +2882,6 @@ pragha_library_tree_context_menu_new (PraghaLibraryPane *library)
 	                                 (gpointer)library);
 }
 
-static GtkUIManager *
-pragha_library_pane_header_context_menu_new (PraghaLibraryPane *library)
-{
-	GtkUIManager *context_menu = NULL;
-	GtkActionGroup *context_actions;
-	GError *error = NULL;
-
-	context_actions = gtk_action_group_new("Header Library Pane Context Actions");
-	context_menu = gtk_ui_manager_new();
-
-	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
-
-	if (!gtk_ui_manager_add_ui_from_string (context_menu,
-	                                        library_pane_context_menu_xml,
-	                                        -1, &error)) {
-		g_critical ("(%s): Unable to create header library tree context menu, err : %s",
-		            __func__, error->message);
-	}
-
-	gtk_action_group_add_actions (context_actions,
-	                              library_pane_context_aentries,
-	                              G_N_ELEMENTS(library_pane_context_aentries),
-	                              (gpointer) library);
-	gtk_ui_manager_insert_action_group (context_menu, context_actions, 0);
-
-	g_object_unref (context_actions);
-
-	return context_menu;
-}
-
 /********************************/
 /* Construction of library pane */
 /********************************/
@@ -3159,17 +3104,17 @@ pragha_library_pane_get_pane_title (PraghaLibraryPane *library)
 	return library->pane_title;
 }
 
-GtkMenu *
-pragha_library_pane_get_popup_menu (PraghaLibraryPane *library)
+GtkWidget *
+pragha_library_pane_get_popover (PraghaLibraryPane *library)
 {
-	return GTK_MENU(gtk_ui_manager_get_widget(library->library_pane_context_menu, "/popup"));
-}
+	GMenuModel *model;
+	GtkWidget *popover;
 
+	model = G_MENU_MODEL(gtk_builder_get_object (library->builder, "library-order-menu"));
+	popover = gtk_popover_new_from_model (library->pane_title, model);
+	gtk_widget_insert_action_group (popover, "lib", G_ACTION_GROUP(library->actions));
 
-GtkUIManager *
-pragha_library_pane_get_pane_context_menu(PraghaLibraryPane *clibrary)
-{
-	return clibrary->library_pane_context_menu;
+	return popover;
 }
 
 static void
@@ -3202,8 +3147,6 @@ pragha_library_pane_init (PraghaLibraryPane *library)
 	pragha_library_pane_create_widget (library);
 
 	/* Create context menus */
-
-	library->library_pane_context_menu = pragha_library_pane_header_context_menu_new (library);
 
 	pragha_library_tree_context_menu_new (library);
 
@@ -3273,8 +3216,6 @@ pragha_library_pane_finalize (GObject *object)
 	g_object_unref (library->library_store);
 
 	g_slist_free (library->library_tree_nodes);
-
-	g_object_unref (library->library_pane_context_menu);
 
 	g_object_unref (library->builder);
 	g_object_unref (library->actions);

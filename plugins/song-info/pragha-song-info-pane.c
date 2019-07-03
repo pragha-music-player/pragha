@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -25,6 +25,8 @@
 #include <glib/gi18n.h>
 #endif
 
+#include "pragha-song-info-ui.h"
+
 #include <glyr/glyr.h>
 
 #include "pragha-song-info-pane.h"
@@ -49,8 +51,9 @@ struct _PraghaSonginfoPane {
 	GLYR_GET_TYPE      info_type;
 
 	/* Sidebar widgets */
-	GtkWidget         *pane_title;
-	GtkUIManager      *context_menu;
+	GtkWidget          *pane_title;
+	GtkBuilder         *builder;
+	GSimpleActionGroup *actions;
 };
 
 G_DEFINE_TYPE(PraghaSonginfoPane, pragha_songinfo_pane, GTK_TYPE_SCROLLED_WINDOW)
@@ -68,26 +71,27 @@ static int signals[LAST_SIGNAL] = { 0 };
  * Menus definitions
  *
  **/
-static void pragha_songinfo_pane_show_artist_info_action (GtkAction *action, PraghaSonginfoPane *pane);
-static void pragha_songinfo_pane_show_lyrics_action      (GtkAction *action, PraghaSonginfoPane *pane);
-static void pragha_songinfo_pane_show_similar_action     (GtkAction *action, PraghaSonginfoPane *pane);
+static void
+pragha_songinfo_pane_show_artist_info_action (GSimpleAction *action,
+                                              GVariant      *parameter,
+                                              gpointer       user_data);
 
-gchar *songinfo_pane_context_menu_xml = "<ui> \
-	<popup>                                   \
-	<menuitem action=\"Artist info\"/>        \
-	<menuitem action=\"Lyrics\"/>             \
-	<menuitem action=\"Similar songs\"/>      \
-	</popup>                                  \
-	</ui>";
+static void
+pragha_songinfo_pane_show_lyrics_action      (GSimpleAction *action,
+                                              GVariant      *parameter,
+                                              gpointer       user_data);
 
-GtkActionEntry songinfo_pane_context_aentries[] = {
-	{"Artist info", NULL, N_("Artist info"),
-	 "", "Artist info", G_CALLBACK(pragha_songinfo_pane_show_artist_info_action)},
-	{"Lyrics", NULL, N_("Lyrics"),
-	 "", "Lyrics", G_CALLBACK(pragha_songinfo_pane_show_lyrics_action)},
-  	{"Similar songs", NULL, N_("Similar songs"),
-	 "", "Similar songs", G_CALLBACK(pragha_songinfo_pane_show_similar_action)}
+static void
+pragha_songinfo_pane_show_similar_action     (GSimpleAction *action,
+                                              GVariant      *parameter,
+                                              gpointer       user_data);
+
+static const GActionEntry song_info_aentries[] = {
+	{ "artist",  pragha_songinfo_pane_show_artist_info_action, NULL, NULL, NULL },
+	{ "lyrics",  pragha_songinfo_pane_show_lyrics_action,      NULL, NULL, NULL },
+	{ "similar", pragha_songinfo_pane_show_similar_action,     NULL, NULL, NULL }
 };
+
 
 /*
  * Public Api
@@ -230,16 +234,17 @@ pragha_songinfo_pane_get_pane_title (PraghaSonginfoPane *pane)
 	return pane->pane_title;
 }
 
-GtkMenu *
-pragha_songinfo_pane_get_popup_menu (PraghaSonginfoPane *pane)
+GtkWidget *
+pragha_songinfo_pane_get_popover (PraghaSonginfoPane *pane)
 {
-	return GTK_MENU(gtk_ui_manager_get_widget(pane->context_menu, "/popup"));
-}
+	GMenuModel *model;
+	GtkWidget *popover;
 
-GtkUIManager *
-pragha_songinfo_pane_get_pane_context_menu (PraghaSonginfoPane *pane)
-{
-	return pane->context_menu;
+	model = G_MENU_MODEL(gtk_builder_get_object (pane->builder, "song-info-menu"));
+	popover = gtk_popover_new_from_model (pane->pane_title, model);
+	gtk_widget_insert_action_group (popover, "info", G_ACTION_GROUP(pane->actions));
+
+	return popover;
 }
 
 GLYR_GET_TYPE
@@ -253,14 +258,14 @@ pragha_songinfo_pane_set_default_view (PraghaSonginfoPane *pane, GLYR_GET_TYPE v
 {
 	switch(view_type) {
 		case GLYR_GET_ARTIST_BIO:
-			pragha_songinfo_pane_show_artist_info_action (NULL, pane);
+			pragha_songinfo_pane_show_artist_info_action (NULL, NULL, pane);
 			break;
 		case GLYR_GET_SIMILAR_SONGS:
-			pragha_songinfo_pane_show_similar_action (NULL, pane);
+			pragha_songinfo_pane_show_similar_action (NULL, NULL, pane);
 			break;
 		case GLYR_GET_LYRICS:
 		default:
-			pragha_songinfo_pane_show_lyrics_action (NULL, pane);
+			pragha_songinfo_pane_show_lyrics_action (NULL, NULL, pane);
 			break;
 	}
 }
@@ -352,8 +357,12 @@ song_list_sort_func (GtkListBoxRow *a,
 /* Menus */
 
 static void
-pragha_songinfo_pane_show_artist_info_action (GtkAction *action, PraghaSonginfoPane *pane)
+pragha_songinfo_pane_show_artist_info_action (GSimpleAction *action,
+                                              GVariant      *parameter,
+                                              gpointer       user_data)
 {
+	PraghaSonginfoPane *pane = PRAGHA_SONGINFO_PANE(user_data);
+
 	gtk_label_set_text (GTK_LABEL(pane->pane_title), _("Artist info"));
 	pane->info_type = GLYR_GET_ARTIST_BIO;
 
@@ -361,8 +370,12 @@ pragha_songinfo_pane_show_artist_info_action (GtkAction *action, PraghaSonginfoP
 }
 
 static void
-pragha_songinfo_pane_show_lyrics_action (GtkAction *action, PraghaSonginfoPane *pane)
+pragha_songinfo_pane_show_lyrics_action (GSimpleAction *action,
+                                         GVariant      *parameter,
+                                         gpointer       user_data)
 {
+	PraghaSonginfoPane *pane = PRAGHA_SONGINFO_PANE(user_data);
+
 	gtk_label_set_text (GTK_LABEL(pane->pane_title), _("Lyrics"));
 	pane->info_type = GLYR_GET_LYRICS;
 
@@ -370,8 +383,12 @@ pragha_songinfo_pane_show_lyrics_action (GtkAction *action, PraghaSonginfoPane *
 }
 
 static void
-pragha_songinfo_pane_show_similar_action (GtkAction *action, PraghaSonginfoPane *pane)
+pragha_songinfo_pane_show_similar_action (GSimpleAction *action,
+                                          GVariant      *parameter,
+                                          gpointer       user_data)
 {
+	PraghaSonginfoPane *pane = PRAGHA_SONGINFO_PANE(user_data);
+
 	gtk_label_set_text (GTK_LABEL(pane->pane_title), _("Similar songs"));
 	pane->info_type = GLYR_GET_SIMILAR_SONGS;
 
@@ -380,34 +397,24 @@ pragha_songinfo_pane_show_similar_action (GtkAction *action, PraghaSonginfoPane 
 
 /* Construction */
 
-static GtkUIManager *
-pragha_songinfo_pane_context_menu_new (PraghaSonginfoPane *pane)
+static void
+pragha_songinfo_pane_construct_builder (PraghaSonginfoPane *pane)
 {
-	GtkUIManager *context_menu = NULL;
-	GtkActionGroup *context_actions;
 	GError *error = NULL;
 
-	context_actions = gtk_action_group_new ("Header Songinfo Pane Context Actions");
-	context_menu = gtk_ui_manager_new ();
-
-	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
-
-	if (!gtk_ui_manager_add_ui_from_string (context_menu,
-	                                        songinfo_pane_context_menu_xml,
-	                                        -1, &error)) {
-		g_critical ("(%s): Unable to create header songinfo tree context menu, err : %s",
-		            __func__, error->message);
+	pane->builder = gtk_builder_new ();
+	gtk_builder_add_from_string (pane->builder, pragha_song_info_ui, -1, &error);
+	if (error) {
+		g_print ("GtkBuilder error: %s", error->message);
+		g_error_free (error);
+		error = NULL;
 	}
 
-	gtk_action_group_add_actions (context_actions,
-	                              songinfo_pane_context_aentries,
-	                              G_N_ELEMENTS(songinfo_pane_context_aentries),
-	                              (gpointer) pane);
-	gtk_ui_manager_insert_action_group (context_menu, context_actions, 0);
-
-	g_object_unref (context_actions);
-
-	return context_menu;
+	pane->actions =  g_simple_action_group_new ();
+	g_action_map_add_action_entries (G_ACTION_MAP(pane->actions),
+	                                 song_info_aentries,
+	                                 G_N_ELEMENTS(song_info_aentries),
+	                                 (gpointer)pane);
 }
 
 static void
@@ -415,7 +422,7 @@ pragha_songinfo_pane_finalize (GObject *object)
 {
 	PraghaSonginfoPane *pane = PRAGHA_SONGINFO_PANE (object);
 
-	g_object_unref (pane->context_menu);
+	g_object_unref (pane->builder);
 
 	(*G_OBJECT_CLASS (pragha_songinfo_pane_parent_class)->finalize) (object);
 }
@@ -507,7 +514,8 @@ pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
 	g_signal_connect (append_button, "clicked",
 	                  G_CALLBACK(pragha_song_info_append_songs), pane);
 
-	pane->context_menu = pragha_songinfo_pane_context_menu_new(pane);
+	pragha_songinfo_pane_construct_builder (pane);
+
 	pane->title = label;
 	pane->text_view = view;
 	pane->list_view = list;

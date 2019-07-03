@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2018 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2018-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -27,7 +27,7 @@ struct _PraghaSidebar {
 	GtkWidget *close_button;
 	GtkWidget *title_box;
 
-	GtkMenu   *popup_menu;
+	GtkWidget *popover;
 };
 
 G_DEFINE_TYPE(PraghaSidebar, pragha_sidebar, GTK_TYPE_BOX)
@@ -38,6 +38,7 @@ enum {
 };
 static int signals[LAST_SIGNAL] = { 0 };
 
+
 /*
  * Public Api.
  */
@@ -46,7 +47,7 @@ void
 pragha_sidebar_attach_plugin (PraghaSidebar *sidebar,
                               GtkWidget     *widget,
                               GtkWidget     *title,
-                              GtkMenu       *popup_menu)
+                              GtkWidget     *popover)
 {
 	if (!widget || !title)
 		return;
@@ -58,9 +59,9 @@ pragha_sidebar_attach_plugin (PraghaSidebar *sidebar,
 
 	gtk_container_add (GTK_CONTAINER(sidebar->title_box), title);
 
-	if (popup_menu) {
-		gtk_menu_attach_to_widget(GTK_MENU(popup_menu), title, NULL);
-		sidebar->popup_menu = popup_menu;
+	if (popover) {
+		gtk_popover_set_relative_to (GTK_POPOVER(popover), sidebar->menu_button);
+		sidebar->popover = popover;
 	}
 	gtk_widget_show_all (title);
 
@@ -79,7 +80,7 @@ pragha_sidebar_remove_plugin (PraghaSidebar *sidebar,
 
 	if (page >= 0) {
 		gtk_notebook_remove_page (GTK_NOTEBOOK(sidebar->container), page);
-		gtk_menu_detach (sidebar->popup_menu);
+		gtk_popover_set_relative_to (GTK_POPOVER(sidebar->popover), NULL);
 
 		list = gtk_container_get_children (GTK_CONTAINER(sidebar->title_box));
 		if (list) {
@@ -108,100 +109,31 @@ pragha_sidebar_style_position (PraghaSidebar *sidebar, GtkPositionType position)
 	                       (position == GTK_POS_RIGHT) ? 0 : 1);
 }
 
+
 /*
  * Internal Calbacks.
  */
 
-#if !GTK_CHECK_VERSION (3, 22, 0)
 static void
-pragha_sidebar_menu_position (GtkMenu  *menu,
-                              gint     *x,
-                              gint     *y,
-                              gboolean *push_in,
-                              gpointer  user_data)
-{
-	GtkWidget *widget;
-	GtkAllocation allocation;
-	GtkRequisition requisition;
-	gint menu_xpos, menu_ypos;
-
-	widget = GTK_WIDGET (user_data);
-
-	gtk_widget_get_preferred_size (GTK_WIDGET(menu), &requisition, NULL);
-
-	gdk_window_get_origin (gtk_widget_get_window(widget), &menu_xpos, &menu_ypos);
-
-	gtk_widget_get_allocation(widget, &allocation);
-
-	menu_xpos += allocation.x;
-	menu_ypos += allocation.y;
-
-	if (menu_ypos > gdk_screen_get_height (gtk_widget_get_screen (widget)) / 2)
-		menu_ypos -= requisition.height;
-	else
-		menu_ypos += allocation.height;
-
-	*x = menu_xpos;
-	*y = menu_ypos - 5;
-
-	*push_in = TRUE;
-}
-#endif
-
-static void
-pragha_sidebar_close_button_cb (GtkWidget *widget, PraghaSidebar *sidebar)
+pragha_sidebar_close_button_cb (GtkWidget     *widget,
+                                PraghaSidebar *sidebar)
 {
 	gtk_widget_hide (GTK_WIDGET(sidebar));
 }
 
-static gboolean
-pragha_sidebar_right_click_cb(GtkWidget *widget,
-                              GdkEventButton *event,
-                              PraghaSidebar *sidebar)
+static void
+pragha_sidebar_button_press_cb (GtkWidget      *widget,
+                                PraghaSidebar  *sidebar)
 {
-	gboolean ret = FALSE;
-
-	if(!sidebar->popup_menu)
-		return FALSE;
+	if(!sidebar->popover)
+		return;
 
 	if(!gtk_widget_get_sensitive(gtk_notebook_get_nth_page (GTK_NOTEBOOK(sidebar->container), 0)))
-		return FALSE;
+		return;
 
-	switch(event->button) {
-		case 3:
-#if GTK_CHECK_VERSION (3, 22, 0)
-			gtk_menu_popup_at_pointer (GTK_MENU(sidebar->popup_menu),
-			                           (const GdkEvent *)event);
-#else
-			gtk_menu_popup(GTK_MENU(sidebar->popup_menu),
-			               NULL, NULL, NULL, NULL,
-			               event->button, event->time);
-#endif
-			ret = TRUE;
-			break;
-		case 1:
-			if (widget == sidebar->menu_button) {
-#if GTK_CHECK_VERSION (3, 22, 0)
-				gtk_menu_popup_at_widget (GTK_MENU(sidebar->popup_menu), widget,
-				                          GDK_GRAVITY_SOUTH_WEST, GDK_GRAVITY_NORTH_WEST,
-				                          (const GdkEvent *)event);
-#else
-				gtk_menu_popup(GTK_MENU(sidebar->popup_menu),
-				                NULL, NULL,
-				                (GtkMenuPositionFunc) pragha_sidebar_menu_position,
-				                widget,
-				                0,
-				                gtk_get_current_event_time());
-#endif
-				ret = TRUE;
-			}
-			break;
-		default:
-			break;
-	}
-
-	return ret;
+	gtk_widget_show (GTK_WIDGET(sidebar->popover));
 }
+
 
 /**
  * Construction:
@@ -213,15 +145,17 @@ praga_sidebar_menu_button_new (PraghaSidebar *sidebar)
 	GtkWidget *button, *hbox, *arrow;
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_widget_set_halign (hbox, GTK_ALIGN_CENTER);
 
 	button = gtk_button_new();
 	gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+	gtk_widget_set_halign (button, GTK_ALIGN_CENTER);
 
 	arrow = gtk_image_new_from_icon_name("pan-down-symbolic", GTK_ICON_SIZE_MENU);
 
 	gtk_box_pack_start (GTK_BOX(hbox),
 	                    sidebar->title_box,
-	                    TRUE, TRUE, 0);
+	                    FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(hbox),
 	                    arrow,
 	                    FALSE, FALSE, 0);
@@ -231,8 +165,8 @@ praga_sidebar_menu_button_new (PraghaSidebar *sidebar)
 	gtk_container_add (GTK_CONTAINER(button), hbox);
 
 	g_signal_connect(G_OBJECT(button),
-	                 "button-press-event",
-	                 G_CALLBACK(pragha_sidebar_right_click_cb),
+	                 "clicked",
+	                 G_CALLBACK(pragha_sidebar_button_press_cb),
 	                 sidebar);
 
 	return button;
@@ -259,6 +193,8 @@ pragha_sidebar_close_button_new(PraghaSidebar *sidebar)
 	gtk_button_set_focus_on_click (GTK_BUTTON (button), FALSE);
 #endif
 	pragha_hig_set_tiny_button (button);
+	gtk_widget_set_margin_start (button, 4);
+	gtk_widget_set_margin_end (button, 4);
 	gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
 
 	icon = g_themed_icon_new_from_names ((gchar **)fallback_icons, -1);
@@ -329,8 +265,7 @@ pragha_sidebar_init (PraghaSidebar *sidebar)
 
 	sidebar->header = pragha_sidebar_header_new (sidebar);
 	sidebar->container = pragha_sidebar_container_new (sidebar);
-
-	sidebar->popup_menu = NULL;
+	sidebar->popover = NULL;
 
 	gtk_box_pack_start (GTK_BOX(sidebar), sidebar->header,
 	                    FALSE, FALSE, 0);
