@@ -21,7 +21,7 @@ image_DATA = \
 man_MANS = pragha.1
 
 EXTRA_DIST = \
-	$(appdata_in_files) \
+	$(appstream_in_files) \
 	$(desktop_in_files) \
 	$(image_DATA)       \
 	$(man_MANS)
