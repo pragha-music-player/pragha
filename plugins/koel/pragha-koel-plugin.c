@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2015-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2015-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -41,6 +41,7 @@
 #include "pragha-koel-plugin.h"
 
 #include "src/pragha.h"
+#include "src/pragha-app-notification.h"
 #include "src/pragha-favorites.h"
 #include "src/pragha-utils.h"
 #include "src/pragha-musicobject-mgmt.h"
@@ -57,6 +58,7 @@
 #include "src/pragha-background-task-widget.h"
 #include "src/pragha-song-cache.h"
 #include "plugins/pragha-plugin-macros.h"
+
 
 typedef struct _PraghaKoelPluginPrivate PraghaKoelPluginPrivate;
 
@@ -964,6 +966,7 @@ pragha_koel_get_auth_done (SoupSession *session,
                            SoupMessage *msg,
                            gpointer     user_data)
 {
+	PraghaAppNotification *notification;
 	JsonParser *parser;
 	JsonNode *root;
 	JsonObject *object;
@@ -972,7 +975,11 @@ pragha_koel_get_auth_done (SoupSession *session,
 	PraghaKoelPluginPrivate *priv = plugin->priv;
 
 	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code)) {
+		notification = pragha_app_notification_new ("Koel", _("Unable to establish conection with Koel"));
+		pragha_app_notification_show (notification);
+
 		g_critical("KOEL ERROR Response: %s", msg->response_body->data);
+
 		return;
 	}
 

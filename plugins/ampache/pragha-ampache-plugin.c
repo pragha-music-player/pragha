@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2015-2017 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2015-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -48,6 +48,7 @@
 #include "pragha-ampache-plugin.h"
 
 #include "src/pragha.h"
+#include "src/pragha-app-notification.h"
 #include "src/pragha-utils.h"
 #include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-music-enum.h"
@@ -841,6 +842,7 @@ pragha_ampache_get_auth_done (GObject      *object,
                               GAsyncResult *res,
                               gpointer      user_data)
 {
+	PraghaAppNotification *notification;
 	GError *wc_error = NULL;
 	gchar *content = NULL, *songs_count = NULL;
 	xmlDocPtr doc;
@@ -855,8 +857,12 @@ pragha_ampache_get_auth_done (GObject      *object,
 	                                NULL,
 	                                &wc_error))
 	{
-		if (!g_cancellable_is_cancelled (priv->cancellable))
+		if (!g_cancellable_is_cancelled (priv->cancellable)) {
+			notification = pragha_app_notification_new ("Ampache", _("Unable to establish conection with Ampache"));
+			pragha_app_notification_show (notification);
+
 			g_warning ("Failed to connect: %s", wc_error->message);
+		}
 		return;
 	}
 
