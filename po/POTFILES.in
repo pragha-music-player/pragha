@@ -27,6 +27,12 @@ src/pragha.c
 #
 [type: gettext/glade]src/pragha-window.ui
 
+
+#
+# Appdata
+#
+data/io.github.pragha_music_player.metainfo.xml.in
+
 #
 # Desktop Files
 #

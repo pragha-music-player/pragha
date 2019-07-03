@@ -14,5 +14,6 @@ INSTALL
 /ltmain.sh
 /stamp-h1
 *.tar.bz2
-*.in
+*Makefile.in
 *Makefile
+*-ui.h

@@ -5,7 +5,7 @@ Type=Application
 
 Name=Pragha
 _GenericName=Music Player
-_Comment=Manage and listen to music
+_Comment=Manage and listen your music
 Icon=pragha
 
 Categories=GTK;AudioVideo;Player;

@@ -4,17 +4,19 @@
   <id>io.github.pragha_music_player</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0+</project_license>
-  <name>Pragha Music Player</name>
-  <summary>Manage and listen to music</summary>
-  <description>
+  <_name>Pragha Music Player</_name>
+  <_summary>Manage and listen your music</_summary>
+  <_description>
     <p>
-      Pragha is a Lightweight Music Player for GNU/Linux, based on Gtk, sqlite, and
-      completely written in C, constructed to be fast, light, and simultaneously tries
-      to be complete without obstructing the daily work.
+      Pragha is a Lightweight Music Player for GNU/Linux, based on GTK3, SQLite,
+      and completely written in C, constructed to be fast, light, and
+      simultaneously tries to be complete without obstructing the daily work.
+      Although it was especifically designed for the Xfce desktop, it integrates
+      very well in other desktop environments.
     </p>
     <p>Features:</p>
     <ul>
-      <li>Full integration with GTK+3 support, but always completely independent of gnome or xfce</li>
+      <li>Full integration with GTK3 support, but always completely independent of gnome or xfce</li>
       <li>Two panel desing inspired on Amarok 1.4. Library and current playlist</li>
       <li>Library with multiple views, according tags or folder structure</li>
       <li>Search, filtering and queue songs on current playlist</li>
@@ -24,9 +26,21 @@
       <li>Playback control with command line and MPRIS2</li>
       <li>Native desktop notifications with libnotify</li>
     </ul>
-  </description>
+  </_description>
   <launchable type="desktop-id">pragha.desktop</launchable>
+  <categories>
+    <category>AudioVideo</category>
+    <category>Audio</category>
+  </categories>
+  <keywords>
+    <keyword>audio</keyword>
+    <keyword>multimedia</keyword>
+  </keywords>
+  <url type="bugtracker">https://github.com/pragha-music-player/pragha/issues</url>
+  <url type="donation">https://www.bountysource.com/teams/pragha-music-player</url>
+  <url type="faq">https://github.com/pragha-music-player/pragha/wiki/FAQ</url>
   <url type="homepage">http://pragha-music-player.github.io</url>
+  <url type="translate">https://www.transifex.com/projects/p/Pragha/</url>
   <screenshots>
     <screenshot type="default">
       <image>http://pragha-music-player.github.io/images/Pragha-Xfce-HIG.png</image>
@@ -38,5 +52,7 @@
       <image>http://pragha-music-player.github.io/images/Pragha-W7.jpg</image>
     </screenshot>
   </screenshots>
+  <translation type="gettext">pragha</translation>
   <update_contact>mati86dl_at_gmail.com</update_contact>
+  <developer_name>Matias De lellis</developer_name>
 </component>
