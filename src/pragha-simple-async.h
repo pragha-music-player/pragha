@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2012-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2012-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -21,6 +21,16 @@
 #include <glib.h>
 
 typedef struct _AsyncSimple AsyncSimple;
+
+typedef struct _IdleMessage IdleMessage;
+
+IdleMessage *
+pragha_idle_message_new (gchar    *title,
+                         gchar    *message,
+                         gboolean  transient);
+
+void
+pragha_idle_message_free (IdleMessage *im);
 
 gboolean pragha_async_set_idle_message (gpointer user_data);
 

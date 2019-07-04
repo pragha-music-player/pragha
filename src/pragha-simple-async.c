@@ -26,22 +26,52 @@ struct _AsyncSimple {
 	GSourceFunc func_f;
 };
 
-/* Generic function to set a message when finished the async operation.
- * You need set 'pragha_async_set_idle_message' as finish_func
- * and then return a 'const gchar *' on worker_func. */
+struct _IdleMessage {
+	gchar    *title;
+	gchar    *message;
+	gboolean  transient;
+};
+
+IdleMessage *
+pragha_idle_message_new (gchar    *title,
+                         gchar    *message,
+                         gboolean  transient)
+{
+	IdleMessage *im;
+
+	im = g_slice_new0(IdleMessage);
+
+	im->title = g_strdup(title);
+	im->message = g_strdup(message);
+	im->transient = transient;
+
+	return im;
+}
+
+void
+pragha_idle_message_free (IdleMessage *im)
+{
+	g_free(im->title);
+	g_free(im->message);
+	g_slice_free(IdleMessage, im);
+}
 
 gboolean
 pragha_async_set_idle_message (gpointer user_data)
 {
 	PraghaAppNotification *notification;
 
-	const gchar *message = user_data;
+	IdleMessage *im = user_data;
 
-	if (message == NULL)
+	if (im == NULL)
 		return FALSE;
 
-	notification = pragha_app_notification_new (message, NULL);
+	notification = pragha_app_notification_new (im->title, im->message);
+	if (im->transient)
+		pragha_app_notification_set_timeout(notification, 5);
 	pragha_app_notification_show (notification);
+
+	pragha_idle_message_free(im);
 
 	return FALSE;
 }

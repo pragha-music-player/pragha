@@ -591,6 +591,7 @@ pragha_lastfm_tag_suggestion_button_new (PraghaLastfmPlugin *plugin)
 gpointer
 do_lastfm_love_mobj (PraghaLastfmPlugin *plugin, const gchar *title, const gchar *artist)
 {
+	IdleMessage *id = NULL;
 	gint rv;
 
 	CDEBUG(DBG_PLUGIN, "Love mobj on thread");
@@ -601,14 +602,15 @@ do_lastfm_love_mobj (PraghaLastfmPlugin *plugin, const gchar *title, const gchar
 	                        artist);
 
 	if (rv != LASTFM_STATUS_OK)
-		return _("Love song on Last.fm failed.");
-	else
-		return NULL;
+		id = pragha_idle_message_new ("Last.fm", _("Love song on Last.fm failed."), FALSE);
+
+	return id;
 }
 
 gpointer
 do_lastfm_unlove_mobj (PraghaLastfmPlugin *plugin, const gchar *title, const gchar *artist)
 {
+	IdleMessage *id = NULL;
 	gint rv;
 
 	CDEBUG(DBG_PLUGIN, "Unlove mobj on thread");
@@ -619,9 +621,9 @@ do_lastfm_unlove_mobj (PraghaLastfmPlugin *plugin, const gchar *title, const gch
 	                          artist);
 
 	if (rv != LASTFM_STATUS_OK)
-		return _("Unlove song on Last.fm failed.");
-	else
-		return NULL;
+		id = pragha_idle_message_new ("Last.fm", _("Unlove song on Last.fm failed."), FALSE);
+
+	return id;
 }
 
 static gboolean
@@ -672,6 +674,7 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 
 	if (summary != NULL) {
 		notification = pragha_app_notification_new ("Last.fm", summary);
+		pragha_app_notification_set_timeout (notification, 5);
 		pragha_app_notification_show (notification);
 	}
 
@@ -815,6 +818,7 @@ lastfm_import_xspf_response (GtkDialog          *dialog,
 	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
 
 	notification = pragha_app_notification_new ("Last.fm", summary);
+	pragha_app_notification_set_timeout(notification, 5);
 	pragha_app_notification_show (notification);
 
 	g_free(summary);
@@ -1079,6 +1083,7 @@ pragha_gmenu_lastfm_import_xspf_action (GSimpleAction *action,
 static gpointer
 pragha_lastfm_scrobble_thread (gpointer data)
 {
+	IdleMessage *id = NULL;
 	gchar *title = NULL, *artist = NULL, *album = NULL;
 	gint track_no, length, rv;
 	time_t last_time;
@@ -1091,8 +1096,9 @@ pragha_lastfm_scrobble_thread (gpointer data)
 	g_mutex_lock (&priv->data_mutex);
 	if (priv->playback_started == 0) {
 		g_mutex_unlock (&priv->data_mutex);
-		return _("Last.fm submission failed");
+		return pragha_idle_message_new ("Last.fm", _("Last.fm submission failed"), FALSE);
 	}
+
 	g_object_get (priv->current_mobj,
 	              "title",    &title,
 	              "artist",   &artist,
@@ -1121,9 +1127,12 @@ pragha_lastfm_scrobble_thread (gpointer data)
 	g_mutex_unlock (&priv->data_mutex);
 
 	if (rv != LASTFM_STATUS_OK)
-		return _("Last.fm submission failed");
-	else
-		return _("Track scrobbled on Last.fm");
+		id = pragha_idle_message_new ("Last.fm", _("Last.fm submission failed"), FALSE);
+	else {
+		id = pragha_idle_message_new ("Last.fm", _("Track scrobbled on Last.fm"), TRUE);
+	}
+
+	return id;
 }
 
 static gboolean
@@ -1169,6 +1178,7 @@ pragha_lastfm_show_corrrection_button (gpointer user_data)
 static gpointer
 pragha_lastfm_now_playing_thread (gpointer data)
 {
+	IdleMessage *id = NULL;
 	LFMList *list = NULL;
 	LASTFM_TRACK_INFO *ntrack = NULL;
 	gchar *title = NULL, *artist = NULL, *album = NULL;
@@ -1241,9 +1251,9 @@ pragha_lastfm_now_playing_thread (gpointer data)
 	g_free(ualbum);
 
 	if (rv != LASTFM_STATUS_OK)
-		return _("Update current song on Last.fm failed.");
-	else
-		return NULL;
+		id = pragha_idle_message_new ("Last.fm", _("Update current song on Last.fm failed."), FALSE);
+
+	return id;
 }
 
 static gboolean
