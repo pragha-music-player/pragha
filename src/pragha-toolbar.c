@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -455,12 +455,6 @@ pragha_toolbar_add_extra_button (PraghaToolbar *toolbar, GtkWidget *widget)
 	gtk_container_add(GTK_CONTAINER(toolbar->extra_button_box), widget);
 }
 
-GtkWidget *
-pragha_toolbar_get_task_progress_button (PraghaToolbar *toolbar)
-{
-	return toolbar->progress_button;
-}
-
 const gchar*
 pragha_toolbar_get_progress_text(PraghaToolbar *toolbar)
 {
@@ -887,7 +881,7 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	gtk_widget_set_tooltip_text(GTK_WIDGET(unfull_button), _("Leave Fullscreen"));
 	toolbar->unfull_button = unfull_button;
 
-	progress_button = GTK_WIDGET(pragha_background_task_bar_new ());
+	progress_button = GTK_WIDGET(pragha_background_task_bar_get ());
 	toolbar->progress_button = progress_button;
 
 	shuffle_button = pragha_toggle_button_new ("media-playlist-shuffle");

@@ -396,9 +396,8 @@ pragha_koel_plugin_cache_provider_done (SoupSession *session,
 {
 	PraghaDatabase *database;
 	PraghaDatabaseProvider *provider;
-	PraghaToolbar *toolbar;
+	PraghaBackgroundTaskBar *taskbar;
 	PraghaMusicobject *mobj = NULL;
-	GtkWidget *tasks_button;
 	GNotification *notification;
 	GIcon *icon;
 	JsonParser *parser = NULL;
@@ -411,17 +410,17 @@ pragha_koel_plugin_cache_provider_done (SoupSession *session,
 	PraghaKoelPluginPrivate *priv = plugin->priv;
 
 	if (g_cancellable_is_cancelled (priv->cancellable)) {
-		toolbar = pragha_application_get_toolbar (priv->pragha);
-		tasks_button = pragha_toolbar_get_task_progress_button (toolbar);
-		pragha_background_task_bar_remove_widget (PRAGHA_BACKGROUND_TASK_BAR(tasks_button), GTK_WIDGET(priv->task_widget));
+		taskbar = pragha_background_task_bar_get ();
+		pragha_background_task_bar_remove_widget (taskbar, GTK_WIDGET(priv->task_widget));
+		g_object_unref(G_OBJECT(taskbar));
 		g_cancellable_reset (priv->cancellable);
 		return;
 	}
 
 	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code)) {
-		toolbar = pragha_application_get_toolbar (priv->pragha);
-		tasks_button = pragha_toolbar_get_task_progress_button (toolbar);
-		pragha_background_task_bar_remove_widget (PRAGHA_BACKGROUND_TASK_BAR(tasks_button), GTK_WIDGET(priv->task_widget));
+		taskbar = pragha_background_task_bar_get ();
+		pragha_background_task_bar_remove_widget (taskbar, GTK_WIDGET(priv->task_widget));
+		g_object_unref(G_OBJECT(taskbar));
 		g_critical("KOEL ERROR Response: %s", msg->response_body->data);
 		return;
 	}
@@ -543,9 +542,9 @@ pragha_koel_plugin_cache_provider_done (SoupSession *session,
 
 	/* Report that finish */
 
-	toolbar = pragha_application_get_toolbar (priv->pragha);
-	tasks_button =  pragha_toolbar_get_task_progress_button (toolbar);
-	pragha_background_task_bar_remove_widget (PRAGHA_BACKGROUND_TASK_BAR(tasks_button), GTK_WIDGET(priv->task_widget));
+	taskbar = pragha_background_task_bar_get ();
+	pragha_background_task_bar_remove_widget (taskbar, GTK_WIDGET(priv->task_widget));
+	g_object_unref(G_OBJECT(taskbar));
 
 	notification = g_notification_new (_("Koel"));
 	g_notification_set_body (notification, _("Import finished"));
@@ -569,8 +568,7 @@ pragha_koel_plugin_msg_cancelled (GCancellable *cancellable, gpointer user_data)
 static void
 pragha_koel_plugin_cache_provider (PraghaKoelPlugin *plugin)
 {
-	PraghaToolbar *toolbar;
-	GtkWidget *tasks_button;
+	PraghaBackgroundTaskBar *taskbar;
 	SoupSession *session;
 	SoupMessage *msg;
 	gchar *query = NULL, *request = NULL;
@@ -584,9 +582,9 @@ pragha_koel_plugin_cache_provider (PraghaKoelPlugin *plugin)
 
 	/* Add the taks manager */
 
-	toolbar = pragha_application_get_toolbar (priv->pragha);
-	tasks_button =  pragha_toolbar_get_task_progress_button (toolbar);
-	pragha_background_task_bar_prepend_widget (PRAGHA_BACKGROUND_TASK_BAR(tasks_button), GTK_WIDGET(priv->task_widget));
+	taskbar = pragha_background_task_bar_get ();
+	pragha_background_task_bar_prepend_widget (taskbar, GTK_WIDGET(priv->task_widget));
+	g_object_unref(G_OBJECT(taskbar));
 
 	/* Launch thread to get music */
 

@@ -43,6 +43,7 @@
 #include "src/pragha-hig.h"
 #include "src/pragha-utils.h"
 #include "src/pragha-window.h"
+#include "src/pragha-background-task-bar.h"
 #include "src/pragha-background-task-widget.h"
 #include "src/xml_helper.h"
 
@@ -132,7 +133,7 @@ pragha_tunein_plugin_get_radio_done (SoupSession *session,
 {
 	PraghaAppNotification *notification;
 	PraghaPlaylist *playlist;
-	PraghaStatusbar *statusbar;
+	PraghaBackgroundTaskBar *taskbar;
 	PraghaDatabase *cdbase;
 	PraghaMusicobject *mobj = NULL;
 	XMLNode *xml = NULL, *xi;
@@ -142,9 +143,9 @@ pragha_tunein_plugin_get_radio_done (SoupSession *session,
 	PraghaTuneinPlugin *plugin = user_data;
 	PraghaTuneinPluginPrivate *priv = plugin->priv;
 
-	statusbar = pragha_statusbar_get ();
-	pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
-	g_object_unref (statusbar);
+	taskbar = pragha_background_task_bar_get ();
+	pragha_background_task_bar_remove_widget (taskbar, GTK_WIDGET(priv->task_widget));
+	g_object_unref(G_OBJECT(taskbar));
 
 	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code)) {
 		notification = pragha_app_notification_new ("TuneIn", _("There was an error when searching radio on TuneIn"));
@@ -198,21 +199,21 @@ pragha_tunein_plugin_get_radio_done (SoupSession *session,
 static void
 pragha_tunein_plugin_get_radio (PraghaTuneinPlugin *plugin, const gchar *field)
 {
-	PraghaStatusbar *statusbar;
+	PraghaBackgroundTaskBar *taskbar;
 	SoupSession *session;
 	SoupMessage *msg;
 	gchar *escaped_field = NULL, *query = NULL;
 
 	PraghaTuneinPluginPrivate *priv = plugin->priv;
 
-	statusbar = pragha_statusbar_get ();
 	priv->task_widget = pragha_background_task_widget_new (_("Searching radio on TuneIn"),
 	                                                       "edit-find",
 	                                                       0,
 	                                                       NULL);
-	g_object_ref (G_OBJECT(priv->task_widget));
-	pragha_statusbar_add_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
-	g_object_unref(G_OBJECT(statusbar));
+
+	taskbar = pragha_background_task_bar_get ();
+	pragha_background_task_bar_prepend_widget (taskbar, GTK_WIDGET(priv->task_widget));
+	g_object_unref(G_OBJECT(taskbar));
 
 	escaped_field = g_uri_escape_string (field, NULL, TRUE);
 	query = g_strdup_printf ("%s%s", "http://opml.radiotime.com/Search.aspx?query=", escaped_field);

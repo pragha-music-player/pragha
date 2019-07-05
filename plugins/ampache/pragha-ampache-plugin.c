@@ -59,9 +59,11 @@
 #include "src/pragha-window.h"
 #include "src/pragha-hig.h"
 #include "src/pragha-database-provider.h"
+#include "src/pragha-background-task-bar.h"
 #include "src/pragha-background-task-widget.h"
 #include "src/pragha-song-cache.h"
 #include "plugins/pragha-plugin-macros.h"
+
 
 typedef struct _PraghaAmpachePluginPrivate PraghaAmpachePluginPrivate;
 
@@ -425,7 +427,7 @@ pragha_ampache_get_songs_done (GObject      *object,
 {
 	PraghaDatabase *database;
 	PraghaDatabaseProvider *provider;
-	PraghaStatusbar *statusbar;
+	PraghaBackgroundTaskBar *taskbar;
 	PraghaMusicobject *mobj;
 	GNotification *notification;
 	GIcon *icon;
@@ -500,9 +502,9 @@ pragha_ampache_get_songs_done (GObject      *object,
 
 	if (priv->pending_threads == 0)
 	{
-		statusbar = pragha_statusbar_get ();
-		pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
-		g_object_unref (statusbar);
+		taskbar = pragha_background_task_bar_get ();
+		pragha_background_task_bar_remove_widget (taskbar, GTK_WIDGET(priv->task_widget));
+		g_object_unref(G_OBJECT(taskbar));
 
 		if (!g_cancellable_is_cancelled (priv->cancellable))
 		{
@@ -561,7 +563,7 @@ pragha_ampache_get_songs_done (GObject      *object,
 static void
 pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin)
 {
-	PraghaStatusbar *statusbar;
+	PraghaBackgroundTaskBar *taskbar;
 	gchar *url = NULL;
 	const guint limit = 250;
 	guint i = 0;
@@ -575,9 +577,9 @@ pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin)
 
 	/* Add the taks manager */
 
-	statusbar = pragha_statusbar_get ();
-	pragha_statusbar_add_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
-	g_object_unref (statusbar);
+	taskbar = pragha_background_task_bar_get ();
+	pragha_background_task_bar_prepend_widget (taskbar, GTK_WIDGET(priv->task_widget));
+	g_object_unref(G_OBJECT(taskbar));
 
 	/* Launch threads to get music */
 

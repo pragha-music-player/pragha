@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2013-2016 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2013-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -36,18 +36,6 @@ typedef struct _PraghaStatusbar      PraghaStatusbar;
 void
 pragha_statusbar_set_main_text (PraghaStatusbar *statusbar,
                                 const gchar     *text);
-
-void
-pragha_statusbar_add_widget(PraghaStatusbar *statusbar,
-                            GtkWidget       *widget);
-
-void
-pragha_statusbar_add_task_widget    (PraghaStatusbar *statusbar,
-                                     GtkWidget       *widget);
-
-void
-pragha_statusbar_remove_task_widget (PraghaStatusbar *statusbar,
-                                     GtkWidget       *widget);
 
 
 GType      pragha_statusbar_get_type    (void) G_GNUC_CONST;

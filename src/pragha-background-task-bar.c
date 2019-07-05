@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2016-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2016-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -23,6 +23,9 @@
 
 #include "pragha-background-task-widget.h"
 #include "pragha-background-task-bar.h"
+
+#include "pragha-debug.h"
+
 
 typedef struct _PraghaBackgroundTaskBarClass PraghaBackgroundTaskBarClass;
 
@@ -152,6 +155,11 @@ void
 pragha_background_task_bar_remove_widget (PraghaBackgroundTaskBar *taskbar,
                                           GtkWidget               *widget)
 {
+	/* Unbind description if it is the last task */
+
+	if (taskbar->task_count == 1)
+		pragha_background_task_bar_show_generic_description (taskbar);
+
 	/* Remove the widget and unref it */
 
 	gtk_container_remove (GTK_CONTAINER(taskbar->listbox), widget);
@@ -162,8 +170,6 @@ pragha_background_task_bar_remove_widget (PraghaBackgroundTaskBar *taskbar,
 
 	if (taskbar->task_count == 1)
 		pragha_background_task_bar_show_first_description (taskbar);
-	else
-		pragha_background_task_bar_show_generic_description (taskbar);
 
 	/* Hide widgets when unnecessary */
 
@@ -178,4 +184,34 @@ PraghaBackgroundTaskBar *
 pragha_background_task_bar_new (void)
 {
 	return g_object_new (PRAGHA_TYPE_BACKGROUND_TASK_BAR, NULL);
+}
+
+/**
+ * pragha_preferences_get:
+ *
+ * Queries the global #PraghaBackgroundTaskbar instance, which is shared
+ * by all modules. The function automatically takes a reference
+ * for the caller, so you'll need to call g_object_unref() when
+ * you're done with it.
+ *
+ * Return value: the global #PraghaBackgroundTaskbar instance.
+ **/
+PraghaBackgroundTaskBar *
+pragha_background_task_bar_get (void)
+{
+	static PraghaBackgroundTaskBar *taskbar = NULL;
+
+	if (G_UNLIKELY (taskbar == NULL)) {
+
+		CDEBUG(DBG_INFO, "Creating a new PraghaBackgroundTaskbar instance");
+
+		taskbar = g_object_new (PRAGHA_TYPE_BACKGROUND_TASK_BAR, NULL);
+		g_object_add_weak_pointer(G_OBJECT (taskbar),
+		                          (gpointer) &taskbar);
+	}
+	else {
+		g_object_ref (G_OBJECT (taskbar));
+	}
+
+	return taskbar;
 }

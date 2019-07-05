@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2013-2017 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2013-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -30,15 +30,14 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
+#include "pragha-background-task-bar.h"
+#include "pragha-background-task-widget.h"
+#include "pragha-database-provider.h"
 #include "pragha-file-utils.h"
-#include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-simple-async.h"
-#include "pragha-database-provider.h"
-
-#include "pragha-statusbar.h"
-#include "pragha-background-task-widget.h"
+#include "pragha-utils.h"
 
 struct _PraghaScanner {
 	/* Widgets */
@@ -226,7 +225,7 @@ pragha_scanner_finished_dialog_delete (GtkDialog *dialog, GdkEvent  *event, gpoi
 static gboolean
 pragha_scanner_worker_finished (gpointer data)
 {
-	PraghaStatusbar *statusbar;
+	PraghaBackgroundTaskBar *taskbar;
 	PraghaPreferences *preferences;
 	PraghaDatabase *database;
 	PraghaDatabaseProvider *provider;
@@ -267,9 +266,9 @@ pragha_scanner_worker_finished (gpointer data)
 
 		gtk_widget_show_all(msg_dialog);
 
-		statusbar = pragha_statusbar_get ();
-		pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(scanner->task_widget));
-		g_object_unref(G_OBJECT(statusbar));
+		taskbar = pragha_background_task_bar_get ();
+		pragha_background_task_bar_remove_widget (taskbar, GTK_WIDGET(scanner->task_widget));
+		g_object_unref(G_OBJECT(taskbar));
 
 		/* Save new database and update the library view */
 
@@ -330,9 +329,10 @@ pragha_scanner_worker_finished (gpointer data)
 		pragha_preferences_set_lock_library (preferences, FALSE);
 		g_object_unref(G_OBJECT(preferences));
 
-		statusbar = pragha_statusbar_get ();
-		pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(scanner->task_widget));
-		g_object_unref(G_OBJECT(statusbar));
+		taskbar = pragha_background_task_bar_get ();
+		pragha_background_task_bar_remove_widget (taskbar, GTK_WIDGET(scanner->task_widget));
+		g_object_unref(G_OBJECT(taskbar));
+
 	}
 
 	/* Reset background task widget */
@@ -565,7 +565,7 @@ pragha_scanner_update_worker(gpointer data)
 void
 pragha_scanner_update_library(PraghaScanner *scanner)
 {
-	PraghaStatusbar *statusbar;
+	PraghaBackgroundTaskBar *taskbar;
 	PraghaPreferences *preferences;
 	PraghaDatabase *database;
 	PraghaDatabaseProvider *provider;
@@ -605,11 +605,9 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 	scanner->update_timeout =
 		g_timeout_add_seconds(1, (GSourceFunc)pragha_scanner_update_progress, scanner);
 
-	pragha_preferences_set_show_status_bar (preferences, TRUE);
-
-	statusbar = pragha_statusbar_get ();
-	pragha_statusbar_add_task_widget (statusbar, GTK_WIDGET(scanner->task_widget));
-	g_object_unref(G_OBJECT(statusbar));
+	taskbar = pragha_background_task_bar_get ();
+	pragha_background_task_bar_prepend_widget (taskbar, GTK_WIDGET(scanner->task_widget));
+	g_object_unref(G_OBJECT(taskbar));
 
 	/* Append the files from database that no changed. */
 
@@ -652,7 +650,7 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 void
 pragha_scanner_scan_library(PraghaScanner *scanner)
 {
-	PraghaStatusbar *statusbar;
+	PraghaBackgroundTaskBar *taskbar;
 	PraghaPreferences *preferences;
 	PraghaDatabaseProvider *provider;
 	gchar *last_scan_time = NULL;
@@ -684,11 +682,9 @@ pragha_scanner_scan_library(PraghaScanner *scanner)
 
 	scanner->update_timeout = g_timeout_add_seconds(1, (GSourceFunc)pragha_scanner_update_progress, scanner);
 
-	pragha_preferences_set_show_status_bar (preferences, TRUE);
-
-	statusbar = pragha_statusbar_get ();
-	pragha_statusbar_add_task_widget (statusbar, GTK_WIDGET(scanner->task_widget));
-	g_object_unref(G_OBJECT(statusbar));
+	taskbar = pragha_background_task_bar_get ();
+	pragha_background_task_bar_prepend_widget (taskbar, GTK_WIDGET(scanner->task_widget));
+	g_object_unref(G_OBJECT(taskbar));
 
 	/* Launch threads */
 

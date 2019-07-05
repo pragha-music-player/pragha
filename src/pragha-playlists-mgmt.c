@@ -716,12 +716,11 @@ pragha_totem_pl_parser_parse_from_uri (const gchar *uri)
 	gchar *base;
 
 	pl_parser = totem_pl_parser_new ();
-	//g_object_set (pl_parser, "recurse", FALSE, NULL);
+	g_object_set (pl_parser, "recurse", FALSE, NULL);
 	g_signal_connect (G_OBJECT(pl_parser), "entry-parsed",
 	                  G_CALLBACK(_on_pl_entry_parsed), &plitems);
 
 	base = get_display_filename(uri, TRUE);
-
 	switch (totem_pl_parser_parse_with_base(pl_parser, uri, base, FALSE)) {
 		case TOTEM_PL_PARSER_RESULT_UNHANDLED:
 		case TOTEM_PL_PARSER_RESULT_IGNORED:

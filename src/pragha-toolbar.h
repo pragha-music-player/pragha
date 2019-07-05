@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -63,8 +63,6 @@ gboolean pragha_toolbar_window_state_event   (GtkWidget *widget, GdkEventWindowS
 void     pragha_toolbar_set_style            (PraghaToolbar *toolbar, gboolean gnome_style);
 void     pragha_toolbar_add_extention_widget (PraghaToolbar *toolbar, GtkWidget *widget);
 void     pragha_toolbar_add_extra_button     (PraghaToolbar *toolbar, GtkWidget *widget);
-
-GtkWidget *pragha_toolbar_get_task_progress_button (PraghaToolbar *toolbar);
 
 const gchar    *pragha_toolbar_get_progress_text (PraghaToolbar *toolbar);
 const gchar    *pragha_toolbar_get_length_text   (PraghaToolbar *toolbar);

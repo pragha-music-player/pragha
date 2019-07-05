@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2017 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -48,6 +48,7 @@
 #include "src/pragha-menubar.h"
 #include "src/pragha-utils.h"
 #include "src/pragha-simple-widgets.h"
+#include "src/pragha-background-task-bar.h"
 #include "src/pragha-background-task-widget.h"
 #include "src/pragha-window.h"
 #include "src/pragha-hig.h"
@@ -630,7 +631,7 @@ pragha_mtp_plugin_remove_menu_action (PraghaMtpPlugin *plugin)
 static void
 pragha_mtp_plugin_cache_tracks (PraghaMtpPlugin *plugin)
 {
-	PraghaStatusbar *statusbar;
+	PraghaBackgroundTaskBar *taskbar;
 	PraghaDatabaseProvider *provider;
 	LIBMTP_devicestorage_t *storage;
 	GSList *provider_list = NULL;
@@ -645,9 +646,9 @@ pragha_mtp_plugin_cache_tracks (PraghaMtpPlugin *plugin)
 	{
 		/* Add the taks manager */
 
-		statusbar = pragha_statusbar_get ();
-		pragha_statusbar_add_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
-		g_object_unref (statusbar);
+		taskbar = pragha_background_task_bar_get ();
+		pragha_background_task_bar_prepend_widget (taskbar, GTK_WIDGET(priv->task_widget));
+		g_object_unref(G_OBJECT(taskbar));
 
 		description = g_strdup_printf ("%s: %s",
 		                               _("Searching files to analyze"),
@@ -691,9 +692,10 @@ pragha_mtp_plugin_cache_tracks (PraghaMtpPlugin *plugin)
 
 		/* Remove task widget */
 
-		statusbar = pragha_statusbar_get ();
-		pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
-		g_object_unref (statusbar);
+		taskbar = pragha_background_task_bar_get ();
+		pragha_background_task_bar_remove_widget (taskbar, GTK_WIDGET(priv->task_widget));
+		g_object_unref(G_OBJECT(taskbar));
+
 	}
 	g_slist_free_full (provider_list, g_free);
 

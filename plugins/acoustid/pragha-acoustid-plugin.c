@@ -48,7 +48,7 @@
 #include "src/pragha-window.h"
 #include "src/pragha-tagger.h"
 #include "src/pragha-tags-dialog.h"
-#include "src/pragha-statusbar.h"
+#include "src/pragha-background-task-bar.h"
 #include "src/pragha-background-task-widget.h"
 
 #include "plugins/pragha-plugin-macros.h"
@@ -195,7 +195,7 @@ pragha_acoustid_plugin_get_metadata_done (SoupSession *session,
 {
 	GtkWidget *dialog;
 	PraghaAppNotification *notification;
-	PraghaStatusbar *statusbar;
+	PraghaBackgroundTaskBar *taskbar;
 	XMLNode *xml = NULL, *xi;
 	gchar *otitle = NULL, *oartist = NULL, *oalbum = NULL;
 	gchar *ntitle = NULL, *nartist = NULL, *nalbum = NULL;
@@ -204,9 +204,9 @@ pragha_acoustid_plugin_get_metadata_done (SoupSession *session,
 	PraghaAcoustidPlugin *plugin = user_data;
 	PraghaAcoustidPluginPrivate *priv = plugin->priv;
 
-	statusbar = pragha_statusbar_get ();
-	pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
-	g_object_unref(G_OBJECT(statusbar));
+	taskbar = pragha_background_task_bar_get ();
+	pragha_background_task_bar_remove_widget (taskbar, GTK_WIDGET(priv->task_widget));
+	g_object_unref(G_OBJECT(taskbar));
 
 	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code)) {
 		notification = pragha_app_notification_new ("AcoustID", _("There was an error when searching your tags on AcoustID"));
@@ -355,7 +355,7 @@ pragha_acoustid_get_metadata_dialog (PraghaAcoustidPlugin *plugin)
 	PraghaAppNotification *notification;
 	PraghaBackend *backend = NULL;
 	PraghaMusicobject *mobj = NULL;
-	PraghaStatusbar *statusbar;
+	PraghaBackgroundTaskBar *taskbar;
 	const gchar *file = NULL;
 	gchar *fingerprint = NULL;
 	gint duration = 0;
@@ -370,21 +370,23 @@ pragha_acoustid_get_metadata_dialog (PraghaAcoustidPlugin *plugin)
 	file = pragha_musicobject_get_file (mobj);
 	duration = pragha_musicobject_get_length (mobj);
 
-	statusbar = pragha_statusbar_get ();
 	priv->task_widget = pragha_background_task_widget_new (_("Searching tags on AcoustID"),
 	                                                      "edit-find",
 	                                                      0,
 	                                                      NULL);
-	g_object_ref (G_OBJECT(priv->task_widget));
-	pragha_statusbar_add_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
-	g_object_unref(G_OBJECT(statusbar));
+	g_object_unref (G_OBJECT(priv->task_widget));
+
+	taskbar = pragha_background_task_bar_get ();
+	pragha_background_task_bar_prepend_widget (taskbar, GTK_WIDGET(priv->task_widget));
+	g_object_unref(G_OBJECT(taskbar));
 
 	if (pragha_acoustid_get_fingerprint (file, &fingerprint))
 		pragha_acoustid_plugin_get_metadata (plugin, duration, fingerprint);
 	else {
-		statusbar = pragha_statusbar_get ();
-		pragha_statusbar_remove_task_widget (statusbar, GTK_WIDGET(priv->task_widget));
-		g_object_unref (statusbar);
+		taskbar = pragha_background_task_bar_get ();
+		pragha_background_task_bar_remove_widget (taskbar, GTK_WIDGET(priv->task_widget));
+		g_object_unref(G_OBJECT(taskbar));
+		priv->task_widget = NULL;
 
 		notification = pragha_app_notification_new ("AcoustID", _("There was an error when searching your tags on AcoustID"));
 		pragha_app_notification_show (notification);

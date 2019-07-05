@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2016-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2016-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -240,6 +240,19 @@ pragha_background_task_widget_dispose (GObject *object)
 }
 
 static void
+pragha_background_task_widget_finalize (GObject *object)
+{
+	PraghaBackgroundTaskWidget *taskwidget = PRAGHA_BACKGROUND_TASK_WIDGET(object);
+
+	if (taskwidget->pulse_timeout) {
+		g_source_remove(taskwidget->pulse_timeout);
+		taskwidget->pulse_timeout = 0;
+	}
+
+	G_OBJECT_CLASS(pragha_background_task_widget_parent_class)->finalize(object);
+}
+
+static void
 pragha_background_task_widget_class_init (PraghaBackgroundTaskWidgetClass *class)
 {
 	GObjectClass  *gobject_class;
@@ -248,6 +261,7 @@ pragha_background_task_widget_class_init (PraghaBackgroundTaskWidgetClass *class
 	gobject_class->set_property = pragha_background_task_widget_set_property;
 	gobject_class->get_property = pragha_background_task_widget_get_property;
 	gobject_class->dispose = pragha_background_task_widget_dispose;
+	gobject_class->finalize = pragha_background_task_widget_finalize;
 
 	/**
 	 * PraghaBackgroundTaskBar:description:

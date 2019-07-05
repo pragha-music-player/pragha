@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2016-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2016-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -44,6 +44,9 @@ pragha_background_task_bar_remove_widget  (PraghaBackgroundTaskBar *taskbar,
 
 PraghaBackgroundTaskBar *
 pragha_background_task_bar_new            (void);
+
+PraghaBackgroundTaskBar *
+pragha_background_task_bar_get            (void);
 
 G_END_DECLS
 
