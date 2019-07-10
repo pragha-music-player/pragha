@@ -7,7 +7,7 @@ AM_CPPFLAGS =								\
 	-DDESKTOPENTRY=\""$(datadir)/applications/pragha.desktop"\"	\
 	-DLIBPLUGINDIR=\""$(libdir)/pragha/plugins/"\"	\
 	-DUSRPLUGINDIR=\""$(prefix)/share/pragha/plugins"\"	\
-	-DUSRCUSTUMDIR=\""$(datadir)/pragha/custom"\"	\
+	-DUSRSTYLEDIR=\""$(datadir)/pragha/style"\"	\
 	-I$(top_srcdir)
 
 pragha_SOURCES = \

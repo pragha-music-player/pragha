@@ -660,34 +660,31 @@ pragha_window_new (PraghaApplication *pragha)
 
 	gtk_container_add(GTK_CONTAINER(window), vbox_main);
 
-	/* Attach the custum CSS to main window */
+	/* Attach CSS to main window */
 
-	css_filename = g_build_path(G_DIR_SEPARATOR_S, g_get_user_config_dir(), "/pragha/custom.css", NULL);
-	if (g_file_test(css_filename, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
+	css_provider = gtk_css_provider_new ();
+
+	css_filename = g_build_path(G_DIR_SEPARATOR_S, USRSTYLEDIR, "pragha.css", NULL);
+	gtk_css_provider_load_from_path (css_provider, css_filename, &error);
+
+	if (error == NULL)
 	{
-		css_provider = gtk_css_provider_new ();
-		gtk_css_provider_load_from_path (css_provider, css_filename, &error);
-
-		if (error == NULL)
-		{
-			gtk_style_context_add_provider_for_screen (gtk_widget_get_screen (GTK_WIDGET (window)),
-			                                           GTK_STYLE_PROVIDER (css_provider),
-			                                           GTK_STYLE_PROVIDER_PRIORITY_USER);
-		}
-		else
-		{
-			g_warning ("Could not attach user css style: %s", error->message);
-			g_error_free (error);
-		}
-
-		g_object_unref (css_provider);
+		gtk_style_context_add_provider_for_screen (gtk_widget_get_screen (GTK_WIDGET (window)),
+		                                           GTK_STYLE_PROVIDER (css_provider),
+		                                           GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	}
+	else
+	{
+		g_warning ("Could not attach pragha css style: %s", error->message);
+		g_error_free (error);
 	}
 	g_free (css_filename);
 
-	css_filename = g_build_path(G_DIR_SEPARATOR_S, USRCUSTUMDIR, "custom.css", NULL);
+	/* Attach the custum CSS to main window */
+
+	css_filename = g_build_path(G_DIR_SEPARATOR_S, USRSTYLEDIR, "custom.css", NULL);
 	if (g_file_test(css_filename, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
 	{
-		css_provider = gtk_css_provider_new ();
 		gtk_css_provider_load_from_path (css_provider, css_filename, &error);
 
 		if (error == NULL)
@@ -701,10 +698,29 @@ pragha_window_new (PraghaApplication *pragha)
 			g_warning ("Could not attach distro css style: %s", error->message);
 			g_error_free (error);
 		}
-
-		g_object_unref (css_provider);
 	}
 	g_free (css_filename);
+
+	css_filename = g_build_path(G_DIR_SEPARATOR_S, g_get_user_config_dir(), "/pragha/custom.css", NULL);
+	if (g_file_test(css_filename, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
+	{
+		gtk_css_provider_load_from_path (css_provider, css_filename, &error);
+
+		if (error == NULL)
+		{
+			gtk_style_context_add_provider_for_screen (gtk_widget_get_screen (GTK_WIDGET (window)),
+			                                           GTK_STYLE_PROVIDER (css_provider),
+			                                           GTK_STYLE_PROVIDER_PRIORITY_USER);
+		}
+		else
+		{
+		g_warning ("Could not attach user css style: %s", error->message);
+		g_error_free (error);
+		}
+	}
+	g_free (css_filename);
+
+	g_object_unref (css_provider);
 
 	if (!pragha_preferences_get_system_titlebar (preferences))
 		gtk_window_set_titlebar (GTK_WINDOW (window), GTK_WIDGET(toolbar));

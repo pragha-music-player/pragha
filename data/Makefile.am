@@ -1,4 +1,4 @@
-SUBDIRS = icons
+SUBDIRS = icons ui
 
 appstreamdir = $(datadir)/metainfo/
 appstream_in_files = io.github.pragha_music_player.metainfo.xml.in
