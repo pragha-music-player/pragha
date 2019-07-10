@@ -446,7 +446,7 @@ pragha_window_new (PraghaApplication *pragha)
 	PraghaStatusbar *statusbar;
 	PraghaToolbar *toolbar;
 	GtkWidget *menubar, *overlay, *pane1, *pane2, *infobox;
-	GtkWidget *main_stack, *playlist_statusbar_vbox, *vbox_main;
+	GtkWidget *main_stack, *playlist_overlay, *vbox_main;
 	GtkWidget *song_box, *menu_button;
 	GtkBuilder *menu_ui;
 	GtkCssProvider *css_provider;
@@ -527,29 +527,28 @@ pragha_window_new (PraghaApplication *pragha)
 		                        GTK_WIN_POS_CENTER);
 	}
 
-	/* Pack widgets: [MAIN STACK]
-	 *               [ Playlist ]
-	 */
-	gtk_stack_add_named (GTK_STACK(main_stack), GTK_WIDGET(playlist), "playlist");
-
-	/* Pack widgets: [ MainStack/Playlist ]
-	 *               [     Status Bar     ]
+	/* Pack widgets: [      MainStack      ]
+	 *               [ Playlist/Status Bar ]
 	 */
 
-	playlist_statusbar_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+	playlist_overlay = gtk_overlay_new();
+	gtk_container_add (GTK_CONTAINER(playlist_overlay),
+	                   GTK_WIDGET(playlist));
 
-	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), GTK_WIDGET(main_stack),
-	                    TRUE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), GTK_WIDGET(statusbar),
-	                    FALSE, FALSE, 0);
+	gtk_widget_set_halign (GTK_WIDGET(statusbar), GTK_ALIGN_START);
+	gtk_widget_set_valign (GTK_WIDGET(statusbar), GTK_ALIGN_END);
+	gtk_overlay_add_overlay (GTK_OVERLAY(playlist_overlay),
+	                         GTK_WIDGET(statusbar));
 
+	gtk_stack_add_named (GTK_STACK(main_stack),
+	                     GTK_WIDGET(playlist_overlay), "playlist");
 
 	/* Pack widgets: [Sidebar1][Main Stack]
 	 *               [        ][Status Bar]
 	 */
 
 	gtk_paned_pack1 (GTK_PANED (pane1), GTK_WIDGET(sidebar1), FALSE, TRUE);
-	gtk_paned_pack2 (GTK_PANED (pane1), playlist_statusbar_vbox, TRUE, FALSE);
+	gtk_paned_pack2 (GTK_PANED (pane1), main_stack, TRUE, FALSE);
 
 	gtk_paned_set_position (GTK_PANED (pane1),
 		pragha_preferences_get_sidebar_size (preferences));
@@ -654,7 +653,7 @@ pragha_window_new (PraghaApplication *pragha)
 	gtk_widget_show (pane2);
 	gtk_widget_show (overlay);
 
-	gtk_widget_show(playlist_statusbar_vbox);
+	gtk_widget_show(playlist_overlay);
 	gtk_widget_show_all (GTK_WIDGET(playlist));
 
 	/* Pack everyting on the main window. */

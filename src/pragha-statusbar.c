@@ -27,13 +27,12 @@ struct _PraghaStatusbarClass
 
 struct _PraghaStatusbar
 {
-	GtkStatusbar __parent__;
+	GtkBox    __parent__;
 
-	guint        main_context_id;
-	guint        misc_context_id;
+	GtkWidget *label;
 };
 
-G_DEFINE_TYPE (PraghaStatusbar, pragha_statusbar, GTK_TYPE_STATUSBAR)
+G_DEFINE_TYPE (PraghaStatusbar, pragha_statusbar, GTK_TYPE_BOX)
 
 static void
 pragha_statusbar_class_init (PraghaStatusbarClass *klass)
@@ -43,21 +42,22 @@ pragha_statusbar_class_init (PraghaStatusbarClass *klass)
 static void
 pragha_statusbar_init (PraghaStatusbar *statusbar)
 {
-	PraghaPreferences *preferences;
+	GtkStyleContext *context;
 
-	const GBindingFlags binding_flags =
-		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
+	statusbar->label = gtk_label_new (NULL);
+	g_object_set (statusbar->label,
+	              "margin-top", 2,
+	              "margin-bottom", 2,
+	              "margin-start", 12,
+	              "margin-end", 12,
+	              NULL);
 
-	g_object_set (G_OBJECT(statusbar), "margin", 0, NULL);
+	gtk_container_add(GTK_CONTAINER(statusbar), statusbar->label);
 
-	statusbar->main_context_id = gtk_statusbar_get_context_id (GTK_STATUSBAR (statusbar), "Main text");
-	statusbar->misc_context_id = gtk_statusbar_get_context_id (GTK_STATUSBAR (statusbar), "Misc info text");
+	context = gtk_widget_get_style_context (GTK_WIDGET (statusbar));
+	gtk_style_context_add_class (context, "floating-bar");
 
-	preferences = pragha_preferences_get();
-	g_object_bind_property (preferences, "show-status-bar",
-	                        GTK_WIDGET(statusbar), "visible",
-	                        binding_flags);
-	g_object_unref (G_OBJECT(preferences));
+	gtk_widget_show_all (GTK_WIDGET(statusbar));
 }
 
 /**
@@ -74,8 +74,7 @@ pragha_statusbar_set_main_text (PraghaStatusbar *statusbar,
 	g_return_if_fail (PRAGHA_IS_STATUSBAR (statusbar));
 	g_return_if_fail (text != NULL);
 
-	gtk_statusbar_pop (GTK_STATUSBAR (statusbar), statusbar->main_context_id);
-	gtk_statusbar_push (GTK_STATUSBAR (statusbar), statusbar->main_context_id, text);
+	gtk_label_set_text (GTK_LABEL (statusbar->label), text);
 }
 
 /**
