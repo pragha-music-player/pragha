@@ -69,7 +69,9 @@ typedef struct _PraghaAmpachePluginPrivate PraghaAmpachePluginPrivate;
 
 struct _PraghaAmpachePluginPrivate {
 	PraghaApplication          *pragha;
+
 	PraghaSongCache            *cache;
+	PraghaDatabaseProvider     *db_provider;
 
 	GrlNetWc                   *glrnet;
 	GCancellable               *cancellable;
@@ -598,6 +600,32 @@ pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin)
 	}
 }
 
+static void
+pragha_ampache_provider_want_upgrade (PraghaDatabaseProvider *provider,
+                                      gint                    provider_id,
+                                      PraghaAmpachePlugin    *plugin)
+{
+	PraghaDatabase *database;
+	PraghaPreparedStatement *statement;
+	const gchar *sql, *provider_type = NULL;
+
+	sql = "SELECT name FROM provider_type WHERE id IN (SELECT type FROM provider WHERE id = ?)";
+
+	database = pragha_database_get ();
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, provider_id);
+	if (pragha_prepared_statement_step (statement))
+		provider_type = pragha_prepared_statement_get_string (statement, 0);
+
+	if (g_ascii_strcasecmp (provider_type, "ampache") == 0)
+	{
+		pragha_ampache_plugin_upgrade_database (plugin);
+	}
+	pragha_prepared_statement_free (statement);
+	g_object_unref (database);
+}
+
+
 /*
  * Ampache Settings
  */
@@ -1107,6 +1135,15 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                                            g_free,
 	                                            g_object_unref);
 
+	/* Updrade signals */
+
+	priv->db_provider = pragha_database_provider_get ();
+	g_signal_connect (priv->db_provider, "want-upgrade",
+	                  G_CALLBACK(pragha_ampache_provider_want_upgrade), plugin);
+	g_signal_connect (priv->db_provider, "want-update",
+	                  G_CALLBACK(pragha_ampache_provider_want_upgrade), plugin);
+	g_object_ref (G_OBJECT(priv->db_provider));
+
 	/* New Task widget */
 
 	priv->task_widget = pragha_background_task_widget_new (_("Searching files to analyze"),
@@ -1175,6 +1212,11 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	g_object_unref (priv->cache);
 
 	g_object_unref (priv->glrnet);
+
+	/* Provider signals */
+
+	g_signal_handlers_disconnect_by_func (priv->db_provider, pragha_ampache_provider_want_upgrade, plugin);
+	g_object_unref (G_OBJECT(priv->db_provider));
 
 	/* If user disable the plugin (Pragha not shutdown) */
 

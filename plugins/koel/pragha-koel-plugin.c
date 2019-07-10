@@ -64,8 +64,10 @@ typedef struct _PraghaKoelPluginPrivate PraghaKoelPluginPrivate;
 
 struct _PraghaKoelPluginPrivate {
 	PraghaApplication          *pragha;
+
 	PraghaSongCache            *cache;
 	PraghaFavorites            *favorites;
+	PraghaDatabaseProvider     *db_provider;
 
 	GCancellable               *cancellable;
 
@@ -602,6 +604,32 @@ pragha_koel_plugin_cache_provider (PraghaKoelPlugin *plugin)
 	g_free (query);
 	g_free (request);
 }
+
+static void
+pragha_koel_provider_want_upgrade (PraghaDatabaseProvider *provider,
+                                   gint                    provider_id,
+                                   PraghaKoelPlugin       *plugin)
+{
+	PraghaDatabase *database;
+	PraghaPreparedStatement *statement;
+	const gchar *sql, *provider_type = NULL;
+
+	sql = "SELECT name FROM provider_type WHERE id IN (SELECT type FROM provider WHERE id = ?)";
+
+	database = pragha_database_get ();
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, provider_id);
+	if (pragha_prepared_statement_step (statement))
+		provider_type = pragha_prepared_statement_get_string (statement, 0);
+
+	if (g_ascii_strcasecmp (provider_type, "koel") == 0)
+	{
+		pragha_koel_plugin_upgrade_database (plugin);
+	}
+	pragha_prepared_statement_free (statement);
+	g_object_unref (database);
+}
+
 
 /*
  * Playcount.
@@ -1203,6 +1231,15 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	priv->favorites = pragha_favorites_get ();
 
+	/* Updrade signals */
+
+	priv->db_provider = pragha_database_provider_get ();
+	g_signal_connect (priv->db_provider, "want-upgrade",
+	                  G_CALLBACK(pragha_koel_provider_want_upgrade), plugin);
+	g_signal_connect (priv->db_provider, "want-update",
+	                  G_CALLBACK(pragha_koel_provider_want_upgrade), plugin);
+	g_object_ref (G_OBJECT(priv->db_provider));
+
 	/* Temp tables.*/
 
 	priv->tracks_table = g_hash_table_new_full (g_str_hash,
@@ -1289,6 +1326,11 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	/* Favorites */
 
 	g_object_unref (priv->favorites);
+
+	/* Provider signals */
+
+	g_signal_handlers_disconnect_by_func (priv->db_provider, pragha_koel_provider_want_upgrade, plugin);
+	g_object_unref (G_OBJECT(priv->db_provider));
 
 	/* If user disable the plugin (Pragha not shutdown) */
 
