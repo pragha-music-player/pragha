@@ -1104,8 +1104,10 @@ pragha_application_startup (GApplication *application)
 
 	version = pragha_preferences_get_installed_version (pragha->preferences);
 	if (string_is_not_empty (version) && (g_ascii_strcasecmp (version, "1.3.90") < 0)) {
+		CDEBUG(DBG_INFO, "Compatibilize database to new version.");
 		pragha_database_compatibilize_version (pragha->cdbase);
 	}
+
 	playlist_id = pragha_database_find_playlist (pragha->cdbase, _("Favorites"));
 	if (playlist_id == 0)
 		pragha_database_add_new_playlist (pragha->cdbase, _("Favorites"));

@@ -305,7 +305,7 @@ pragha_library_pane_delete_action (GSimpleAction *action,
                                    gpointer       user_data)
 {
 	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
-	pragha_library_pane_delete_from_db  (library);
+	pragha_library_pane_remove_item (library);
 }
 
 static void
@@ -341,7 +341,7 @@ pragha_library_pane_remove_action (GSimpleAction *action,
                                    gpointer       user_data)
 {
 	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (user_data);
-	pragha_library_pane_remove_item (library);
+	pragha_library_pane_delete_from_db  (library);
 }
 
 static void
