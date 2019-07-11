@@ -565,6 +565,7 @@ pragha_ampache_get_songs_done (GObject      *object,
 static void
 pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin)
 {
+	PraghaAppNotification *notification;
 	PraghaBackgroundTaskBar *taskbar;
 	gchar *url = NULL;
 	const guint limit = 250;
@@ -576,6 +577,12 @@ pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin)
 
 	if (!priv->auth)
 		return;
+
+	if (!priv->songs_count) {
+		notification = pragha_app_notification_new ("Ampache", _("The server has no songs to play"));
+		pragha_app_notification_show (notification);
+		return;
+	}
 
 	/* Add the taks manager */
 
@@ -1034,7 +1041,8 @@ pragha_ampache_plugin_need_upgrade (PraghaAmpachePlugin *plugin)
 {
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 
-	return priv->upgrade;;
+	//TODO: Verify the update date on auth.
+	return priv->upgrade;
 }
 
 /*
