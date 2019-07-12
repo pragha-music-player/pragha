@@ -49,6 +49,7 @@
 
 #include "src/pragha.h"
 #include "src/pragha-app-notification.h"
+#include "src/pragha-favorites.h"
 #include "src/pragha-utils.h"
 #include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-music-enum.h"
@@ -70,6 +71,7 @@ typedef struct _PraghaAmpachePluginPrivate PraghaAmpachePluginPrivate;
 struct _PraghaAmpachePluginPrivate {
 	PraghaApplication          *pragha;
 
+	PraghaFavorites            *favorites;
 	PraghaSongCache            *cache;
 	PraghaDatabaseProvider     *db_provider;
 
@@ -78,15 +80,19 @@ struct _PraghaAmpachePluginPrivate {
 
 	gchar                      *server;
 
+	gchar                      *username;
 	gchar                      *auth;
+	gchar                      *version;
 	gint                        songs_count;
 	gboolean                    upgrade;
+	gboolean                    implement_flags;
 
 	guint                       ping_timer_id;
 
 	gint                        pending_threads;
 	GHashTable                 *tracks_table;
 	gint                        songs_cache;
+	GHashTable                 *favorites_table;
 
 	PraghaBackgroundTaskWidget *task_widget;
 
@@ -115,6 +121,9 @@ PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_AMPACHE_PLUGIN,
 /*
  * Propotypes
  */
+
+static gboolean
+pragha_musicobject_is_ampache_file (PraghaMusicobject *mobj);
 
 static void
 pragha_ampache_plugin_authenticate (PraghaAmpachePlugin *plugin);
@@ -170,6 +179,38 @@ static const gchar *main_menu_xml = "<ui>								\
 
 /* Helpers */
 
+static gchar *
+pragha_ampache_raw_url_get_song_id (const gchar *raw_uri)
+{
+	GRegex *regex = NULL;
+	GMatchInfo *match_info;
+	gchar *song_id = NULL;
+
+	regex = g_regex_new ("[\\?&]oid=([^&#]*)",
+	                     G_REGEX_MULTILINE | G_REGEX_RAW, 0, NULL);
+	if (g_regex_match (regex, raw_uri, 0, &match_info)) {
+		song_id = g_match_info_fetch(match_info, 1);
+	}
+	g_regex_unref(regex);
+	g_match_info_free (match_info);
+
+	return song_id;
+}
+
+static gchar *
+pragha_ampache_raw_url_get_clean_url (const gchar *raw_uri)
+{
+	GRegex *regex = NULL;
+	gchar *url = NULL;
+
+	regex = g_regex_new ("ssid=(.[^&]*)&",
+	                     G_REGEX_MULTILINE | G_REGEX_RAW, 0, NULL);
+	url = g_regex_replace_literal (regex, raw_uri, -1, 0, "", 0, NULL);
+	g_regex_unref(regex);
+
+	return url;
+}
+
 static void
 pragha_ampache_plugin_add_track_db (gpointer key,
                                     gpointer value,
@@ -183,45 +224,51 @@ pragha_ampache_plugin_add_track_db (gpointer key,
 	pragha_process_gtk_events ();
 }
 
+static void
+pragha_ampache_plugin_add_favorites (gpointer key,
+                                     gpointer value,
+                                     gpointer user_data)
+{
+	guint playlist_id = 0;
+	const gchar *filename = NULL;
+
+	PraghaMusicobject *mobj = value;
+	PraghaDatabase *database = user_data;
+
+	playlist_id = pragha_database_find_playlist (database, _("Favorites on Ampache"));
+	if (!playlist_id)
+		playlist_id = pragha_database_add_new_playlist (database, _("Favorites on Ampache"));
+
+	filename  = pragha_musicobject_get_file (mobj);
+	pragha_database_add_playlist_track (database, playlist_id, filename);
+
+	pragha_process_gtk_events ();
+}
+
 /*
  * Basic Cache.
  */
 
 static void
-pragha_ampache_cache_clear (PraghaAmpachePlugin *plugin)
+pragha_ampache_tracks_cache_insert (PraghaAmpachePlugin *plugin,
+                                    PraghaMusicobject   *mobj)
 {
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
-
-	g_hash_table_remove_all (priv->tracks_table);
-}
-
-static void
-pragha_ampache_save_cache (PraghaAmpachePlugin *plugin)
-{
-	PraghaDatabase *database;
-	PraghaAmpachePluginPrivate *priv = plugin->priv;
-
-	database = pragha_database_get ();
-	g_hash_table_foreach (priv->tracks_table,
-	                      pragha_ampache_plugin_add_track_db,
-	                      database);
-	g_object_unref (database);
-}
-
-static void
-pragha_ampache_cache_insert_track (PraghaAmpachePlugin *plugin, PraghaMusicobject *mobj)
-{
-	PraghaAmpachePluginPrivate *priv = plugin->priv;
-
-	const gchar *file = pragha_musicobject_get_file(mobj);
-
-	if (string_is_empty(file))
-		return;
-
 	g_hash_table_insert (priv->tracks_table,
-	                     g_strdup(file),
+	                     g_strdup(pragha_musicobject_get_file(mobj)),
 	                     mobj);
 }
+
+static void
+pragha_ampache_favorites_cache_insert (PraghaAmpachePlugin *plugin,
+                                       PraghaMusicobject   *mobj)
+{
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+	g_hash_table_insert (priv->favorites_table,
+	                     g_strdup(pragha_musicobject_get_file(mobj)),
+	                     mobj);
+}
+
 
 /*
  * Settings.
@@ -329,6 +376,7 @@ pragha_ampache_plugin_set_password (PraghaPreferences *preferences, const gchar 
 	g_free (plugin_group);
 }
 
+
 /*
  * Ampache plugin.
  */
@@ -337,7 +385,6 @@ PraghaMusicobject *
 pragha_ampache_xml_get_media (xmlDocPtr doc, xmlNodePtr node)
 {
 	PraghaMusicobject *mobj = NULL;
-	GRegex *regex = NULL;
 	gchar *raw_url = NULL, *url = NULL, *title =  NULL, *artist = NULL, \
 		*album = NULL, *genre = NULL, *comment = NULL;
 	gchar *tracknoc = NULL, *yearc = NULL, *lenghtc = NULL;
@@ -349,12 +396,7 @@ pragha_ampache_xml_get_media (xmlDocPtr doc, xmlNodePtr node)
 		if (!xmlStrcmp (node->name, (const xmlChar *) "url"))
 		{
 			raw_url = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
-
-			regex = g_regex_new ("ssid=(.[^&]*)&",
-			                     G_REGEX_MULTILINE | G_REGEX_RAW, 0, NULL);
-			url = g_regex_replace_literal (regex, raw_url, -1, 0, "", 0, NULL);
-			g_regex_unref(regex);
-
+			url = pragha_ampache_raw_url_get_clean_url (raw_url);
 			g_free (raw_url);
 		}
 		if (!xmlStrcmp (node->name, (const xmlChar *) "track"))
@@ -423,16 +465,148 @@ pragha_ampache_xml_get_media (xmlDocPtr doc, xmlNodePtr node)
 }
 
 static void
-pragha_ampache_get_songs_done (GObject      *object,
-                               GAsyncResult *res,
-                               gpointer      user_data)
+pragha_ampache_plugin_import_finished (PraghaAmpachePlugin *plugin)
 {
 	PraghaDatabase *database;
 	PraghaDatabaseProvider *provider;
 	PraghaBackgroundTaskBar *taskbar;
+
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	/* Remove background task widget. */
+
+	taskbar = pragha_background_task_bar_get ();
+	pragha_background_task_bar_remove_widget (taskbar, GTK_WIDGET(priv->task_widget));
+	g_object_unref(G_OBJECT(taskbar));
+
+	/* If cancelled just clean and return */
+
+	if (g_cancellable_is_cancelled (priv->cancellable))
+	{
+		g_hash_table_remove_all (priv->tracks_table);
+		g_hash_table_remove_all (priv->favorites_table);
+
+		g_cancellable_reset (priv->cancellable);
+
+		return;
+	}
+
+	/* Generate provider */
+
+	database = pragha_database_get ();
+	provider = pragha_database_provider_get ();
+	if (pragha_database_find_provider (database, priv->server))
+	{
+		pragha_provider_forget_songs (provider, priv->server);
+	}
+	else
+	{
+		pragha_provider_add_new (provider,
+		                         priv->server,
+		                         "AMPACHE",
+		                         priv->server,
+		                         "folder-remote");
+		pragha_provider_set_visible (provider, priv->server, TRUE);
+	}
+
+	/* Insert songs and favorites */
+
+	g_hash_table_foreach (priv->tracks_table,
+	                      pragha_ampache_plugin_add_track_db,
+	                      database);
+
+	g_hash_table_foreach (priv->favorites_table,
+	                      pragha_ampache_plugin_add_favorites,
+	                      database);
+
+	/* Inform provides changes */
+
+	pragha_provider_update_done (provider);
+
+	/* Clean */
+
+	g_hash_table_remove_all (priv->tracks_table);
+	g_hash_table_remove_all (priv->favorites_table);
+
+	priv->songs_cache = 0;
+
+	g_object_unref (provider);
+	g_object_unref (database);
+}
+
+static void
+pragha_ampache_get_flagged_done (GObject      *object,
+                                 GAsyncResult *res,
+                                 gpointer      user_data)
+{
+	GError *wc_error = NULL;
+	gchar *content = NULL;
 	PraghaMusicobject *mobj;
-	GNotification *notification;
-	GIcon *icon;
+	xmlDocPtr doc;
+	xmlNodePtr node;
+
+	PraghaAmpachePlugin *plugin = user_data;
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	/* Set thread as handled */
+
+	priv->pending_threads--;
+
+	/* Check error */
+
+	if (!grl_net_wc_request_finish (GRL_NET_WC (object),
+	                                res,
+	                                &content,
+	                                NULL,
+	                                &wc_error))
+	{
+		if (!g_cancellable_is_cancelled (priv->cancellable))
+			g_warning ("Failed to get flagged songs: %s", wc_error->message);
+	}
+
+	if (content)
+	{
+		doc = xmlReadMemory (content, strlen(content), NULL, NULL,
+		                     XML_PARSE_RECOVER | XML_PARSE_NOBLANKS);
+
+		node = xmlDocGetRootElement (doc);
+		node = node->xmlChildrenNode;
+
+		while(node)
+		{
+			if (!xmlStrcmp (node->name, (const xmlChar *) "song"))
+			{
+				mobj = pragha_ampache_xml_get_media (doc, node);
+				if (G_LIKELY(mobj)) {
+					pragha_musicobject_set_provider (mobj, priv->server);
+					pragha_ampache_favorites_cache_insert (plugin, mobj);
+				}
+
+				/* Have to give control to GTK periodically ... */
+				pragha_process_gtk_events ();
+			}
+			node = node->next;
+ 		}
+
+		xmlFreeDoc (doc);
+
+	}
+
+	/* If it is last response finishing import */
+
+	if (priv->pending_threads == 0)
+	{
+		pragha_ampache_plugin_import_finished (plugin);
+	}
+
+}
+
+static void
+pragha_ampache_get_songs_done (GObject      *object,
+                               GAsyncResult *res,
+                               gpointer      user_data)
+{
+	PraghaMusicobject *mobj;
 	GError *wc_error = NULL;
 	xmlDocPtr doc;
 	xmlNodePtr node;
@@ -472,7 +646,7 @@ pragha_ampache_get_songs_done (GObject      *object,
 				mobj = pragha_ampache_xml_get_media (doc, node);
 				if (G_LIKELY(mobj)) {
 					pragha_musicobject_set_provider (mobj, priv->server);
-					pragha_ampache_cache_insert_track (plugin, mobj);
+					pragha_ampache_tracks_cache_insert (plugin, mobj);
 				}
 				priv->songs_cache++;
 
@@ -504,61 +678,7 @@ pragha_ampache_get_songs_done (GObject      *object,
 
 	if (priv->pending_threads == 0)
 	{
-		taskbar = pragha_background_task_bar_get ();
-		pragha_background_task_bar_remove_widget (taskbar, GTK_WIDGET(priv->task_widget));
-		g_object_unref(G_OBJECT(taskbar));
-
-		if (!g_cancellable_is_cancelled (priv->cancellable))
-		{
-			/* Finalize upgrade process */
-
-			pragha_ampache_plugin_set_need_upgrade (plugin, FALSE);
-
-			/* Add provider */
-
-			database = pragha_database_get ();
-			provider = pragha_database_provider_get ();
-			if (pragha_database_find_provider (database, priv->server))
-			{
-				pragha_provider_forget_songs (provider, priv->server);
-			}
-			else
-			{
-				pragha_provider_add_new (provider,
-				                         priv->server,
-				                         "AMPACHE",
-				                         priv->server,
-				                         "folder-remote");
-				pragha_provider_set_visible (provider, priv->server, TRUE);
-			}
-
-			/* Save cache */
-
-			pragha_ampache_save_cache (plugin);
-
-			/* Update done */
-
-			notification = g_notification_new (_("Ampache"));
-			g_notification_set_body (notification, _("Import finished"));
-			icon = g_themed_icon_new ("software-update-available");
-			g_notification_set_icon (notification, icon);
-			g_object_unref (icon);
-
-			g_application_send_notification (G_APPLICATION(priv->pragha), "import-finished", notification);
-			g_object_unref (notification);
-
-			pragha_provider_update_done (provider);
-
-			g_object_unref (provider);
-			g_object_unref (database);
-		}
-		else
-		{
-			g_cancellable_reset (priv->cancellable);
-		}
-
-		pragha_ampache_cache_clear (plugin);
-		priv->songs_cache = 0;
+		pragha_ampache_plugin_import_finished (plugin);
 	}
 }
 
@@ -602,6 +722,22 @@ pragha_ampache_plugin_cache_music (PraghaAmpachePlugin *plugin)
 		                          url,
 		                          priv->cancellable,
 		                          pragha_ampache_get_songs_done,
+		                          plugin);
+		g_free (url);
+	}
+
+	/* Finally launch get favorites as last thread */
+
+	if (priv->implement_flags) {
+		priv->pending_threads++;
+
+		url = g_strdup_printf("%s/server/xml.server.php?action=stats&type=song&filter=flagged&auth=%s",
+		                      priv->server, priv->auth);
+
+		grl_net_wc_request_async (priv->glrnet,
+		                          url,
+		                          priv->cancellable,
+		                          pragha_ampache_get_flagged_done,
 		                          plugin);
 		g_free (url);
 	}
@@ -815,6 +951,110 @@ pragha_ampache_plugin_remove_setting (PraghaAmpachePlugin *plugin)
 	                                              G_CALLBACK(pragha_ampache_preferences_dialog_response),
 	                                              plugin);
 }
+/*
+ *
+ */
+
+/*
+ * Interactions.
+ */
+static void
+pragha_ampache_plugin_flag_done (GObject      *object,
+                                 GAsyncResult *res,
+                                 gpointer user_data)
+{
+	GError *wc_error = NULL;
+	gchar *content = NULL;
+
+	PraghaAmpachePlugin *plugin = PRAGHA_AMPACHE_PLUGIN(user_data);
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	if (!grl_net_wc_request_finish (GRL_NET_WC (object),
+	                                res,
+	                                &content,
+	                                NULL,
+	                                &wc_error))
+	{
+		if (!g_cancellable_is_cancelled (priv->cancellable))
+			g_critical("Ampache ERROR Response: %s", content);
+	}
+}
+
+static void
+pragha_ampache_plugin_flag_launch (PraghaAmpachePlugin *plugin,
+                                   const gchar         *filename,
+                                   gboolean             flag)
+{
+	gchar *url = NULL, *song_id = NULL;
+
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Ampache server plugin %s", G_STRFUNC);
+
+	if (!priv->auth)
+		return;
+
+	song_id = pragha_ampache_raw_url_get_song_id (filename);
+
+	url = g_strdup_printf("%s/server/xml.server.php?action=flag&type=song&id=%s&flag=%i&auth=%s",
+	                      priv->server,
+	                      song_id,
+	                      flag ? 1 : 0,
+	                      priv->auth);
+
+	grl_net_wc_request_async (priv->glrnet,
+	                          url,
+	                          priv->cancellable,
+	                          pragha_ampache_plugin_flag_done,
+	                          plugin);
+
+	g_free (song_id);
+	g_free (url);
+}
+
+static void
+pragha_ampache_plugin_favorites_song_added (PraghaFavorites     *favorites,
+                                            PraghaMusicobject   *mobj,
+                                            PraghaAmpachePlugin *plugin)
+{
+	PraghaDatabase *database;
+	const gchar *file = NULL;
+	gint playlist_id = 0;
+
+	if (!pragha_musicobject_is_ampache_file (mobj))
+		return;
+
+	file  = pragha_musicobject_get_file (mobj);
+	pragha_ampache_plugin_flag_launch (plugin, file, TRUE);
+
+	database = pragha_database_get ();
+	playlist_id = pragha_database_find_playlist (database, _("Favorites on Ampache"));
+	if (!playlist_id)
+		playlist_id = pragha_database_add_new_playlist (database, _("Favorites on Ampache"));
+	pragha_database_add_playlist_track (database, playlist_id, file);
+	g_object_unref (database);
+}
+
+static void
+pragha_ampache_plugin_favorites_song_removed (PraghaFavorites     *favorites,
+                                              PraghaMusicobject   *mobj,
+                                              PraghaAmpachePlugin *plugin)
+{
+	PraghaDatabase *database;
+	const gchar *file = NULL;
+	gint playlist_id = 0;
+
+	if (!pragha_musicobject_is_ampache_file (mobj))
+		return;
+
+	file  = pragha_musicobject_get_file (mobj);
+	pragha_ampache_plugin_flag_launch (plugin, file, FALSE);
+
+	database = pragha_database_get ();
+	playlist_id = pragha_database_find_playlist (database, _("Favorites on Ampache"));
+	pragha_database_delete_playlist_track (database, playlist_id, file);
+	g_object_unref (database);
+}
 
 /*
  * Authentication.
@@ -917,6 +1157,10 @@ pragha_ampache_get_auth_done (GObject      *object,
 			{
 				priv->auth = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
 			}
+			if (!xmlStrcmp (node->name, (const xmlChar *) "api"))
+			{
+				priv->version = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
+			}
 			if (!xmlStrcmp (node->name, (const xmlChar *) "songs"))
 			{
 				songs_count = (gchar *) xmlNodeListGetString (doc, node->xmlChildrenNode, 1);
@@ -931,6 +1175,8 @@ pragha_ampache_get_auth_done (GObject      *object,
 
 	if (priv->auth != NULL)
 	{
+		priv->implement_flags = g_ascii_strcasecmp (priv->version, "400001") >= 0;
+
 		priv->ping_timer_id = g_timeout_add_seconds (10*60,
 		                                             pragha_ampache_plugin_ping_server,
 		                                             plugin);
@@ -968,6 +1214,7 @@ pragha_ampache_plugin_authenticate (PraghaAmpachePlugin *plugin)
 	/* Set new server as alias of provider */
 
 	priv->server = g_strdup (server);
+	priv->username = g_strdup(username);
 
 	/* Authenticate */
 
@@ -1010,6 +1257,10 @@ pragha_ampache_plugin_deauthenticate (PraghaAmpachePlugin *plugin)
 	if (priv->server) {
 		g_free (priv->server);
 		priv->server = NULL;
+	}
+	if (priv->username) {
+		g_free (priv->username);
+		priv->username = NULL;
 	}
 	if (priv->auth) {
 		g_free (priv->auth);
@@ -1143,6 +1394,11 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                                            g_free,
 	                                            g_object_unref);
 
+	priv->favorites_table = g_hash_table_new_full (g_str_hash,
+	                                               g_str_equal,
+	                                               g_free,
+	                                               g_object_unref);
+
 	/* Updrade signals */
 
 	priv->db_provider = pragha_database_provider_get ();
@@ -1192,6 +1448,14 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	g_signal_connect (backend, "download-done",
 	                  G_CALLBACK(pragha_ampache_plugin_download_done), plugin);
 
+	/* Favorites handler */
+
+	priv->favorites = pragha_favorites_get ();
+	g_signal_connect (priv->favorites, "song-added",
+	                  G_CALLBACK(pragha_ampache_plugin_favorites_song_added), plugin);
+	g_signal_connect (priv->favorites, "song-removed",
+	                  G_CALLBACK(pragha_ampache_plugin_favorites_song_removed), plugin);
+
 	/* Append setting */
 
 	pragha_ampache_plugin_append_setting (plugin);
@@ -1218,6 +1482,13 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	g_hash_table_destroy (priv->tracks_table);
 	g_object_unref (priv->cache);
+
+	/* Favorites */
+
+	g_hash_table_destroy (priv->favorites_table);
+	g_object_unref (priv->favorites);
+
+	/* Network staff */
 
 	g_object_unref (priv->glrnet);
 
