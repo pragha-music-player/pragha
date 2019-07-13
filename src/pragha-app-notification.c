@@ -224,7 +224,7 @@ PraghaAppNotification *
 pragha_app_notification_new (const char *head,
                              const char *body)
 {
-	return g_object_new (PRAGHA_APP_TYPE_NOTIFICATION,
+	return g_object_new (PRAGHA_TYPE_APP_NOTIFICATION,
 	                     "column-spacing", 12,
 	                     "orientation", GTK_ORIENTATION_HORIZONTAL,
 	                     "head", head,

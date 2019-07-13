@@ -23,9 +23,15 @@
 
 G_BEGIN_DECLS
 
-#define PRAGHA_TYPE_APP_NOTIFICATION_CONTAINER (pragha_app_notification_container_get_type ())
+typedef struct _PraghaAppNotificationContainerClass PraghaAppNotificationContainerClass;
+typedef struct _PraghaAppNotificationContainer      PraghaAppNotificationContainer;
 
-G_DECLARE_FINAL_TYPE (PraghaAppNotificationContainer, pragha_app_notification_container, PRAGHA, APP_NOTIFICATION_CONTAINER, GtkRevealer)
+#define PRAGHA_TYPE_APP_NOTIFICATION_CONTAINER             (pragha_app_notification_container_get_type ())
+#define PRAGHA_APP_NOTIFICATION_CONTAINER(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_APP_NOTIFICATION_CONTAINER, PraghaAppNotificationContainer))
+#define PRAGHA_APP_NOTIFICATION_CONTAINER_CLASS(klass)     (G_TYPE_CHECK_CLASS_CAST ((klass), PRAGHA_TYPE_APP_NOTIFICATION_CONTAINER, PraghaAppNotificationContainerClass))
+#define PRAGHA_IS_APP_NOTIFICATION_CONTAINER(obj)          (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_APP_NOTIFICATION_CONTAINER))
+#define PRAGHA_IS_APP_NOTIFICATION_CONTAINER_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_APP_NOTIFICATION_CONTAINER))
+#define PRAGHA_APP_NOTIFICATION_CONTAINER_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_APP_NOTIFICATION_CONTAINER, PraghaAppNotificationContainerClass))
 
 PraghaAppNotificationContainer *
 pragha_app_notification_container_get_default      (void);

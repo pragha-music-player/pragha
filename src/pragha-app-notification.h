@@ -24,9 +24,15 @@
 
 G_BEGIN_DECLS
 
-#define PRAGHA_APP_TYPE_NOTIFICATION (pragha_app_notification_get_type ())
+typedef struct _PraghaAppNotificationClass PraghaAppNotificationClass;
+typedef struct _PraghaAppNotification      PraghaAppNotification;
 
-G_DECLARE_FINAL_TYPE (PraghaAppNotification, pragha_app_notification, PRAGHA, APP_NOTIFICATION, GtkFrame)
+#define PRAGHA_TYPE_APP_NOTIFICATION             (pragha_app_notification_get_type ())
+#define PRAGHA_APP_NOTIFICATION(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_APP_NOTIFICATION, PraghaAppNotification))
+#define PRAGHA_APP_NOTIFICATION_CLASS(klass)     (G_TYPE_CHECK_CLASS_CAST ((klass), PRAGHA_TYPE_APP_NOTIFICATION, PraghaAppNotificationClass))
+#define PRAGHA_IS_APP_NOTIFICATION(obj)          (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_APP_NOTIFICATION))
+#define PRAGHA_IS_APP_NOTIFICATION_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_APP_NOTIFICATION))
+#define PRAGHA_APP_NOTIFICATION_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_APP_NOTIFICATION, PraghaAppNotificationClass))
 
 PraghaAppNotification *
 pragha_app_notification_new         (const char            *head,
