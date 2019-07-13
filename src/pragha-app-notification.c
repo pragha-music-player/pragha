@@ -32,6 +32,8 @@ struct _PraghaAppNotification {
 
 	gchar     *head_msg;
 	gchar     *body_msg;
+
+	guint      timeout_id;
 };
 
 struct _PraghaAppNotificationClass {
@@ -123,6 +125,11 @@ pragha_app_notification_close_button_clicked_cb (GtkButton             *button,
 {
 	PraghaAppNotificationContainer *container;
 
+	if (self->timeout_id != 0) {
+		g_source_remove (self->timeout_id);
+		self->timeout_id = 0;
+	}
+
 	gtk_widget_destroy (GTK_WIDGET (self));
 
 	container = pragha_app_notification_container_get_default ();
@@ -147,7 +154,7 @@ pragha_app_notification_timeout_call (gpointer data)
 		gtk_revealer_set_reveal_child (GTK_REVEALER (container), FALSE);
 	}
 
-	return FALSE;
+	return G_SOURCE_REMOVE;
 }
 
 static void
@@ -247,6 +254,6 @@ pragha_app_notification_set_timeout (PraghaAppNotification *self,
 {
 	g_assert (PRAGHA_IS_APP_NOTIFICATION (self));
 
-	g_timeout_add_seconds(timeout, pragha_app_notification_timeout_call, self);
+	self->timeout_id = g_timeout_add_seconds(timeout, pragha_app_notification_timeout_call, self);
 }
 
