@@ -154,6 +154,15 @@ pragha_CFLAGS += $(LIBPEAS_GTK_CFLAGS)
 pragha_LDADD += $(LIBPEAS_GTK_LIBS)
 endif
 
+if HAVE_GUDEV
+pragha_SOURCES += \
+	pragha-device-client.c \
+	pragha-device-client.h
+
+pragha_CFLAGS += $(GUDEV_CFLAGS)
+pragha_LDADD += $(GUDEV_LIBS)
+endif
+
 if WIN32
 pragha_SOURCES += \
 	$(top_srcdir)/win32/win32dep.c \

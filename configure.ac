@@ -6,12 +6,12 @@ dnl
 dnl Version information
 m4_define([pragha_version_major], [1])
 m4_define([pragha_version_minor], [3])
-m4_define([pragha_version_micro], [99])
+m4_define([pragha_version_micro], [99.1])
 
 m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
 
 dnl Initialize autoconf
-AC_COPYRIGHT([Copyright (c) 2009-2018
+AC_COPYRIGHT([Copyright (c) 2009-2019
         Matias De lellis <mati86dl@gmail.com>])
 AC_INIT([pragha], [pragha_version()], [mati86dl@gmail.com])
 AC_CONFIG_HEADERS([config.h])
@@ -343,7 +343,6 @@ AC_CONFIG_FILES([plugins/koel/Makefile])
 AC_CONFIG_FILES([plugins/gnome-media-keys/Makefile])
 AC_CONFIG_FILES([plugins/song-info/Makefile])
 AC_CONFIG_FILES([plugins/notify/Makefile])
-AC_CONFIG_FILES([plugins/devices/Makefile])
 AC_CONFIG_FILES([plugins/mtp/Makefile])
 AC_CONFIG_FILES([plugins/removable-media/Makefile])
 AC_CONFIG_FILES([plugins/tunein/Makefile])
@@ -380,8 +379,10 @@ echo "   * Play songs on DLNA Servers......................(Need grilo >= 0.2.11
 echo "   * Append music on Ampache server...............(Need grilo-net >= 0.2.5).: $GRILO_NET_FOUND"
 echo "   * Append music on Koel server...............(Need libsoup and json-glib).: $KOEL_SUPPORT"
 echo "   * Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
-echo "   * EXPERIMENTAL management of removable devices..........(Need gudev-1.0).: $GUDEV_FOUND"
-echo "   * EXPERIMENTAL management of mtp devices....:(Need gudev-1.0 and libmtp).: $LIBMTP_FOUND"
+echo "   * EXPERIMENTAL management of external devices...........(Need gudev-1.0).: $GUDEV_FOUND"
+echo "     * USB flash drive/Memory cards........................(Need gudev-1.0).: $GUDEV_FOUND"
+echo "     * Optical disc Hot-plug...............................(Need gudev-1.0).: $GUDEV_FOUND"
+echo "     * MTP compatible devices..................:(Need gudev-1.0 and libmtp).: $LIBMTP_FOUND"
 echo ""
 echo "  Others build options..:"
 echo "   * Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_AUDIO_FOUND"

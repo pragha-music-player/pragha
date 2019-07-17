@@ -1,9 +1,0 @@
-[Plugin]
-Module=devices
-Name=Devices
-Description=Management removable devices
-Authors=Matias De lellis <mati86dl@gmail.com>
-Copyright=Copyright © 2014 Matias De lellis
-Website=https://github.com/matiasdelellis/pragha
-Help=https://github.com/matiasdelellis/pragha
-Hidden=true

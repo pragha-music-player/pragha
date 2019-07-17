@@ -3,7 +3,7 @@ Module=cdrom
 Name=Play cdrom
 Description=Play audios cds
 Authors=Matias De lellis <mati86dl@gmail.com>
-Copyright=Copyright © 2014 Matias De lellis
+Copyright=Copyright © 2014-2019 Matias De lellis
 Website=https://github.com/matiasdelellis/pragha
 Help=https://github.com/matiasdelellis/pragha
-Depends=devices
+

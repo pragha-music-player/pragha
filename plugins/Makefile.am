@@ -27,12 +27,10 @@ SUBDIRS += notify
 endif
 
 if HAVE_GUDEV
-SUBDIRS += devices
 SUBDIRS += removable-media
-endif
-
 if HAVE_LIBMTP
 SUBDIRS += mtp
+endif
 endif
 
 if HAVE_LIBSOUP

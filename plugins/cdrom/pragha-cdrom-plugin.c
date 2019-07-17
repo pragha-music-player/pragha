@@ -50,8 +50,7 @@
 #include "src/pragha-window.h"
 
 #if HAVE_GUDEV
-#include "plugins/devices/pragha-devices-plugin.h"
-#include "plugins/devices/pragha-device-client.h"
+#include "src/pragha-device-client.h"
 #endif
 
 #include "plugins/pragha-plugin-macros.h"
@@ -65,6 +64,10 @@
 
 struct _PraghaCdromPluginPrivate {
 	PraghaApplication *pragha;
+
+#if HAVE_GUDEV
+	PraghaDeviceClient *device_client;
+#endif
 
 	guint64             bus_hooked;
 	guint64             device_hooked;
@@ -813,16 +816,14 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	g_signal_connect (backend, "prepare-source",
 	                  G_CALLBACK(pragha_cdrom_plugin_prepare_source), plugin);
 
-	#ifdef HAVE_GUDEV
-	PraghaDeviceClient *device_client;
-	device_client = pragha_device_client_get();
+#ifdef HAVE_GUDEV
+	priv->device_client = pragha_device_client_get();
 
-	g_signal_connect (G_OBJECT(device_client), "device-added",
+	g_signal_connect (G_OBJECT(priv->device_client), "device-added",
 	                  G_CALLBACK(pragha_cdrom_plugin_device_added), plugin);
-	g_signal_connect (G_OBJECT(device_client), "device-removed",
+	g_signal_connect (G_OBJECT(priv->device_client), "device-removed",
 	                  G_CALLBACK(pragha_cdrom_plugin_device_removed), plugin);
-	g_object_unref (device_client);
-	#endif
+#endif
 
 	enum_map = pragha_music_enum_get ();
 	pragha_music_enum_map_get (enum_map, "CDROM");
@@ -861,17 +862,15 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	g_signal_handlers_disconnect_by_func (backend, pragha_cdrom_plugin_set_device, plugin);
 	g_signal_handlers_disconnect_by_func (backend, pragha_cdrom_plugin_prepare_source, plugin);
 
-	#ifdef HAVE_GUDEV
-	PraghaDeviceClient *device_client;
-	device_client = pragha_device_client_get();
-	g_signal_handlers_disconnect_by_func (device_client,
+#ifdef HAVE_GUDEV
+	g_signal_handlers_disconnect_by_func (priv->device_client,
 	                                      pragha_cdrom_plugin_device_added,
 	                                      plugin);
-	g_signal_handlers_disconnect_by_func (device_client,
+	g_signal_handlers_disconnect_by_func (priv->device_client,
 	                                      pragha_cdrom_plugin_device_removed,
 	                                      plugin);
-	g_object_unref (device_client);
-	#endif
+	g_object_unref (priv->device_client);
+#endif
 
 	/* Remove from database */
 

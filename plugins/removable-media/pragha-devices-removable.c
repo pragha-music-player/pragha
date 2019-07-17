@@ -36,9 +36,7 @@
 
 #include "plugins/pragha-plugin-macros.h"
 
-#include "plugins/devices/pragha-devices-plugin.h"
-#include "plugins/devices/pragha-device-client.h"
-
+#include "src/pragha-device-client.h"
 #include "src/pragha-database-provider.h"
 #include "src/pragha-playback.h"
 #include "src/pragha-utils.h"
@@ -55,6 +53,8 @@ typedef struct _PraghaRemovablePluginPrivate PraghaRemovablePluginPrivate;
 
 struct _PraghaRemovablePluginPrivate {
 	PraghaApplication  *pragha;
+
+	PraghaDeviceClient *device_client;
 
 	/* Gudev devie */
 	guint64             bus_hooked;
@@ -379,7 +379,6 @@ pragha_removable_plugin_device_removed (PraghaDeviceClient *device_client,
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
 {
-	PraghaDeviceClient *device_client;
 	PraghaRemovablePlugin *plugin = PRAGHA_REMOVABLE_PLUGIN (activatable);
 	PraghaRemovablePluginPrivate *priv = plugin->priv;
 
@@ -387,18 +386,16 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
-	device_client = pragha_device_client_get();
-	g_signal_connect (G_OBJECT(device_client), "device-added",
+	priv->device_client = pragha_device_client_get();
+	g_signal_connect (G_OBJECT(priv->device_client), "device-added",
 	                  G_CALLBACK(pragha_removable_plugin_device_added), plugin);
-	g_signal_connect (G_OBJECT(device_client), "device-removed",
+	g_signal_connect (G_OBJECT(priv->device_client), "device-removed",
 	                  G_CALLBACK(pragha_removable_plugin_device_removed), plugin);
-	g_object_unref (device_client);
 }
 
 static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
-	PraghaDeviceClient *device_client;
 	PraghaDatabaseProvider *provider;
 
 	PraghaRemovablePlugin *plugin = PRAGHA_REMOVABLE_PLUGIN (activatable);
@@ -434,14 +431,14 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	/* Disconnect signals */
 
-	device_client = pragha_device_client_get();
-	g_signal_handlers_disconnect_by_func (device_client,
+	g_signal_handlers_disconnect_by_func (priv->device_client,
 	                                      pragha_removable_plugin_device_added,
 	                                      plugin);
-	g_signal_handlers_disconnect_by_func (device_client,
+	g_signal_handlers_disconnect_by_func (priv->device_client,
 	                                      pragha_removable_plugin_device_removed,
 	                                      plugin);
-	g_object_unref (device_client);
+
+	g_object_unref (G_OBJECT(priv->device_client));
 
 	priv->pragha = NULL;
 }

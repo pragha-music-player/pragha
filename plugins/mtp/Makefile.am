@@ -30,7 +30,6 @@ libpmtp_la_CFLAGS =							\
 	-Wall
 
 libpmtp_la_LIBADD =							\
-	../devices/libdeviceclient.la					\
 	$(GSTREAMER_LIBS)						\
 	$(GLIB_LIBS) 							\
 	$(GIO_LIBS) 							\
