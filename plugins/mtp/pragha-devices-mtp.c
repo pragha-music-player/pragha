@@ -763,13 +763,18 @@ static void
 pragha_mtp_detected_ask_action (PraghaMtpPlugin *plugin)
 {
 	GtkWidget *dialog;
+	gchar *message = NULL;
 
 	PraghaMtpPluginPrivate *priv = plugin->priv;
 
+	message = g_strdup_printf (_("Do you want to manage the “%s” device with Pragha?"), priv->friend_name);
+
 	dialog = pragha_gudev_dialog_new (pragha_application_get_window (priv->pragha),
 	                                  _("MTP Device"), "multimedia-player",
-	                                  _("Was inserted an MTP Device"), NULL,
-	                                  _("Append songs of device"), PRAGHA_DEVICE_RESPONSE_PLAY);
+	                                  _("An MTP device was detected"), message,
+	                                  _("Manage device"), PRAGHA_DEVICE_RESPONSE_PLAY);
+
+	g_free(message);
 
 	g_signal_connect (G_OBJECT (dialog), "response",
 	                  G_CALLBACK (pragha_mtp_detected_ask_action_response), plugin);
@@ -851,6 +856,8 @@ pragha_mtp_plugin_device_added (PraghaDeviceClient *device_client,
 	priv->friend_name = LIBMTP_Get_Friendlyname (priv->mtp_device);
 	if (!priv->friend_name)
 		priv->friend_name = LIBMTP_Get_Modelname (priv->mtp_device);
+	if (!priv->friend_name)
+		priv->friend_name = g_strdup (_("Unknown MTP device"));
 	priv->device_id = LIBMTP_Get_Serialnumber (priv->mtp_device);
 
 	pragha_mtp_detected_ask_action (plugin);

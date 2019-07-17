@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2017 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -222,7 +222,7 @@ pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, PraghaR
 		if (error->code != G_IO_ERROR_FAILED_HANDLED &&
 		    error->code != G_IO_ERROR_ALREADY_MOUNTED) {
 			name = g_volume_get_name (G_VOLUME (volume));
-			primary = g_strdup_printf (_("Unable to access \"%s\""), name);
+			primary = g_strdup_printf (_("Unable to accesss to “%s” device"), name);
 			g_free (name);
 
 			dialog = pragha_gudev_dialog_new (pragha_application_get_window (priv->pragha),
@@ -288,7 +288,7 @@ pragha_block_device_detected (gpointer data)
 	GtkWidget      *dialog;
 	GVolumeMonitor *monitor;
 	GVolume        *volume;
-	gchar *name = NULL, *primary = NULL;
+	gchar *name = NULL, *secondary = NULL;
 
 	PraghaRemovablePlugin *plugin = data;
 	PraghaRemovablePluginPrivate *priv = plugin->priv;
@@ -308,20 +308,20 @@ pragha_block_device_detected (gpointer data)
 	}
 
 	name = g_volume_get_name (G_VOLUME (volume));
-	primary = g_strdup_printf (_("Want to manage \"%s\" volume?"), name);
+	secondary = g_strdup_printf (_("Do you want to manage the “%s” device with Pragha?"), name);
 	g_free (name);
 
 	dialog = pragha_gudev_dialog_new (pragha_application_get_window (priv->pragha),
 	                                  _("Removable Device"), "media-removable",
-	                                  primary, NULL,
-	                                  _("_Update library"), PRAGHA_DEVICE_RESPONSE_BROWSE);
+	                                  _("An removable device was detected"), secondary,
+	                                  _("Manage device"), PRAGHA_DEVICE_RESPONSE_BROWSE);
 
 	g_signal_connect (G_OBJECT (dialog), "response",
 	                  G_CALLBACK (pragha_block_device_detected_response), plugin);
 
 	gtk_widget_show_all (dialog);
 
-	g_free (primary);
+	g_free (secondary);
 
 	return FALSE;
 }

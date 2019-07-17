@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2014-2015 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2014-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -55,15 +55,20 @@ gchar * gudev_subsystems[] =
 /*
  * Publics functions.
  */
+
 GtkWidget *
-pragha_gudev_dialog_new (GtkWidget *parent, const gchar *title, const gchar *icon,
-                         const gchar *primary_text, const gchar *secondary_text,
-                         const gchar *first_button_text, gint first_button_response)
+pragha_gudev_dialog_new (GtkWidget   *parent,
+                         const gchar *title,
+                         const gchar *icon,
+                         const gchar *primary_text,
+                         const gchar *secondary_text,
+                         const gchar *first_button_text,
+                         gint         first_button_response)
 {
 	GtkWidget *dialog;
 	GtkWidget *image;
 
-	dialog = gtk_message_dialog_new (NULL,
+	dialog = gtk_message_dialog_new (GTK_WINDOW(parent),
 	                                 GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 	                                 GTK_MESSAGE_QUESTION,
 	                                 GTK_BUTTONS_NONE,

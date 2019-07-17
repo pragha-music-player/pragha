@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2014 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2014-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -69,9 +69,13 @@ enum
 };
 
 GtkWidget *
-pragha_gudev_dialog_new (GtkWidget *parent, const gchar *title, const gchar *icon,
-                         const gchar *primary_text, const gchar *secondary_text,
-                         const gchar *first_button_text, gint first_button_response);
+pragha_gudev_dialog_new (GtkWidget   *parent,
+                         const gchar *title,
+                         const gchar *icon,
+                         const gchar *primary_text,
+                         const gchar *secondary_text,
+                         const gchar *first_button_text,
+                         gint         first_button_response);
 
 gint
 pragha_gudev_get_property_as_int (GUdevDevice *device,
