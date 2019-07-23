@@ -38,9 +38,7 @@
 
 #include "plugins/pragha-plugin-macros.h"
 
-
-#include "pragha-mtp-musicobject.h"
-
+#include "src/pragha-app-notification.h"
 #include "src/pragha-database-provider.h"
 #include "src/pragha-device-client.h"
 #include "src/pragha-music-enum.h"
@@ -52,6 +50,10 @@
 #include "src/pragha-window.h"
 #include "src/pragha-hig.h"
 #include "src/pragha.h"
+
+#include "pragha-mtp-musicobject.h"
+#include "pragha-mtp-thread.h"
+#include "pragha-mtp-thread-data.h"
 
 #define PRAGHA_TYPE_MTP_PLUGIN         (pragha_mtp_plugin_get_type ())
 #define PRAGHA_MTP_PLUGIN(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), PRAGHA_TYPE_MTP_PLUGIN, PraghaMtpPlugin))
@@ -67,15 +69,17 @@ struct _PraghaMtpPluginPrivate {
 
 	PraghaDeviceClient *device_client;
 
+	PraghaMtpThread    *device_thread;
+
 	guint64             bus_hooked;
 	guint64             device_hooked;
-	GUdevDevice        *u_device;
-	LIBMTP_mtpdevice_t *mtp_device;
 
 	GCancellable       *cancellable;
 
 	gchar              *friend_name;
 	gchar              *device_id;
+
+	PraghaMtpThreadDownloadData *dw_data;
 
 	GHashTable         *tracks_table;
 
@@ -93,13 +97,19 @@ PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_MTP_PLUGIN,
                         PraghaMtpPlugin,
                         pragha_mtp_plugin)
 
+
 /*
- * Prototypes
+ * Forward declarations
  */
 static void
-pragha_mtp_plugin_remove_menu_action (PraghaMtpPlugin *plugin);
+pragha_mtp_plugin_append_menu_action (PraghaMtpPlugin *plugin);
+
 static void
-pragha_mtp_clear_hook_device (PraghaMtpPlugin *plugin);
+pragha_mtp_plugin_remove_menu_action (PraghaMtpPlugin *plugin);
+
+static void
+pragha_mtp_detected_ask_action (PraghaMtpPlugin *plugin);
+
 
 /*
  * Menu Actions.
@@ -194,225 +204,79 @@ static const gchar *mtp_menu_ui = \
 	"	</menu>" \
 	"</interface>";
 
-/*
- * Basic Cache..
- */
-static void
-pragha_mtp_plugin_add_track_db (gpointer key,
-                                gpointer value,
-                                gpointer user_data)
-{
-	PraghaMusicobject *mobj = value;
-	PraghaDatabase *database = user_data;
-
-	pragha_database_add_new_musicobject (database, mobj);
-
-	pragha_process_gtk_events ();
-}
-
-static void
-pragha_mtp_save_cache (PraghaMtpPlugin *plugin)
-{
-	PraghaDatabase *database;
-	PraghaMtpPluginPrivate *priv = plugin->priv;
-
-	database = pragha_database_get ();
-	g_hash_table_foreach (priv->tracks_table,
-	                      pragha_mtp_plugin_add_track_db,
-	                      database);
-	g_object_unref (database);
-}
-
-static void
-pragha_mtp_cache_clear (PraghaMtpPlugin *plugin)
-{
-	PraghaMtpPluginPrivate *priv = plugin->priv;
-
-	g_hash_table_remove_all (priv->tracks_table);
-}
-
-static void
-pragha_mtp_cache_insert_track (PraghaMtpPlugin *plugin, PraghaMusicobject *mobj)
-{
-	PraghaMtpPluginPrivate *priv = plugin->priv;
-
-	const gchar *file = pragha_musicobject_get_file(mobj);
-
-	if (string_is_empty(file))
-		return;
-
-	g_hash_table_insert (priv->tracks_table,
-	                     g_strdup(file),
-	                     mobj);
-}
-
-static void
-pragha_mtp_plugin_cache_storage_recursive (LIBMTP_mtpdevice_t *device,
-                                           guint               storageid,
-                                           gint                leaf,
-                                           PraghaMtpPlugin    *plugin)
-{
-	PraghaMusicobject *mobj = NULL;
-	LIBMTP_file_t *folders = NULL, *lfolder = NULL, *audios = NULL, *laudio = NULL;
-	LIBMTP_file_t *files, *file, *tmp;
-	gboolean nomedia = FALSE;
-
-	PraghaMtpPluginPrivate *priv = plugin->priv;
-
-	files = LIBMTP_Get_Files_And_Folders (device,
-	                                      storageid,
-	                                      leaf);
-
-	if (files == NULL)
-		return;
-
-	file = files;
-	while (file != NULL)
-	{
-		if (g_cancellable_is_cancelled (priv->cancellable))
-			break;
-
-		if (file->filetype == LIBMTP_FILETYPE_FOLDER)
-		{
-			if (folders == NULL)
-				folders = lfolder = file;
-			else {
-				lfolder->next = file;
-				lfolder = lfolder->next;
-			}
-		}
-		else if (LIBMTP_FILETYPE_IS_AUDIO(file->filetype))
-		{
-			if (audios == NULL)
-				audios = laudio = file;
-			else {
-				laudio->next = file;
-				laudio = laudio->next;
-			}
-		}
-		else {
-			if (g_ascii_strcasecmp(file->filename, ".nomedia") == 0) {
-				nomedia = TRUE;
-				break;
-			}
-		}
-
-		pragha_process_gtk_events ();
-
-		file = file->next;
-	}
-
-	if (nomedia == FALSE)
-	{
-		/* Add folders recursively */
-		file = folders;
-		while (file != NULL) {
-			pragha_mtp_plugin_cache_storage_recursive (device, storageid, file->item_id, plugin);
-			pragha_process_gtk_events ();
-			file = file->next;
-		}
-
-		/* Add music files */
-		file = audios;
-		while (file != NULL)
-		{
-			LIBMTP_track_t *track;
-			track = LIBMTP_Get_Trackmetadata(device, file->item_id);
-			if (G_LIKELY(track))
-			{
-				mobj = pragha_musicobject_new_from_mtp_track (track);
-				if (G_LIKELY(mobj))
-				{
-					pragha_musicobject_set_provider (mobj, priv->device_id);
-					pragha_mtp_cache_insert_track (plugin, mobj);
-				}
-				LIBMTP_destroy_track_t(track);
-			}
-			pragha_process_gtk_events ();
-			file = file->next;
-		}
-	}
-
-	/* Clean memory. */
-	file = files;
-	while (file != NULL)
-	{
-		tmp = file;
-		file = file->next;
-		LIBMTP_destroy_file_t(tmp);
-	}
-}
 
 /*
- * Menu actions
+ *  Some utils.
  */
-static void
-pragha_mtp_action_send_to_device (GtkAction *action, PraghaMtpPlugin *plugin)
-{
-	PraghaPlaylist *playlist;
-	PraghaDatabase *database;
-	PraghaDatabaseProvider *provider;
-	PraghaMusicobject *mobj = NULL;
-	LIBMTP_track_t *mtp_track;
-	LIBMTP_error_t *stack;
-	const gchar *file;
-	gint ret;
 
+static void
+pragha_mtp_clear_hook_device (PraghaMtpPlugin *plugin)
+{
 	PraghaMtpPluginPrivate *priv = plugin->priv;
 
-	playlist = pragha_application_get_playlist (priv->pragha);
-	mobj = pragha_playlist_get_selected_musicobject (playlist);
+	if (priv->bus_hooked)
+		priv->bus_hooked = 0;
 
-	if (!mobj)
-		return;
+	if (priv->device_hooked)
+		priv->device_hooked = 0;
 
-	file = pragha_musicobject_get_file (mobj);
-	mtp_track = mtp_track_new_from_pragha_musicobject (priv->mtp_device, mobj);
-
-	ret = LIBMTP_Send_Track_From_File (priv->mtp_device, file, mtp_track, NULL, NULL);
-
-	if (ret != 0) {
-		stack = LIBMTP_Get_Errorstack (priv->mtp_device);
-		CDEBUG(DBG_INFO, "unable to send track: %s", stack->error_text);
-
-		if (stack->errornumber == LIBMTP_ERROR_STORAGE_FULL) {
-			CDEBUG(DBG_PLUGIN, "No space left on MTP device");
-		}
-		else {
-			CDEBUG(DBG_PLUGIN, "Unable to send file to MTP device: %s", file);
-		}
-
-		LIBMTP_Dump_Errorstack(priv->mtp_device);
-		LIBMTP_Clear_Errorstack(priv->mtp_device);
-	}
-	else
-	{
-		mobj = pragha_musicobject_new_from_mtp_track (mtp_track);
-		if (G_LIKELY(mobj))
-		{
-			pragha_musicobject_set_provider (mobj, priv->device_id);
-
-			database = pragha_database_get ();
-			pragha_database_add_new_musicobject (database, mobj);
-			g_object_unref (database);
-
-			provider = pragha_database_provider_get ();
-			pragha_provider_update_done (provider);
-			g_object_unref (provider);
-		}
-
-		CDEBUG(DBG_INFO, "Added %s to MTP device", file);
+	if (priv->device_id) {
+		g_free (priv->device_id);
+		priv->device_id = NULL;
 	}
 
-	LIBMTP_destroy_track_t(mtp_track);
+	if (priv->friend_name) {
+		g_free (priv->friend_name);
+		priv->friend_name = NULL;
+	}
 }
 
-static void
-pragha_mtp_action_disconnect_device (GtkAction *action, PraghaMtpPlugin *plugin)
+
+/*
+ * MTP thread responses and show the results to the user.
+ */
+
+static gboolean
+pragha_mtp_plugin_device_opened_idle (PraghaMtpThreadOpenedData *data)
+{
+	PraghaAppNotification *notification;
+	const gchar *device_id = NULL, *friendly_name;
+
+	PraghaMtpPlugin *plugin = PRAGHA_MTP_PLUGIN(pragha_mtp_thread_opened_data_get_user_data (data));
+	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
+
+	device_id = pragha_mtp_thread_opened_data_get_device_id (data);
+	friendly_name = pragha_mtp_thread_opened_data_get_friendly_name (data);
+
+	if (!device_id) {
+		CDEBUG(DBG_INFO, "Mtp plugin fail to open device...");
+		notification = pragha_app_notification_new (_("MTP Device"), _("Failed to open the MTP device. Try again."));
+		pragha_app_notification_show (notification);
+		pragha_mtp_thread_opened_data_free (data);
+		pragha_mtp_clear_hook_device (plugin);
+
+		return FALSE;
+	}
+
+	priv->device_id = g_strdup (device_id);
+	priv->friend_name = g_strdup (friendly_name);
+
+	pragha_mtp_detected_ask_action (plugin);
+
+	pragha_mtp_thread_opened_data_free (data);
+
+	return FALSE;
+}
+
+static gboolean
+pragha_mtp_plugin_close_device_idle (gpointer user_data)
 {
 	PraghaDatabaseProvider *provider;
 	PraghaMusicEnum *enum_map = NULL;
 
+	PraghaMtpPlugin *plugin = PRAGHA_MTP_PLUGIN(user_data);
 	PraghaMtpPluginPrivate *priv = plugin->priv;
 
 	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
@@ -433,22 +297,167 @@ pragha_mtp_action_disconnect_device (GtkAction *action, PraghaMtpPlugin *plugin)
 	/* Remove cache and clear the rest */
 
 	pragha_mtp_plugin_remove_menu_action (plugin);
-	pragha_mtp_cache_clear (plugin);
 	pragha_mtp_clear_hook_device (plugin);
+
+	return FALSE;
 }
 
-static void
-pragha_mtp_action_show_device_info (GtkAction *action, PraghaMtpPlugin *plugin)
+static gboolean
+pragha_mtp_plugin_tracklist_progress_idle (PraghaMtpThreadProgressData *data)
 {
+	gchar *description = NULL;
+	guint progress, total;
+
+	PraghaMtpPlugin *plugin = PRAGHA_MTP_PLUGIN(pragha_mtp_thread_progress_data_get_user_data (data));
+	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
+
+	progress = pragha_mtp_thread_progress_data_get_progress (data);
+	total = pragha_mtp_thread_progress_data_get_total (data);
+
+	CDEBUG(DBG_PLUGIN, "Tracklist progress: %i of %i", progress, total);
+
+	description = g_strdup_printf(_("%i files found in the %s device"), progress, priv->friend_name);
+	pragha_background_task_widget_set_description (priv->task_widget, description);
+	g_free(description);
+
+	pragha_mtp_thread_progress_data_free(data);
+
+	return FALSE;
+}
+
+static gboolean
+pragha_mtp_plugin_tracklist_loaded_idle (PraghaMtpThreadTracklistData *data)
+{
+	PraghaBackgroundTaskBar *taskbar;
+	PraghaDatabase *database;
+	PraghaDatabaseProvider *provider;
+	PraghaAppNotification *notification;
+	PraghaMusicobject *mobj;
+	GList *list, *l;
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
+
+	PraghaMtpPlugin *plugin = PRAGHA_MTP_PLUGIN(pragha_mtp_thread_tracklist_data_get_user_data (data));
+	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	list = pragha_mtp_thread_tracklist_data_get_list (data);
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin tracklist has %i tracks", g_list_length (list));
+
+	/* Save to database
+	 * TODO: Merge changes instead replace songs.
+	 */
+
+	database = pragha_database_get ();
+	provider = pragha_database_provider_get ();
+	if (pragha_database_find_provider (database, priv->device_id)) {
+		pragha_provider_forget_songs (provider, priv->device_id);
+	}
+	else {
+		pragha_provider_add_new (provider,
+		                         priv->device_id,
+		                         "MTP",
+		                         priv->friend_name,
+		                         "multimedia-player");
+	}
+
+	for (l = list; l != NULL; l = l->next) {
+		mobj = PRAGHA_MUSICOBJECT(l->data);
+		if (G_LIKELY(mobj))
+			pragha_database_add_new_musicobject (database, mobj);
+	}
+
+	/* Inform to user */
+
+	taskbar = pragha_background_task_bar_get ();
+	pragha_background_task_bar_remove_widget (taskbar, GTK_WIDGET(priv->task_widget));
+	g_object_unref(G_OBJECT(taskbar));
+
+	notification = pragha_app_notification_new (_("MTP Device"), _("You can interact with your MTP device"));
+	pragha_app_notification_show (notification);
+
+	pragha_mtp_plugin_append_menu_action (plugin);
+
+	pragha_provider_set_visible (provider, priv->device_id, TRUE);
+	pragha_provider_update_done (provider);
+
+	/* Clean */
+
+	g_object_unref (database);
+	g_object_unref (provider);
+
+	pragha_mtp_thread_tracklist_data_free(data);
+
+	return FALSE;
+}
+
+static gboolean
+pragha_mtp_plugin_device_download_idle (PraghaMtpThreadDownloadData *data)
+{
+	PraghaMtpPlugin *plugin = PRAGHA_MTP_PLUGIN(pragha_mtp_thread_download_data_get_user_data (data));
+	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
+
+	priv->dw_data = data;
+
+	return FALSE;
+}
+
+static gboolean
+pragha_mtp_plugin_send_to_device_idle (PraghaMtpThreadUploadData *data)
+{
+	PraghaAppNotification *notification;
+	const gchar *error;
+
+	PraghaMtpPlugin *plugin = PRAGHA_MTP_PLUGIN(pragha_mtp_thread_upload_data_get_user_data (data));
+	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
+
+	error = pragha_mtp_thread_upload_data_get_error (data);
+	if (error) {
+		notification = pragha_app_notification_new (priv->friend_name, _("Failed to send the song to the device."));
+		pragha_app_notification_show (notification);
+		pragha_mtp_thread_upload_data_free (data);
+		return FALSE;
+	}
+
+	//TODO: Update cache ang gui...
+
+	pragha_mtp_thread_upload_data_free (data);
+
+	return FALSE;
+}
+
+static gboolean
+pragha_mtp_action_show_device_info_idle (PraghaMtpThreadStatsData *data)
+{
+	PraghaAppNotification *notification;
 	PraghaHeader *header;
 	GtkWidget *dialog, *table, *label;
-	LIBMTP_devicestorage_t *storage;
-	gchar *storage_size = NULL;
-	gchar *storage_free = NULL;
-	gchar *storage_string = NULL;
+	gchar *storage_size = NULL, *storage_free = NULL, *storage_string = NULL;
+	guint64 storage_free_space, storage_capacity;
+	guint8 current_battery_level = 0, maximum_battery_level = 0;
+	gchar *battery_string;
 	guint row = 0;
+	const gchar *error;
 
+	PraghaMtpPlugin *plugin = pragha_mtp_thread_stats_data_get_user_data (data);
 	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
+
+	error = pragha_mtp_thread_stats_data_get_error (data);
+	if (error) {
+		CDEBUG(DBG_INFO, "Mtp plugin get stats hass some error: %s", error);
+		notification = pragha_app_notification_new (priv->friend_name, _("We could not get the device information."));
+		pragha_app_notification_show (notification);
+		pragha_mtp_thread_stats_data_free (data);
+		return FALSE;
+	}
 
 	dialog = gtk_dialog_new_with_buttons (priv->friend_name,
 	                                      GTK_WINDOW(pragha_application_get_window (priv->pragha)),
@@ -462,16 +471,19 @@ pragha_mtp_action_show_device_info (GtkAction *action, PraghaMtpPlugin *plugin)
 
 	table = pragha_hig_workarea_table_new ();
 
-	LIBMTP_Get_Storage (priv->mtp_device, LIBMTP_STORAGE_SORTBY_FREESPACE);
-	for (storage = priv->mtp_device->storage; storage != 0; storage = storage->next) {
-		pragha_hig_workarea_table_add_section_title (table, &row, storage->StorageDescription);
+	if (pragha_mtp_thread_stats_data_get_first_storage_description(data)) {
+		pragha_hig_workarea_table_add_section_title (table, &row,
+			pragha_mtp_thread_stats_data_get_first_storage_description(data));
 
-		storage_free = g_format_size (storage->FreeSpaceInBytes);
-		storage_size = g_format_size (storage->MaxCapacity);
+		storage_free_space = pragha_mtp_thread_stats_data_get_first_storage_free_space (data);
+		storage_capacity = pragha_mtp_thread_stats_data_get_first_storage_capacity (data);
+
+		storage_free = g_format_size (storage_free_space);
+		storage_size = g_format_size (storage_capacity);
 
 		storage_string = g_strdup_printf (_("%s free of %s (%d%% used)"),
 		                                  storage_free, storage_size,
-		                                  (gint) ((storage->MaxCapacity - storage->FreeSpaceInBytes) * 100 / storage->MaxCapacity));
+		                                  (gint) ((storage_capacity - storage_free_space) * 100 / storage_capacity));
 
 		label = gtk_label_new_with_mnemonic (storage_string);
 
@@ -482,6 +494,44 @@ pragha_mtp_action_show_device_info (GtkAction *action, PraghaMtpPlugin *plugin)
 		g_free (storage_string);
 	}
 
+	if (pragha_mtp_thread_stats_data_get_second_storage_description(data)) {
+		pragha_hig_workarea_table_add_section_title (table, &row,
+			pragha_mtp_thread_stats_data_get_second_storage_description(data));
+
+		storage_free_space = pragha_mtp_thread_stats_data_get_second_storage_free_space (data);
+		storage_capacity = pragha_mtp_thread_stats_data_get_second_storage_capacity (data);
+
+		storage_free = g_format_size (storage_free_space);
+		storage_size = g_format_size (storage_capacity);
+
+		storage_string = g_strdup_printf (_("%s free of %s (%d%% used)"),
+		                                  storage_free, storage_size,
+		                                  (gint) ((storage_capacity - storage_free_space) * 100 / storage_capacity));
+
+		label = gtk_label_new_with_mnemonic (storage_string);
+
+		pragha_hig_workarea_table_add_wide_control (table, &row, label);
+
+		g_free (storage_free);
+		g_free (storage_size);
+		g_free (storage_string);
+	}
+
+	if (pragha_mtp_thread_stats_data_get_maximun_battery_level (data)) {
+		pragha_hig_workarea_table_add_section_title (table, &row, _("Battery level"));
+
+		current_battery_level = pragha_mtp_thread_stats_data_get_current_battery_level (data);
+		maximum_battery_level = pragha_mtp_thread_stats_data_get_maximun_battery_level (data);
+
+		battery_string = g_strdup_printf (_("%d%%"), (int) ((float)current_battery_level / (float)maximum_battery_level * 100));
+
+		label = gtk_label_new_with_mnemonic (battery_string);
+
+		pragha_hig_workarea_table_add_wide_control (table, &row, label);
+
+		g_free (battery_string);
+	}
+
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), GTK_WIDGET(header), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), table, TRUE, TRUE, 0);
 
@@ -489,11 +539,305 @@ pragha_mtp_action_show_device_info (GtkAction *action, PraghaMtpPlugin *plugin)
 	                  G_CALLBACK(gtk_widget_destroy), NULL);
 
 	gtk_widget_show_all (dialog);
+
+	pragha_mtp_thread_stats_data_free (data);
+
+	return FALSE;
+}
+
+
+/*
+ * User actions.
+ */
+
+static void
+pragha_mtp_detected_ask_action_response (GtkWidget *dialog,
+                                         gint       response,
+                                         gpointer   user_data)
+{
+	PraghaBackgroundTaskBar *taskbar;
+
+	PraghaMtpPlugin *plugin = user_data;
+	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
+
+	/* Destroy first due cache track is slow in main thread */
+	gtk_widget_destroy (dialog);
+
+	switch (response)
+	{
+		case PRAGHA_DEVICE_RESPONSE_PLAY:
+			taskbar = pragha_background_task_bar_get ();
+			pragha_background_task_bar_prepend_widget (taskbar, GTK_WIDGET(priv->task_widget));
+			g_object_unref(G_OBJECT(taskbar));
+
+			pragha_mtp_thread_get_track_list (priv->device_thread,
+			                                  G_SOURCE_FUNC (pragha_mtp_plugin_tracklist_loaded_idle),
+			                                  G_SOURCE_FUNC (pragha_mtp_plugin_tracklist_progress_idle),
+			                                  plugin);
+			break;
+		case PRAGHA_DEVICE_RESPONSE_NONE:
+		default:
+			pragha_mtp_clear_hook_device (plugin);
+			break;
+	}
+}
+
+static void
+pragha_mtp_detected_ask_action (PraghaMtpPlugin *plugin)
+{
+	GtkWidget *dialog;
+	gchar *message = NULL;
+
+	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
+
+	message = g_strdup_printf (_("Do you want to manage the “%s” device with Pragha?"), priv->friend_name);
+
+	dialog = pragha_gudev_dialog_new (pragha_application_get_window (priv->pragha),
+	                                  _("MTP Device"), "multimedia-player",
+	                                  _("An MTP device was detected"), message,
+	                                  _("Manage device"), PRAGHA_DEVICE_RESPONSE_PLAY);
+
+	g_free(message);
+
+	g_signal_connect (G_OBJECT (dialog), "response",
+	                  G_CALLBACK (pragha_mtp_detected_ask_action_response), plugin);
+
+	priv->ask_dialog = dialog;
+
+	gtk_widget_show_all (dialog);
+}
+
+static void
+pragha_mtp_action_send_to_device (GtkAction *action, PraghaMtpPlugin *plugin)
+{
+	PraghaPlaylist *playlist;
+	PraghaMusicobject *mobj = NULL;
+
+	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
+
+	playlist = pragha_application_get_playlist (priv->pragha);
+	mobj = pragha_playlist_get_selected_musicobject (playlist);
+
+	if (!mobj)
+		return;
+
+	pragha_mtp_thread_upload_track (priv->device_thread,
+	                                mobj,
+	                                G_SOURCE_FUNC (pragha_mtp_plugin_send_to_device_idle),
+	                                plugin);
+}
+
+static void
+pragha_mtp_action_disconnect_device (GtkAction *action, PraghaMtpPlugin *plugin)
+{
+	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
+
+	pragha_mtp_thread_close_device (priv->device_thread,
+	                                pragha_mtp_plugin_close_device_idle,
+	                                plugin);
+}
+
+static void
+pragha_mtp_action_show_device_info (GtkAction *action, PraghaMtpPlugin *plugin)
+{
+	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
+
+	pragha_mtp_thread_get_stats (priv->device_thread,
+	                             G_SOURCE_FUNC (pragha_mtp_action_show_device_info_idle),
+	                             plugin);
 }
 
 /*
- * MTP plugin.
+ *  PraghaBackend signals to playback.
  */
+static void
+pragha_mtp_plugin_clean_source (PraghaBackend *backend, gpointer user_data)
+{
+	PraghaMusicobject *mobj;
+	gchar *tmp_filename = NULL;
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
+
+	mobj = pragha_backend_get_musicobject (backend);
+	if (!pragha_musicobject_is_mtp_file (mobj))
+		return;
+
+	tmp_filename = pragha_mtp_plugin_get_temp_filename(mobj);
+	g_unlink (tmp_filename);
+	g_free (tmp_filename);
+}
+
+static void
+pragha_mtp_plugin_prepare_source (PraghaBackend *backend, gpointer user_data)
+{
+	PraghaAppNotification *notification;
+	PraghaMusicobject *mobj;
+	gchar *tmp_filename = NULL, *uri = NULL;
+	const gchar *error_msg = NULL;
+	gint track_id;
+
+	PraghaMtpPlugin *plugin = user_data;
+	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
+
+	mobj = pragha_backend_get_musicobject (backend);
+	if (!pragha_musicobject_is_mtp_file (mobj))
+		return;
+
+	tmp_filename = pragha_mtp_plugin_get_temp_filename(mobj);
+	track_id = pragha_mtp_plugin_get_track_id(mobj);
+
+	pragha_mtp_thread_download_track (priv->device_thread,
+	                                  track_id,
+	                                  tmp_filename,
+	                                  G_SOURCE_FUNC (pragha_mtp_plugin_device_download_idle),
+	                                  NULL,
+	                                  plugin);
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin waiting until download track done.");
+
+	// FIXME: Maybe an ugly hack to syncronize download.
+	while (priv->dw_data == NULL) {
+		pragha_process_gtk_events ();
+	}
+
+	error_msg = pragha_mtp_thread_download_data_get_error(priv->dw_data);
+	if (error_msg) {
+		CDEBUG(DBG_INFO, "Mtp plugin download track with some error: %s", error_msg);
+		notification = pragha_app_notification_new (priv->friend_name, _("Failed to download the song from device."));
+		pragha_app_notification_show (notification);
+	}
+	else {
+		CDEBUG(DBG_INFO, "Mtp plugin download done. Try to reproduce it: %s", tmp_filename);
+		uri = g_filename_to_uri (tmp_filename, NULL, NULL);
+		pragha_backend_set_playback_uri (backend, uri);
+		g_free(uri);
+	}
+
+	pragha_mtp_thread_download_data_free(priv->dw_data);
+	g_free (tmp_filename);
+
+	// Download and playback done.
+	priv->dw_data = NULL;
+}
+
+
+/*
+ * PraghaDevices signals to handle device conections
+ */
+static void
+pragha_mtp_plugin_device_added (PraghaDeviceClient *device_client,
+                                PraghaDeviceType    device_type,
+                                GUdevDevice        *u_device,
+                                gpointer            user_data)
+{
+	PraghaAppNotification *notification;
+	LIBMTP_raw_device_t *raw_devices, *raw_device = NULL;
+	gint busnum = 0, devnum = 0, num_raw_devices = 0, i = 0;
+
+	PraghaMtpPlugin *plugin = user_data;
+	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
+
+	if (priv->device_hooked  != 0)
+		return;
+
+	if (device_type != PRAGHA_DEVICE_MTP)
+		return;
+
+	/* Get devices.. */
+
+	if (LIBMTP_Detect_Raw_Devices (&raw_devices, &num_raw_devices) != LIBMTP_ERROR_NONE)
+		return;
+
+	busnum = g_udev_device_get_property_as_int (u_device, "BUSNUM");
+	devnum = pragha_gudev_get_property_as_int (u_device, "DEVNUM", 10);
+
+	for (i = 0; i < num_raw_devices; i++)
+	{
+		if (raw_devices[i].bus_location == busnum &&
+		    raw_devices[i].devnum == devnum)
+		{
+			raw_device = &raw_devices[i];
+			break;
+		}
+	}
+
+	if (!raw_device) {
+		CDEBUG(DBG_PLUGIN, "Mtp plugin no mach any mtp device with bus, testing first.");
+		raw_device = &raw_devices[0];
+	}
+
+	if (!raw_device) {
+		g_free (raw_devices);
+		return;
+	}
+
+	notification = pragha_app_notification_new (_("MTP Device"), _("An MTP device was detected"));
+	pragha_app_notification_show (notification);
+
+	/* Partial hook device */
+
+	priv->bus_hooked = busnum;
+	priv->device_hooked = devnum;
+
+	/* Open device */
+
+	pragha_mtp_thread_open_device (priv->device_thread,
+	                               raw_device,
+	                               G_SOURCE_FUNC (pragha_mtp_plugin_device_opened_idle),
+	                               plugin);
+
+	g_free (raw_devices);
+}
+
+void
+pragha_mtp_plugin_device_removed (PraghaDeviceClient *device_client,
+                                  PraghaDeviceType    device_type,
+                                  GUdevDevice        *u_device,
+                                  gpointer            user_data)
+{
+	guint64 busnum = 0;
+	guint64 devnum = 0;
+
+	PraghaMtpPlugin *plugin = PRAGHA_MTP_PLUGIN(user_data);
+	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
+
+	busnum = g_udev_device_get_property_as_uint64(u_device, "BUSNUM");
+	devnum = pragha_gudev_get_property_as_int (u_device, "DEVNUM", 10);
+
+	if (busnum == priv->bus_hooked && devnum == priv->device_hooked)
+	{
+		if (priv->ask_dialog) {
+			gtk_widget_destroy (priv->ask_dialog);
+			priv->ask_dialog = NULL;
+		}
+
+		pragha_mtp_thread_close_device (priv->device_thread,
+		                                pragha_mtp_plugin_close_device_idle,
+		                                plugin);
+	}
+}
+
+
+/*
+ *  PraghaMtpPlugin implementation.
+ */
+
 static void
 pragha_mtp_plugin_append_menu_action (PraghaMtpPlugin *plugin)
 {
@@ -503,6 +847,8 @@ pragha_mtp_plugin_append_menu_action (PraghaMtpPlugin *plugin)
 	GActionMap *map;
 
 	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
 
 	/* Menubar tools. */
 
@@ -555,57 +901,14 @@ pragha_mtp_plugin_append_menu_action (PraghaMtpPlugin *plugin)
 	priv->action_group_playlist = action_group;
 }
 
-void
-pragha_mtp_plugin_clean_source (PraghaBackend *backend, gpointer user_data)
-{
-	PraghaMusicobject *mobj;
-	gchar *tmp_filename = NULL;
-
-	mobj = pragha_backend_get_musicobject (backend);
-	if (!pragha_musicobject_is_mtp_file (mobj))
-		return;
-
-	tmp_filename = pragha_mtp_plugin_get_temp_filename(mobj);
-	g_unlink (tmp_filename);
-	g_free (tmp_filename);
-}
-
-static void
-pragha_mtp_plugin_prepare_source (PraghaBackend *backend, gpointer user_data)
-{
-	PraghaMusicobject *mobj;
-	gchar *tmp_filename = NULL, *uri = NULL;
-	gint track_id, ret = -1;
-
-	PraghaMtpPlugin *plugin = user_data;
-	PraghaMtpPluginPrivate *priv = plugin->priv;
-
-	mobj = pragha_backend_get_musicobject (backend);
-	if (!pragha_musicobject_is_mtp_file (mobj))
-		return;
-
-	tmp_filename = pragha_mtp_plugin_get_temp_filename(mobj);
-	track_id = pragha_mtp_plugin_get_track_id(mobj);
-
-	ret = LIBMTP_Get_Track_To_File (priv->mtp_device,
-	                                track_id, tmp_filename,
-	                                NULL, NULL);
-
-	if (ret == 0) {
-		uri = g_filename_to_uri (tmp_filename, NULL, NULL);
-		pragha_backend_set_playback_uri (backend, uri);
-		g_free(uri);
-	}
-	g_free (tmp_filename);
-}
-
-
 static void
 pragha_mtp_plugin_remove_menu_action (PraghaMtpPlugin *plugin)
 {
 	PraghaPlaylist *playlist;
 
 	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
 
 	if (!priv->merge_id_menu)
 		return;
@@ -630,286 +933,6 @@ pragha_mtp_plugin_remove_menu_action (PraghaMtpPlugin *plugin)
 }
 
 static void
-pragha_mtp_plugin_cache_tracks (PraghaMtpPlugin *plugin)
-{
-	PraghaBackgroundTaskBar *taskbar;
-	PraghaDatabaseProvider *provider;
-	LIBMTP_devicestorage_t *storage;
-	GSList *provider_list = NULL;
-	gchar *description = NULL;
-
-	PraghaMtpPluginPrivate *priv = plugin->priv;
-
-	provider = pragha_database_provider_get ();
-	provider_list = pragha_database_provider_get_list_by_type (provider, "MTP");
-
-	if (pragha_string_list_is_not_present (provider_list, priv->device_id))
-	{
-		/* Add the taks manager */
-
-		taskbar = pragha_background_task_bar_get ();
-		pragha_background_task_bar_prepend_widget (taskbar, GTK_WIDGET(priv->task_widget));
-		g_object_unref(G_OBJECT(taskbar));
-
-		description = g_strdup_printf ("%s: %s",
-		                               _("Searching files to analyze"),
-		                               priv->friend_name);
-		pragha_background_task_widget_set_description (priv->task_widget, description);
-		g_free (description);
-		pragha_background_task_widget_set_job_progress (priv->task_widget, 0);
-
-		/* Get music recursively */
-
-		for (storage = priv->mtp_device->storage; storage != 0; storage = storage->next)
-		{
-			if (g_cancellable_is_cancelled (priv->cancellable))
-				break;
-
-			pragha_mtp_plugin_cache_storage_recursive (priv->mtp_device, storage->id, 0xffffffff, plugin);
-		}
-
-		if (!g_cancellable_is_cancelled (priv->cancellable))
-		{
-			/* Add provider */
-
-			pragha_provider_add_new (provider,
-			                         priv->device_id,
-			                         "MTP",
-			                         priv->friend_name,
-			                         "multimedia-player");
-
-			/* Save on database and clear cache */
-
-			pragha_mtp_save_cache (plugin);
-		}
-		else
-		{
-			g_cancellable_reset (priv->cancellable);
-		}
-
-		/* Clear cache */
-
-		pragha_mtp_cache_clear (plugin);
-
-		/* Remove task widget */
-
-		taskbar = pragha_background_task_bar_get ();
-		pragha_background_task_bar_remove_widget (taskbar, GTK_WIDGET(priv->task_widget));
-		g_object_unref(G_OBJECT(taskbar));
-
-	}
-	g_slist_free_full (provider_list, g_free);
-
-	/* Update library view. */
-
-	pragha_provider_set_visible (provider, priv->device_id, TRUE);
-	pragha_provider_update_done (provider);
-	g_object_unref (provider);
-}
-
-static void
-pragha_mtp_clear_hook_device (PraghaMtpPlugin *plugin)
-{
-	PraghaMtpPluginPrivate *priv = plugin->priv;
-
-	if (priv->bus_hooked)
-		priv->bus_hooked = 0;
-	if (priv->device_hooked)
-		priv->device_hooked = 0;
-
-	if (priv->u_device) {
-		g_object_unref (priv->u_device);
-		priv->u_device = NULL;
-	}
-	if (priv->mtp_device) {
-		LIBMTP_Release_Device (priv->mtp_device);
-		priv->mtp_device = NULL;
-	}
-
-	if (priv->friend_name) {
-		g_free (priv->friend_name);
-		priv->friend_name = NULL;
-	}
-	if (priv->device_id) {
-		g_free (priv->device_id);
-		priv->device_id = NULL;
-	}
-}
-
-static void
-pragha_mtp_detected_ask_action_response (GtkWidget *dialog,
-                                         gint       response,
-                                         gpointer   user_data)
-{
-	PraghaMtpPlugin *plugin = user_data;
-
-	/* Destroy first due cache track is slow in main thread */
-	gtk_widget_destroy (dialog);
-
-	switch (response)
-	{
-		case PRAGHA_DEVICE_RESPONSE_PLAY:
-			pragha_mtp_plugin_cache_tracks (plugin);
-			pragha_mtp_plugin_append_menu_action (plugin);
-			break;
-		case PRAGHA_DEVICE_RESPONSE_NONE:
-		default:
-			pragha_mtp_clear_hook_device (plugin);
-			break;
-	}
-}
-
-static void
-pragha_mtp_detected_ask_action (PraghaMtpPlugin *plugin)
-{
-	GtkWidget *dialog;
-	gchar *message = NULL;
-
-	PraghaMtpPluginPrivate *priv = plugin->priv;
-
-	message = g_strdup_printf (_("Do you want to manage the “%s” device with Pragha?"), priv->friend_name);
-
-	dialog = pragha_gudev_dialog_new (pragha_application_get_window (priv->pragha),
-	                                  _("MTP Device"), "multimedia-player",
-	                                  _("An MTP device was detected"), message,
-	                                  _("Manage device"), PRAGHA_DEVICE_RESPONSE_PLAY);
-
-	g_free(message);
-
-	g_signal_connect (G_OBJECT (dialog), "response",
-	                  G_CALLBACK (pragha_mtp_detected_ask_action_response), plugin);
-
-	priv->ask_dialog = dialog;
-
-	gtk_widget_show_all (dialog);
-}
-
-static void
-pragha_mtp_plugin_device_added (PraghaDeviceClient *device_client,
-                                PraghaDeviceType    device_type,
-                                GUdevDevice        *u_device,
-                                gpointer            user_data)
-{
-	LIBMTP_raw_device_t *device_list, *raw_device = NULL;
-	LIBMTP_mtpdevice_t *mtp_device;
-	LIBMTP_devicestorage_t *storage;
-	gint busnum = 0, devnum = 0, numdevs = 0, i = 0;
-	guint64 freeSpace = 0;
-
-	PraghaMtpPlugin *plugin = user_data;
-	PraghaMtpPluginPrivate *priv = plugin->priv;
-
-	if (priv->mtp_device != NULL)
-		return;
-
-	if (device_type != PRAGHA_DEVICE_MTP)
-		return;
-
-	/* Get devices.. */
-
-	if (LIBMTP_Detect_Raw_Devices (&device_list, &numdevs) != LIBMTP_ERROR_NONE)
-		return;
-
-	busnum = g_udev_device_get_property_as_int (u_device, "BUSNUM");
-	devnum = pragha_gudev_get_property_as_int (u_device, "DEVNUM", 10);
-
-	for (i = 0; i < numdevs; i++) {
-		if (device_list[i].bus_location == busnum &&
-		    device_list[i].devnum == devnum) {
-			raw_device = &device_list[i];
-			break;
-		}
-	}
-
-	if (!raw_device) {
-		g_warning("No mach any mtp device with bus, testing first.");
-		raw_device = &device_list[0];
-	}
-
-	if (!raw_device) {
-		g_free (device_list);
-		return;
-	}
-
-	mtp_device = LIBMTP_Open_Raw_Device_Uncached (raw_device);
-	if (!LIBMTP_Get_Storage (mtp_device, LIBMTP_STORAGE_SORTBY_FREESPACE)) {
-		LIBMTP_Dump_Errorstack (mtp_device);
-		LIBMTP_Clear_Errorstack (mtp_device);
-	}
-
-	for (storage = mtp_device->storage; storage != 0; storage = storage->next) {
-		freeSpace += storage->FreeSpaceInBytes;
-	}
-
-	if (!freeSpace) {
-		LIBMTP_Release_Device (mtp_device);
-		return;
-	}
-
-	/* Hook device */
-
-	priv->bus_hooked = busnum;
-	priv->device_hooked = devnum;
-	priv->u_device = g_object_ref (u_device);
-	priv->mtp_device = mtp_device;
-
-	priv->friend_name = LIBMTP_Get_Friendlyname (priv->mtp_device);
-	if (!priv->friend_name)
-		priv->friend_name = LIBMTP_Get_Modelname (priv->mtp_device);
-	if (!priv->friend_name)
-		priv->friend_name = g_strdup (_("Unknown MTP device"));
-	priv->device_id = LIBMTP_Get_Serialnumber (priv->mtp_device);
-
-	pragha_mtp_detected_ask_action (plugin);
-
-	g_free (device_list);
-}
-
-void
-pragha_mtp_plugin_device_removed (PraghaDeviceClient *device_client,
-                                  PraghaDeviceType    device_type,
-                                  GUdevDevice        *u_device,
-                                  gpointer            user_data)
-{
-	PraghaDatabaseProvider *provider;
-	PraghaMusicEnum *enum_map = NULL;
-	guint64 busnum = 0;
-	guint64 devnum = 0;
-
-	PraghaMtpPlugin *plugin = user_data;
-	PraghaMtpPluginPrivate *priv = plugin->priv;
-
-	if (device_type != PRAGHA_DEVICE_MTP)
-		return;
-
-	if (priv->ask_dialog) {
-		gtk_widget_destroy (priv->ask_dialog);
-		priv->ask_dialog = NULL;
-	}
-
-	busnum = g_udev_device_get_property_as_uint64(u_device, "BUSNUM");
-	devnum = pragha_gudev_get_property_as_int (u_device, "DEVNUM", 10);
-
-	if (busnum == priv->bus_hooked && devnum == priv->device_hooked)
-	{
-		pragha_mtp_plugin_remove_menu_action (plugin);
-
-		provider = pragha_database_provider_get ();
-		pragha_provider_set_visible (provider, priv->device_id, FALSE);
-		pragha_provider_update_done (provider);
-		g_object_unref (provider);
-
-		pragha_mtp_cache_clear (plugin);
-
-		pragha_mtp_clear_hook_device (plugin);
-
-		enum_map = pragha_music_enum_get ();
-		pragha_music_enum_map_remove (enum_map, "MTP");
-		g_object_unref (enum_map);
-	}
-}
-
-static void
 pragha_plugin_activate (PeasActivatable *activatable)
 {
 	PraghaBackend *backend;
@@ -925,6 +948,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                                            g_str_equal,
 	                                            g_free,
 	                                            g_object_unref);
+
+	priv->device_thread = pragha_mtp_thread_new ();
 
 	/* New Task widget */
 
@@ -950,7 +975,6 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	g_signal_connect (G_OBJECT(priv->device_client), "device-removed",
 	                  G_CALLBACK(pragha_mtp_plugin_device_removed), plugin);
 
-	LIBMTP_Init ();
 }
 
 static void
@@ -985,10 +1009,11 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	}
 	g_object_unref (provider);
 
+	g_object_unref (priv->device_thread);
+
 	/* Remove cache and clear the rest */
 
 	pragha_mtp_plugin_remove_menu_action (plugin);
-	pragha_mtp_cache_clear (plugin);
 	pragha_mtp_clear_hook_device (plugin);
 
 	g_hash_table_destroy (priv->tracks_table);

@@ -10,7 +10,11 @@ plugin_LTLIBRARIES = libpmtp.la
 libpmtp_la_SOURCES = \
 	pragha-devices-mtp.c \
 	pragha-mtp-musicobject.c \
-	pragha-mtp-musicobject.h
+	pragha-mtp-musicobject.h \
+	pragha-mtp-thread.c \
+	pragha-mtp-thread.h \
+	pragha-mtp-thread-data.c \
+	pragha-mtp-thread-data.h
 
 libpmtp_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 

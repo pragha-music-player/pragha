@@ -26,7 +26,10 @@
 #endif
 #include <stdlib.h>
 
+#include "pragha-debug.h"
+
 #include "pragha-device-client.h"
+
 
 struct _PraghaDeviceClient {
 	GObject             _parent;
@@ -51,6 +54,35 @@ gchar * gudev_subsystems[] =
 	"usb",
 	NULL,
 };
+
+
+static const gchar *
+device_type_name (PraghaDeviceType type)
+{
+	switch (type) {
+		case PRAGHA_DEVICE_NONE:
+			return ("NONE");
+			break;
+		case PRAGHA_DEVICE_MOUNTABLE:
+			return ("MOUNTABLE");
+			break;
+		case PRAGHA_DEVICE_AUDIO_CD:
+			return ("AUDIO_CD");
+			break;
+		case PRAGHA_DEVICE_EMPTY_AUDIO_CD:
+			return ("EMPTY_AUDIO_CD");
+			break;
+		case PRAGHA_DEVICE_MTP:
+			return ("MTP");
+			break;
+		case PRAGHA_DEVICE_UNKNOWN:
+		default:
+			return ("UNKNOWN");
+			break;
+	}
+	return ("UNKNOWN");
+}
+
 
 /*
  * Publics functions.
@@ -165,9 +197,19 @@ pragha_gudev_get_device_type (GUdevDevice *device)
 static void
 pragha_gudev_device_added (PraghaDeviceClient *client, GUdevDevice *device)
 {
+	guint devnum = 0, busnum = 0;
 	PraghaDeviceType device_type = PRAGHA_DEVICE_UNKNOWN;
 
+	devnum = pragha_gudev_get_property_as_int (device, "DEVNUM", 10);
+	busnum = pragha_gudev_get_property_as_int (device, "BUSNUM", 10);
+
+	if (devnum == 0 || busnum == 0)
+		return;
+
 	device_type = pragha_gudev_get_device_type (device);
+
+	CDEBUG (DBG_INFO, "Device %s added: %i - %i", device_type_name (device_type), busnum, devnum);
+
 	if (device_type != PRAGHA_DEVICE_UNKNOWN)
 		g_signal_emit (client, signals[SIGNAL_DEVICE_ADDED], 0, device_type, device);
 }
@@ -175,9 +217,19 @@ pragha_gudev_device_added (PraghaDeviceClient *client, GUdevDevice *device)
 static void
 pragha_gudev_device_changed (PraghaDeviceClient *client, GUdevDevice *device)
 {
+	guint devnum = 0, busnum = 0;
 	PraghaDeviceType device_type = PRAGHA_DEVICE_UNKNOWN;
 
+	devnum = pragha_gudev_get_property_as_int (device, "DEVNUM", 10);
+	busnum = pragha_gudev_get_property_as_int (device, "BUSNUM", 10);
+
+	if (devnum == 0 || busnum == 0)
+		return;
+
 	device_type = pragha_gudev_get_device_type (device);
+
+	CDEBUG (DBG_INFO, "Device %s changed: %i - %i", device_type_name (device_type), busnum, devnum);
+
 	if (device_type == PRAGHA_DEVICE_AUDIO_CD) {
 		g_signal_emit (client, signals[SIGNAL_DEVICE_ADDED], 0, device_type, device);
 	}
@@ -189,11 +241,21 @@ pragha_gudev_device_changed (PraghaDeviceClient *client, GUdevDevice *device)
 static void
 pragha_gudev_device_removed (PraghaDeviceClient *client, GUdevDevice *device)
 {
+	guint devnum = 0, busnum = 0;
 	PraghaDeviceType device_type = PRAGHA_DEVICE_UNKNOWN;
 
+	devnum = pragha_gudev_get_property_as_int (device, "DEVNUM", 10);
+	busnum = pragha_gudev_get_property_as_int (device, "BUSNUM", 10);
+
+	if (devnum == 0 || busnum == 0)
+		return;
+
 	device_type = pragha_gudev_get_device_type (device);
-	if (device_type != PRAGHA_DEVICE_UNKNOWN)
-		g_signal_emit (client, signals[SIGNAL_DEVICE_REMOVED], 0, device_type, device);
+
+	CDEBUG (DBG_INFO, "Device %s removed: %i - %i", device_type_name (device_type), busnum, devnum);
+
+	// Always emit remove signal since udev does not return enough information to identify the type.
+	g_signal_emit (client, signals[SIGNAL_DEVICE_REMOVED], 0, device_type, device);
 }
 
 static void

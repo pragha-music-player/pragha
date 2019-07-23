@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2012-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2012-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -30,6 +30,7 @@
 
 #include "pragha-mtp-musicobject.h"
 
+
 static gboolean
 is_valid_mime(const gchar *mime, const gchar **mlist)
 {
@@ -40,6 +41,21 @@ is_valid_mime(const gchar *mime, const gchar **mlist)
 		i++;
 	}
 	return FALSE;
+}
+
+static guint
+mtp_track_get_year (const gchar *date)
+{
+	gchar *year_string = NULL;
+	guint year = 0;
+
+	year_string = g_strndup (date, 4);
+	if (year_string) {
+		year = atoi (year_string);
+		g_free (year_string);
+	}
+
+	return year;
 }
 
 LIBMTP_track_t *
@@ -146,6 +162,8 @@ pragha_musicobject_new_from_mtp_track (LIBMTP_track_t *track)
 		pragha_musicobject_set_artist (mobj, track->artist);
 	if (track->album)
 		pragha_musicobject_set_album (mobj, track->album);
+	if (track->date)
+		pragha_musicobject_set_year (mobj, mtp_track_get_year (track->date));
 	if (track->genre)
 		pragha_musicobject_set_genre (mobj, track->genre);
 	if (track->duration)

@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2012-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2012-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -15,10 +15,11 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#ifndef __PRAGHA_MTP_PLUGIN_H__
-#define __PRAGHA_MTP_PLUGIN_H__
+#ifndef __PRAGHA_MTP_MUSICOBJECT_H__
+#define __PRAGHA_MTP_MUSICOBJECT_H__
 
 #include <libmtp.h>
+
 #include "src/pragha-musicobject.h"
 
 G_BEGIN_DECLS
@@ -32,4 +33,4 @@ gboolean           pragha_musicobject_is_mtp_file        (PraghaMusicobject *mob
 
 G_END_DECLS
 
-#endif /* __PRAGHA_MTP_PLUGIN_H__ */
+#endif /* __PRAGHA_MTP_MUSICOBJECT_H__ */
