@@ -31,7 +31,7 @@
 #include <glib/gi18n.h>
 
 #include "src/pragha-debug.h"
-#include "src/pragha-musicobject.h"
+#include "src/pragha-utils.h"
 
 #include "pragha-mtp-thread-data.h"
 #include "pragha-mtp-musicobject.h"
@@ -102,8 +102,7 @@ task_name (PraghaMtpThreadTask *task)
 			                        task->track_id,
 			                        task->filename[0] ? task->filename : "<temporary>");
 		case UPLOAD_TRACK:
-			return g_strdup_printf ("upload track from %s",
-			                        task->filename[0] ? task->filename : "<unknown>");
+			return g_strdup_printf ("upload track");
 		case CLOSE_DEVICE:
 			return g_strdup ("close device");
 		case SHUTDOWN:
@@ -413,14 +412,62 @@ upload_track (PraghaMtpThread     *thread,
 {
 	PraghaMtpThreadUploadData *data;
 	PraghaMusicobject *mobj;
+	LIBMTP_folder_t *folders, *music;
 	LIBMTP_track_t *track;
 	LIBMTP_error_t *stack;
-	const gchar *filename;
+	const gchar *filename = NULL, *artist = NULL, *album = NULL;
+	guint32 storage_id, music_id, artist_id, album_id;
 
 	CDEBUG(DBG_PLUGIN, "Mtp thread %s", G_STRFUNC);
 
+	/*
+	 * Create an Music/Artist/Album tree to put the file, with fallback to root
+	 */
+
+	folders = LIBMTP_Get_Folder_List (thread->device);
+	music = LIBMTP_Find_Folder (folders, thread->device->default_music_folder);
+	if (music) {
+		storage_id = music->storage_id;
+		music_id = music->folder_id;
+	}
+	else {
+		CDEBUG(DBG_PLUGIN, "unable to find default music folder");
+		storage_id = thread->device->storage->id;
+		music_id = LIBMTP_Create_Folder (thread->device,
+		                                 g_strdup(_("Music")),
+		                                 LIBMTP_FILES_AND_FOLDERS_ROOT, storage_id);
+		if (music_id == 0) {
+			CDEBUG(DBG_PLUGIN, "couldn't create the Music folder");
+			pragha_mtp_thread_report_errors (thread);
+		}
+	}
+
+	artist = pragha_musicobject_get_artist (task->mobj);
+	artist_id = LIBMTP_Create_Folder (thread->device,
+	                                  g_strdup(string_is_not_empty(artist) ? artist : _("Unknown Artist")),
+	                                  music_id, storage_id);
+	if (artist_id == 0) {
+		CDEBUG(DBG_PLUGIN, "couldn't create the artist folder");
+		pragha_mtp_thread_report_errors (thread);
+	}
+
+	album = pragha_musicobject_get_album (task->mobj);
+	album_id = LIBMTP_Create_Folder (thread->device,
+	                                 g_strdup(string_is_not_empty(album) ? album : _("Unknown Album")),
+	                                 artist_id, storage_id);
+	if (album_id == 0) {
+		CDEBUG(DBG_PLUGIN, "couldn't create the album folder");
+		pragha_mtp_thread_report_errors (thread);
+	}
+
+	/*
+	 *  Create Track and upload it.
+	 */
 	filename = pragha_musicobject_get_file (task->mobj);
 	track = mtp_track_new_from_pragha_musicobject (thread->device, task->mobj);
+
+	track->parent_id = album_id;
+	track->storage_id = storage_id;
 
 	if (LIBMTP_Send_Track_From_File (thread->device, filename, track, NULL, NULL)) {
 		stack = LIBMTP_Get_Errorstack (thread->device);
@@ -436,10 +483,12 @@ upload_track (PraghaMtpThread     *thread,
 	}
 
 	mobj = pragha_musicobject_new_from_mtp_track (track);
+	pragha_musicobject_set_provider (mobj, thread->device_id);
 	data = pragha_mtp_thread_upload_data_new (task->user_data, mobj, NULL);
 	g_idle_add ((GSourceFunc) task->callback, data);
 
 	LIBMTP_destroy_track_t (track);
+	LIBMTP_destroy_folder_t (folders);
 }
 
 static void
@@ -607,8 +656,7 @@ pragha_mtp_thread_upload_track (PraghaMtpThread   *thread,
 
 	CDEBUG(DBG_PLUGIN, "Mtp thread %s", G_STRFUNC);
 
-	if (mobj)
-		task->mobj = g_object_ref(mobj);
+	task->mobj = g_object_ref(mobj);
 	task->callback = finish_func;
 	task->user_data = data;
 

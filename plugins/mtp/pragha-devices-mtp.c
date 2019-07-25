@@ -409,7 +409,10 @@ pragha_mtp_plugin_device_download_idle (PraghaMtpThreadDownloadData *data)
 static gboolean
 pragha_mtp_plugin_send_to_device_idle (PraghaMtpThreadUploadData *data)
 {
+	PraghaDatabase *database;
+	PraghaDatabaseProvider *provider;
 	PraghaAppNotification *notification;
+	PraghaMusicobject *mobj;
 	const gchar *error;
 
 	PraghaMtpPlugin *plugin = PRAGHA_MTP_PLUGIN(pragha_mtp_thread_upload_data_get_user_data (data));
@@ -425,7 +428,19 @@ pragha_mtp_plugin_send_to_device_idle (PraghaMtpThreadUploadData *data)
 		return FALSE;
 	}
 
-	//TODO: Update cache ang gui...
+	mobj = pragha_mtp_thread_upload_data_get_musicobject (data);
+	if (G_LIKELY(mobj)) {
+		database = pragha_database_get ();
+		pragha_database_add_new_musicobject (database, mobj);
+		g_object_unref(database);
+
+		notification = pragha_app_notification_new (priv->friend_name, _("The song was uploaded to your device."));
+		pragha_app_notification_show (notification);
+
+		provider = pragha_database_provider_get ();
+		pragha_provider_update_done (provider);
+		g_object_unref(provider);
+	}
 
 	pragha_mtp_thread_upload_data_free (data);
 

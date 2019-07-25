@@ -21,6 +21,8 @@
 #include <glib.h>
 #include <glib-object.h>
 
+#include "src/pragha-musicobject.h"
+
 #ifndef __PRAGHA_MTP_THREAD_DATA_H
 #define __PRAGHA_MTP_THREAD_DATA_H
 

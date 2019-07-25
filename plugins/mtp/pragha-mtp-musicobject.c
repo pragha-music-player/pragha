@@ -55,7 +55,8 @@ mtp_track_get_year (const gchar *date)
 		g_free (year_string);
 	}
 
-	return year;
+	// Minimal validate since some phones not implement it well.
+	return year > 1900 ? year : 0;
 }
 
 LIBMTP_track_t *
