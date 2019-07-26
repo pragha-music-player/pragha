@@ -75,7 +75,8 @@ typedef enum {
 typedef struct {
 	PraghaMtpTaskType    task;
 
-	LIBMTP_raw_device_t *raw_device;
+	guint                devnum;
+	guint                busnum;
 
 	PraghaMusicobject   *mobj;
 
@@ -155,24 +156,47 @@ static void
 open_device (PraghaMtpThread *thread, PraghaMtpThreadTask *task)
 {
 	PraghaMtpThreadOpenedData *data;
-	LIBMTP_mtpdevice_t *device;
+	LIBMTP_raw_device_t *raw_devices;
+	LIBMTP_mtpdevice_t *device = NULL;
+	LIBMTP_devicestorage_t *storage;
 	gchar *device_id = NULL, *friendly_name = NULL;
-	guint retry;
+	guint64 freeSpace = 0;
+	gint num_raw_devices = 0, i = 0;
 
 	CDEBUG(DBG_PLUGIN, "Mtp thread %s", G_STRFUNC);
 
-	for (retry = 0; retry < 5; retry++) {
-		if (retry > 0) {
-			/* sleep a while before trying again */
-			g_usleep (G_USEC_PER_SEC);
+	LIBMTP_Detect_Raw_Devices (&raw_devices, &num_raw_devices);
+	for (i = 0; i < num_raw_devices; i++)
+	{
+		if (raw_devices[i].bus_location == task->busnum &&
+		    raw_devices[i].devnum == task->devnum)
+		{
+			/*
+			 * Open device
+			 */
+			device = LIBMTP_Open_Raw_Device_Uncached (&raw_devices[i]);
+			if (device == NULL)
+				continue;
+
+			/*
+			 * Check storage and ignore just charging devices.
+			 */
+			if (!LIBMTP_Get_Storage (device, LIBMTP_STORAGE_SORTBY_FREESPACE)) {
+				LIBMTP_Dump_Errorstack (device);
+				LIBMTP_Clear_Errorstack (device);
+			}
+			for (storage = device->storage; storage != 0; storage = storage->next) {
+				freeSpace += storage->FreeSpaceInBytes;
+			}
+			if (!freeSpace) {
+				LIBMTP_Release_Device (device);
+				device = NULL;
+			}
+
+			if (device != NULL) {
+				break;
+			}
 		}
-
-		device = LIBMTP_Open_Raw_Device_Uncached (task->raw_device);
-
-		if (device)
-			break;
-
-		CDEBUG(DBG_PLUGIN, "Mtp thread attempt %d failed..", retry+1);
 	}
 
 	if (device) {
@@ -578,7 +602,8 @@ task_thread (PraghaMtpThread *thread)
 
 void
 pragha_mtp_thread_open_device (PraghaMtpThread     *thread,
-                               LIBMTP_raw_device_t *raw_device,
+                               guint                devnum,
+                               guint                busnum,
                                GSourceFunc          finish_func,
                                gpointer             data)
 {
@@ -586,7 +611,8 @@ pragha_mtp_thread_open_device (PraghaMtpThread     *thread,
 
 	CDEBUG(DBG_PLUGIN, "Mtp thread %s", G_STRFUNC);
 
-	task->raw_device = raw_device;
+	task->devnum = devnum;
+	task->busnum = busnum;
 	task->callback = finish_func;
 	task->user_data = data;
 

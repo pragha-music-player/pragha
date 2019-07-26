@@ -50,7 +50,8 @@ pragha_mtp_thread_new (void);
 
 void
 pragha_mtp_thread_open_device    (PraghaMtpThread           *thread,
-                                  LIBMTP_raw_device_t       *raw_device,
+                                  guint                      devnum,
+                                  guint                      busnum,
                                   GSourceFunc                finish_func,
                                   gpointer                   user_data);
 

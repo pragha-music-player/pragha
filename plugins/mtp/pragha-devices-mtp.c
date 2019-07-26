@@ -375,7 +375,8 @@ pragha_mtp_plugin_tracklist_loaded_idle (PraghaMtpThreadTracklistData *data)
 	pragha_background_task_bar_remove_widget (taskbar, GTK_WIDGET(priv->task_widget));
 	g_object_unref(G_OBJECT(taskbar));
 
-	notification = pragha_app_notification_new (_("MTP Device"), _("You can interact with your MTP device"));
+	notification = pragha_app_notification_new (priv->friend_name, _("You can interact with your MTP device"));
+	pragha_app_notification_set_timeout (notification, 5);
 	pragha_app_notification_show (notification);
 
 	pragha_mtp_plugin_append_menu_action (plugin);
@@ -435,6 +436,7 @@ pragha_mtp_plugin_send_to_device_idle (PraghaMtpThreadUploadData *data)
 		g_object_unref(database);
 
 		notification = pragha_app_notification_new (priv->friend_name, _("The song was uploaded to your device."));
+		pragha_app_notification_set_timeout (notification, 5);
 		pragha_app_notification_show (notification);
 
 		provider = pragha_database_provider_get ();
@@ -774,33 +776,11 @@ pragha_mtp_plugin_device_added (PraghaDeviceClient *device_client,
 
 	/* Get devices.. */
 
-	if (LIBMTP_Detect_Raw_Devices (&raw_devices, &num_raw_devices) != LIBMTP_ERROR_NONE)
-		return;
-
 	busnum = g_udev_device_get_property_as_int (u_device, "BUSNUM");
 	devnum = pragha_gudev_get_property_as_int (u_device, "DEVNUM", 10);
 
-	for (i = 0; i < num_raw_devices; i++)
-	{
-		if (raw_devices[i].bus_location == busnum &&
-		    raw_devices[i].devnum == devnum)
-		{
-			raw_device = &raw_devices[i];
-			break;
-		}
-	}
-
-	if (!raw_device) {
-		CDEBUG(DBG_PLUGIN, "Mtp plugin no mach any mtp device with bus, testing first.");
-		raw_device = &raw_devices[0];
-	}
-
-	if (!raw_device) {
-		g_free (raw_devices);
-		return;
-	}
-
-	notification = pragha_app_notification_new (_("MTP Device"), _("An MTP device was detected"));
+	notification = pragha_app_notification_new (_("MTP Device"), _("An MTP device was connected"));
+	pragha_app_notification_set_timeout (notification, 5);
 	pragha_app_notification_show (notification);
 
 	/* Partial hook device */
@@ -811,11 +791,9 @@ pragha_mtp_plugin_device_added (PraghaDeviceClient *device_client,
 	/* Open device */
 
 	pragha_mtp_thread_open_device (priv->device_thread,
-	                               raw_device,
+	                               devnum, busnum,
 	                               G_SOURCE_FUNC (pragha_mtp_plugin_device_opened_idle),
 	                               plugin);
-
-	g_free (raw_devices);
 }
 
 void
@@ -824,6 +802,7 @@ pragha_mtp_plugin_device_removed (PraghaDeviceClient *device_client,
                                   GUdevDevice        *u_device,
                                   gpointer            user_data)
 {
+	PraghaAppNotification *notification;
 	guint64 busnum = 0;
 	guint64 devnum = 0;
 
@@ -837,6 +816,9 @@ pragha_mtp_plugin_device_removed (PraghaDeviceClient *device_client,
 
 	if (busnum == priv->bus_hooked && devnum == priv->device_hooked)
 	{
+		notification = pragha_app_notification_new (priv->friend_name, _("The device was disconnected."));
+		pragha_app_notification_show (notification);
+
 		if (priv->ask_dialog) {
 			gtk_widget_destroy (priv->ask_dialog);
 			priv->ask_dialog = NULL;
