@@ -207,86 +207,70 @@ pragha_unescape_html_utf75 (const gchar *str)
 	return s_unicode;
 }
 
-static gunichar
-stripped_char (gunichar ch)
-{
-	gunichar retval = 0;
-	GUnicodeType utype;
-	gunichar decomp[4];
-	gsize dlen;
-
-	utype = g_unichar_type (ch);
-
-	switch (utype) {
-	case G_UNICODE_CONTROL:
-	case G_UNICODE_FORMAT:
-	case G_UNICODE_UNASSIGNED:
-	case G_UNICODE_NON_SPACING_MARK:
-	case G_UNICODE_SPACING_MARK:
-	case G_UNICODE_ENCLOSING_MARK:
-		/* Ignore those */
-		break;
-	case G_UNICODE_PRIVATE_USE:
-	case G_UNICODE_SURROGATE:
-	case G_UNICODE_LOWERCASE_LETTER:
-	case G_UNICODE_MODIFIER_LETTER:
-	case G_UNICODE_OTHER_LETTER:
-	case G_UNICODE_TITLECASE_LETTER:
-	case G_UNICODE_UPPERCASE_LETTER:
-	case G_UNICODE_DECIMAL_NUMBER:
-	case G_UNICODE_LETTER_NUMBER:
-	case G_UNICODE_OTHER_NUMBER:
-	case G_UNICODE_CONNECT_PUNCTUATION:
-	case G_UNICODE_DASH_PUNCTUATION:
-	case G_UNICODE_CLOSE_PUNCTUATION:
-	case G_UNICODE_FINAL_PUNCTUATION:
-	case G_UNICODE_INITIAL_PUNCTUATION:
-	case G_UNICODE_OTHER_PUNCTUATION:
-	case G_UNICODE_OPEN_PUNCTUATION:
-	case G_UNICODE_CURRENCY_SYMBOL:
-	case G_UNICODE_MODIFIER_SYMBOL:
-	case G_UNICODE_MATH_SYMBOL:
-	case G_UNICODE_OTHER_SYMBOL:
-	case G_UNICODE_LINE_SEPARATOR:
-	case G_UNICODE_PARAGRAPH_SEPARATOR:
-	case G_UNICODE_SPACE_SEPARATOR:
-	default:
-		ch = g_unichar_tolower (ch);
-		dlen = g_unichar_fully_decompose (ch, FALSE, decomp, 4);
-		if (dlen > 0)
-			retval = decomp[0];
-	}
-
-	return retval;
-}
-
 static gchar *
 pragha_string_strip_utf8 (const gchar *string)
 {
-	GString *word = NULL;
-	const gchar *p;
+	GString *gstring;
+	gchar *normalized;
+	gunichar *unicode, *cur;
 
-	if (string == NULL || *string == '\0')
-		return NULL;
+	g_return_val_if_fail (string != NULL, NULL);
 
-	for (p = string; *p != '\0'; p = g_utf8_next_char (p)) {
-		gunichar sc;
+	/* old behaviour is equivalent to: return g_utf8_casefold (string, -1); */
 
-		/* Make the char lower-case, remove its accentuation marks, and ignore it
-		 * if it is just unicode marks */
-		sc = stripped_char (g_utf8_get_char (p));
-		if (sc == 0)
-			continue;
+	gstring = g_string_new (NULL);
+	normalized = g_utf8_normalize(string, -1, G_NORMALIZE_DEFAULT);
+	unicode = g_utf8_to_ucs4_fast (normalized, -1, NULL);
 
-		/* If it is not alpha-num, it is separator between words */
-		if (!g_unichar_isalnum (sc)) {
-			continue;
+
+	for (cur = unicode; *cur != 0; cur++) {
+		switch (g_unichar_type (*cur)) {
+		case G_UNICODE_COMBINING_MARK:
+		case G_UNICODE_ENCLOSING_MARK:
+		case G_UNICODE_NON_SPACING_MARK:
+		case G_UNICODE_CONNECT_PUNCTUATION:
+		case G_UNICODE_DASH_PUNCTUATION:
+		case G_UNICODE_CLOSE_PUNCTUATION:
+		case G_UNICODE_FINAL_PUNCTUATION:
+		case G_UNICODE_INITIAL_PUNCTUATION:
+		case G_UNICODE_OTHER_PUNCTUATION:
+		case G_UNICODE_OPEN_PUNCTUATION:
+			/* remove these */
+			break;
+
+		case G_UNICODE_LOWERCASE_LETTER:
+		case G_UNICODE_MODIFIER_LETTER:
+		case G_UNICODE_OTHER_LETTER:
+		case G_UNICODE_TITLECASE_LETTER:
+		case G_UNICODE_UPPERCASE_LETTER:
+			/* convert to lower case */
+			*cur = g_unichar_tolower (*cur);
+			/* ... and fall through */\
+		case G_UNICODE_DECIMAL_NUMBER:
+		case G_UNICODE_LETTER_NUMBER:
+		case G_UNICODE_OTHER_NUMBER:
+		/* should be keep symbols? */
+		case G_UNICODE_CURRENCY_SYMBOL:
+		case G_UNICODE_MODIFIER_SYMBOL:
+		case G_UNICODE_MATH_SYMBOL:
+		case G_UNICODE_OTHER_SYMBOL:
+			g_string_append_unichar (gstring, *cur);
+			break;
+
+		case G_UNICODE_UNASSIGNED:
+			g_critical ("unassigned unicode character type found");
+			/* fall through */
+
+		default:
+			/* leave these in */
+			g_string_append_unichar (gstring, *cur);
 		}
-
-		g_string_append_unichar (word, sc);
 	}
 
-	return g_string_free(word, FALSE);
+	g_free (unicode);
+	g_free (normalized);
+
+	return g_string_free (gstring, FALSE);
 }
 
 
