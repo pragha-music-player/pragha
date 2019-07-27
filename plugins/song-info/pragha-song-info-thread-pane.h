@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -19,8 +19,8 @@
 #define PRAGHA_SONGINFO_THREAD_PANE_H
 
 #include <glib.h>
-
 #include <glyr/glyr.h>
+
 #include "pragha-song-info-plugin.h"
 
 G_BEGIN_DECLS

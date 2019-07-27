@@ -31,6 +31,8 @@
 
 #include "pragha-song-info-pane.h"
 
+#include "src/pragha-database.h"
+#include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-hig.h"
 #include "src/pragha-utils.h"
 
@@ -100,36 +102,45 @@ static const GActionEntry song_info_aentries[] = {
 GtkWidget *
 pragha_songinfo_pane_row_new (PraghaMusicobject *mobj)
 {
+	PraghaDatabase *cdbase;
+	PraghaMusicobject *db_mobj;
 	GtkWidget *row, *box, *icon, *label;
-	const gchar *provider = NULL, *title = NULL, *artist = NULL;
+	const gchar *title = NULL, *artist = NULL;
 	gchar *song_name = NULL;
+
+	row = gtk_list_box_row_new ();
+	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	gtk_container_add(GTK_CONTAINER(row), box);
 
 	title = pragha_musicobject_get_title (mobj);
 	artist = pragha_musicobject_get_artist (mobj);
-	provider = pragha_musicobject_get_provider (mobj);
 
-	if (string_is_empty(provider))
-		icon = gtk_image_new_from_icon_name ("edit-find-symbolic", GTK_ICON_SIZE_MENU);
-	else
-		icon = gtk_image_new_from_icon_name ("media-playback-start-symbolic", GTK_ICON_SIZE_MENU);
-
-	row = gtk_list_box_row_new ();
-
-	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	gtk_box_pack_start(GTK_BOX(box), icon, FALSE, FALSE, 6);
+	cdbase = pragha_database_get ();
+	db_mobj = pragha_database_get_artist_and_title_song (cdbase, artist, title);
+	if (db_mobj) {
+		g_object_set_data_full (G_OBJECT(row), "SONG", db_mobj, g_object_unref);
+		icon = gtk_image_new_from_icon_name ("media-playback-start-symbolic",
+		                                     GTK_ICON_SIZE_MENU);
+	}
+	else {
+		g_object_set_data_full (G_OBJECT(row), "SONG", mobj, g_object_unref);
+		icon = gtk_image_new_from_icon_name ("edit-find-symbolic",
+		                                     GTK_ICON_SIZE_MENU);
+	}
 
 	song_name = g_strdup_printf ("%s - %s", title, artist);
+
 	label = gtk_label_new (song_name);
 	gtk_label_set_ellipsize (GTK_LABEL(label), PANGO_ELLIPSIZE_END);
 	gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 	gtk_widget_set_halign (label, GTK_ALIGN_START);
+
+	gtk_box_pack_start(GTK_BOX(box), icon, FALSE, FALSE, 6);
 	gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 0);
 
-	gtk_container_add(GTK_CONTAINER(row), box);
 	gtk_widget_show_all (row);
 
-	g_object_set_data_full (G_OBJECT(row), "SONG", mobj, g_object_unref);
-
+	g_object_unref(cdbase);
 	g_free (song_name);
 
 	return row;

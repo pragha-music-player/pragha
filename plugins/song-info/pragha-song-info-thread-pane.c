@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -28,7 +28,6 @@
 #include "pragha-song-info-pane.h"
 
 #include "src/pragha-simple-async.h"
-#include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-database.h"
 #include "src/pragha-utils.h"
 
@@ -46,8 +45,8 @@ typedef struct {
  * Utils.
  */
 
-static GList *
-glyr_append_mboj_list (PraghaDatabase *cdbase, GlyrMemCache *it, GList *list)
+PraghaMusicobject *
+glyr_mem_cache_get_raw_mobj (GlyrMemCache *it)
 {
 	PraghaMusicobject *mobj = NULL;
 	gchar *title, *artist, *url;
@@ -59,26 +58,23 @@ glyr_append_mboj_list (PraghaDatabase *cdbase, GlyrMemCache *it, GList *list)
 	artist = tags[1];
 	url = tags[3];
 
-	if (string_is_empty(title) || string_is_empty(artist))
-		return list;
+	if (string_is_empty(title) || string_is_empty(artist) || string_is_empty(url))
+		return NULL;
 
 	utitle = pragha_unescape_html_utf75(title);
 	uartist = pragha_unescape_html_utf75(artist);
 
-	mobj = pragha_database_get_artist_and_title_song (cdbase, uartist, utitle);
-	if (mobj == NULL) {
-		mobj = pragha_musicobject_new ();
-		pragha_musicobject_set_file (mobj, url);
-		pragha_musicobject_set_title (mobj, utitle);
-		pragha_musicobject_set_artist (mobj, uartist);
-	}
+	mobj = pragha_musicobject_new ();
+	pragha_musicobject_set_file (mobj, url);
+	pragha_musicobject_set_title (mobj, utitle);
+	pragha_musicobject_set_artist (mobj, uartist);
 
 	g_free(utitle);
 	g_free(uartist);
 
 	g_strfreev (tags);
 
-	return g_list_append (list, mobj);
+	return mobj;
 }
 
 /*
@@ -145,7 +141,7 @@ glyr_finished_successfully_pane (glyr_struct *glyr_info)
 		case GLYR_TYPE_SIMILAR_SONG:
 			cdbase = pragha_database_get ();
 			for (it = glyr_info->head ; it != NULL ; it = it->next) {
-				list = glyr_append_mboj_list (cdbase, it, list);
+				list = g_list_append (list, glyr_mem_cache_get_raw_mobj(it));
 			}
 			g_object_unref (cdbase);
 
@@ -157,7 +153,7 @@ glyr_finished_successfully_pane (glyr_struct *glyr_info)
 
 			for (l = list ; l != NULL ; l = l->next) {
 				pragha_songinfo_pane_append_song_row (pane,
-					pragha_songinfo_pane_row_new ((PraghaMusicobject *)l->data));
+					pragha_songinfo_pane_row_new (PRAGHA_MUSICOBJECT(l->data)));
 			}
 			g_list_free (list);
 

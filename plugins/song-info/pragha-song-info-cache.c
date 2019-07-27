@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2018-2019 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2018 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -190,17 +190,11 @@ pragha_info_cache_get_similar_songs (PraghaInfoCache *cache,
 		iartist = g_key_file_get_string (key_file, "Similar-Songs", key, NULL);
 		g_free (key);
 
-		mobj = pragha_database_get_artist_and_title_song (cache->cdbase,
-		                                                  iartist,
-		                                                  ititle);
+		mobj = pragha_musicobject_new ();
 
-		if (!mobj)
-		{
-			mobj = pragha_musicobject_new ();
-			pragha_musicobject_set_file (mobj, ifile);
-			pragha_musicobject_set_title (mobj, ititle);
-			pragha_musicobject_set_artist (mobj, iartist);
-		}
+		pragha_musicobject_set_file (mobj, ifile);
+		pragha_musicobject_set_title (mobj, ititle);
+		pragha_musicobject_set_artist (mobj, iartist);
 
 		list = g_list_prepend (list, mobj);
 
@@ -248,7 +242,7 @@ pragha_info_cache_save_similar_songs (PraghaInfoCache *cache,
 	g_key_file_set_string (key_file, "Similar-Songs", "Provider", provider);
 
 	for (list = mlist; list != NULL; list = list->next) {
-		mobj = list->data;
+		mobj = PRAGHA_MUSICOBJECT(list->data);
 		i++;
 
 		key = g_strdup_printf("File%d", i);
