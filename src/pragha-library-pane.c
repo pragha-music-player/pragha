@@ -1608,8 +1608,7 @@ static gboolean
 pragha_search_entry_pulse_it (PraghaLibraryPane *library)
 {
 	gtk_entry_progress_pulse (GTK_ENTRY(library->search_entry));
-	library->pulse_id = g_timeout_add (250, (GSourceFunc)pragha_search_entry_pulse_it, library);
-	return G_SOURCE_REMOVE;
+	return G_SOURCE_CONTINUE;
 }
 
 static gboolean
@@ -1619,7 +1618,7 @@ pragha_library_pane_do_refilter (PraghaLibraryPane *clibrary)
 	gboolean ret = FALSE;
 
 	gtk_entry_set_progress_pulse_step (GTK_ENTRY(clibrary->search_entry), 0.1);
-	pragha_search_entry_pulse_it (clibrary);
+	clibrary->pulse_id = g_timeout_add (250, (GSourceFunc)pragha_search_entry_pulse_it, clibrary);
 
 	if (clibrary->filter_active == TRUE)
 		return TRUE;
@@ -1646,8 +1645,10 @@ pragha_library_pane_do_refilter (PraghaLibraryPane *clibrary)
 
 	g_free(needle);
 
-	gtk_entry_set_progress_fraction (GTK_ENTRY(clibrary->search_entry), 0);
+	gtk_entry_set_progress_pulse_step (GTK_ENTRY(clibrary->search_entry), 0.0);
+	gtk_entry_set_progress_fraction (GTK_ENTRY(clibrary->search_entry), 0.0);
 	g_source_remove (clibrary->pulse_id);
+	clibrary->pulse_id = 0;
 
 	return ret;
 }
