@@ -251,13 +251,21 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	registry = grl_registry_get_default ();
 #ifdef HAVE_GRILO3
+	if (!grl_registry_load_all_plugins (registry, FALSE, &error)) {
+		g_warning ("Failed to load plugins: %s\n\n", error->message);
+		g_clear_error (&error);
+	}
 	if (!grl_registry_activate_plugin_by_id (registry, "grl-dleyna", &error)) {
+		g_warning ("Failed to activate dleyna plugin: %s\n\n", error->message);
+		g_clear_error (&error);
+	}
 #endif
 #ifdef HAVE_GRILO2
 	if (!grl_registry_load_plugin_by_id (registry, "grl-dleyna", &error)) {
+		g_warning ("Failed to load plugins: %s\n\n", error->message);
+		g_clear_error (&error);
+	}
 #endif
-		g_print ("Failed to load plugins: %s\n\n", error->message);
- 	}
 
 	/* Attach main menu */
 
