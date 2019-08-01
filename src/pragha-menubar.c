@@ -161,7 +161,6 @@ static const gchar *main_menu_xml = "<ui>					\
 			<menuitem action=\"Lateral panel2\"/>		\
 			<menuitem action=\"Playback controls below\"/>	\
 			<menuitem action=\"Show menubar\"/>			\
-			<menuitem action=\"Status bar\"/>			\
 			<separator/>						\
 			<menuitem action=\"Jump to playing song\"/>	\
 		</menu>								\
@@ -277,9 +276,6 @@ static GtkToggleActionEntry toggles_entries[] = {
 	FALSE},
 	{"Show menubar", NULL, N_("Menubar"),
 	 "<Control>M", "Show menubar", NULL,
-	TRUE},
-	{"Status bar", NULL, N_("Status bar"),
-	 "", "Status bar", NULL,
 	TRUE}
 };
 
@@ -739,9 +735,6 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 
 	GtkAction *action_lateral2 = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Lateral panel2");
 	g_object_bind_property (preferences, "secondary-lateral-panel", action_lateral2, "active", binding_flags);
-
-	GtkAction *action_status_bar = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Status bar");
-	g_object_bind_property (preferences, "show-status-bar", action_status_bar, "active", binding_flags);
 
 	GtkAction *action_show_menubar = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Show menubar");
 	g_object_bind_property (preferences, "show-menubar", action_show_menubar, "active", binding_flags);
@@ -1442,7 +1435,6 @@ static GActionEntry win_entries[] = {
 	{ "sidebar1",         activate_toggle,               NULL, "false", NULL },
 	{ "sidebar2",         activate_toggle,               NULL, "false", NULL },
 	{ "menubar",          activate_toggle,               NULL, "true",  NULL },
-	{ "status-bar",       activate_toggle,               NULL, "false", NULL },
 	{ "jump-song",        pragha_gmenu_jump_to_song,     NULL, NULL,    NULL },
 	/* Tools submenu */
 	{ "equalizer",        pragha_gmenu_equalizer,        NULL, NULL,    NULL },
@@ -1531,14 +1523,6 @@ pragha_gmenu_toolbar_new (PraghaApplication *pragha)
 	                             NULL,
 	                             NULL);
 
-	action = g_action_map_lookup_action (map, "status-bar");
-	g_object_bind_property_full (preferences, "show-status-bar",
-	                             action, "state",
-	                             binding_flags,
-	                             binding_gboolean_to_variant,
-	                             binding_variant_to_gboolean,
-	                             NULL,
-	                             NULL);
 	action = g_action_map_lookup_action (map, "menubar");
 	g_object_bind_property_full (preferences, "show-menubar",
 	                             action, "state",

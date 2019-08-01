@@ -42,11 +42,7 @@ pragha_statusbar_class_init (PraghaStatusbarClass *klass)
 static void
 pragha_statusbar_init (PraghaStatusbar *statusbar)
 {
-	PraghaPreferences *preferences;
 	GtkStyleContext *context;
-
-	const GBindingFlags binding_flags =
-		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	statusbar->label = gtk_label_new (NULL);
 	g_object_set (statusbar->label,
@@ -62,12 +58,6 @@ pragha_statusbar_init (PraghaStatusbar *statusbar)
 	gtk_style_context_add_class (context, "floating-bar");
 
 	gtk_widget_show_all (GTK_WIDGET(statusbar));
-
-	preferences = pragha_preferences_get();
-	g_object_bind_property (preferences, "show-status-bar",
-	                        GTK_WIDGET(statusbar), "visible",
-	                        binding_flags);
-	g_object_unref (G_OBJECT(preferences));
 }
 
 /**

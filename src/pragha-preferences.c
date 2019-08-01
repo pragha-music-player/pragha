@@ -65,7 +65,6 @@ struct _PraghaPreferencesPrivate
 	gint       album_art_size;
 	gchar     *album_art_pattern;
 	GtkIconSize toolbar_size;
-	gboolean   show_status_bar;
 	gboolean   show_status_icon;
 	gboolean   show_menubar;
 	gboolean   system_titlebar;
@@ -106,7 +105,6 @@ enum
 	PROP_ALBUM_ART_SIZE,
 	PROP_ALBUM_ART_PATTERN,
 	PROP_TOOLBAR_SIZE,
-	PROP_SHOW_STATUS_BAR,
 	PROP_SHOW_STATUS_ICON,
 	PROP_SHOW_MENUBAR,
 	PROP_SYSTEM_TITLEBAR,
@@ -1076,33 +1074,6 @@ pragha_preferences_set_toolbar_size (PraghaPreferences *preferences,
 }
 
 /**
- * pragha_preferences_get_show_status_bar:
- *
- */
-gboolean
-pragha_preferences_get_show_status_bar (PraghaPreferences *preferences)
-{
-	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
-
-	return preferences->priv->show_status_bar;
-}
-
-/**
- * pragha_preferences_set_show_status_bar:
- *
- */
-void
-pragha_preferences_set_show_status_bar (PraghaPreferences *preferences,
-                                        gboolean show_status_bar)
-{
-	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
-
-	preferences->priv->show_status_bar = show_status_bar;
-
-	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SHOW_STATUS_BAR]);
-}
-
-/**
  * pragha_preferences_get_show_status_icon:
  *
  */
@@ -1407,7 +1378,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gchar *installed_version;
 	gboolean approximate_search, instant_search;
 	gboolean shuffle, repeat, restore_playlist, software_mixer;
-	gboolean lateral_panel, secondary_lateral_panel, show_album_art, show_status_bar, \
+	gboolean lateral_panel, secondary_lateral_panel, show_album_art, \
 		show_status_icon, show_menubar, system_titlebar, controls_below, remember_state;
 	gchar *album_art_pattern;
 	gchar *start_mode, *last_folder, *last_folder_converted = NULL;
@@ -1706,18 +1677,6 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_toolbar_size(preferences, toolbar_size);
 	}
 
-	show_status_bar = g_key_file_get_boolean(priv->rc_keyfile,
-	                                         GROUP_WINDOW,
-	                                         KEY_STATUS_BAR,
-	                                         &error);
-	if (error) {
-		g_error_free(error);
-		error = NULL;
-	}
-	else {
-		pragha_preferences_set_show_status_bar(preferences, show_status_bar);
-	}
-
 	show_status_icon = g_key_file_get_boolean(priv->rc_keyfile,
 	                                          GROUP_GENERAL,
 	                                          KEY_SHOW_ICON_TRAY,
@@ -1958,10 +1917,6 @@ pragha_preferences_finalize (GObject *object)
 	                       KEY_TOOLBAR_SIZE,
 	                       priv->toolbar_size);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_WINDOW,
-	                       KEY_STATUS_BAR,
-	                       priv->show_status_bar);
-	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_GENERAL,
 	                       KEY_SHOW_ICON_TRAY,
 	                       priv->show_status_icon);
@@ -2102,9 +2057,6 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_TOOLBAR_SIZE:
 			g_value_set_enum (value, pragha_preferences_get_toolbar_size(preferences));
 			break;
-		case PROP_SHOW_STATUS_BAR:
-			g_value_set_boolean (value, pragha_preferences_get_show_status_bar(preferences));
-			break;
 		case PROP_SHOW_STATUS_ICON:
 			g_value_set_boolean (value, pragha_preferences_get_show_status_icon(preferences));
 			break;
@@ -2208,9 +2160,6 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_TOOLBAR_SIZE:
 			pragha_preferences_set_toolbar_size(preferences, g_value_get_enum(value));
-			break;
-		case PROP_SHOW_STATUS_BAR:
-			pragha_preferences_set_show_status_bar(preferences, g_value_get_boolean(value));
 			break;
 		case PROP_SHOW_STATUS_ICON:
 			pragha_preferences_set_show_status_icon(preferences, g_value_get_boolean(value));
@@ -2493,17 +2442,6 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                   GTK_TYPE_ICON_SIZE,
 		                   GTK_ICON_SIZE_LARGE_TOOLBAR,
 		                   PRAGHA_PREF_PARAMS);
-
-	/**
-	  * PraghaPreferences:show_status_bar:
-	  *
-	  */
-	gParamSpecs[PROP_SHOW_STATUS_BAR] =
-		g_param_spec_boolean("show-status-bar",
-		                     "ShowStatusBar",
-		                     "Show Status Bar Preference",
-		                      TRUE,
-		                      PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:show_status_icon:

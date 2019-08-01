@@ -101,7 +101,6 @@ struct _PraghaPreferencesClass
 #define KEY_SHOW_ALBUM_ART         "show_album_art"
 #define KEY_ALBUM_ART_SIZE         "album_art_size"
 #define KEY_TOOLBAR_SIZE           "toolbar_icon_size"
-#define KEY_STATUS_BAR             "status_bar"
 #define KEY_SYSTEM_TITLEBAR        "system_titlebar"
 #define KEY_CONTROLS_BELOW         "controls_below"
 #define KEY_SHOW_MENUBAR           "show_menubar"
@@ -366,13 +365,6 @@ pragha_preferences_get_toolbar_size (PraghaPreferences *preferences);
 void
 pragha_preferences_set_toolbar_size (PraghaPreferences *preferences,
                                      GtkIconSize        toolbar_size);
-
-gboolean
-pragha_preferences_get_show_status_bar (PraghaPreferences *preferences);
-
-void
-pragha_preferences_set_show_status_bar (PraghaPreferences *preferences,
-                                       gboolean show_status_bar);
 
 gboolean
 pragha_preferences_get_show_status_icon (PraghaPreferences *preferences);

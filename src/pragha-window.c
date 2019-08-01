@@ -187,6 +187,22 @@ pragha_sidebar_children_changed (PraghaSidebar *sidebar, PraghaApplication *prag
 	}
 }
 
+static void
+pragha_playlist_edge_reache (GtkScrolledWindow *scrolled_window,
+                             GtkPositionType    pos,
+                             PraghaApplication *pragha)
+{
+	PraghaStatusbar *statusbar;
+	statusbar = pragha_application_get_statusbar (pragha);
+
+	// TODO: Do it intelligently. Just hidden it when reach the end of the list.
+	if (pos == GTK_POS_BOTTOM)
+		gtk_widget_set_visible (GTK_WIDGET(statusbar), FALSE);
+	else if (pos == GTK_POS_TOP)
+		gtk_widget_set_visible (GTK_WIDGET(statusbar), TRUE);
+}
+
+
 /*
  * Public api.
  */
@@ -542,6 +558,12 @@ pragha_window_new (PraghaApplication *pragha)
 
 	gtk_stack_add_named (GTK_STACK(main_stack),
 	                     GTK_WIDGET(playlist_overlay), "playlist");
+
+	/*
+	 *  Show and hide the status bar automatically.
+	 */
+	g_signal_connect (G_OBJECT (playlist), "edge-reached",
+	                  G_CALLBACK(pragha_playlist_edge_reache), pragha);
 
 	/* Pack widgets: [Sidebar1][Main Stack]
 	 *               [        ][Status Bar]
