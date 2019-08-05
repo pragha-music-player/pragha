@@ -165,8 +165,8 @@ endif
 
 if WIN32
 pragha_SOURCES += \
-	$(top_srcdir)/win32/win32dep.c \
-	$(top_srcdir)/win32/win32dep.h
+	win32/win32dep.c \
+	win32/win32dep.h
 
 AM_CFLAGS = \
 	-mms-bitfields
@@ -174,14 +174,14 @@ AM_CFLAGS = \
 AM_LDFLAGS = \
 	-Wl,-subsystem,windows
 
-pragha-res.o: $(top_srcdir)/win32/pragha.rc
-	$(WINDRES) -i $(top_srcdir)/win32/pragha.rc --input-format=rc -o pragha-res.o -O coff
+pragha-res.o: win32/pragha.rc
+	$(WINDRES) -i win32/pragha.rc --input-format=rc -o pragha-res.o -O coff
 
 pragha_LDADD += pragha-res.o
 endif
 
 pragha-window-ui.h: pragha-window.ui Makefile
-	$(AM_V_GEN) exo-csource --strip-comments --strip-content --static --name=pragha_window_ui $< > $@
+	$(AM_V_GEN) xdt-csource --strip-comments --strip-content --static --name=pragha_window_ui $< > $@
 
 EXTRA_DIST = \
 	pragha-window.ui

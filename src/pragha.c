@@ -45,7 +45,7 @@
 #include "pragha-database-provider.h"
 
 #ifdef G_OS_WIN32
-#include "../win32/win32dep.h"
+#include "win32/win32dep.h"
 #endif
 
 gint debug_level;

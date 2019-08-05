@@ -42,15 +42,19 @@ AC_ARG_ENABLE(debug,[  --enable-debug    Turn on debugging],[
 dnl ***********************************************************************
 dnl Check for win32 platform
 dnl ***********************************************************************
+AC_CANONICAL_HOST
+AC_MSG_CHECKING([whether to build with mingw32 for a Windows host])
 case "${host}" in
         *-*-mingw*|*-*-cygwin*) WIN32="yes" ;;
         *) WIN32="no" ;;
 esac
+
 AM_CONDITIONAL([WIN32], test "$WIN32" = "yes")
 
-if test x"$WIN32" = x"yes"; then
-AC_CHECK_TOOL(WINDRES, windres)
-fi
+AS_IF([test "x$WIN32" = "xyes"],
+      [AC_CHECK_TOOL([WINDRES], [windres])
+       AS_IF([test -z "$WINDRES"],
+             [AC_MSG_ERROR([windres is required when building for a Windows host])])])
 
 AC_SUBST(CFLAGS)
 
@@ -73,9 +77,9 @@ dnl Check for i18n support
 XDT_I18N([ar bg ca_ES cs da de es el fr hu id it ja ko_KR lt nl no pl pt pt_BR ru sk sv tr uk vi zh_CN])
 
 dnl Check tools required
-AC_CHECK_PROG([HAVE_EXO_CSOURCE], [exo-csource], [yes])
-if test x"$HAVE_EXO_CSOURCE" != xyes; then
-  AC_MSG_FAILURE([exo-csource not installed])
+AC_CHECK_PROG([HAVE_XDT_CSOURCE], [xdt-csource], [yes])
+if test x"$HAVE_XDT_CSOURCE" != xyes; then
+  AC_MSG_FAILURE([xdt-csource not installed])
 fi
 
 GSTREAMER_REQUIRED=0.11.90
@@ -331,7 +335,7 @@ AC_CONFIG_FILES([data/icons/symbolic/Makefile])
 AC_CONFIG_FILES([data/ui/Makefile])
 AC_CONFIG_FILES([po/Makefile.in])
 AC_CONFIG_FILES([src/Makefile])
-AC_CONFIG_FILES([win32/Makefile])
+AC_CONFIG_FILES([src/win32/Makefile])
 
 if test x"$LIBPEAS_FOUND" = x"yes"; then
 AC_CONFIG_FILES([plugins/Makefile])
