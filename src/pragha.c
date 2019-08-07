@@ -48,11 +48,6 @@
 #include "win32/win32dep.h"
 #endif
 
-gint debug_level;
-#ifdef DEBUG
-GThread *pragha_main_thread = NULL;
-#endif
-
 struct _PraghaApplication {
 	GtkApplication base_instance;
 
@@ -1390,36 +1385,4 @@ pragha_application_new ()
 	                     "application-id", "io.github.pragha_music_player",
 	                     "flags", G_APPLICATION_HANDLES_COMMAND_LINE | G_APPLICATION_HANDLES_OPEN,
 	                     NULL);
-}
-
-gint main(gint argc, gchar *argv[])
-{
-	PraghaApplication *pragha;
-	int status;
-#ifdef DEBUG
-	g_print ("debug enabled\n");
-	pragha_main_thread = g_thread_self ();
-#endif
-	debug_level = 0;
-
-	/* setup translation domain */
-	setlocale (LC_ALL, "");
-	bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
-	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
-	textdomain (GETTEXT_PACKAGE);
-
-	/* Force unicode to taglib. */
-	taglib_set_strings_unicode(TRUE);
-	taglib_set_string_management_enabled(FALSE);
-
-	/* Setup application name and pulseaudio role */
-	g_set_application_name(_("Pragha Music Player"));
-	g_setenv("PULSE_PROP_media.role", "audio", TRUE);
-
-	pragha = pragha_application_new ();
-	status = g_application_run (G_APPLICATION (pragha), argc, argv);
-	g_object_run_dispose (G_OBJECT (pragha));
-	g_object_unref (pragha);
-
-	return status;
 }

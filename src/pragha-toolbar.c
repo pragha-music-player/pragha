@@ -442,18 +442,15 @@ pragha_toolbar_add_extention_widget(PraghaToolbar *toolbar, GtkWidget *widget)
 void
 pragha_toolbar_add_extra_button (PraghaToolbar *toolbar, GtkWidget *widget)
 {
-	GList *list;
-	GtkWidget *children;
-
-	list = gtk_container_get_children (GTK_CONTAINER(toolbar->extra_button_box));
-	if(list) {
-		children = list->data;
-		gtk_container_remove(GTK_CONTAINER(toolbar->extra_button_box), children);
-		gtk_widget_destroy(GTK_WIDGET(children));
-		g_list_free(list);
-	}
 	gtk_container_add(GTK_CONTAINER(toolbar->extra_button_box), widget);
 }
+
+void
+pragha_toolbar_remove_extra_button (PraghaToolbar *toolbar, GtkWidget *widget)
+{
+	gtk_container_remove(GTK_CONTAINER(toolbar->extra_button_box), widget);
+}
+
 
 const gchar*
 pragha_toolbar_get_progress_text(PraghaToolbar *toolbar)

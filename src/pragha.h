@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2015 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -123,7 +123,8 @@ typedef struct {
 	GtkApplicationClass parent_class;
 } PraghaApplicationClass;
 
-void pragha_application_quit (PraghaApplication *pragha);
+void                pragha_application_quit (PraghaApplication *pragha);
+PraghaApplication * pragha_application_new  ();
 
 G_END_DECLS
 

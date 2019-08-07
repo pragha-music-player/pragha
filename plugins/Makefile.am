@@ -6,13 +6,17 @@ AM_CPPFLAGS =								\
 	$(WARN_CFLAGS)							\
 	$(DISABLE_DEPRECATED)
 
-pluginincludedir = $(includedir)/pragha/plugins
+pluginincludedir = $(includedir)/libpragha/plugins
 plugininclude_HEADERS = pragha-plugin-macros.h
 
-SUBDIRS =              \
-	mpris2             \
-	gnome-media-keys \
+SUBDIRS = \
 	visualizer
+
+if DBUS_PLUGINS_SUPPORT
+SUBDIRS += \
+	mpris2 \
+	gnome-media-keys
+endif
 
 if HAVE_LIBGLYR
 SUBDIRS += song-info
