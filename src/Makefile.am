@@ -1,3 +1,5 @@
+SUBDIRS = win32
+
 AM_CPPFLAGS =								\
 	-DG_LOG_DOMAIN=\"pragha\"					\
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\"				\
@@ -144,6 +146,28 @@ endif
 
 
 #
+# WIN32
+#
+if WIN32
+AM_CFLAGS = \
+	-mms-bitfields
+
+AM_LDFLAGS = \
+	-Wl,-subsystem,windows
+
+libpragha_la_LIBADD += \
+	win32/libwin32.la
+endif
+
+
+libpragha_la_LDFLAGS = \
+	-avoid-version \
+	-export-dynamic \
+	-no-undefined \
+	-export-symbols-regex "^[^_].*"
+
+
+#
 # pkgconfig
 #
 pkgconfigdir = $(libdir)/pkgconfig
@@ -158,30 +182,6 @@ EXTRA_DIST += \
 
 DISTCLEANFILES += \
 	$(pkgconfig_DATA)
-
-
-#
-# WIN32
-#
-if WIN32
-libpragha_la_SOURCES += \
-	win32/win32dep.c
-libpragha_HEADERS += \
-	win32/win32dep.h
-
-AM_CFLAGS = \
-	-mms-bitfields
-
-AM_LDFLAGS = \
-	-Wl,-subsystem,windows
-endif
-
-libpragha_la_LDFLAGS = \
-	-avoid-version \
-	-export-dynamic \
-	-no-undefined \
-	-export-symbols-regex "^[^_].*"
-# endif WIN32
 
 
 #

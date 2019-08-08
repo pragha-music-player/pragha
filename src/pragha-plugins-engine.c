@@ -181,7 +181,7 @@ pragha_plugins_engine_new (GObject *object)
 	engine->object = g_object_ref(object);
 
 	peas_engine_add_search_path (engine->peas_engine, LIBPLUGINDIR, USRPLUGINDIR);
-
+	//peas_engine_add_search_path (engine->peas_engine, "/home/matias/Desarrollo/pragha/plugins/", "/home/matias/Desarrollo/pragha/plugins/");
 	engine->peas_exten_set = peas_extension_set_new (engine->peas_engine,
 	                                                 PEAS_TYPE_ACTIVATABLE,
 	                                                 "object", object,

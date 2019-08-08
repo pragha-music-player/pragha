@@ -22,7 +22,7 @@ src/pragha-toolbar.c
 src/pragha-utils.c
 src/pragha-window.c
 src/pragha.c
-
+src/main.c
 #
 # Builder Files
 #
@@ -48,6 +48,7 @@ plugins/cdrom/pragha-cdrom-plugin.c
 plugins/dlna/pragha-dlna-plugin.c
 plugins/dlna-renderer/pragha-dlna-renderer-plugin.c
 plugins/lastfm/pragha-lastfm-plugin.c
+plugins/mtp/pragha-mtp-thread.c
 plugins/mpris2/pragha-mpris2-plugin.c
 plugins/notify/pragha-notify-plugin.c
 plugins/koel/pragha-koel-plugin.c
