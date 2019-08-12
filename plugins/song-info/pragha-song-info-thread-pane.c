@@ -277,7 +277,13 @@ pragha_songinfo_plugin_get_info_to_pane (PraghaSongInfoPlugin *plugin,
 			glyr_opt_lang_aware_only (&glyr_info->query, TRUE);
 			break;
 		case GLYR_GET_SIMILAR_SONGS:
+			pragha_songinfo_pane_set_title (pane, title);
+			pragha_songinfo_pane_set_text (pane, _("Searching..."), "");
+
 			glyr_opt_number (&glyr_info->query, 50);
+			glyr_opt_artist(&glyr_info->query, artist);
+			glyr_opt_title(&glyr_info->query, title);
+			break;
 		case GLYR_GET_LYRICS:
 			pragha_songinfo_pane_set_title (pane, title);
 			pragha_songinfo_pane_set_text (pane, _("Searching..."), "");

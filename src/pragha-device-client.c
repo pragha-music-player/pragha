@@ -80,7 +80,6 @@ device_type_name (PraghaDeviceType type)
 			return ("UNKNOWN");
 			break;
 	}
-	return ("UNKNOWN");
 }
 
 
