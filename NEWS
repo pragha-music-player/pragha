@@ -1,8 +1,52 @@
 ==============================================================
-Overview of changes between Pragha 1.3.99 and 1.3.92
+Overview of changes between Pragha 1.3.99.1 and 1.3.99
 ==============================================================
 
-V1.3.90
+News:
+	Shows temporary messages or services errors such as in-app-notifications.
+	Replace the status bar with a floating bar that does not require so much space.
+	Huge refactoring of the mtp plugin. Everything runs in a second thread.
+	Split Pragha between the application and a library to link the plugins. [1]
+
+Other Changes:
+	Add proxy setting to song-info plugin. Thanks to Pavel Vasin.
+	Introduce PraghaTempProvider but not used yet.
+	Move background tasks popover to main toolbar.
+	Strip accentuation and others characters when approximate search. Issue #146
+	Send notification when finished ampache or koel import
+	Use popovers in the menus of sidebars.
+	Improve metadata for appstream. Issue #152 Thanks to Joel Barrios
+	Adjust copyright mentioning Consonance.
+	Convert the status bar to an floating bar.
+	Implement upgrade Koel and Ampache from library pane menu.
+	Ampache: Reports when the server is empty.
+	Save the list of suggestions with the original information.
+	Show and hide the status bar automatically.
+	Depends on xdt-csource instead of exo-csource to compile the menus.
+	Add option to ignore playback errors to continue with others songs.
+
+Bug Fixes:
+	Vizualizer: Not saturate particles so much but give them more dynamics.
+	Last.fm: Postpose update current song when a scrobble is pending. Improve issue #142
+	Tune.In: Find the first audio between all results.
+	Rename dbus and appstream ids to better reverse-DNS domain. Issue #117
+	Don't use deprecated g_type_class_add_private.
+	Port the status icon menu to GktBuilder/GMenu/GAction.
+	Port part of library pane to GtkBuilder/GMenu.
+	Fix a lot of deprecations messages.
+	Fix ghost row (null null), in the list of similar songs
+	Fix pulse indication in filter entry while search.
+	DLNA client.. Force load glr-dleyna plugin.
+	Various fixes to compile pragha with msys2
+
+[1]: This results in a true plugin system, being able to write 3rd party plugins
+ * https://github.com/pragha-music-player/pragha-sample-plugin
+
+==============================================================
+OTHERS RELEASES:
+==============================================================
+
+V1.3.99
 News:
 	First implementation of Favorites as a playlist.
 	Sync favorites with Koel and Last.Fm.
@@ -35,11 +79,6 @@ Updates Translations:
 	Update Catalan translation thanks to Robert Antoni Buj Gelonch.
 	Update Bulgarian translation thanks to Любомир Василев.
 	Update Lithuanian translation thanks to Moo.
-
-
-==============================================================
-OTHERS RELEASES:
-==============================================================
 
 V1.3.92
 News:
