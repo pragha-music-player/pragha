@@ -56,6 +56,7 @@ struct _PraghaPreferencesPrivate
 	gchar     *audio_device;
 	gboolean   software_mixer;
 	gdouble    software_volume;
+	gboolean   ignore_errors;
 	/* Window preferences. */
 	gboolean   lateral_panel;
 	gint       sidebar_size;
@@ -97,6 +98,7 @@ enum
 	PROP_AUDIO_DEVICE,
 	PROP_SOFTWARE_MIXER,
 	PROP_SOFTWARE_VOLUME,
+	PROP_IGNORE_ERRORS,
 	PROP_LATERAL_PANEL,
 	PROP_SIDEBAR_SIZE,
 	PROP_SECONDARY_LATERAL_PANEL,
@@ -856,6 +858,35 @@ pragha_preferences_set_software_volume (PraghaPreferences *preferences,
 	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SOFTWARE_VOLUME]);
 }
 
+
+/**
+ * pragha_preferences_get_ignore_errors:
+ *
+ */
+gboolean
+pragha_preferences_get_ignore_errors (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), FALSE);
+
+	return preferences->priv->ignore_errors;
+}
+
+/**
+ * pragha_preferences_set_ignore_errors:
+ *
+ */
+void
+pragha_preferences_set_ignore_errors (PraghaPreferences *preferences,
+                                      gboolean           ignore_errors)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->ignore_errors = ignore_errors;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_IGNORE_ERRORS]);
+}
+
+
 /**
  * pragha_preferences_get_lateral_panel:
  *
@@ -1377,7 +1408,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 {
 	gchar *installed_version;
 	gboolean approximate_search, instant_search;
-	gboolean shuffle, repeat, restore_playlist, software_mixer;
+	gboolean shuffle, repeat, restore_playlist, software_mixer, ignore_errors;
 	gboolean lateral_panel, secondary_lateral_panel, show_album_art, \
 		show_status_icon, show_menubar, system_titlebar, controls_below, remember_state;
 	gchar *album_art_pattern;
@@ -1579,6 +1610,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 	else {
 		pragha_preferences_set_software_volume(preferences, software_volume);
+	}
+
+	ignore_errors = g_key_file_get_boolean(priv->rc_keyfile,
+	                                       GROUP_AUDIO,
+	                                       KEY_IGNORE_ERRORS,
+	                                       &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_ignore_errors(preferences, ignore_errors);
 	}
 
 	lateral_panel = g_key_file_get_boolean(priv->rc_keyfile,
@@ -1878,6 +1921,10 @@ pragha_preferences_finalize (GObject *object)
 	                      GROUP_AUDIO,
 	                      KEY_SOFTWARE_VOLUME,
 	                      priv->software_volume);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_AUDIO,
+	                       KEY_IGNORE_ERRORS,
+	                       priv->ignore_errors);
 
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_WINDOW,
@@ -2033,6 +2080,9 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_SOFTWARE_VOLUME:
 			g_value_set_double (value, pragha_preferences_get_software_volume(preferences));
 			break;
+		case PROP_IGNORE_ERRORS:
+			g_value_set_boolean (value, pragha_preferences_get_ignore_errors(preferences));
+			break;
 		case PROP_LATERAL_PANEL:
 			g_value_set_boolean (value, pragha_preferences_get_lateral_panel(preferences));
 			break;
@@ -2136,6 +2186,9 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_SOFTWARE_VOLUME:
 			pragha_preferences_set_software_volume(preferences, g_value_get_double(value));
+			break;
+		case PROP_IGNORE_ERRORS:
+			pragha_preferences_set_ignore_errors(preferences, g_value_get_boolean(value));
 			break;
 		case PROP_LATERAL_PANEL:
 			pragha_preferences_set_lateral_panel(preferences, g_value_get_boolean(value));
@@ -2346,6 +2399,17 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     -1.0,
 		                      1.0,
 		                     -1.0,
+		                     PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:ignore_errors:
+	  *
+	  */
+	gParamSpecs[PROP_IGNORE_ERRORS] =
+		g_param_spec_boolean("ignore-errors",
+		                     "IgnoreErrors",
+		                     "Ignore Errors on Playback",
+		                     FALSE,
 		                     PRAGHA_PREF_PARAMS);
 
 	/**

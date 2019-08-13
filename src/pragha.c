@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -1133,9 +1133,9 @@ pragha_application_startup (GApplication *application)
 	                  G_CALLBACK(pragha_backend_tags_changed), pragha);
 
 	g_signal_connect (pragha->backend, "error",
-	                 G_CALLBACK(gui_backend_error_show_dialog_cb), pragha);
-	g_signal_connect (pragha->backend, "error",
 	                  G_CALLBACK(gui_backend_error_update_current_playlist_cb), pragha);
+	g_signal_connect (pragha->backend, "error",
+	                 G_CALLBACK(pragha_backend_finished_error), pragha);
 	g_signal_connect (pragha->backend, "notify::state",
 	                  G_CALLBACK (pragha_menubar_update_playback_state_cb), pragha);
 

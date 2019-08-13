@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -64,6 +64,7 @@ struct _PreferencesDialog {
 	GtkWidget *audio_sink_combo_w;
 	GtkWidget *soft_mixer_w;
 #endif
+	GtkWidget *ignore_errors_w;
 	GtkWidget *system_titlebar_w;
 	GtkWidget *small_toolbar_w;
 	GtkWidget *album_art_w;
@@ -346,6 +347,9 @@ pragha_preferences_dialog_restore_changes (PreferencesDialog *dialog)
 		pragha_preferences_get_software_mixer (dialog->preferences));
 #endif
 
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->ignore_errors_w),
+		pragha_preferences_get_ignore_errors(dialog->preferences));
+
 	/*
 	 * Apareanse settings
 	 */
@@ -457,6 +461,9 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 	if (need_restart)
 		pragha_preferences_need_restart (dialog->preferences);
 #endif
+
+	pragha_preferences_set_ignore_errors (dialog->preferences,
+		gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->ignore_errors_w)));
 
 	/*
 	 * Get scanded folders and compare. If changed show infobar
@@ -834,6 +841,9 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w), TRUE);
 #endif
 
+	if (pragha_preferences_get_ignore_errors(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->ignore_errors_w), TRUE);
+
 	/* General Options */
 
 	if(pragha_preferences_get_remember_state(dialog->preferences))
@@ -1085,6 +1095,29 @@ pref_create_library_page (PreferencesDialog *dialog)
 }
 
 static GtkWidget*
+pref_create_playback_page (PreferencesDialog *dialog)
+{
+	GtkWidget *table;
+	GtkWidget *ignore_errors_w;
+	guint row = 0;
+
+	table = pragha_hig_workarea_table_new();
+
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Playback"));
+
+	ignore_errors_w = gtk_check_button_new_with_label(_("Ignore errors and continue playback"));
+
+	pragha_hig_workarea_table_add_wide_control(table, &row, ignore_errors_w);
+
+	if (pragha_preferences_get_ignore_errors (dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ignore_errors_w), TRUE);
+
+	dialog->ignore_errors_w = ignore_errors_w;
+
+	return table;
+}
+
+static GtkWidget*
 pref_create_appearance_page(PreferencesDialog *dialog)
 {
 	GtkWidget *table;
@@ -1302,8 +1335,8 @@ pragha_preferences_dialog_new (GtkWidget *parent)
 	PreferencesDialog *dialog;
 	PraghaHeader *header;
 	GtkWidget *pref_notebook;
-	GtkWidget *audio_vbox, *appearance_vbox, *library_vbox, *general_vbox, *desktop_vbox;
-	GtkWidget *label_appearance, *label_library, *label_general;
+	GtkWidget *audio_vbox, *playback_vbox, *appearance_vbox, *library_vbox, *general_vbox, *desktop_vbox;
+	GtkWidget *label_playback, *label_appearance, *label_library, *label_general;
 	#ifdef HAVE_LIBPEAS
 	GtkWidget *plugins_vbox;
 	GtkWidget *label_plugins;
@@ -1325,6 +1358,7 @@ pragha_preferences_dialog_new (GtkWidget *parent)
 	/* Labels */
 
 	label_appearance = gtk_label_new(_("Appearance"));
+	label_playback = gtk_label_new(_("Playback"));
 	label_library = gtk_label_new(_("Library"));
 	label_general = gtk_label_new(_("General"));
 	#ifdef HAVE_LIBPEAS
@@ -1337,12 +1371,22 @@ pragha_preferences_dialog_new (GtkWidget *parent)
 
 	gtk_container_set_border_width (GTK_CONTAINER(pref_notebook), 4);
 
+	/* Library */
+
 	library_vbox = pref_create_library_page(dialog);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), library_vbox, label_library);
 	gtk_widget_show_all (library_vbox);
 
 	/* Fose hide infobar */
 	pragha_preferences_set_lock_library (dialog->preferences, FALSE);
+
+	/* Playback */
+
+	playback_vbox = pref_create_playback_page (dialog);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), playback_vbox, label_playback);
+	gtk_widget_show_all (playback_vbox);
+
+	/* Audio */
 
 	dialog->audio_tab = pragha_preferences_tab_new (_("Audio"));
 	#ifndef G_OS_WIN32

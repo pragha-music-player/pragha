@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -28,7 +28,8 @@ gboolean pragha_close_window        (GtkWidget *widget, GdkEvent *event, PraghaA
 void     pragha_destroy_window      (GtkWidget *widget, PraghaApplication *pragha);
 void     pragha_window_toggle_state (PraghaApplication *pragha, gboolean ignoreActivity);
 
-void     gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, gpointer user_data);
+void     pragha_window_show_backend_error_dialog (PraghaApplication *pragha);
+
 void     gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GError *error, PraghaApplication *pragha);
 
 void     pragha_window_unfullscreen          (GObject *object, PraghaApplication *pragha);

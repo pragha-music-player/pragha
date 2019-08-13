@@ -84,30 +84,45 @@ pragha_window_toggle_state (PraghaApplication *pragha, gboolean ignoreActivity)
 	}
 }
 
+
 static void
-backend_error_dialog_response_cb (GtkDialog *dialog, gint response, PraghaApplication *pragha)
+toggle_check_ignore_button_cb (GtkToggleButton   *button,
+                               PraghaApplication *pragha)
+{
+	PraghaPreferences *preferences;
+	preferences = pragha_preferences_get();
+	pragha_preferences_set_ignore_errors (preferences,
+		gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (button)));
+	g_object_unref(preferences);
+}
+
+static void
+backend_error_dialog_response_cb (GtkDialog         *dialog,
+                                  gint               response,
+                                  PraghaApplication *pragha)
 {
 	switch (response) {
-		case GTK_RESPONSE_APPLY: {
+		case GTK_RESPONSE_APPLY:
 			pragha_advance_playback (pragha);
 			break;
-		}
-		case GTK_RESPONSE_ACCEPT:
+		case GTK_RESPONSE_CANCEL:
 		case GTK_RESPONSE_DELETE_EVENT:
-		default: {
+		default:
 			pragha_backend_stop (pragha_application_get_backend (pragha));
 			break;
-		}
 	}
 	gtk_widget_destroy(GTK_WIDGET(dialog));
 }
 
 void
-gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, gpointer user_data)
+pragha_window_show_backend_error_dialog (PraghaApplication *pragha)
 {
-	GtkWidget *dialog;
+	PraghaBackend *backend;
+	const GError *error;
+	GtkWidget *dialog, *check_ignore;
 
-	PraghaApplication *pragha = user_data;
+	backend = pragha_application_get_backend (pragha);
+	error = pragha_backend_get_error (backend);
 
 	const gchar *file = pragha_musicobject_get_file (pragha_backend_get_musicobject (backend));
 
@@ -118,10 +133,17 @@ gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, g
 	                                             _("<b>Error playing current track.</b>\n(%s)\n<b>Reason:</b> %s"),
 	                                             file, error->message);
 
-	gtk_dialog_add_button (GTK_DIALOG (dialog), _("_Stop"), GTK_RESPONSE_ACCEPT);
+	check_ignore = gtk_check_button_new_with_mnemonic (_("Ignore errors and continue playback"));
+	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))),
+	                    check_ignore, FALSE, FALSE, 0);
+
+	gtk_dialog_add_button (GTK_DIALOG (dialog), _("_Stop"), GTK_RESPONSE_CANCEL);
 	gtk_dialog_add_button (GTK_DIALOG (dialog), _("_Next"), GTK_RESPONSE_APPLY);
 
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_APPLY);
+
+	g_signal_connect (G_OBJECT (check_ignore), "toggled",
+	                  G_CALLBACK (toggle_check_ignore_button_cb), pragha);
 
 	g_signal_connect(G_OBJECT(dialog), "response",
 	                 G_CALLBACK(backend_error_dialog_response_cb), pragha);

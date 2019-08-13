@@ -86,6 +86,7 @@ struct _PraghaPreferencesClass
 #define KEY_AUDIO_DEVICE           "audio_device"
 #define KEY_SOFTWARE_MIXER         "software_mixer"
 #define KEY_SOFTWARE_VOLUME        "software_volume"
+#define KEY_IGNORE_ERRORS          "ignore_errors"
 #define KEY_EQ_10_BANDS            "equealizer_10_bands"
 #define KEY_EQ_PRESET              "equalizer_preset"
 
@@ -323,6 +324,14 @@ pragha_preferences_get_software_volume (PraghaPreferences *preferences);
 void
 pragha_preferences_set_software_volume (PraghaPreferences *preferences,
                                         gdouble software_volume);
+
+gboolean
+pragha_preferences_get_ignore_errors (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_ignore_errors (PraghaPreferences *preferences,
+                                      gboolean           ignore_errors);
+
 
 gboolean
 pragha_preferences_get_lateral_panel (PraghaPreferences *preferences);

@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2010-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2010-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -36,6 +36,8 @@ gboolean pragha_playback_can_go_next      (PraghaApplication *pragha);
 gint     pragha_playback_get_no_tracks    (PraghaApplication *pragha);
 
 void pragha_backend_finished_song         (PraghaBackend *backend, PraghaApplication *pragha);
+void pragha_backend_finished_error        (PraghaBackend *backend, const GError *error, PraghaApplication *pragha);
+
 void pragha_backend_tags_changed          (PraghaBackend *backend, gint changed, PraghaApplication *pragha);
 
 void pragha_playback_show_current_album_art (GObject *object, PraghaApplication *pragha);

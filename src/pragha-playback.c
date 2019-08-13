@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2010-2018 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2010-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -27,6 +27,7 @@
 #include "pragha-favorites.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
+#include "pragha-window.h"
 #include "pragha.h"
 
 static void pragha_playback_update_current_album_art (PraghaApplication *pragha, PraghaMusicobject *mobj);
@@ -219,6 +220,24 @@ void
 pragha_backend_finished_song (PraghaBackend *backend, PraghaApplication *pragha)
 {
 	pragha_advance_playback(pragha);
+}
+
+void
+pragha_backend_finished_error (PraghaBackend     *backend,
+                               const GError      *error,
+                               PraghaApplication *pragha)
+{
+	PraghaPreferences *preferences;
+	preferences = pragha_preferences_get();
+
+	if (!pragha_preferences_get_ignore_errors (preferences)) {
+		pragha_window_show_backend_error_dialog (pragha);
+	}
+	else {
+		pragha_advance_playback(pragha);
+	}
+
+	g_object_unref(preferences);
 }
 
 void
