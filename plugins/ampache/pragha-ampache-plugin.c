@@ -951,9 +951,7 @@ pragha_ampache_plugin_remove_setting (PraghaAmpachePlugin *plugin)
 	                                              G_CALLBACK(pragha_ampache_preferences_dialog_response),
 	                                              plugin);
 }
-/*
- *
- */
+
 
 /*
  * Interactions.
@@ -1021,6 +1019,11 @@ pragha_ampache_plugin_favorites_song_added (PraghaFavorites     *favorites,
 	const gchar *file = NULL;
 	gint playlist_id = 0;
 
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	if (!priv->implement_flags)
+		return;
+
 	if (!pragha_musicobject_is_ampache_file (mobj))
 		return;
 
@@ -1043,6 +1046,11 @@ pragha_ampache_plugin_favorites_song_removed (PraghaFavorites     *favorites,
 	PraghaDatabase *database;
 	const gchar *file = NULL;
 	gint playlist_id = 0;
+
+	PraghaAmpachePluginPrivate *priv = plugin->priv;
+
+	if (!priv->implement_flags)
+		return;
 
 	if (!pragha_musicobject_is_ampache_file (mobj))
 		return;
@@ -1175,7 +1183,8 @@ pragha_ampache_get_auth_done (GObject      *object,
 
 	if (priv->auth != NULL)
 	{
-		priv->implement_flags = g_ascii_strcasecmp (priv->version, "400001") >= 0;
+		/* Disabled until ampache solves several problems */
+		//priv->implement_flags = g_ascii_strcasecmp (priv->version, "400001") >= 0;
 
 		priv->ping_timer_id = g_timeout_add_seconds (10*60,
 		                                             pragha_ampache_plugin_ping_server,
@@ -1375,6 +1384,10 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
 	CDEBUG(DBG_PLUGIN, "Ampache Server plugin %s", G_STRFUNC);
+
+	/* Default settings */
+
+	priv->implement_flags = FALSE;
 
 	/* New grilo network helper */
 
