@@ -82,15 +82,19 @@ if test x"$HAVE_XDT_CSOURCE" != xyes; then
   AC_MSG_FAILURE([xdt-csource not installed])
 fi
 
-GSTREAMER_REQUIRED=0.11.90
 
 dnl Check for required packages
-XDT_CHECK_PACKAGE([GSTREAMER], [gstreamer-1.0], [$GSTREAMER_REQUIRED])
-XDT_CHECK_PACKAGE([GSTREAMER_BASE], [gstreamer-base-1.0], [$GSTREAMER_REQUIRED])
-XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.42])
-XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [3.14.0])
-XDT_CHECK_PACKAGE([SQLITE3], [sqlite3], [3.4])
-XDT_CHECK_PACKAGE([TAGLIB_C], [taglib_c], [1.8])
+PKG_CHECK_MODULES(PRAGHA, \
+	gstreamer-1.0 >= 0.11.90 \
+	gstreamer-base-1.0 >= 0.11.90 \
+	gio-2.0 >= 2.42 \
+	gtk+-3.0 >= 3.14 \
+	sqlite3 >= 3.4 \
+	taglib_c >= 1.8)
+
+AC_SUBST(PRAGHA_CFLAGS)
+AC_SUBST(PRAGHA_LIBS)
+
 
 dnl Check peas library to plugins support
 LIBPEAS_FOUND="no"
@@ -103,6 +107,67 @@ if test x"$LIBPEAS_FOUND" = x"yes"; then
 XDT_CHECK_PACKAGE([LIBPEAS_GTK], [libpeas-gtk-1.0], [1.0.0])
 fi
 
+PRAGHA_CFLAGS+=" $LIBPEAS_CFLAGS $LIBPEAS_GTK_CFLAGS"
+PRAGHA_LIBS+=" $LIBPEAS_LIBS $LIBPEAS_GTK_LIBS"
+
+
+dnl Check gstreamer-audio
+GSTREAMER_AUDIO_FOUND="no"
+XDT_CHECK_OPTIONAL_PACKAGE([GSTREAMER_AUDIO],
+                       [gstreamer-audio-1.0], 0.11.90,
+                       [gstreamer-audio],
+                       [gstreamer-audio], [yes])
+
+PRAGHA_CFLAGS+=" $GSTREAMER_AUDIO_CFLAGS"
+PRAGHA_LIBS+=" $GSTREAMER_AUDIO_LIBS"
+
+
+dnl Check libxfce4ui
+LIBXFCE4UI_FOUND="no"
+XDT_CHECK_OPTIONAL_PACKAGE([LIBXFCE4UI],
+                       [libxfce4ui-2], [4.10.0],
+                       [libxfce4ui],
+                       [libxfce4ui library], [yes])
+
+PRAGHA_CFLAGS+=" $LIBXFCE4UI_CFLAGS"
+PRAGHA_LIBS+=" $LIBXFCE4UI_LIBS"
+
+
+dnl Check totem-pl-parser
+PLPARSER_FOUND="no"
+XDT_CHECK_OPTIONAL_PACKAGE([PLPARSER],
+                       [totem-plparser], [2.26],
+                       [totem-plparser],
+                       [totem-plparser library], [yes])
+
+PRAGHA_CFLAGS+=" $PLPARSER_CFLAGS"
+PRAGHA_LIBS+=" $PLPARSER_LIBS"
+
+
+dnl Check for gudev
+GUDEV_FOUND="no"
+if test x"$LIBPEAS_FOUND" = x"yes"; then
+XDT_CHECK_OPTIONAL_PACKAGE([GUDEV],
+                           [gudev-1.0], [145],
+                           [gudev-1.0],
+                           [gudev-1.0 library], [yes])
+else
+AM_CONDITIONAL([HAVE_GUDEV], 0)
+fi
+
+PRAGHA_CFLAGS+=" $GUDEV_CFLAGS"
+PRAGHA_LIBS+=" $GUDEV_LIBS"
+
+
+dnl Check dbus plugins support
+DBUS_PLUGINS_SUPPORT="no"
+if test x"$LIBPEAS_FOUND" = x"yes" && test x"$WIN32" = x"no"; then
+DBUS_PLUGINS_SUPPORT="yes"
+fi
+
+AM_CONDITIONAL([DBUS_PLUGINS_SUPPORT], test "$DBUS_PLUGINS_SUPPORT" = "yes")
+
+
 dnl Check notify support
 LIBNOTIFY_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
@@ -113,6 +178,7 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBNOTIFY],
 else
 AM_CONDITIONAL([HAVE_LIBNOTIFY], 0)
 fi
+
 
 dnl Check global keyboard shortcuts support
 LIBKEYBINDER_FOUND="no"
@@ -125,6 +191,7 @@ else
 AM_CONDITIONAL([HAVE_LIBKEYBINDER], 0)
 fi
 
+
 dnl Check libglyr
 LIBGLYR_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
@@ -136,15 +203,6 @@ else
 AM_CONDITIONAL([HAVE_LIBGLYR], 0)
 fi
 
-GUDEV_FOUND="no"
-if test x"$LIBPEAS_FOUND" = x"yes"; then
-XDT_CHECK_OPTIONAL_PACKAGE([GUDEV],
-                           [gudev-1.0], [145],
-                           [gudev-1.0],
-                           [gudev-1.0 library], [yes])
-else
-AM_CONDITIONAL([HAVE_GUDEV], 0)
-fi
 
 LIBMTP_FOUND="no"
 if test x"$GUDEV_FOUND" = x"yes"; then
@@ -155,6 +213,7 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBMTP],
 else
 AM_CONDITIONAL([HAVE_LIBMTP], 0)
 fi
+
 
 dnl Check libpsuop
 LIBSOUP_FOUND="no"
@@ -167,6 +226,7 @@ else
 AM_CONDITIONAL([HAVE_LIBSOUP], 0)
 fi
 
+
 dnl Check libpsuop
 JSON_GLIB_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
@@ -178,6 +238,7 @@ else
 AM_CONDITIONAL([HAVE_JSON_GLIB], 0)
 fi
 
+
 dnl Check rygel
 RYGEL_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
@@ -188,6 +249,7 @@ XDT_CHECK_OPTIONAL_PACKAGE([RYGEL],
 else
 AM_CONDITIONAL([HAVE_RYGEL], 0)
 fi
+
 
 dnl Check grilo
 GRILO_FOUND="no"
@@ -218,6 +280,7 @@ if test x"$GRILO2_FOUND" = x"yes"; then
 GRILO_FOUND="yes"
 fi
 
+
 dnl Check grilo-net
 GRILO_NET_FOUND="no"
 GRILO_NET3_FOUND="no"
@@ -247,6 +310,7 @@ if test x"$GRILO_NET2_FOUND" = x"yes"; then
 GRILO_NET_FOUND="yes"
 fi
 
+
 dnl Check libclastfm
 LIBCLASTFM_FOUND="no"
 if test x"$LIBPEAS_FOUND" = x"yes"; then
@@ -257,6 +321,7 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBCLASTFM],
 else
 AM_CONDITIONAL([HAVE_LIBCLASTFM], 0)
 fi
+
 
 dnl Check libcdio, libcdio_paranoia and libcddb
 LIBCDIO_FOUND="no"
@@ -284,42 +349,20 @@ AM_CONDITIONAL([HAVE_LIBCDDB], 0)
 fi
 
 CDROM_SUPPORT="no"
-if test x"$LIBCDIO_FOUND" = x"yes"; then
-if test x"$LIBCDIO_PARANOIA_FOUND" = x"yes"; then
-if test x"$LIBCDDB_FOUND" = x"yes"; then
+if test x"$LIBCDIO_FOUND" = x"yes"  &&
+   test x"$LIBCDIO_PARANOIA_FOUND" = x"yes" &&
+   test x"$LIBCDDB_FOUND" = x"yes"; then
 CDROM_SUPPORT="yes"
 fi
-fi
-fi
+
 
 KOEL_SUPPORT="no"
-if test x"$LIBSOUP_FOUND" = x"yes"; then
-if test x"$JSON_GLIB_FOUND" = x"yes"; then
+if test x"$LIBPEAS_FOUND" = x"yes" &&
+   test x"$LIBSOUP_FOUND" = x"yes" &&
+   test x"$JSON_GLIB_FOUND" = x"yes"; then
 KOEL_SUPPORT="yes"
 fi
-fi
 
-
-dnl Check gstreamer-audio
-GSTREAMER_AUDIO_FOUND="no"
-XDT_CHECK_OPTIONAL_PACKAGE([GSTREAMER_AUDIO],
-                       [gstreamer-audio-1.0], [$GSTREAMER_REQUIRED],
-                       [gstreamer-audio],
-                       [gstreamer-audio], [yes])
-
-dnl Check libxfce4ui
-LIBXFCE4UI_FOUND="no"
-XDT_CHECK_OPTIONAL_PACKAGE([LIBXFCE4UI],
-                       [libxfce4ui-2], [4.10.0],
-                       [libxfce4ui],
-                       [libxfce4ui library], [yes])
-
-dnl Check totem-pl-parser
-PLPARSER_FOUND="no"
-XDT_CHECK_OPTIONAL_PACKAGE([PLPARSER],
-                       [totem-plparser], [2.26],
-                       [totem-plparser],
-                       [totem-plparser library], [yes])
 
 dnl Output files
 AC_CONFIG_FILES([Makefile])
@@ -371,8 +414,8 @@ echo "  Debug enabled.........: $debug"
 echo ""
 echo "  Plugins enabled.......: $LIBPEAS_FOUND"
 echo "   * Show notification when change songs..........(Need libnotify >= 0.7.5).: $LIBNOTIFY_FOUND"
-echo "   * Controls Pragha using Mpris2 interface.................................: $LIBPEAS_FOUND"
-echo "   * Controls Pragha using gnome-media-keys interface.......................: $LIBPEAS_FOUND"
+echo "   * Controls Pragha using Mpris2 interface.................................: $DBUS_PLUGINS_SUPPORT"
+echo "   * Controls Pragha using gnome-media-keys interface.......................: $DBUS_PLUGINS_SUPPORT"
 echo "   * Play Audio cds...............(Need libcdio, libcdio_paranoia, libcddb).: $CDROM_SUPPORT"
 echo "   * Controls Pragha using multimedia keys....(Need keybinder-3.0 >= 0.2.0).: $LIBKEYBINDER_FOUND"
 echo "   * Search lyrics, artists info and albums art.....(Need libglyr >= 1.0.1).: $LIBGLYR_FOUND"

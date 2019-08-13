@@ -3366,7 +3366,7 @@ init_current_playlist_columns(PraghaPlaylist* cplaylist)
 	const gchar *col_name;
 	GtkTreeViewColumn *col, *last;
 	GList *list = NULL, *i;
-	GSList *slist = NULL, *j, *widths;
+	GSList *slist = NULL, *j, *widths = NULL;
 	gint *col_widths, icon_size, k = 0;
 	gsize cnt = 0, isize;
 

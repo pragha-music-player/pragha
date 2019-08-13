@@ -1,4 +1,4 @@
-bin_PROGRAMS = pragha
+SUBDIRS = win32
 
 AM_CPPFLAGS =								\
 	-DG_LOG_DOMAIN=\"pragha\"					\
@@ -10,184 +10,212 @@ AM_CPPFLAGS =								\
 	-DUSRSTYLEDIR=\""$(datadir)/pragha/style"\"	\
 	-I$(top_srcdir)
 
-pragha_SOURCES = \
-	gtkcellrendererbubble.c \
+EXTRA_DIST =
+DISTCLEANFILES =
+
+#
+# Pragha library
+#
+pkglib_LTLIBRARIES = libpragha.la
+
+libpraghadir = $(includedir)/libpragha
+libpragha_HEADERS = \
 	gtkcellrendererbubble.h \
-	info-bar-import-music.c \
-	pragha-album-art.c \
 	pragha-album-art.h \
-	pragha-app-notification.c \
 	pragha-app-notification.h \
-	pragha-app-notification-container.c \
 	pragha-app-notification-container.h \
-	pragha-art-cache.c \
 	pragha-art-cache.h \
-	pragha-backend.c \
 	pragha-backend.h \
-	pragha-background-task-bar.c \
 	pragha-background-task-bar.h \
-	pragha-background-task-widget.c \
 	pragha-background-task-widget.h \
-	pragha-cmdline.c \
-	pragha-database-provider.c \
 	pragha-database-provider.h \
-	pragha-database.c \
 	pragha-database.h \
-	pragha-debug.c \
 	pragha-debug.h \
-	pragha-dnd.c \
 	pragha-dnd.h \
-	pragha-equalizer-dialog.c \
 	pragha-equalizer-dialog.h \
-	pragha-favorites.c \
 	pragha-favorites.h \
-	pragha-file-utils.c \
 	pragha-file-utils.h \
-	pragha-filter-dialog.c \
 	pragha-filter-dialog.h \
-	pragha-hig.c \
-	pragha-hig.h \
-	pragha-library-pane.c \
 	pragha-library-pane.h \
-	pragha-menubar.c \
+	pragha-hig.h \
 	pragha-menubar.h \
-	pragha-music-enum.c \
 	pragha-music-enum.h \
-	pragha-musicobject.c \
 	pragha-musicobject.h \
-	pragha-musicobject-mgmt.c \
 	pragha-musicobject-mgmt.h \
-	pragha-playback.c \
 	pragha-playback.h \
-	pragha-playlist.c \
 	pragha-playlist.h \
-	pragha-playlists-mgmt.c \
 	pragha-playlists-mgmt.h \
-	pragha-preferences.c \
 	pragha-preferences.h \
-	pragha-preferences-dialog.c \
 	pragha-preferences-dialog.h \
-	pragha-prepared-statement.c \
 	pragha-prepared-statement.h \
 	pragha-prepared-statement-private.h \
-	pragha-provider.c \
 	pragha-provider.h \
-	pragha-scanner.c \
 	pragha-scanner.h \
-	pragha-search-entry.c \
 	pragha-search-entry.h \
-	pragha-session.c \
 	pragha-session.h \
-	pragha-sidebar.c \
 	pragha-sidebar.h \
-	pragha-simple-async.c \
 	pragha-simple-async.h \
-	pragha-simple-widgets.c \
 	pragha-simple-widgets.h \
-	pragha-song-cache.c \
 	pragha-song-cache.h \
-	pragha-statusbar.c \
 	pragha-statusbar.h \
-	pragha-statusicon.c \
 	pragha-statusicon.h \
-	pragha-tagger.c \
 	pragha-tagger.h \
-	pragha-tags-dialog.c \
 	pragha-tags-dialog.h \
-	pragha-tags-mgmt.c \
 	pragha-tags-mgmt.h \
-	pragha-temp-provider.c \
 	pragha-temp-provider.h \
-	pragha-toolbar.c \
 	pragha-toolbar.h \
-	pragha-utils.c \
 	pragha-utils.h \
-	pragha-window.c \
 	pragha-window.h \
-	pragha.c \
 	pragha.h \
-	pragha-window-ui.h \
-	xml_helper.c \
 	xml_helper.h
 
-pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
-	$(GSTREAMER_BASE_CFLAGS)					\
-	$(GLIB_CFLAGS) 							\
-	$(GIO_CFLAGS) 							\
-	$(GTK_CFLAGS) 							\
-	$(SQLITE3_CFLAGS) 						\
-	$(TAGLIB_C_CFLAGS) 						\
-	-I$(top_srcdir)/src/include 					\
+libpragha_la_SOURCES = \
+	$(libpragha_HEADERS) \
+	$(BUILT_SOURCES) \
+	gtkcellrendererbubble.c \
+	info-bar-import-music.c \
+	pragha-album-art.c \
+	pragha-app-notification.c \
+	pragha-app-notification-container.c \
+	pragha-art-cache.c \
+	pragha-backend.c \
+	pragha-background-task-bar.c \
+	pragha-background-task-widget.c \
+	pragha-cmdline.c \
+	pragha-database-provider.c \
+	pragha-database.c \
+	pragha-debug.c \
+	pragha-dnd.c \
+	pragha-equalizer-dialog.c \
+	pragha-favorites.c \
+	pragha-file-utils.c \
+	pragha-filter-dialog.c \
+	pragha-hig.c \
+	pragha-library-pane.c \
+	pragha-menubar.c \
+	pragha-music-enum.c \
+	pragha-musicobject.c \
+	pragha-musicobject-mgmt.c \
+	pragha-playback.c \
+	pragha-playlist.c \
+	pragha-playlists-mgmt.c \
+	pragha-preferences.c \
+	pragha-preferences-dialog.c \
+	pragha-prepared-statement.c \
+	pragha-provider.c \
+	pragha-scanner.c \
+	pragha-search-entry.c \
+	pragha-session.c \
+	pragha-sidebar.c \
+	pragha-simple-async.c \
+	pragha-simple-widgets.c \
+	pragha-song-cache.c \
+	pragha-statusbar.c \
+	pragha-statusicon.c \
+	pragha-tagger.c \
+	pragha-tags-dialog.c \
+	pragha-tags-mgmt.c \
+	pragha-temp-provider.c \
+	pragha-toolbar.c \
+	pragha-utils.c \
+	pragha-window.c \
+	pragha.c \
+	xml_helper.c
+
+libpragha_la_CFLAGS = \
+	$(PRAGHA_CFLAGS) \
+	-I$(top_srcdir)/src/include \
 	-Wall -lm
 
-pragha_LDADD = $(GSTREAMER_LIBS)					\
-	$(GLIB_LIBS) 							\
-	$(GIO_LIBS) 							\
-	$(GTK_LIBS) 							\
-	$(SQLITE3_LIBS)							\
-	$(TAGLIB_C_LIBS)
-
-if HAVE_GSTREAMER_AUDIO
-pragha_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
-pragha_LDADD += $(GSTREAMER_AUDIO_LIBS)
-endif
-
-if HAVE_LIBXFCE4UI
-pragha_CFLAGS += $(LIBXFCE4UI_CFLAGS)
-pragha_LDADD += $(LIBXFCE4UI_LIBS)
-endif
-
-if HAVE_PLPARSER
-pragha_CFLAGS += $(PLPARSER_CFLAGS)
-pragha_LDADD += $(PLPARSER_LIBS)
-endif
+libpragha_la_LIBADD = \
+	$(PRAGHA_LIBS)
 
 if HAVE_LIBPEAS
-pragha_SOURCES += \
-	pragha-plugins-engine.c \
+libpragha_la_SOURCES += \
+	pragha-plugins-engine.c
+libpragha_HEADERS += \
 	pragha-plugins-engine.h
-
-pragha_CFLAGS += $(LIBPEAS_CFLAGS)
-pragha_LDADD += $(LIBPEAS_LIBS)
-
-pragha_CFLAGS += $(LIBPEAS_GTK_CFLAGS)
-pragha_LDADD += $(LIBPEAS_GTK_LIBS)
 endif
 
 if HAVE_GUDEV
-pragha_SOURCES += \
-	pragha-device-client.c \
+libpragha_la_SOURCES += \
+	pragha-device-client.c
+libpragha_HEADERS += \
 	pragha-device-client.h
-
-pragha_CFLAGS += $(GUDEV_CFLAGS)
-pragha_LDADD += $(GUDEV_LIBS)
 endif
 
-if WIN32
-pragha_SOURCES += \
-	win32/win32dep.c \
-	win32/win32dep.h
 
+#
+# WIN32
+#
+if WIN32
 AM_CFLAGS = \
 	-mms-bitfields
 
 AM_LDFLAGS = \
 	-Wl,-subsystem,windows
 
-pragha-res.o: win32/pragha.rc
-	$(WINDRES) -i win32/pragha.rc --input-format=rc -o pragha-res.o -O coff
-
-pragha_LDADD += pragha-res.o
+libpragha_la_LIBADD += \
+	win32/libwin32.la
 endif
 
+
+libpragha_la_LDFLAGS = \
+	-avoid-version \
+	-export-dynamic \
+	-no-undefined \
+	-export-symbols-regex "^[^_].*"
+
+
+#
+# pkgconfig
+#
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_in_files = libpragha.pc.in
+pkgconfig_DATA = $(pkgconfig_in_files:.pc.in=.pc)
+
+%.pc: %.pc.in
+	sed "s,\@VERSION\@,$(VERSION),g; s,\@prefix\@,$(prefix),g; s,\@libdir\@,$(libdir),g; s,\@includedir\@,$(includedir),g" < $< > $@
+
+EXTRA_DIST += \
+	$(pkgconfig_in_files)
+
+DISTCLEANFILES += \
+	$(pkgconfig_DATA)
+
+
+#
+# Build sources
+#
 pragha-window-ui.h: pragha-window.ui Makefile
 	$(AM_V_GEN) xdt-csource --strip-comments --strip-content --static --name=pragha_window_ui $< > $@
 
-EXTRA_DIST = \
-	pragha-window.ui
-
-DISTCLEANFILES = \
-	pragha-window-ui.h
-
 BUILT_SOURCES = \
 	pragha-window-ui.h
+
+DISTCLEANFILES += \
+	pragha-window-ui.h
+
+
+#
+# Pragha binary
+#
+bin_PROGRAMS = pragha
+
+pragha_SOURCES = \
+	main.c
+
+pragha_CFLAGS = \
+	$(libpragha_la_CFLAGS)
+
+pragha_LDADD = \
+	libpragha.la
+
+if WIN32
+pragha-res.o: win32/pragha.rc
+	$(WINDRES) -i win32/pragha.rc --input-format=rc -o pragha-res.o -O coff
+pragha_LDADD += pragha-res.o
+endif
+
+EXTRA_DIST += \
+	pragha-window.ui

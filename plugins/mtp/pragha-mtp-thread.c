@@ -227,7 +227,7 @@ get_stats (PraghaMtpThread *thread, PraghaMtpThreadTask *task)
 	gchar *first_storage_description = NULL;
 	guint64 first_storage_capacity, first_storage_free_space;
 	gchar *second_storage_description = NULL;
-	guint64 second_storage_capacity, second_storage_free_space;
+	guint64 second_storage_capacity = 0, second_storage_free_space = 0;
 	guint8 maximum_battery_level = 0, current_battery_level = 0;
 
 	CDEBUG(DBG_PLUGIN, "Mtp thread %s", G_STRFUNC);

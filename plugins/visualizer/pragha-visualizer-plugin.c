@@ -1,6 +1,6 @@
 /*************************************************************************/
-/* Copyright (C) 2018 matias <mati86dl@gmail.com>                        */
-/*                                                       */
+/* Copyright (C) 2018-2019 matias <mati86dl@gmail.com>                   */
+/*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
 /* the Free Software Foundation, either version 3 of the License, or     */
@@ -29,7 +29,6 @@
 #include <glib-object.h>
 #include <gmodule.h>
 #include <gtk/gtk.h>
-#include <gdk/gdkx.h>
 
 #include <libpeas/peas.h>
 #include <libpeas-gtk/peas-gtk.h>

@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2018 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2018-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -41,7 +41,7 @@ const gdouble ALPHA_MAX = 0.9;
 const gdouble SPIN_MIN = 0.002;
 const gdouble SPIN_MAX = 0.010;
 const gdouble SIZE_MIN = 0.5;
-const gdouble SIZE_MAX = 1.25;
+const gdouble PSIZE_MAX = 1.25;
 
 #ifdef DRAW_DEBUG
 static gint tick_i = 0;
@@ -101,7 +101,7 @@ pragha_particle_reset (PraghaParticle *particle)
 	particle->speed = g_random_double_range (SPEED_MIN, SPEED_MAX);
 	gdk_rgba_parse (&particle->color, COLORS[g_random_int_range (0, G_N_ELEMENTS(COLORS))]);
 
-	particle->size = g_random_double_range (SIZE_MIN, SIZE_MAX);
+	particle->size = g_random_double_range (SIZE_MIN, PSIZE_MAX);
 	particle->spin = g_random_double_range (SPIN_MIN, SPIN_MAX);
 
 	if (g_random_double_range (0.0, 1.0) < 0.5)

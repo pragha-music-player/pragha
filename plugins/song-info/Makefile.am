@@ -27,43 +27,18 @@ libsong_info_la_SOURCES =						\
 
 libsong_info_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 
-libsong_info_la_CFLAGS =						\
-	$(LIBGLYR_CFLAGS)							\
-	$(GSTREAMER_CFLAGS)						\
-	$(GSTREAMER_BASE_CFLAGS)					\
-	$(GLIB_CFLAGS) 							\
-	$(GIO_CFLAGS) 							\
-	$(GTK_CFLAGS) 							\
-	$(SQLITE3_CFLAGS) 						\
-	$(TAGLIB_C_CFLAGS) 						\
-	$(LIBPEAS_CFLAGS) 						\
-	$(LIBPEAS_GTK_CFLAGS) 						\
-	-I$(top_srcdir)/src/include 					\
-	-Wall
+libsong_info_la_CFLAGS = \
+	$(PRAGHA_CFLAGS) \
+	$(LIBGLYR_CFLAGS)
 
-libsong_info_la_LIBADD =						\
-	$(LIBGLYR_LIBS) 							\
-	$(GSTREAMER_LIBS)							\
-	$(GLIB_LIBS) 							\
-	$(GIO_LIBS) 							\
-	$(GTK_LIBS) 							\
-	$(SQLITE3_LIBS)							\
-	$(TAGLIB_C_LIBS)							\
-	$(LIBPEAS_LIBS)							\
-	$(LIBPEAS_GTK_LIBS)
+libsong_info_la_LIBADD = \
+	$(PRAGHA_LIBS) \
+	$(LIBGLYR_LIBS) \
+	$(top_builddir)/src/libpragha.la
 
-if HAVE_GSTREAMER_AUDIO
-libsong_info_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
-libsong_info_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
-endif
-
-if HAVE_LIBXFCE4UI
-libsong_info_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
-libsong_info_la_LIBADD += $(LIBXFCE4UI_LIBS)
-endif
 
 pragha-song-info-ui.h: pragha-song-info.ui Makefile
-	$(AM_V_GEN) exo-csource --strip-comments --strip-content --static --name=pragha_song_info_ui $< > $@
+	$(AM_V_GEN) xdt-csource --strip-comments --strip-content --static --name=pragha_song_info_ui $< > $@
 
 plugin_DATA = song-info.plugin
 

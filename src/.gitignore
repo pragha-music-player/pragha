@@ -2,5 +2,9 @@ pragha-window-ui.h
 *.deps*
 *.libs*
 pragha
+pragha.exe
 *.o
+*.la
+*.lo
+*.pc
 *~

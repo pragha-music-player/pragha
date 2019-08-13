@@ -22,6 +22,8 @@
 
 /* Function to save debug on file. */
 
+gint debug_level;
+
 void
 pragha_log_to_file (const gchar* log_domain,
                     GLogLevelFlags log_level,
