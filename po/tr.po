@@ -11,9 +11,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Pragha\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-04 09:01-0300\n"
-"PO-Revision-Date: 2018-05-28 13:08+0000\n"
-"Last-Translator: Ulaş Çakmak <Celonfix@protonmail.com>\n"
+"POT-Creation-Date: 2019-08-13 19:32-0300\n"
+"PO-Revision-Date: 2019-08-13 22:39+0000\n"
+"Last-Translator: Matias De lellis <mati86dl@gmail.com>\n"
 "Language-Team: Turkish (http://www.transifex.com/matias/Pragha/language/"
 "tr/)\n"
 "Language: tr\n"
@@ -52,10 +52,14 @@ msgid "Some changes need restart pragha."
 msgstr ""
 "Bazı değişiklikler sebebiyle pragha'nın yeniden başlatılması gerekiyor."
 
-#: ../src/pragha-background-task-bar.c:91
-#: ../src/pragha-background-task-bar.c:136
+#: ../src/pragha-background-task-bar.c:82
+#: ../src/pragha-background-task-bar.c:125
 msgid "There are background tasks working"
 msgstr "Çalışan arka plan görevleri var"
+
+#: ../src/pragha-device-client.c:113
+msgid "Ignore"
+msgstr "Görmezden gel"
 
 #: ../src/pragha-cmdline.c:192
 msgid "FILENAME"
@@ -153,20 +157,21 @@ msgstr "Ekolayzer"
 
 #: ../src/pragha-favorites.c:110 ../src/pragha-favorites.c:120
 #: ../src/pragha-favorites.c:130 ../src/pragha-favorites.c:132
-#: ../src/pragha-library-pane.c:1120 ../src/pragha-playlists-mgmt.c:1379
-#: ../src/pragha-playlists-mgmt.c:1416 ../src/pragha.c:1102
-#: ../src/pragha.c:1104 ../plugins/koel/pragha-koel-plugin.c:524
+#: ../src/pragha-library-pane.c:1197 ../src/pragha-playlists-mgmt.c:1378
+#: ../src/pragha-playlists-mgmt.c:1415 ../src/pragha.c:1106
+#: ../src/pragha.c:1108 ../plugins/koel/pragha-koel-plugin.c:535
 msgid "Favorites"
 msgstr "Favoriler"
 
-#: ../src/pragha-filter-dialog.c:218 ../src/pragha-library-pane.c:553
-#: ../src/pragha-tags-dialog.c:114
+#: ../src/pragha-filter-dialog.c:218 ../src/pragha-library-pane.c:626
+#: ../src/pragha-tags-dialog.c:114 ../plugins/mtp/pragha-mtp-thread.c:471
 #: ../plugins/notify/pragha-notify-plugin.c:166
 msgid "Unknown Artist"
 msgstr "Bilinmeyen sanatçı"
 
-#: ../src/pragha-filter-dialog.c:219 ../src/pragha-library-pane.c:560
-#: ../src/pragha-library-pane.c:565 ../src/pragha-tags-dialog.c:115
+#: ../src/pragha-filter-dialog.c:219 ../src/pragha-library-pane.c:633
+#: ../src/pragha-library-pane.c:638 ../src/pragha-tags-dialog.c:115
+#: ../plugins/mtp/pragha-mtp-thread.c:480
 #: ../plugins/notify/pragha-notify-plugin.c:167
 msgid "Unknown Album"
 msgstr "Bilinmeyen albüm"
@@ -188,173 +193,108 @@ msgstr "Oynatma sırasına ekle"
 msgid "_Jump to"
 msgstr "_Atla"
 
-#: ../src/pragha-library-pane.c:139
+#: ../src/pragha-library-pane.c:141
 msgid "_Skip"
 msgstr "_Atla"
 
-#: ../src/pragha-library-pane.c:140
+#: ../src/pragha-library-pane.c:142
 msgid "S_kip All"
 msgstr "_Hepsini Atla"
 
-#: ../src/pragha-library-pane.c:141
+#: ../src/pragha-library-pane.c:143
 msgid "Delete _All"
 msgstr "Hepsini Sil"
 
-#: ../src/pragha-library-pane.c:205
-msgid "_Expand library"
-msgstr "Kütüphaneyi _yay"
-
-#: ../src/pragha-library-pane.c:207
-msgid "_Collapse library"
-msgstr "Kütüphaneyi _toparla"
-
-#: ../src/pragha-library-pane.c:209 ../src/pragha-library-pane.c:1739
-msgid "Folders structure"
-msgstr "Klasör görünümü"
-
-#: ../src/pragha-library-pane.c:211 ../src/pragha-library-pane.c:1748
-#: ../src/pragha-playlist.c:115 ../src/pragha-playlist.c:3503
-#: ../src/pragha-statusicon.c:183 ../src/pragha-tags-dialog.c:168
-#: ../src/pragha-tags-dialog.c:1104
-msgid "Artist"
-msgstr "Sanatçı"
-
-#: ../src/pragha-library-pane.c:213 ../src/pragha-library-pane.c:1757
-#: ../src/pragha-playlist.c:116 ../src/pragha-playlist.c:3504
-#: ../src/pragha-statusicon.c:184 ../src/pragha-tags-dialog.c:169
-#: ../src/pragha-tags-dialog.c:1109
-msgid "Album"
-msgstr "Albüm"
-
-#: ../src/pragha-library-pane.c:215 ../src/pragha-library-pane.c:1766
-#: ../src/pragha-playlist.c:117 ../src/pragha-playlist.c:3505
-#: ../src/pragha-tags-dialog.c:170 ../src/pragha-tags-dialog.c:1114
-msgid "Genre"
-msgstr "Tür"
-
-#: ../src/pragha-library-pane.c:217 ../src/pragha-library-pane.c:1778
-msgid "Artist / Album"
-msgstr "Sanatçı / Albüm"
-
-#: ../src/pragha-library-pane.c:219 ../src/pragha-library-pane.c:1802
-msgid "Genre / Album"
-msgstr "Tür / Albüm"
-
-#: ../src/pragha-library-pane.c:221 ../src/pragha-library-pane.c:1790
-msgid "Genre / Artist"
-msgstr "Tür / Sanatçı"
-
-#: ../src/pragha-library-pane.c:223 ../src/pragha-library-pane.c:1817
-msgid "Genre / Artist / Album"
-msgstr "Tür / Sanatçı / Albüm"
-
-#. Playlist and Radio tree
-#: ../src/pragha-library-pane.c:278
-msgid "_Add to current playlist"
-msgstr "Güncel _listeye ekle"
-
-#: ../src/pragha-library-pane.c:280
-msgid "_Replace current playlist"
-msgstr "_Güncel listeyi yenile"
-
-#: ../src/pragha-library-pane.c:282
-msgid "Replace and _play"
-msgstr "Değiştir ve Çal"
-
-#: ../src/pragha-library-pane.c:284
-msgid "Add and _play"
-msgstr "Ekle ve _oynat"
-
-#: ../src/pragha-library-pane.c:286 ../src/pragha-playlists-mgmt.c:514
-msgid "Rename"
-msgstr "Yeniden adlandır"
-
-#: ../src/pragha-library-pane.c:288
-msgid "Delete"
-msgstr "Sil"
-
-#: ../src/pragha-library-pane.c:290 ../src/pragha-menubar.c:226
-#: ../src/pragha-menubar.c:231 ../src/pragha-playlists-mgmt.c:1369
-#: ../src/pragha-playlists-mgmt.c:1406
-msgid "Export"
-msgstr "Dışarı Aktar"
-
-#. Set dialog properties
-#: ../src/pragha-library-pane.c:292 ../src/pragha-tags-dialog.c:147
-msgid "Edit tags"
-msgstr "Etiketleri Düzenle"
-
-#: ../src/pragha-library-pane.c:294
-msgid "Move to _trash"
-msgstr "Çöpe _Taşı"
-
-#: ../src/pragha-library-pane.c:296
-msgid "Delete from library"
-msgstr "Kütüphaneden kaldır"
-
-#: ../src/pragha-library-pane.c:298 ../src/pragha-menubar.c:241
-msgid "_Rescan library"
-msgstr "Kütüphaneyi yenile"
-
-#: ../src/pragha-library-pane.c:300 ../src/pragha-menubar.c:243
-#: ../plugins/removable-media/pragha-devices-removable.c:317
-msgid "_Update library"
-msgstr "Kütüphaneyi güncelle"
-
-#: ../src/pragha-library-pane.c:302
-msgid "_Remove library"
-msgstr "_Kütüphaneyi kaldır"
-
-#: ../src/pragha-library-pane.c:558 ../src/pragha-tags-dialog.c:105
+#: ../src/pragha-library-pane.c:631 ../src/pragha-tags-dialog.c:105
 msgid "Unknown"
 msgstr "Bilinmeyen"
 
-#: ../src/pragha-library-pane.c:570
+#: ../src/pragha-library-pane.c:643
 msgid "Unknown Genre"
 msgstr "Bilinmeyen tür"
 
-#: ../src/pragha-library-pane.c:898
+#: ../src/pragha-library-pane.c:971
 msgid "File can't be moved to trash. Delete permanently?"
 msgstr "Dosya çöp kutusuna taşınamaz. Kalıcı olarak sil?"
 
-#: ../src/pragha-library-pane.c:899
+#: ../src/pragha-library-pane.c:972
 #, c-format
 msgid "The file \"%s\" cannot be moved to the trash. Details: %s"
 msgstr "Dosya \"%s\" maalesef silinemedi. Detay: %s"
 
-#: ../src/pragha-library-pane.c:907 ../src/pragha-playlists-mgmt.c:85
-#: ../src/pragha-playlists-mgmt.c:517 ../src/pragha-playlists-mgmt.c:589
-#: ../src/pragha-playlists-mgmt.c:1271 ../src/pragha-preferences-dialog.c:696
-#: ../src/pragha-preferences-dialog.c:1321 ../src/pragha-tags-dialog.c:149
-#: ../src/pragha.c:212 ../src/pragha.c:411
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:843
-#: ../plugins/tunein/pragha-tunein-plugin.c:263
+#: ../src/pragha-library-pane.c:980 ../src/pragha-playlists-mgmt.c:86
+#: ../src/pragha-playlists-mgmt.c:518 ../src/pragha-playlists-mgmt.c:590
+#: ../src/pragha-playlists-mgmt.c:1270 ../src/pragha-preferences-dialog.c:703
+#: ../src/pragha-preferences-dialog.c:1354 ../src/pragha-tags-dialog.c:149
+#: ../src/pragha.c:208 ../src/pragha.c:407
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:845
+#: ../plugins/tunein/pragha-tunein-plugin.c:268
 msgid "_Cancel"
 msgstr "_İptal et"
 
-#: ../src/pragha-library-pane.c:913
+#: ../src/pragha-library-pane.c:986
 msgid "_Delete"
 msgstr "_Sil"
 
-#: ../src/pragha-library-pane.c:2045 ../src/pragha-library-pane.c:2159
-#: ../src/pragha-playlists-mgmt.c:618 ../src/pragha-playlists-mgmt.c:645
-#: ../src/pragha.c:309
+#: ../src/pragha-library-pane.c:1817 ../src/pragha-window.ui.h:30
+msgid "Folders structure"
+msgstr "Klasör görünümü"
+
+#: ../src/pragha-library-pane.c:1826 ../src/pragha-playlist.c:115
+#: ../src/pragha-playlist.c:3503 ../src/pragha-statusicon.c:222
+#: ../src/pragha-tags-dialog.c:168 ../src/pragha-tags-dialog.c:1104
+#: ../src/pragha-window.ui.h:31
+msgid "Artist"
+msgstr "Sanatçı"
+
+#: ../src/pragha-library-pane.c:1835 ../src/pragha-playlist.c:116
+#: ../src/pragha-playlist.c:3504 ../src/pragha-statusicon.c:223
+#: ../src/pragha-tags-dialog.c:169 ../src/pragha-tags-dialog.c:1109
+#: ../src/pragha-window.ui.h:32
+msgid "Album"
+msgstr "Albüm"
+
+#: ../src/pragha-library-pane.c:1844 ../src/pragha-playlist.c:117
+#: ../src/pragha-playlist.c:3505 ../src/pragha-tags-dialog.c:170
+#: ../src/pragha-tags-dialog.c:1114 ../src/pragha-window.ui.h:33
+msgid "Genre"
+msgstr "Tür"
+
+#: ../src/pragha-library-pane.c:1856 ../src/pragha-window.ui.h:34
+msgid "Artist / Album"
+msgstr "Sanatçı / Albüm"
+
+#: ../src/pragha-library-pane.c:1868 ../src/pragha-window.ui.h:36
+msgid "Genre / Artist"
+msgstr "Tür / Sanatçı"
+
+#: ../src/pragha-library-pane.c:1880 ../src/pragha-window.ui.h:35
+msgid "Genre / Album"
+msgstr "Tür / Albüm"
+
+#: ../src/pragha-library-pane.c:1895 ../src/pragha-window.ui.h:37
+msgid "Genre / Artist / Album"
+msgstr "Tür / Sanatçı / Albüm"
+
+#: ../src/pragha-library-pane.c:2123 ../src/pragha-library-pane.c:2237
+#: ../src/pragha-playlists-mgmt.c:619 ../src/pragha-playlists-mgmt.c:646
+#: ../src/pragha.c:305
 msgid "Playlists"
 msgstr "Oynatma Listeleri"
 
-#: ../src/pragha-library-pane.c:2061 ../src/pragha-library-pane.c:2168
+#: ../src/pragha-library-pane.c:2139 ../src/pragha-library-pane.c:2246
 msgid "Radios"
 msgstr "Radyolar"
 
-#: ../src/pragha-library-pane.c:2667
+#: ../src/pragha-library-pane.c:2678
 msgid "Really want to move the files to trash?"
 msgstr "Bu dosyaları gerçekten çöpe aktarmak istiyor musunuz?"
 
-#: ../src/pragha-library-pane.c:2669
+#: ../src/pragha-library-pane.c:2680
 msgid "Delete permanently instead of moving to trash"
 msgstr "Çöp kutusuna taşımak yerine kalıcı olarak sil"
 
-#: ../src/pragha-library-pane.c:2723
+#: ../src/pragha-library-pane.c:2734
 msgid ""
 "Are you sure you want to delete current file from library?\n"
 "\n"
@@ -364,189 +304,202 @@ msgstr ""
 "\n"
 "Uyarı: Bu işlemin ardından bütün kütüphaneyi yenilemek zorundayız."
 
-#: ../src/pragha-menubar.c:194
+#: ../src/pragha-menubar.c:193
 msgid "_Playback"
 msgstr "_Çalma"
 
-#: ../src/pragha-menubar.c:195
+#: ../src/pragha-menubar.c:194
 msgid "Play_list"
 msgstr "Oynatma_listesi"
 
-#: ../src/pragha-menubar.c:196
+#: ../src/pragha-menubar.c:195
 msgid "_View"
 msgstr "_Görünüm"
 
-#: ../src/pragha-menubar.c:197 ../src/pragha-playlist.c:223
+#: ../src/pragha-menubar.c:196 ../src/pragha-playlist.c:223
 msgid "_Tools"
 msgstr "_Araçlar"
 
-#: ../src/pragha-menubar.c:198
+#: ../src/pragha-menubar.c:197
 msgid "_Help"
 msgstr "_Yardım"
 
-#: ../src/pragha-menubar.c:199 ../src/pragha-statusicon.c:86
+#: ../src/pragha-menubar.c:198 ../src/pragha-window.ui.h:24
 #: ../plugins/notify/pragha-notify-plugin.c:177
 msgid "Previous track"
 msgstr "Önceki parça"
 
-#: ../src/pragha-menubar.c:201 ../src/pragha-statusicon.c:88
+#: ../src/pragha-menubar.c:200 ../src/pragha-window.ui.h:25
 msgid "Play / Pause"
 msgstr "Oynat / Durakla"
 
-#: ../src/pragha-menubar.c:203 ../src/pragha-statusicon.c:90
+#: ../src/pragha-menubar.c:202 ../src/pragha-window.ui.h:26
 msgid "Stop"
 msgstr "Dur"
 
-#: ../src/pragha-menubar.c:205 ../src/pragha-statusicon.c:92
+#: ../src/pragha-menubar.c:204 ../src/pragha-window.ui.h:27
 #: ../plugins/notify/pragha-notify-plugin.c:181
 msgid "Next track"
 msgstr "Sonraki parça"
 
-#: ../src/pragha-menubar.c:207 ../src/pragha-playlist.c:226
-#: ../src/pragha-statusicon.c:94
+#: ../src/pragha-menubar.c:206 ../src/pragha-playlist.c:226
+#: ../src/pragha-window.ui.h:4
 msgid "Edit track information"
 msgstr "Parça bilgisini düzenle"
 
-#: ../src/pragha-menubar.c:209 ../src/pragha-statusicon.c:96
+#: ../src/pragha-menubar.c:208 ../src/pragha-window.ui.h:23
 msgid "_Quit"
 msgstr "_Çık"
 
-#: ../src/pragha-menubar.c:211 ../src/pragha-statusicon.c:82
+#: ../src/pragha-menubar.c:210 ../src/pragha-window.ui.h:1
 msgid "_Add files"
 msgstr "Dosya _ekle"
 
-#: ../src/pragha-menubar.c:212
+#: ../src/pragha-menubar.c:211
 msgid "Open a media file"
 msgstr "Müzik parçası aç"
 
-#: ../src/pragha-menubar.c:213 ../src/pragha-statusicon.c:84
+#: ../src/pragha-menubar.c:212 ../src/pragha-window.ui.h:2
 msgid "Add _location"
 msgstr "_Konum ekle"
 
-#: ../src/pragha-menubar.c:215
+#: ../src/pragha-menubar.c:214 ../src/pragha-window.ui.h:3
 msgid "_Add the library"
 msgstr "_Kütüphaneye ekle"
 
-#: ../src/pragha-menubar.c:217
+#: ../src/pragha-menubar.c:216 ../src/pragha-window.ui.h:6
 msgid "Remove selection from playlist"
 msgstr "Seçimi listeden çıkar"
 
-#: ../src/pragha-menubar.c:219 ../src/pragha-playlist.c:216
+#: ../src/pragha-menubar.c:218 ../src/pragha-playlist.c:216
+#: ../src/pragha-window.ui.h:7
 msgid "Crop playlist"
 msgstr "Parça listesini kırp"
 
-#: ../src/pragha-menubar.c:221 ../src/pragha-playlist.c:218
+#: ../src/pragha-menubar.c:220 ../src/pragha-playlist.c:218
+#: ../src/pragha-window.ui.h:8
 msgid "Clear playlist"
 msgstr "Parça Listesini Temizle"
 
-#: ../src/pragha-menubar.c:223 ../src/pragha-playlist.c:220
-#: ../src/pragha-playlists-mgmt.c:69 ../src/pragha-playlists-mgmt.c:92
-#: ../src/pragha-playlists-mgmt.c:1276
+#: ../src/pragha-menubar.c:222 ../src/pragha-playlist.c:220
+#: ../src/pragha-playlists-mgmt.c:70 ../src/pragha-playlists-mgmt.c:93
+#: ../src/pragha-playlists-mgmt.c:1275 ../src/pragha-window.ui.h:9
 msgid "Save playlist"
 msgstr "Oynatma Listesini Kaydet"
 
-#: ../src/pragha-menubar.c:224 ../src/pragha-menubar.c:229
-#: ../src/pragha-playlists-mgmt.c:1365 ../src/pragha-playlists-mgmt.c:1402
+#: ../src/pragha-menubar.c:223 ../src/pragha-menubar.c:228
+#: ../src/pragha-playlists-mgmt.c:1364 ../src/pragha-playlists-mgmt.c:1401
+#: ../src/pragha-window.ui.h:10
 msgid "New playlist"
 msgstr "Yeni liste"
 
-#: ../src/pragha-menubar.c:228 ../src/pragha-playlist.c:221
-#: ../src/pragha-playlists-mgmt.c:71 ../src/pragha-playlists-mgmt.c:94
-#: ../src/pragha-playlists-mgmt.c:1278
+#: ../src/pragha-menubar.c:225 ../src/pragha-menubar.c:230
+#: ../src/pragha-playlists-mgmt.c:1368 ../src/pragha-playlists-mgmt.c:1405
+#: ../src/pragha-window.ui.h:11
+msgid "Export"
+msgstr "Dışarı Aktar"
+
+#: ../src/pragha-menubar.c:227 ../src/pragha-playlist.c:221
+#: ../src/pragha-playlists-mgmt.c:72 ../src/pragha-playlists-mgmt.c:95
+#: ../src/pragha-playlists-mgmt.c:1277 ../src/pragha-window.ui.h:12
 msgid "Save selection"
 msgstr "Seçimi kaydet"
 
-#: ../src/pragha-menubar.c:233
+#: ../src/pragha-menubar.c:232 ../src/pragha-window.ui.h:13
 msgid "_Search in playlist"
 msgstr "Oynatma listesinde _ara"
 
-#: ../src/pragha-menubar.c:235
+#: ../src/pragha-menubar.c:234 ../src/pragha-window.ui.h:21
 msgid "_Preferences"
 msgstr "_Tercihler"
 
-#: ../src/pragha-menubar.c:237
+#: ../src/pragha-menubar.c:236 ../src/pragha-window.ui.h:14
 msgid "Jump to playing song"
 msgstr "Çalınan parçaya git"
 
-#: ../src/pragha-menubar.c:239
+#: ../src/pragha-menubar.c:238 ../src/pragha-window.ui.h:5
 msgid "E_qualizer"
 msgstr "Ses _dengeleyicisi"
 
-#: ../src/pragha-menubar.c:245
+#: ../src/pragha-menubar.c:240 ../src/pragha-window.ui.h:19
+msgid "_Rescan library"
+msgstr "Kütüphaneyi yenile"
+
+#: ../src/pragha-menubar.c:242 ../src/pragha-window.ui.h:20
+msgid "_Update library"
+msgstr "Kütüphaneyi güncelle"
+
+#: ../src/pragha-menubar.c:244
 msgid "_Statistics"
 msgstr "_İstatistikler"
 
-#: ../src/pragha-menubar.c:247
+#: ../src/pragha-menubar.c:246
 msgid "Homepage"
 msgstr "Anasayfa"
 
-#: ../src/pragha-menubar.c:249
+#: ../src/pragha-menubar.c:248
 msgid "Community"
 msgstr "Topluluk "
 
-#: ../src/pragha-menubar.c:251
+#: ../src/pragha-menubar.c:250
 msgid "Wiki"
 msgstr "Wiki"
 
-#: ../src/pragha-menubar.c:253
+#: ../src/pragha-menubar.c:252
 msgid "Translate Pragha"
 msgstr "Pragha'yı tercüme et"
 
-#: ../src/pragha-menubar.c:255 ../src/pragha-statusicon.c:80
+#: ../src/pragha-menubar.c:254 ../src/pragha-window.ui.h:22
 msgid "About"
 msgstr "Hakkında"
 
-#: ../src/pragha-menubar.c:260
+#: ../src/pragha-menubar.c:259
 msgid "_Shuffle"
 msgstr "Tesa_düfle"
 
-#: ../src/pragha-menubar.c:263
+#: ../src/pragha-menubar.c:262
 msgid "_Repeat"
 msgstr "_Tekrarla"
 
-#: ../src/pragha-menubar.c:266
+#: ../src/pragha-menubar.c:265
 msgid "_Fullscreen"
 msgstr "_Tam ekran"
 
-#: ../src/pragha-menubar.c:269
+#: ../src/pragha-menubar.c:268
 msgid "Lateral _panel"
 msgstr "Yan bölme"
 
-#: ../src/pragha-menubar.c:272
+#: ../src/pragha-menubar.c:271
 msgid "Secondary lateral panel"
 msgstr "İkincil yan panel"
 
-#: ../src/pragha-menubar.c:275
+#: ../src/pragha-menubar.c:274
 msgid "Playback controls below"
 msgstr "Tekrarlama seçenekleri"
 
-#: ../src/pragha-menubar.c:278
+#: ../src/pragha-menubar.c:277
 msgid "Menubar"
 msgstr "Menü çubuğu"
 
-#: ../src/pragha-menubar.c:281
-msgid "Status bar"
-msgstr "Durum çubuğu"
-
-#: ../src/pragha-menubar.c:642
+#: ../src/pragha-menubar.c:638
 msgid "Total Tracks:"
 msgstr "Parça sayısı:"
 
-#: ../src/pragha-menubar.c:644
+#: ../src/pragha-menubar.c:640
 msgid "Total Artists:"
 msgstr "Sanatçı sayısı:"
 
-#: ../src/pragha-menubar.c:646
+#: ../src/pragha-menubar.c:642
 msgid "Total Albums:"
 msgstr "Albüm sayısı:"
 
-#: ../src/pragha-menubar.c:649
+#: ../src/pragha-menubar.c:645
 msgid "Statistics"
 msgstr "İstatistikler"
 
 #. Create labels
 #: ../src/pragha-playlist.c:114 ../src/pragha-playlist.c:3502
-#: ../src/pragha-statusicon.c:182 ../src/pragha-tags-dialog.c:167
+#: ../src/pragha-statusicon.c:221 ../src/pragha-tags-dialog.c:167
 #: ../src/pragha-tags-dialog.c:1099
 msgid "Title"
 msgstr "Başlık"
@@ -568,7 +521,7 @@ msgstr "Açıklama"
 
 #. Create labels
 #: ../src/pragha-playlist.c:121 ../src/pragha-playlist.c:3509
-#: ../src/pragha-statusicon.c:185 ../src/pragha-tags-dialog.c:689
+#: ../src/pragha-statusicon.c:224 ../src/pragha-tags-dialog.c:689
 msgid "Length"
 msgstr "Süre"
 
@@ -630,7 +583,7 @@ msgid "Copy \"%s\" to selected comments"
 msgstr "\"%s\" ı seçili yorumlara kopyala"
 
 #. Create the checkmenu items
-#: ../src/pragha-playlist.c:3501 ../src/pragha.c:642
+#: ../src/pragha-playlist.c:3501 ../src/pragha.c:637
 msgid "Track"
 msgid_plural "Tracks"
 msgstr[0] "Parça"
@@ -640,65 +593,69 @@ msgstr[1] "Parça"
 msgid "Clear sort"
 msgstr "Sıralamayı boşver"
 
-#: ../src/pragha-playlists-mgmt.c:73
+#: ../src/pragha-playlists-mgmt.c:74
 msgid "Playlist"
 msgstr "Parça Listesi"
 
-#: ../src/pragha-playlists-mgmt.c:86 ../src/pragha-playlists-mgmt.c:518
-#: ../src/pragha-playlists-mgmt.c:1272 ../src/pragha-preferences-dialog.c:1322
+#: ../src/pragha-playlists-mgmt.c:87 ../src/pragha-playlists-mgmt.c:519
+#: ../src/pragha-playlists-mgmt.c:1271 ../src/pragha-preferences-dialog.c:1355
 #: ../src/pragha-tags-dialog.c:150 ../src/pragha-tags-dialog.c:789
-#: ../src/pragha.c:412 ../plugins/song-info/pragha-song-info-dialog.c:84
-#: ../plugins/tunein/pragha-tunein-plugin.c:264
+#: ../src/pragha.c:408 ../plugins/song-info/pragha-song-info-dialog.c:84
+#: ../plugins/tunein/pragha-tunein-plugin.c:269
 msgid "_Ok"
 msgstr "_Tamam"
 
-#: ../src/pragha-playlists-mgmt.c:129
+#: ../src/pragha-playlists-mgmt.c:130
 msgid "<b>con_playlist</b> is a reserved playlist name"
 msgstr "<b>con_playlist</b> çalma listesinin adı muhafızdır"
 
-#: ../src/pragha-playlists-mgmt.c:153
+#: ../src/pragha-playlists-mgmt.c:154
 #, c-format
 msgid "Do you want to overwrite the playlist: %s ?"
 msgstr "%s listesinin üzerine yazmak istiyor musunuz?"
 
-#: ../src/pragha-playlists-mgmt.c:507
+#: ../src/pragha-playlists-mgmt.c:508
 msgid "Choose a new name"
 msgstr "Yeni bir isim seç"
 
-#: ../src/pragha-playlists-mgmt.c:556
+#: ../src/pragha-playlists-mgmt.c:515 ../src/pragha-window.ui.h:42
+msgid "Rename"
+msgstr "Yeniden adlandır"
+
+#: ../src/pragha-playlists-mgmt.c:557
 #, c-format
 msgid "Do you want to delete the item: %s ?"
 msgstr "%s 'i silmek istiyor musunuz?"
 
-#: ../src/pragha-playlists-mgmt.c:586
+#: ../src/pragha-playlists-mgmt.c:587
 msgid "Export playlist to file"
 msgstr "Oynatma listesini dosyaya kaydet"
 
-#: ../src/pragha-playlists-mgmt.c:590
+#: ../src/pragha-playlists-mgmt.c:591
 msgid "_Save"
 msgstr "_Kaydet"
 
 #: ../src/pragha-playlists-mgmt.c:1036
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:816
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:818
 #, c-format
 msgid "Added %d songs from %d of the imported playlist."
 msgstr "İçe aktarılan parça listesinden %d parçanın %d'i eklendi."
 
-#: ../src/pragha-playlists-mgmt.c:1256
+#: ../src/pragha-playlists-mgmt.c:1255
 msgid "What do you want to do?"
 msgstr "Ne yapmak istiyorsun?"
 
-#: ../src/pragha-playlists-mgmt.c:1258
+#: ../src/pragha-playlists-mgmt.c:1257
 #, c-format
 msgid "Replace the playlist \"%s\""
 msgstr "\"%s\" parçasını değiştir"
 
-#: ../src/pragha-playlists-mgmt.c:1263
+#: ../src/pragha-playlists-mgmt.c:1262
 #, c-format
 msgid "Add to playlist \"%s\""
 msgstr "\"%s\" parçasını ekle"
 
-#: ../src/pragha-preferences-dialog.c:203
+#: ../src/pragha-preferences-dialog.c:204
 msgid ""
 "Patterns should be of the form:<filename>;<filename>;....\n"
 "A maximum of six patterns are allowed.\n"
@@ -708,204 +665,219 @@ msgstr ""
 "En fazla altı örüntüye izin verilmektedir.\n"
 "Şimdilik meta karakterler kabul edilmemektedir (yama kabul ediyoruz :-))."
 
-#: ../src/pragha-preferences-dialog.c:226
+#: ../src/pragha-preferences-dialog.c:227
 msgid "Album art pattern"
 msgstr "Kapak resmi türü"
 
-#: ../src/pragha-preferences-dialog.c:538
-#: ../src/pragha-preferences-dialog.c:1172
+#: ../src/pragha-preferences-dialog.c:545
+#: ../src/pragha-preferences-dialog.c:1205
 msgid "Start normal"
 msgstr "Düzgün başla"
 
-#: ../src/pragha-preferences-dialog.c:542
-#: ../src/pragha-preferences-dialog.c:1173
+#: ../src/pragha-preferences-dialog.c:549
+#: ../src/pragha-preferences-dialog.c:1206
 msgid "Start fullscreen"
 msgstr "Tam ekran kipinde başla"
 
-#: ../src/pragha-preferences-dialog.c:546
-#: ../src/pragha-preferences-dialog.c:1174
+#: ../src/pragha-preferences-dialog.c:553
+#: ../src/pragha-preferences-dialog.c:1207
 msgid "Start in system tray"
 msgstr "Sistem çekmecesinde başla"
 
 #. Create a folder chooser dialog
-#: ../src/pragha-preferences-dialog.c:693
+#: ../src/pragha-preferences-dialog.c:700
 msgid "Select a folder to add to library"
 msgstr "Kütüphaneye eklemek için klasör seçiniz"
 
-#: ../src/pragha-preferences-dialog.c:697
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:844
+#: ../src/pragha-preferences-dialog.c:704
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:846
 msgid "_Open"
 msgstr "_Aç"
 
-#: ../src/pragha-preferences-dialog.c:919
-#: ../src/pragha-preferences-dialog.c:1347
+#. Audio
+#: ../src/pragha-preferences-dialog.c:929
+#: ../src/pragha-preferences-dialog.c:1391
 msgid "Audio"
 msgstr "Ses"
 
-#: ../src/pragha-preferences-dialog.c:921
+#: ../src/pragha-preferences-dialog.c:931
 msgid "Audio sink"
 msgstr "Ses alıcı"
 
-#: ../src/pragha-preferences-dialog.c:925
-#: ../src/pragha-preferences-dialog.c:945
-#: ../src/pragha-preferences-dialog.c:951
+#: ../src/pragha-preferences-dialog.c:935
+#: ../src/pragha-preferences-dialog.c:955
+#: ../src/pragha-preferences-dialog.c:961
 msgid "Restart Required"
 msgstr "Yeniden başlatılması gerekiyor"
 
-#: ../src/pragha-preferences-dialog.c:940
+#: ../src/pragha-preferences-dialog.c:950
 msgid "Audio Device"
 msgstr "Ses aygıtı"
 
-#: ../src/pragha-preferences-dialog.c:950
+#: ../src/pragha-preferences-dialog.c:960
 msgid "Use software mixer"
 msgstr "Yazılım mikseri kullan"
 
-#: ../src/pragha-preferences-dialog.c:984
-#: ../src/pragha-preferences-dialog.c:1328
+#: ../src/pragha-preferences-dialog.c:994
+#: ../src/pragha-preferences-dialog.c:1362
 msgid "Library"
 msgstr "Kütüphane"
 
-#: ../src/pragha-preferences-dialog.c:988
+#: ../src/pragha-preferences-dialog.c:998
 msgid "Can not change directories while they are analyzing."
 msgstr "Analiz yaparken dizinleri değiştiremez."
 
-#: ../src/pragha-preferences-dialog.c:1008
+#: ../src/pragha-preferences-dialog.c:1018
 msgid "Folders"
 msgstr "_Klasörler"
 
-#: ../src/pragha-preferences-dialog.c:1042 ../src/pragha.c:213
+#: ../src/pragha-preferences-dialog.c:1052 ../src/pragha.c:209
 msgid "_Add"
 msgstr "_Ekle"
 
-#: ../src/pragha-preferences-dialog.c:1043
+#: ../src/pragha-preferences-dialog.c:1053
 msgid "_Remove"
 msgstr "_Kaldır"
 
 #. Sort by year option.
-#: ../src/pragha-preferences-dialog.c:1059
+#: ../src/pragha-preferences-dialog.c:1069
 msgid "Sort albums by release year"
 msgstr "Albümleri yayınlanma yılına göre sırala"
 
+#: ../src/pragha-preferences-dialog.c:1106
+#: ../src/pragha-preferences-dialog.c:1361
+msgid "Playback"
+msgstr ""
+
+#: ../src/pragha-preferences-dialog.c:1108 ../src/pragha-window.c:136
+msgid "Ignore errors and continue playback"
+msgstr ""
+
 #. Labels
-#: ../src/pragha-preferences-dialog.c:1097
-#: ../src/pragha-preferences-dialog.c:1327
+#: ../src/pragha-preferences-dialog.c:1130
+#: ../src/pragha-preferences-dialog.c:1360
 msgid "Appearance"
 msgstr "Görünüm"
 
-#: ../src/pragha-preferences-dialog.c:1099
+#: ../src/pragha-preferences-dialog.c:1132
 msgid "Use system title bar and borders"
 msgstr "Sistem başlık çubuğunu ve kenarlıklarını kullan"
 
-#: ../src/pragha-preferences-dialog.c:1105
+#: ../src/pragha-preferences-dialog.c:1138
 msgid "Use small icons on the toolbars"
 msgstr "Araç çubuklarında küçük simgeler kullan"
 
-#: ../src/pragha-preferences-dialog.c:1108
+#: ../src/pragha-preferences-dialog.c:1141
 msgid "Controls"
 msgstr "Kontroller"
 
-#: ../src/pragha-preferences-dialog.c:1110
+#: ../src/pragha-preferences-dialog.c:1143
 msgid "Show Album art in Panel"
 msgstr "Yan bölmede kapak resmini göster"
 
-#: ../src/pragha-preferences-dialog.c:1113
+#: ../src/pragha-preferences-dialog.c:1146
 msgid "Size of Album art"
 msgstr "Kapak resim bouyutu"
 
-#: ../src/pragha-preferences-dialog.c:1118
+#: ../src/pragha-preferences-dialog.c:1151
 msgid "Album art file pattern"
 msgstr "Kapak resmi dosya seçeneği"
 
-#: ../src/pragha-preferences-dialog.c:1160 ../src/pragha-search-entry.c:116
+#: ../src/pragha-preferences-dialog.c:1193 ../src/pragha-search-entry.c:116
 msgid "Search"
 msgstr "Ara"
 
 #. Instant search.
-#: ../src/pragha-preferences-dialog.c:1162 ../src/pragha-search-entry.c:41
+#: ../src/pragha-preferences-dialog.c:1195 ../src/pragha-search-entry.c:41
 msgid "Search while typing"
 msgstr "Yazarken ara"
 
 #. Aproximate search.
-#: ../src/pragha-preferences-dialog.c:1165 ../src/pragha-search-entry.c:48
+#: ../src/pragha-preferences-dialog.c:1198 ../src/pragha-search-entry.c:48
 msgid "Search similar words"
 msgstr "Benzer kelimeleri ara"
 
-#: ../src/pragha-preferences-dialog.c:1168
+#: ../src/pragha-preferences-dialog.c:1201
 msgid "When starting pragha"
 msgstr "Pragha başlatılırken"
 
-#: ../src/pragha-preferences-dialog.c:1171
+#: ../src/pragha-preferences-dialog.c:1204
 msgid "Remember last window state"
 msgstr "Son kullanılan pencere kipini hatırla"
 
-#: ../src/pragha-preferences-dialog.c:1177
+#: ../src/pragha-preferences-dialog.c:1210
 msgid "Restore last playlist"
 msgstr "Son çalma sırasını geri getir"
 
-#: ../src/pragha-preferences-dialog.c:1180
+#: ../src/pragha-preferences-dialog.c:1213
 msgid "When adding folders"
 msgstr "Dizin eklerken"
 
-#: ../src/pragha-preferences-dialog.c:1181 ../src/pragha.c:204
+#: ../src/pragha-preferences-dialog.c:1214 ../src/pragha.c:200
 msgid "Add files recursively"
 msgstr "Ortam dosyaları ekle"
 
-#: ../src/pragha-preferences-dialog.c:1205
-#: ../src/pragha-preferences-dialog.c:1362
+#: ../src/pragha-preferences-dialog.c:1238
+#: ../src/pragha-preferences-dialog.c:1406
 msgid "Desktop"
 msgstr "Masaüstü"
 
-#: ../src/pragha-preferences-dialog.c:1207
+#: ../src/pragha-preferences-dialog.c:1240
 msgid "Show Pragha icon in the notification area"
 msgstr "Uyarı alanında Pragha simgesini göster"
 
-#: ../src/pragha-preferences-dialog.c:1210
+#: ../src/pragha-preferences-dialog.c:1243
 msgid "Minimize Pragha when closing window"
 msgstr "Pencereyi kapatırken Pragha'yı simge durumuna küçült"
 
-#: ../src/pragha-preferences-dialog.c:1231
-#: ../src/pragha-preferences-dialog.c:1331
+#: ../src/pragha-preferences-dialog.c:1264
+#: ../src/pragha-preferences-dialog.c:1365
 msgid "Plugins"
 msgstr "Eklentiler"
 
 #. The main preferences dialog
-#: ../src/pragha-preferences-dialog.c:1318
+#: ../src/pragha-preferences-dialog.c:1351
 msgid "Preferences"
 msgstr "Tercihler"
 
-#: ../src/pragha-preferences-dialog.c:1329
+#: ../src/pragha-preferences-dialog.c:1363
 msgid "General"
 msgstr "Genel"
 
-#: ../src/pragha-preferences-dialog.c:1366
+#: ../src/pragha-preferences-dialog.c:1410
 msgid "Services"
 msgstr "Servisler"
 
-#: ../src/pragha-preferences-dialog.c:1380
+#: ../src/pragha-preferences-dialog.c:1424
 msgid "Preferences of Pragha"
 msgstr "Praghanın Tercihleri"
 
-#: ../src/pragha-scanner.c:97 ../plugins/ampache/pragha-ampache-plugin.c:490
+#: ../src/pragha-scanner.c:96 ../plugins/ampache/pragha-ampache-plugin.c:677
 #, c-format
 msgid "%i files analyzed of %i detected"
 msgstr "%i dosya analiz edildi %i algılandı"
 
 #. Create background task widget
 #. New Task widget
-#: ../src/pragha-scanner.c:103 ../src/pragha-scanner.c:341
-#: ../src/pragha-scanner.c:734 ../plugins/ampache/pragha-ampache-plugin.c:1093
-#: ../plugins/koel/pragha-koel-plugin.c:1178
+#: ../src/pragha-scanner.c:102 ../src/pragha-scanner.c:341
+#: ../src/pragha-scanner.c:730 ../plugins/ampache/pragha-ampache-plugin.c:1424
+#: ../plugins/koel/pragha-koel-plugin.c:1252
 msgid "Searching files to analyze"
 msgstr "Analiz için dosyalar aranıyor"
 
-#: ../src/pragha-scanner.c:258
+#: ../src/pragha-scanner.c:257
 msgid "Library scan complete"
 msgstr "Dosya güncelleşmesi tamamlandı"
 
-#: ../src/pragha-statusicon.c:177 ../src/pragha-toolbar.c:168
+#: ../src/pragha-statusicon.c:216 ../src/pragha-toolbar.c:171
 #: ../src/pragha-toolbar.c:550
 msgid "<b>Not playing</b>"
 msgstr "<b>Çalınmıyor</b>"
+
+#. Set dialog properties
+#: ../src/pragha-tags-dialog.c:147 ../src/pragha-window.ui.h:45
+msgid "Edit tags"
+msgstr "Etiketleri Düzenle"
 
 #: ../src/pragha-tags-dialog.c:171
 msgid "Track No"
@@ -957,7 +929,7 @@ msgstr "Seçili tüm şarkıları %d olarak ayarlamak istiyormusunuz ?"
 msgid "Do you want to set the title tag of ALL of the selected tracks to: %s ?"
 msgstr "Seçili tüm şarkıların türünü %s olarak ayarlamak istiyormusunuz ?"
 
-#: ../src/pragha-toolbar.c:144
+#: ../src/pragha-toolbar.c:147
 #, c-format
 msgid ""
 "%s <small><span weight=\"light\">by</span></small> %s <small><span weight="
@@ -966,26 +938,24 @@ msgstr ""
 "%s <small><span weight=\"light\">by</span></small> %s <small><span weight="
 "\"light\">in</span></small> %s"
 
-#: ../src/pragha-toolbar.c:149
-#: ../plugins/song-info/pragha-song-info-thread-dialog.c:52
+#: ../src/pragha-toolbar.c:152
+#: ../plugins/song-info/pragha-song-info-thread-dialog.c:53
 #, c-format
 msgid "%s <small><span weight=\"light\">by</span></small> %s"
 msgstr "%s <small><span weight=\"light\">ile</span></small> %s"
 
-#: ../src/pragha-toolbar.c:153
+#: ../src/pragha-toolbar.c:156
 #, c-format
 msgid "%s <small><span weight=\"light\">in</span></small> %s"
 msgstr "%s <small><span weight=\"light\">içi</span></small> %s"
 
-#: ../src/pragha-toolbar.c:215
-#, fuzzy
+#: ../src/pragha-toolbar.c:218
 msgid "Remove from Favorites"
-msgstr "Parça listesinden çıkar"
+msgstr ""
 
-#: ../src/pragha-toolbar.c:215
-#, fuzzy
+#: ../src/pragha-toolbar.c:218
 msgid "Add to Favorites"
-msgstr "Favorilere ekle"
+msgstr ""
 
 #: ../src/pragha-toolbar.c:855
 msgid "Previous Track"
@@ -1007,25 +977,25 @@ msgstr "Sonraki Parça"
 msgid "Leave Fullscreen"
 msgstr "Tam ekrandan çık"
 
-#: ../src/pragha-toolbar.c:882
+#: ../src/pragha-toolbar.c:885
 msgid "Play songs in a random order"
 msgstr "Oynatma sırasındaki dosyaları rastgele oynat"
 
-#: ../src/pragha-toolbar.c:885
+#: ../src/pragha-toolbar.c:888
 msgid "Repeat playback list at the end"
 msgstr "Oynatma sırasının sonuna gelindiğinde tekrar başla"
 
-#: ../src/pragha-utils.c:414
+#: ../src/pragha-utils.c:493
 msgid "day"
 msgid_plural "days"
 msgstr[0] "gün"
 msgstr[1] "gün"
 
-#: ../src/pragha-utils.c:717
+#: ../src/pragha-utils.c:796
 msgid "Unable to open the browser"
 msgstr "Adres açılamadı"
 
-#: ../src/pragha-window.c:117
+#: ../src/pragha-window.c:133
 #, c-format
 msgid ""
 "<b>Error playing current track.</b>\n"
@@ -1036,133 +1006,238 @@ msgstr ""
 "(%s)\n"
 "<b>Neden:</b> %s"
 
-#: ../src/pragha-window.c:120
+#: ../src/pragha-window.c:140
 msgid "_Stop"
 msgstr "_Dur"
 
-#: ../src/pragha-window.c:121
+#: ../src/pragha-window.c:141
 msgid "_Next"
 msgstr "_Sonraki"
 
-#: ../src/pragha.c:179
+#: ../src/pragha.c:175
 msgid "Select a file to play"
 msgstr "Oynatmak için dosya seç"
 
-#: ../src/pragha.c:226 ../plugins/lastfm/pragha-lastfm-plugin.c:848
+#: ../src/pragha.c:222 ../plugins/lastfm/pragha-lastfm-plugin.c:850
 msgid "Supported media"
 msgstr "Desteklenen medya"
 
-#: ../src/pragha.c:312
+#: ../src/pragha.c:308
 msgid "All files"
 msgstr "Tüm dosyalar"
 
-#: ../src/pragha.c:388
+#: ../src/pragha.c:384
 msgid "Enter the URL of an internet radio stream"
 msgstr "İnternet radyosu için URL girin"
 
-#: ../src/pragha.c:395
+#: ../src/pragha.c:391
 msgid "Give it a name to save"
 msgstr "Kaydetmek için bir isim belirle"
 
-#: ../src/pragha.c:408
+#: ../src/pragha.c:404
 msgid "Add a location"
 msgstr "Konum ekle"
 
-#: ../src/pragha.c:540
-msgid "translator-credits"
-msgstr "Almancı Türkçe çevirimi:Hakan Erduman <smultimeter@gmail.com> "
-
 #. Setup application name and pulseaudio role
 #. Launch server
-#: ../src/pragha.c:772 ../src/pragha.c:1010 ../src/pragha.c:1407
+#: ../src/pragha.c:767 ../src/pragha.c:1012 ../src/main.c:61
+#: ../data/io.github.pragha_music_player.metainfo.xml.in.h:1
 #: ../plugins/dlna/pragha-dlna-plugin.c:246
 msgid "Pragha Music Player"
 msgstr "Pragha Müzik Çalar"
+
+#: ../src/pragha-window.ui.h:15
+msgid "Show lateral _panel"
+msgstr ""
+
+#: ../src/pragha-window.ui.h:16
+msgid "Show secondary lateral panel"
+msgstr ""
+
+#: ../src/pragha-window.ui.h:17
+msgid "Show menubar"
+msgstr ""
+
+#: ../src/pragha-window.ui.h:18
+msgid "Show status bar"
+msgstr ""
+
+#: ../src/pragha-window.ui.h:28
+msgid "_Expand library"
+msgstr "Kütüphaneyi _yay"
+
+#: ../src/pragha-window.ui.h:29
+msgid "_Collapse library"
+msgstr "Kütüphaneyi _toparla"
+
+#: ../src/pragha-window.ui.h:38
+#: ../plugins/song-info/pragha-song-info-pane.c:471
+msgid "_Add to current playlist"
+msgstr "Güncel _listeye ekle"
+
+#: ../src/pragha-window.ui.h:39
+msgid "_Replace current playlist"
+msgstr "_Güncel listeyi yenile"
+
+#: ../src/pragha-window.ui.h:40
+msgid "Replace and _play"
+msgstr "Değiştir ve Çal"
+
+#: ../src/pragha-window.ui.h:41
+msgid "Add and play"
+msgstr ""
+
+#: ../src/pragha-window.ui.h:43
+msgid "Delete"
+msgstr "Sil"
+
+#: ../src/pragha-window.ui.h:44
+msgid "_Remove library"
+msgstr "_Kütüphaneyi kaldır"
+
+#: ../src/pragha-window.ui.h:46
+msgid "Move to _trash"
+msgstr "Çöpe _Taşı"
+
+#: ../src/pragha-window.ui.h:47
+msgid "Delete from library"
+msgstr "Kütüphaneden kaldır"
+
+#: ../data/io.github.pragha_music_player.metainfo.xml.in.h:2
+#: ../data/pragha.desktop.in.h:2
+msgid "Manage and listen your music"
+msgstr ""
+
+#: ../data/io.github.pragha_music_player.metainfo.xml.in.h:3
+msgid ""
+"<p> Pragha is a Lightweight Music Player for GNU/Linux, based on GTK3, "
+"SQLite, and completely written in C, constructed to be fast, light, and "
+"simultaneously tries to be complete without obstructing the daily work. "
+"Although it was especifically designed for the Xfce desktop, it integrates "
+"very well in other desktop environments. </p> <p>Features:</p> <ul> <li>Full "
+"integration with GTK3 support, but always completely independent of gnome or "
+"xfce</li> <li>Two panel desing inspired on Amarok 1.4. Library and current "
+"playlist</li> <li>Library with multiple views, according tags or folder "
+"structure</li> <li>Search, filtering and queue songs on current playlist</"
+"li> <li>Playing and edit tag of mp3, m4a, ogg, flac, asf, wma, and ape "
+"files. Of course you need codecs</li> <li>Playlist management. Exporting M3U "
+"and read M3U, PLS, XSPF and WAX playlists</li> <li>Play audio CDs and "
+"identifies this with CDDB</li> <li>Playback control with command line and "
+"MPRIS2</li> <li>Native desktop notifications with libnotify</li> </ul>"
+msgstr ""
+
+#: ../data/io.github.pragha_music_player.metainfo.xml.in.h:4
+msgid "audio"
+msgstr ""
+
+#: ../data/io.github.pragha_music_player.metainfo.xml.in.h:5
+msgid "multimedia"
+msgstr ""
+
+#: ../data/io.github.pragha_music_player.metainfo.xml.in.h:6
+msgid "player"
+msgstr ""
 
 #: ../data/pragha.desktop.in.h:1
 msgid "Music Player"
 msgstr "Müzik Çalar"
 
-#: ../data/pragha.desktop.in.h:2
-msgid "Manage and listen to music"
-msgstr "Müziği yönetin ve dinleyin"
+#: ../data/pragha.desktop.in.h:3
+msgid "audio;multimedia;player;"
+msgstr ""
 
-#: ../plugins/acoustid/pragha-acoustid-plugin.c:103
-#: ../plugins/acoustid/pragha-acoustid-plugin.c:442
+#: ../plugins/acoustid/pragha-acoustid-plugin.c:104
+#: ../plugins/acoustid/pragha-acoustid-plugin.c:451
 msgid "Search tags on AcoustID"
 msgstr "Akustik kimliğindeki etiketleri ara"
 
-#: ../plugins/acoustid/pragha-acoustid-plugin.c:265
-msgid "AcoustID not found any similar song"
-msgstr "Akustik kimliği benzer bir şarkı bulunamadı"
-
-#: ../plugins/acoustid/pragha-acoustid-plugin.c:369
-msgid "Searching tags on AcoustID"
-msgstr "Akustik kimliğinde etiketler aranıyor"
-
-#: ../plugins/acoustid/pragha-acoustid-plugin.c:382
+#: ../plugins/acoustid/pragha-acoustid-plugin.c:212
+#: ../plugins/acoustid/pragha-acoustid-plugin.c:391
 msgid "There was an error when searching your tags on AcoustID"
 msgstr "Etiketlerinizi Akustik  kimliğinde ararken bir hata oluştu"
 
-#: ../plugins/ampache/pragha-ampache-plugin.c:152
-#: ../plugins/ampache/pragha-ampache-plugin.c:1118
+#: ../plugins/acoustid/pragha-acoustid-plugin.c:269
+msgid "AcoustID not found any similar song"
+msgstr "Akustik kimliği benzer bir şarkı bulunamadı"
+
+#: ../plugins/acoustid/pragha-acoustid-plugin.c:373
+msgid "Searching tags on AcoustID"
+msgstr "Akustik kimliğinde etiketler aranıyor"
+
+#: ../plugins/ampache/pragha-ampache-plugin.c:166
+#: ../plugins/ampache/pragha-ampache-plugin.c:1449
 msgid "Refresh the Ampache library"
 msgstr "Ampache kütüphanesini yenile"
 
-#: ../plugins/ampache/pragha-ampache-plugin.c:695
-#: ../plugins/koel/pragha-koel-plugin.c:851
+#: ../plugins/ampache/pragha-ampache-plugin.c:238
+#: ../plugins/ampache/pragha-ampache-plugin.c:240
+#: ../plugins/ampache/pragha-ampache-plugin.c:1039
+#: ../plugins/ampache/pragha-ampache-plugin.c:1041
+#: ../plugins/ampache/pragha-ampache-plugin.c:1062
+msgid "Favorites on Ampache"
+msgstr ""
+
+#: ../plugins/ampache/pragha-ampache-plugin.c:708
+msgid "The server has no songs to play"
+msgstr ""
+
+#: ../plugins/ampache/pragha-ampache-plugin.c:886
+#: ../plugins/koel/pragha-koel-plugin.c:911
 msgid "Server"
 msgstr "Sunucu"
 
-#: ../plugins/ampache/pragha-ampache-plugin.c:707
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:1664
-#: ../plugins/koel/pragha-koel-plugin.c:862
+#: ../plugins/ampache/pragha-ampache-plugin.c:898
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:1710
+#: ../plugins/koel/pragha-koel-plugin.c:922
 msgid "Username"
 msgstr "Kullanıcı Adı"
 
-#: ../plugins/ampache/pragha-ampache-plugin.c:719
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:1671
-#: ../plugins/koel/pragha-koel-plugin.c:874
+#: ../plugins/ampache/pragha-ampache-plugin.c:910
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:1717
+#: ../plugins/koel/pragha-koel-plugin.c:934
 msgid "Password"
 msgstr "Parola"
 
-#: ../plugins/cdrom/pragha-cdrom-plugin.c:410
-#: ../plugins/cdrom/pragha-cdrom-plugin.c:707
+#: ../plugins/ampache/pragha-ampache-plugin.c:1147
+msgid "Unable to establish conection with Ampache"
+msgstr ""
+
+#: ../plugins/cdrom/pragha-cdrom-plugin.c:412
+#: ../plugins/cdrom/pragha-cdrom-plugin.c:701
 msgid "Audio CD"
 msgstr "Müzik CD'si"
 
-#: ../plugins/cdrom/pragha-cdrom-plugin.c:533
+#: ../plugins/cdrom/pragha-cdrom-plugin.c:535
 msgid "Audio/Data CD"
 msgstr "Ses / Veri CD'si"
 
-#: ../plugins/cdrom/pragha-cdrom-plugin.c:534
+#: ../plugins/cdrom/pragha-cdrom-plugin.c:536
 msgid "An audio CD was inserted"
 msgstr "Bir ses CD'si takıldı"
 
-#: ../plugins/cdrom/pragha-cdrom-plugin.c:535
-#: ../plugins/cdrom/pragha-cdrom-plugin.c:604
-#: ../plugins/cdrom/pragha-cdrom-plugin.c:816
+#: ../plugins/cdrom/pragha-cdrom-plugin.c:537
+#: ../plugins/cdrom/pragha-cdrom-plugin.c:606
+#: ../plugins/cdrom/pragha-cdrom-plugin.c:802
+#: ../plugins/cdrom/pragha-cdrom-plugin.c:807
 msgid "Add Audio _CD"
 msgstr "Müzik _CD'si ekle"
 
-#: ../plugins/cdrom/pragha-cdrom-plugin.c:709
+#: ../plugins/cdrom/pragha-cdrom-plugin.c:703
 msgid "Audio CD Device"
 msgstr "CD Okuyucu aygıtı"
 
-#: ../plugins/cdrom/pragha-cdrom-plugin.c:730
+#: ../plugins/cdrom/pragha-cdrom-plugin.c:724
 msgid "Connect to CDDB server"
 msgstr "CDDB Sunucusuna bağlan"
 
-#: ../plugins/devices/pragha-device-client.c:77
-msgid "Ignore"
-msgstr "Görmezden gel"
-
-#: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:89
-#: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:282
+#: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:90
+#: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:220
+#: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:225
+#: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:289
 msgid "Search music on DLNA server"
 msgstr "DLNA sunucusunda müzik ara"
 
-#: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:220
+#: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:219
 #, c-format
 msgid "Music of the %s server was added."
 msgstr "%s sunucusunun müziği eklendi."
@@ -1171,76 +1246,89 @@ msgstr "%s sunucusunun müziği eklendi."
 msgid "Could not find any DLNA server."
 msgstr "DLNA sunucusu bulunamadı."
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:176
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:1425
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:177
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:1470
+#: ../plugins/lastfm/pragha-lastfm-menu.ui.h:1
 msgid "_Lastfm"
 msgstr "_Lastfm"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:177
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:840
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:178
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:842
+#: ../plugins/lastfm/pragha-lastfm-menu.ui.h:4
 msgid "Import a XSPF playlist"
 msgstr "XSPF listesini içeri aktar"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:179
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:180
+#: ../plugins/lastfm/pragha-lastfm-menu.ui.h:5
 msgid "Add favorites"
 msgstr "Favorilere ekle"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:181
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:208
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:182
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:209
+#: ../plugins/lastfm/pragha-lastfm-menu.ui.h:6
 msgid "Add similar"
 msgstr "Benzer ekle"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:388
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:389
 msgid "Unable to establish conection with Last.fm"
 msgstr "Last.fm ile bağlantı kurulamıyor"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:577
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:578
 msgid "Last.fm suggested a tag correction"
 msgstr "Last.fm etikette bir düzeltme önerdi"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:603
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:605
 msgid "Love song on Last.fm failed."
 msgstr "Last.fm'de parçayı sevme başarısız oldu"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:621
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:624
 msgid "Unlove song on Last.fm failed."
 msgstr "Last.fm üzerinde Unlove şarkısı başarısız oldu"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:655
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:658
 #, c-format
 msgid "Added %d tracks of %d suggested from Last.fm"
 msgstr "Last.fm'in önerdiği %d parçaları %d'den eklendi"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:658
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:661
 #, c-format
 msgid "Last.fm doesn't suggest any similar track"
 msgstr "Last.fm benzer bir parça önermiyor"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:662
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:665
 #, c-format
 msgid "Added %d songs of the last %d loved on Last.fm."
 msgstr "Last.fm'de sevdiğiniz son %d parçanın %d'i eklendi."
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:665
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:668
 #, c-format
 msgid "You don't have favorite tracks on Last.fm"
 msgstr "Last.fm'de favori parçanız yok"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:1118
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:1099
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:1136
 msgid "Last.fm submission failed"
 msgstr "Last.fm gönderimi başarısız oldu"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:1120
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:1138
 msgid "Track scrobbled on Last.fm"
 msgstr "Parça Last.fm'e skroplandı"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:1238
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:1266
 msgid "Update current song on Last.fm failed."
 msgstr "Bu parçayı Last.fm'de güncelleme başarısız oldu."
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:1661
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:1707
 msgid "Scrobble on Last.fm"
 msgstr "Parça Last.fm'e skroplandı"
+
+#: ../plugins/mtp/pragha-mtp-thread.c:208
+msgid "Unknown MTP device"
+msgstr ""
+
+#: ../plugins/mtp/pragha-mtp-thread.c:461
+msgid "Music"
+msgstr ""
 
 #: ../plugins/mpris2/pragha-mpris2-plugin.c:856
 msgid "Tracks"
@@ -1263,21 +1351,33 @@ msgstr "Bildirilerde kapak resmi göster"
 msgid "Add actions to change track in notifications"
 msgstr "Bildirimlerde parça değiştirmek için eylemler ekle"
 
-#: ../plugins/koel/pragha-koel-plugin.c:145
-#: ../plugins/koel/pragha-koel-plugin.c:1203
+#: ../plugins/koel/pragha-koel-plugin.c:150
+#: ../plugins/koel/pragha-koel-plugin.c:1277
 msgid "Refresh the Koel library"
 msgstr "Koel kütüphanesini yenileyin"
 
-#: ../plugins/koel/pragha-koel-plugin.c:523
-#: ../plugins/koel/pragha-koel-plugin.c:718
-#: ../plugins/koel/pragha-koel-plugin.c:738
+#: ../plugins/koel/pragha-koel-plugin.c:534
+#: ../plugins/koel/pragha-koel-plugin.c:778
+#: ../plugins/koel/pragha-koel-plugin.c:798
 msgid "Favorites on Koel"
 msgstr "Koel'de Sık Kullanılanlar"
 
+#: ../plugins/koel/pragha-koel-plugin.c:551
+msgid "Koel"
+msgstr ""
+
+#: ../plugins/koel/pragha-koel-plugin.c:552
+msgid "Import finished"
+msgstr ""
+
+#: ../plugins/koel/pragha-koel-plugin.c:1004
+msgid "Unable to establish conection with Koel"
+msgstr ""
+
 #: ../plugins/removable-media/pragha-devices-removable.c:225
 #, c-format
-msgid "Unable to access \"%s\""
-msgstr "Erişilemiyor \"%s\""
+msgid "Unable to accesss to “%s” device"
+msgstr ""
 
 #: ../plugins/removable-media/pragha-devices-removable.c:229
 #: ../plugins/removable-media/pragha-devices-removable.c:315
@@ -1286,92 +1386,127 @@ msgstr "Çıkarılabilir Aygıt"
 
 #: ../plugins/removable-media/pragha-devices-removable.c:311
 #, c-format
-msgid "Want to manage \"%s\" volume?"
-msgstr "Sesi  \"%s\" yönetmek istiyor musun?"
+msgid "Do you want to manage the “%s” device with Pragha?"
+msgstr ""
 
-#: ../plugins/song-info/pragha-song-info-plugin.c:89
-msgid "Search _lyric"
-msgstr "Ara _beste"
+#: ../plugins/removable-media/pragha-devices-removable.c:316
+msgid "An removable device was detected"
+msgstr ""
 
-#: ../plugins/song-info/pragha-song-info-plugin.c:91
-msgid "Search _artist info"
-msgstr "Ara _sanatçı bilgisi"
+#: ../plugins/removable-media/pragha-devices-removable.c:317
+msgid "Manage device"
+msgstr ""
 
-#: ../plugins/song-info/pragha-song-info-plugin.c:512
-msgid "Song Information"
-msgstr "Şarkı Bilgisi"
+#: ../plugins/song-info/pragha-song-info-pane.c:175
+msgid "Thanks to "
+msgstr ""
 
-#: ../plugins/song-info/pragha-song-info-plugin.c:514
-msgid "Download the album art while playing their songs."
-msgstr "Şarkılarını çalarken albüm resmini indirin."
-
-#: ../plugins/song-info/pragha-song-info-thread-dialog.c:51
-#, c-format
-msgid "Lyrics thanks to %s"
-msgstr "Şarkı sözleri %s"
-
-#: ../plugins/song-info/pragha-song-info-thread-dialog.c:58
+#: ../plugins/song-info/pragha-song-info-pane.c:377
+#: ../plugins/song-info/pragha-song-info-thread-dialog.c:59
+#: ../plugins/song-info/pragha-song-info-thread-dialog.c:86
+#: ../plugins/song-info/pragha-song-info.ui.h:1
 #, c-format
 msgid "Artist info"
 msgstr "Sanatçı bilgisi"
 
-#: ../plugins/song-info/pragha-song-info-thread-dialog.c:59
+#: ../plugins/song-info/pragha-song-info-pane.c:390
+#: ../plugins/song-info/pragha-song-info-pane.c:453
+#: ../plugins/song-info/pragha-song-info-pane.c:517
+#: ../plugins/song-info/pragha-song-info-thread-dialog.c:82
+#: ../plugins/song-info/pragha-song-info.ui.h:2
+msgid "Lyrics"
+msgstr ""
+
+#: ../plugins/song-info/pragha-song-info-pane.c:403
+#: ../plugins/song-info/pragha-song-info.ui.h:3
+msgid "Similar songs"
+msgstr ""
+
+#: ../plugins/song-info/pragha-song-info-plugin.c:90
+msgid "Search _lyric"
+msgstr "Ara _beste"
+
+#: ../plugins/song-info/pragha-song-info-plugin.c:92
+msgid "Search _artist info"
+msgstr "Ara _sanatçı bilgisi"
+
+#: ../plugins/song-info/pragha-song-info-plugin.c:558
+msgid "Song Information"
+msgstr "Şarkı Bilgisi"
+
+#: ../plugins/song-info/pragha-song-info-plugin.c:560
+msgid "Download the album art while playing their songs."
+msgstr "Şarkılarını çalarken albüm resmini indirin."
+
+#: ../plugins/song-info/pragha-song-info-plugin.c:564
+msgid "Proxy"
+msgstr ""
+
+#: ../plugins/song-info/pragha-song-info-thread-dialog.c:52
+#, c-format
+msgid "Lyrics thanks to %s"
+msgstr "Şarkı sözleri %s"
+
+#: ../plugins/song-info/pragha-song-info-thread-dialog.c:60
 #, c-format
 msgid "%s <small><span weight=\"light\">thanks to</span></small> %s"
 msgstr "%s <small><span weight=\"light\">teşekkürler</span></small> %s"
 
-#: ../plugins/song-info/pragha-song-info-thread-dialog.c:81
-#: ../plugins/song-info/pragha-song-info-thread-pane.c:182
+#: ../plugins/song-info/pragha-song-info-thread-dialog.c:82
+#: ../plugins/song-info/pragha-song-info-thread-pane.c:178
 msgid "Lyrics not found."
 msgstr "Parçanın sözleri bulunamadı."
 
-#: ../plugins/song-info/pragha-song-info-thread-dialog.c:84
-#: ../plugins/song-info/pragha-song-info-thread-pane.c:187
+#: ../plugins/song-info/pragha-song-info-thread-dialog.c:86
+#: ../plugins/song-info/pragha-song-info-thread-pane.c:183
 msgid "Artist information not found."
 msgstr "Sanatçı bilgisi bulunamadı."
 
-#: ../plugins/song-info/pragha-song-info-thread-pane.c:192
+#: ../plugins/song-info/pragha-song-info-thread-pane.c:188
 msgid "No recommended songs."
 msgstr "Önerilen şarkı yok."
 
-#: ../plugins/song-info/pragha-song-info-thread-pane.c:276
-#: ../plugins/song-info/pragha-song-info-thread-pane.c:287
+#: ../plugins/song-info/pragha-song-info-thread-pane.c:272
+#: ../plugins/song-info/pragha-song-info-thread-pane.c:281
+#: ../plugins/song-info/pragha-song-info-thread-pane.c:289
 msgid "Searching..."
 msgstr "Aranıyor..."
 
-#: ../plugins/tunein/pragha-tunein-plugin.c:95
-#: ../plugins/tunein/pragha-tunein-plugin.c:322
+#: ../plugins/tunein/pragha-tunein-plugin.c:98
+#: ../plugins/tunein/pragha-tunein-plugin.c:327
 msgid "Search radio on TuneIn"
 msgstr "TuneIn'da radyo ara"
 
-#: ../plugins/tunein/pragha-tunein-plugin.c:148
-#: ../plugins/tunein/pragha-tunein-plugin.c:159
-#: ../plugins/tunein/pragha-tunein-plugin.c:170
+#: ../plugins/tunein/pragha-tunein-plugin.c:151
+#: ../plugins/tunein/pragha-tunein-plugin.c:175
 msgid "There was an error when searching radio on TuneIn"
 msgstr "TuneIn'da radyo ararken bir hata oluştu"
 
-#: ../plugins/tunein/pragha-tunein-plugin.c:205
+#: ../plugins/tunein/pragha-tunein-plugin.c:165
+msgid "Radio was not found"
+msgstr ""
+
+#: ../plugins/tunein/pragha-tunein-plugin.c:209
 msgid "Searching radio on TuneIn"
 msgstr "TuneIn'da radyo aranıyor"
 
-#: ../plugins/tunein/pragha-tunein-plugin.c:260
-#: ../plugins/tunein/pragha-tunein-plugin.c:271
+#: ../plugins/tunein/pragha-tunein-plugin.c:265
+#: ../plugins/tunein/pragha-tunein-plugin.c:276
 msgid "Search in TuneIn"
 msgstr "TuneIn'da ara"
 
-#: ../plugins/visualizer/pragha-visualizer-plugin.c:79
-#, fuzzy
+#: ../plugins/visualizer/pragha-visualizer-plugin.c:78
 msgid "_Visualizer"
-msgstr "Ses _dengeleyicisi"
+msgstr ""
 
-#: ../plugins/visualizer/pragha-visualizer-plugin.c:156
+#: ../plugins/visualizer/pragha-visualizer-plugin.c:155
 msgid "Show Visualizer"
 msgstr ""
 
-#, fuzzy
-#~ msgid "Love track"
-#~ msgstr "Sonraki parça"
+#: ../plugins/lastfm/pragha-lastfm-menu.ui.h:2
+msgid "Love track"
+msgstr ""
 
-#, fuzzy
-#~ msgid "Unlove track"
-#~ msgstr "Sonraki parça"
+#: ../plugins/lastfm/pragha-lastfm-menu.ui.h:3
+msgid "Unlove track"
+msgstr ""
