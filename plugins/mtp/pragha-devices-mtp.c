@@ -81,8 +81,6 @@ struct _PraghaMtpPluginPrivate {
 
 	PraghaMtpThreadDownloadData *dw_data;
 
-	GHashTable         *tracks_table;
-
 	GtkActionGroup     *action_group_menu;
 	guint               merge_id_menu;
 
@@ -941,11 +939,6 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
-	priv->tracks_table = g_hash_table_new_full (g_str_hash,
-	                                            g_str_equal,
-	                                            g_free,
-	                                            g_object_unref);
-
 	priv->device_thread = pragha_mtp_thread_new ();
 
 	/* New Task widget */
@@ -1013,7 +1006,6 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	pragha_mtp_plugin_remove_menu_action (plugin);
 	pragha_mtp_clear_hook_device (plugin);
 
-	g_hash_table_destroy (priv->tracks_table);
 	g_object_unref(priv->cancellable);
 
 	/* Disconnect signals */
