@@ -67,6 +67,10 @@ void
 pragha_provider_remove (PraghaDatabaseProvider *provider,
                         const gchar            *name);
 
+gboolean
+pragha_provider_exist (PraghaDatabaseProvider *provider,
+                       const gchar            *name);
+
 void
 pragha_provider_forget_songs (PraghaDatabaseProvider *provider,
                               const gchar            *name);

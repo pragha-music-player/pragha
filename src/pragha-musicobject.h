@@ -72,6 +72,8 @@ void
 pragha_musicobject_clean (PraghaMusicobject *musicobject);
 gint
 pragha_musicobject_compare (PraghaMusicobject *a, PraghaMusicobject *b);
+gint
+pragha_musicobject_compare_tags (PraghaMusicobject *a, PraghaMusicobject *b);
 
 const gchar *
 pragha_musicobject_get_file (PraghaMusicobject *musicobject);

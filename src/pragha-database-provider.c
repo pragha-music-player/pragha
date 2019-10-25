@@ -122,6 +122,19 @@ pragha_provider_remove (PraghaDatabaseProvider *provider,
 	pragha_database_flush_stale_entries (priv->database);
 }
 
+gboolean
+pragha_provider_exist (PraghaDatabaseProvider *provider,
+                       const gchar            *name)
+{
+	gint provider_id = 0;
+
+	PraghaDatabaseProviderPrivate *priv = provider->priv;
+
+	provider_id = pragha_database_find_provider (priv->database, name);
+
+	return (provider_id != 0);
+}
+
 void
 pragha_provider_forget_songs (PraghaDatabaseProvider *provider,
                               const gchar            *name)

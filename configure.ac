@@ -384,19 +384,20 @@ if test x"$LIBPEAS_FOUND" = x"yes"; then
 AC_CONFIG_FILES([plugins/Makefile])
 AC_CONFIG_FILES([plugins/acoustid/Makefile])
 AC_CONFIG_FILES([plugins/ampache/Makefile])
-AC_CONFIG_FILES([plugins/mpris2/Makefile])
-AC_CONFIG_FILES([plugins/keybinder/Makefile])
-AC_CONFIG_FILES([plugins/koel/Makefile])
-AC_CONFIG_FILES([plugins/gnome-media-keys/Makefile])
-AC_CONFIG_FILES([plugins/song-info/Makefile])
-AC_CONFIG_FILES([plugins/notify/Makefile])
-AC_CONFIG_FILES([plugins/mtp/Makefile])
-AC_CONFIG_FILES([plugins/removable-media/Makefile])
-AC_CONFIG_FILES([plugins/tunein/Makefile])
+AC_CONFIG_FILES([plugins/cdrom/Makefile])
 AC_CONFIG_FILES([plugins/dlna/Makefile])
 AC_CONFIG_FILES([plugins/dlna-renderer/Makefile])
-AC_CONFIG_FILES([plugins/cdrom/Makefile])
+AC_CONFIG_FILES([plugins/gnome-media-keys/Makefile])
+AC_CONFIG_FILES([plugins/keybinder/Makefile])
+AC_CONFIG_FILES([plugins/koel/Makefile])
 AC_CONFIG_FILES([plugins/lastfm/Makefile])
+AC_CONFIG_FILES([plugins/mpris2/Makefile])
+AC_CONFIG_FILES([plugins/mtp/Makefile])
+AC_CONFIG_FILES([plugins/notify/Makefile])
+AC_CONFIG_FILES([plugins/removable-media/Makefile])
+AC_CONFIG_FILES([plugins/song-info/Makefile])
+AC_CONFIG_FILES([plugins/subsonic/Makefile])
+AC_CONFIG_FILES([plugins/tunein/Makefile])
 AC_CONFIG_FILES([plugins/visualizer/Makefile])
 fi
 AC_OUTPUT
@@ -424,6 +425,7 @@ echo "   * Search radios on TuneIn.........................(Need libsoup >= 2.38
 echo "   * Share music library on DLNA............(Need rygel-server-2.2 >= 0.26).: $RYGEL_FOUND"
 echo "   * Play songs on DLNA Servers......................(Need grilo >= 0.2.11).: $GRILO_FOUND"
 echo "   * Append music on Ampache server...............(Need grilo-net >= 0.2.5).: $GRILO_NET_FOUND"
+echo "   * Append music on Subsonic server..............(Need grilo-net >= 0.2.5).: $GRILO_NET_FOUND"
 echo "   * Append music on Koel server...............(Need libsoup and json-glib).: $KOEL_SUPPORT"
 echo "   * Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
 echo "   * EXPERIMENTAL management of external devices...........(Need gudev-1.0).: $GUDEV_FOUND"

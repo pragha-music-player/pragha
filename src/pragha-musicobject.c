@@ -144,6 +144,60 @@ pragha_musicobject_compare (PraghaMusicobject *a, PraghaMusicobject *b)
 }
 
 /**
+ * pragha_musicobject_compare_tags:
+ *
+ */
+gint
+pragha_musicobject_compare_tags (PraghaMusicobject *a, PraghaMusicobject *b)
+{
+	gint diff = 0;
+
+	diff = g_strcmp0(pragha_musicobject_get_mime_type(a),
+	                 pragha_musicobject_get_mime_type(b));
+	if (diff) return diff;
+
+	diff = g_strcmp0(pragha_musicobject_get_title(a),
+	                 pragha_musicobject_get_title(b));
+	if (diff) return diff;
+
+	diff = g_strcmp0(pragha_musicobject_get_artist(a),
+	                 pragha_musicobject_get_artist(b));
+	if (diff) return diff;
+
+	diff = g_strcmp0(pragha_musicobject_get_album(a),
+	                 pragha_musicobject_get_album(b));
+	if (diff) return diff;
+
+	diff = g_strcmp0(pragha_musicobject_get_genre(a),
+	                 pragha_musicobject_get_genre(b));
+	if (diff) return diff;
+
+	diff = g_strcmp0(pragha_musicobject_get_comment(a),
+	                 pragha_musicobject_get_comment(b));
+	if (diff) return diff;
+
+	diff = pragha_musicobject_get_year(a) - pragha_musicobject_get_year(b);
+	if (diff) return diff;
+
+	diff = pragha_musicobject_get_track_no(a) - pragha_musicobject_get_track_no(b);
+	if (diff) return diff;
+
+	diff = pragha_musicobject_get_length(a) - pragha_musicobject_get_length(b);
+	if (diff) return diff;
+
+	diff = pragha_musicobject_get_bitrate(a) - pragha_musicobject_get_bitrate(b);
+	if (diff) return diff;
+
+	diff = pragha_musicobject_get_channels(a) - pragha_musicobject_get_channels(b);
+	if (diff) return diff;
+
+	diff = pragha_musicobject_get_samplerate(a) - pragha_musicobject_get_samplerate(b);
+	if (diff) return diff;
+
+	return diff;
+}
+
+/**
  * pragha_musicobject_get_file:
  *
  */

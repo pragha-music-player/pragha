@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2018 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2018-2019 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -42,27 +42,25 @@ struct _PraghaTempProviderClass
 };
 
 
-typedef gboolean (ProviderCheckFunc) (gpointer key, gpointer value, gpointer user_data);
-
+void
+pragha_temp_provider_insert_track    (PraghaTempProvider *provider,
+                                      PraghaMusicobject  *mobj);
 
 void
-pragha_temp_provider_insert_track (PraghaTempProvider *provider,
-                                   PraghaMusicobject  *mobj);
+pragha_temp_provider_merge_database  (PraghaTempProvider *provider);
 
 void
-pragha_temp_provider_delete_track (PraghaTempProvider *provider,
-                                   PraghaMusicobject  *mobj);
+pragha_temp_provider_commit_database (PraghaTempProvider *provider);
 
 void
-pragha_temp_provider_replace_track (PraghaTempProvider *provider,
-                                    PraghaMusicobject  *mobj);
+pragha_temp_provider_set_visible     (PraghaTempProvider *provider,
+                                      gboolean            visible);
 
-void
-pragha_temp_provider_foreach_purge (PraghaTempProvider *provider,
-                                    ProviderCheckFunc  *check_func,
-                                    gpointer            user_data);
-
-PraghaTempProvider *pragha_temp_provider_new      (const gchar *name);
+PraghaTempProvider *
+pragha_temp_provider_new             (const gchar        *name,
+                                      const gchar        *type,
+                                      const gchar        *friendly_name,
+                                      const gchar        *icon_name);
 
 G_END_DECLS
 

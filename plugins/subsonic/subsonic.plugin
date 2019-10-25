@@ -1,0 +1,8 @@
+[Plugin]
+Module=psubsonic
+Name=Subsonic Client
+Description=Play music from a Subsonic compatible server
+Authors=Matias De lellis <mati86dl@gmail.com>
+Copyright=Copyright © 2019 Matias De lellis
+Website=https://github.com/matiasdelellis/pragha
+Help=https://github.com/matiasdelellis/pragha

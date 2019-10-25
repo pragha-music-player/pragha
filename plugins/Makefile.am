@@ -60,6 +60,13 @@ if HAVE_GRILO_NET2
 SUBDIRS += ampache
 endif
 
+if HAVE_GRILO_NET3
+SUBDIRS += subsonic
+endif
+if HAVE_GRILO_NET2
+SUBDIRS += subsonic
+endif
+
 if HAVE_JSON_GLIB
 if HAVE_LIBSOUP
 SUBDIRS += koel
