@@ -1680,7 +1680,7 @@ pragha_lastfm_init_settings (PraghaLastfmPlugin *plugin)
 static void
 pragha_lastfm_plugin_append_setting (PraghaLastfmPlugin *plugin)
 {
-	PreferencesDialog *dialog;
+	PraghaPreferencesDialog *dialog;
 	GtkWidget *table;
 	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *lastfm_ulabel, *lastfm_plabel;
 	guint row = 0;
@@ -1736,7 +1736,7 @@ pragha_lastfm_plugin_append_setting (PraghaLastfmPlugin *plugin)
 static void
 pragha_lastfm_plugin_remove_setting (PraghaLastfmPlugin *plugin)
 {
-	PreferencesDialog *dialog;
+	PraghaPreferencesDialog *dialog;
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	dialog = pragha_application_get_preferences_dialog (priv->pragha);

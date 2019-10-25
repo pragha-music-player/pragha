@@ -864,7 +864,7 @@ static void
 pragha_ampache_plugin_append_setting (PraghaAmpachePlugin *plugin)
 {
 	PraghaPreferences *preferences;
-	PreferencesDialog *dialog;
+	PraghaPreferencesDialog *dialog;
 	GtkWidget *table, *label, *ampache_server, *ampache_uname, *ampache_pass;
 	gchar *server = NULL, *user = NULL, *pass = NULL;
 	guint row = 0;
@@ -940,7 +940,7 @@ pragha_ampache_plugin_append_setting (PraghaAmpachePlugin *plugin)
 static void
 pragha_ampache_plugin_remove_setting (PraghaAmpachePlugin *plugin)
 {
-	PreferencesDialog *dialog;
+	PraghaPreferencesDialog *dialog;
 	PraghaAmpachePluginPrivate *priv = plugin->priv;
 
 	dialog = pragha_application_get_preferences_dialog (priv->pragha);

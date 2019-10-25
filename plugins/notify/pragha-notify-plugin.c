@@ -256,7 +256,7 @@ pragha_notify_preferences_dialog_response (GtkDialog          *dialog,
 static void
 pragha_notify_plugin_append_setting (PraghaNotifyPlugin *plugin)
 {
-	PreferencesDialog *dialog;
+	PraghaPreferencesDialog *dialog;
 	GtkWidget *table, *albumart_in_osd, *actions_in_osd;
 	guint row = 0;
 
@@ -295,7 +295,7 @@ pragha_notify_plugin_append_setting (PraghaNotifyPlugin *plugin)
 static void
 pragha_notify_plugin_remove_setting (PraghaNotifyPlugin *plugin)
 {
-	PreferencesDialog *dialog;
+	PraghaPreferencesDialog *dialog;
 	PraghaNotifyPluginPrivate *priv = plugin->priv;
 
 	dialog = pragha_application_get_preferences_dialog (priv->pragha);

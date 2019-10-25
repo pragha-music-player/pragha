@@ -42,6 +42,19 @@
 #include "pragha-database.h"
 #include "pragha-database-provider.h"
 #include "pragha-provider.h"
+#include "pragha-debug.h"
+
+
+enum library_columns {
+	COLUMN_NAME,
+	COLUMN_KIND,
+	COLUMN_FRIENDLY,
+	COLUMN_ICON_NAME,
+	COLUMN_VISIBLE,
+	COLUMN_IGNORED,
+	COLUMN_MARKUP,
+	N_COLUMNS
+};
 
 struct _PreferencesTab {
 	GtkWidget *widget;
@@ -50,10 +63,16 @@ struct _PreferencesTab {
 };
 typedef struct _PreferencesTab PreferencesTab;
 
-struct _PreferencesDialog {
+struct _PraghaPreferencesDialogClass {
+	GtkDialogClass     __parent__;
+};
+typedef struct _PraghaPreferencesDialogClass PraghaPreferencesDialogClass;
+
+struct _PraghaPreferencesDialog {
+	GtkDialog         __parent__;
+
 	PraghaPreferences *preferences;
 
-	GtkWidget         *widget;
 	GtkWidget         *notebook;
 	PreferencesTab    *audio_tab;
 	PreferencesTab    *desktop_tab;
@@ -83,16 +102,7 @@ struct _PreferencesDialog {
 	GtkWidget *add_recursively_w;
 };
 
-enum library_columns {
-	COLUMN_NAME,
-	COLUMN_KIND,
-	COLUMN_FRIENDLY,
-	COLUMN_ICON_NAME,
-	COLUMN_VISIBLE,
-	COLUMN_IGNORED,
-	COLUMN_MARKUP,
-	N_COLUMNS
-};
+G_DEFINE_TYPE (PraghaPreferencesDialog, pragha_preferences_dialog, GTK_TYPE_DIALOG)
 
 
 /*
@@ -165,37 +175,37 @@ pragha_preferences_notebook_append_tab (GtkWidget *notebook, PreferencesTab *tab
 }
 
 void
-pragha_preferences_append_audio_setting (PreferencesDialog *dialog, GtkWidget *widget, gboolean expand)
+pragha_preferences_append_audio_setting (PraghaPreferencesDialog *dialog, GtkWidget *widget, gboolean expand)
 {
 	pragha_preferences_tab_append_setting (dialog->audio_tab, widget, expand);
 }
 
 void
-pragha_preferences_remove_audio_setting (PreferencesDialog *dialog, GtkWidget *widget)
+pragha_preferences_remove_audio_setting (PraghaPreferencesDialog *dialog, GtkWidget *widget)
 {
 	pragha_preferences_tab_remove_setting (dialog->audio_tab, widget);
 }
 
 void
-pragha_preferences_append_desktop_setting (PreferencesDialog *dialog, GtkWidget *widget, gboolean expand)
+pragha_preferences_append_desktop_setting (PraghaPreferencesDialog *dialog, GtkWidget *widget, gboolean expand)
 {
 	pragha_preferences_tab_append_setting (dialog->desktop_tab, widget, expand);
 }
 
 void
-pragha_preferences_remove_desktop_setting (PreferencesDialog *dialog, GtkWidget *widget)
+pragha_preferences_remove_desktop_setting (PraghaPreferencesDialog *dialog, GtkWidget *widget)
 {
 	pragha_preferences_tab_remove_setting (dialog->desktop_tab, widget);
 }
 
 void
-pragha_preferences_append_services_setting (PreferencesDialog *dialog, GtkWidget *widget, gboolean expand)
+pragha_preferences_append_services_setting (PraghaPreferencesDialog *dialog, GtkWidget *widget, gboolean expand)
 {
 	pragha_preferences_tab_append_setting (dialog->services_tab, widget, expand);
 }
 
 void
-pragha_preferences_remove_services_setting (PreferencesDialog *dialog, GtkWidget *widget)
+pragha_preferences_remove_services_setting (PraghaPreferencesDialog *dialog, GtkWidget *widget)
 {
 	pragha_preferences_tab_remove_setting (dialog->services_tab, widget);
 }
@@ -214,7 +224,7 @@ album_art_pattern_helper_response (GtkDialog *dialog,
 }
 
 static void
-album_art_pattern_helper (GtkDialog *parent, PreferencesDialog *dialogs)
+album_art_pattern_helper (GtkDialog *parent, PraghaPreferencesDialog *dialogs)
 {
 	GtkWidget *dialog;
 
@@ -304,7 +314,7 @@ pragha_preferences_dialog_set_library_list (GtkWidget *library_tree, GSList *lib
  * When cancel the preferences dialog should restore all changes
  */
 static void
-pragha_preferences_dialog_restore_changes (PreferencesDialog *dialog)
+pragha_preferences_dialog_restore_changes (PraghaPreferencesDialog *dialog)
 {
 	PraghaDatabaseProvider *provider;
 	GSList *library_list = NULL;
@@ -413,7 +423,7 @@ pragha_preferences_dialog_restore_changes (PreferencesDialog *dialog)
  * When accepting the preferences dialog must be set changes.
  */
 static void
-pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
+pragha_preferences_dialog_accept_changes (PraghaPreferencesDialog *dialog)
 {
 	PraghaDatabaseProvider *dbase_provider;
 	GSList *list, *library_dir = NULL, *folder_scanned = NULL, *folders_added = NULL, *folders_deleted = NULL;
@@ -594,7 +604,7 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 
 		if (string_is_not_empty(album_art_pattern)) {
 			if (!validate_album_art_pattern(album_art_pattern)) {
-				album_art_pattern_helper(GTK_DIALOG(dialog->widget), dialog);
+				album_art_pattern_helper(GTK_DIALOG(dialog), dialog);
 				return;
 			}
 			/* Proper pattern, store in preferences */
@@ -619,7 +629,7 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 /* Handler for the preferences dialog */
 
 static void
-pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, PreferencesDialog *dialog)
+pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, PraghaPreferencesDialog *dialog)
 {
 	switch(response_id) {
 		case GTK_RESPONSE_OK:
@@ -630,18 +640,18 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 			pragha_preferences_dialog_restore_changes (dialog);
 			break;
 	}
-	gtk_widget_hide(GTK_WIDGET(dialog->widget));
+	gtk_widget_hide(GTK_WIDGET(dialog));
 }
 
 static gboolean
-pragha_preferences_dialog_delete (GtkWidget *widget, GdkEvent *event, PreferencesDialog *dialog)
+pragha_preferences_dialog_delete (GtkWidget *widget, GdkEvent *event, PraghaPreferencesDialog *dialog)
 {
 	return TRUE;
 }
 
 /* Handler for adding a new library */
 static void
-library_add_cb_response (GtkDialog *add_dialog, gint response, PreferencesDialog *dialog)
+library_add_cb_response (GtkDialog *add_dialog, gint response, PraghaPreferencesDialog *dialog)
 {
 	gchar *u_folder, *folder, *basename, *markup;
 	GtkTreeIter iter;
@@ -691,14 +701,14 @@ library_add_cb_response (GtkDialog *add_dialog, gint response, PreferencesDialog
 }
 
 static void
-library_add_cb (GtkButton *button, PreferencesDialog *dialog)
+library_add_cb (GtkButton *button, PraghaPreferencesDialog *dialog)
 {
 	GtkWidget *add_dialog;
 
 	/* Create a folder chooser dialog */
 
 	add_dialog = gtk_file_chooser_dialog_new (_("Select a folder to add to library"),
-	                                          GTK_WINDOW(dialog->widget),
+	                                          GTK_WINDOW(dialog),
 	                                          GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
 	                                          _("_Cancel"), GTK_RESPONSE_CANCEL,
 	                                          _("_Open"), GTK_RESPONSE_ACCEPT,
@@ -714,7 +724,7 @@ library_add_cb (GtkButton *button, PreferencesDialog *dialog)
 
 /* Handler for removing a library */
 
-static void library_remove_cb(GtkButton *button, PreferencesDialog *dialog)
+static void library_remove_cb(GtkButton *button, PraghaPreferencesDialog *dialog)
 {
 	GtkTreeSelection *selection;
 	GtkTreeModel *model;
@@ -728,7 +738,7 @@ static void library_remove_cb(GtkButton *button, PreferencesDialog *dialog)
 
 /* Toggle album art pattern */
 
-static void toggle_album_art(GtkToggleButton *button, PreferencesDialog *dialog)
+static void toggle_album_art(GtkToggleButton *button, PraghaPreferencesDialog *dialog)
 {
 	gboolean is_active;
 
@@ -741,32 +751,32 @@ static void toggle_album_art(GtkToggleButton *button, PreferencesDialog *dialog)
 /* Some audios toggles handlers */
 
 #ifndef G_OS_WIN32
-static void update_audio_device_alsa(PreferencesDialog *dialog)
+static void update_audio_device_alsa(PraghaPreferencesDialog *dialog)
 {
 	gtk_widget_set_sensitive(dialog->audio_device_w, TRUE);
 	gtk_widget_set_sensitive(dialog->soft_mixer_w, TRUE);
 }
 
-static void update_audio_device_oss4(PreferencesDialog *dialog)
+static void update_audio_device_oss4(PraghaPreferencesDialog *dialog)
 {
 	gtk_widget_set_sensitive(dialog->audio_device_w, TRUE);
 	gtk_widget_set_sensitive(dialog->soft_mixer_w, TRUE);
 }
 
-static void update_audio_device_oss(PreferencesDialog *dialog)
+static void update_audio_device_oss(PraghaPreferencesDialog *dialog)
 {
 	gtk_widget_set_sensitive(dialog->audio_device_w, TRUE);
 	gtk_widget_set_sensitive(dialog->soft_mixer_w, TRUE);
 }
 
-static void update_audio_device_pulse(PreferencesDialog *dialog)
+static void update_audio_device_pulse(PraghaPreferencesDialog *dialog)
 {
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w), FALSE);
 	gtk_widget_set_sensitive(dialog->audio_device_w, FALSE);
 	gtk_widget_set_sensitive(dialog->soft_mixer_w, FALSE);
 }
 
-static void update_audio_device_default(PreferencesDialog *dialog)
+static void update_audio_device_default(PraghaPreferencesDialog *dialog)
 {
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w), FALSE);
 	gtk_widget_set_sensitive(dialog->audio_device_w, FALSE);
@@ -776,7 +786,7 @@ static void update_audio_device_default(PreferencesDialog *dialog)
 /* The enumerated audio devices have to be changed here */
 
 static void
-change_audio_sink(GtkComboBox *combo, PreferencesDialog *dialog)
+change_audio_sink(GtkComboBox *combo, PraghaPreferencesDialog *dialog)
 {
 	gchar *audio_sink;
 
@@ -798,7 +808,7 @@ change_audio_sink(GtkComboBox *combo, PreferencesDialog *dialog)
 #endif
 
 static void
-pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
+pragha_preferences_dialog_init_settings(PraghaPreferencesDialog *dialog)
 {
 	PraghaDatabaseProvider *provider;
 	GSList *library_dir = NULL;
@@ -898,7 +908,7 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->sort_by_year_w), TRUE);
 }
 
-gint library_view_key_press (GtkWidget *win, GdkEventKey *event, PreferencesDialog *dialog)
+gint library_view_key_press (GtkWidget *win, GdkEventKey *event, PraghaPreferencesDialog *dialog)
 {
 	if (event->state != 0 &&
 	    ((event->state & GDK_CONTROL_MASK) ||
@@ -918,7 +928,7 @@ gint library_view_key_press (GtkWidget *win, GdkEventKey *event, PreferencesDial
 
 #ifndef G_OS_WIN32
 static GtkWidget*
-pref_create_audio_page (PreferencesDialog *dialog)
+pref_create_audio_page (PraghaPreferencesDialog *dialog)
 {
 	GtkWidget *table;
 	GtkWidget *audio_device_entry, *audio_device_label, *audio_sink_combo, *sink_label, *soft_mixer;
@@ -978,7 +988,7 @@ pref_create_audio_page (PreferencesDialog *dialog)
 #endif
 
 static GtkWidget*
-pref_create_library_page (PreferencesDialog *dialog)
+pref_create_library_page (PraghaPreferencesDialog *dialog)
 {
 	GtkWidget *table;
 	GtkWidget *library_view, *library_view_scroll, *library_bbox, *library_add, \
@@ -1095,7 +1105,7 @@ pref_create_library_page (PreferencesDialog *dialog)
 }
 
 static GtkWidget*
-pref_create_playback_page (PreferencesDialog *dialog)
+pref_create_playback_page (PraghaPreferencesDialog *dialog)
 {
 	GtkWidget *table;
 	GtkWidget *ignore_errors_w;
@@ -1118,7 +1128,7 @@ pref_create_playback_page (PreferencesDialog *dialog)
 }
 
 static GtkWidget*
-pref_create_appearance_page(PreferencesDialog *dialog)
+pref_create_appearance_page(PraghaPreferencesDialog *dialog)
 {
 	GtkWidget *table;
 	GtkWidget *system_titlebar, *album_art, *small_toolbar;
@@ -1182,7 +1192,7 @@ pref_create_appearance_page(PreferencesDialog *dialog)
 }
 
 static GtkWidget*
-pref_create_general_page(PreferencesDialog *dialog)
+pref_create_general_page(PraghaPreferencesDialog *dialog)
 {
 	GtkWidget *table;
 	GtkWidget *instant_filter, *aproximate_search, *window_state_combo, *restore_playlist, *add_recursively;
@@ -1227,7 +1237,7 @@ pref_create_general_page(PreferencesDialog *dialog)
 }
 
 static GtkWidget*
-pref_create_desktop_page(PreferencesDialog *dialog)
+pref_create_desktop_page(PraghaPreferencesDialog *dialog)
 {
 	GtkWidget *table;
 	GtkWidget *show_icon_tray, *close_to_tray;
@@ -1253,7 +1263,7 @@ pref_create_desktop_page(PreferencesDialog *dialog)
 
 #ifdef HAVE_LIBPEAS
 static GtkWidget*
-pref_create_plugins_page (PreferencesDialog *dialog)
+pref_create_plugins_page (PraghaPreferencesDialog *dialog)
 {
 	GtkWidget *table;
 	GtkWidget *view, *sw;
@@ -1280,27 +1290,27 @@ pref_create_plugins_page (PreferencesDialog *dialog)
 #endif
 
 void
-pragha_preferences_dialog_connect_handler (PreferencesDialog *dialog,
+pragha_preferences_dialog_connect_handler (PraghaPreferencesDialog *dialog,
                                            GCallback          callback,
                                            gpointer           user_data)
 {
-	g_signal_connect (G_OBJECT(dialog->widget), "response",
+	g_signal_connect (G_OBJECT(dialog), "response",
 	                  G_CALLBACK(callback), user_data);
 }
 
 void
-pragha_preferences_dialog_disconnect_handler (PreferencesDialog *dialog,
+pragha_preferences_dialog_disconnect_handler (PraghaPreferencesDialog *dialog,
                                               GCallback          callback,
                                               gpointer           user_data)
 {
-	g_signal_handlers_disconnect_by_func (dialog->widget,
+	g_signal_handlers_disconnect_by_func (dialog,
 	                                      callback,
 	                                      user_data);
 }
 
 
 void
-pragha_preferences_dialog_show (PreferencesDialog *dialog)
+pragha_preferences_dialog_show (PraghaPreferencesDialog *dialog)
 {
 	PraghaDatabaseProvider *provider;
 	GSList *library_list = NULL;
@@ -1314,25 +1324,55 @@ pragha_preferences_dialog_show (PreferencesDialog *dialog)
 		g_slist_free_full (library_list, g_object_unref);
 	}
 	gtk_notebook_set_current_page (GTK_NOTEBOOK(dialog->notebook), 0);
-	gtk_widget_show (dialog->widget);
+	gtk_widget_show (GTK_WIDGET(dialog));
 }
 
 void
-pragha_preferences_dialog_free (PreferencesDialog *dialog)
+pragha_preferences_dialog_set_parent (PraghaPreferencesDialog *dialog, GtkWidget *parent)
 {
-	g_object_unref (dialog->preferences);
+	gtk_window_set_transient_for (GTK_WINDOW (dialog), GTK_WINDOW (parent));
+	gtk_window_set_modal (GTK_WINDOW (dialog), TRUE);
+}
+
+
+/* Pragha preferences dialog object */
+
+static void
+pragha_preferences_dialog_dispose (GObject *object)
+{
+	PraghaPreferencesDialog *dialog = PRAGHA_PREFERENCES_DIALOG(object);
+	if (dialog->preferences) {
+		g_object_unref (dialog->preferences);
+		dialog->preferences = NULL;
+	}
+	(*G_OBJECT_CLASS (pragha_preferences_dialog_parent_class)->dispose) (object);
+}
+
+static void
+pragha_preferences_dialog_finalize (GObject *object)
+{
+	PraghaPreferencesDialog *dialog = PRAGHA_PREFERENCES_DIALOG(object);
 
 	pragha_preferences_tab_free (dialog->audio_tab);
 	pragha_preferences_tab_free (dialog->desktop_tab);
 	pragha_preferences_tab_free (dialog->services_tab);
 
-	g_slice_free (PreferencesDialog, dialog);
+	(*G_OBJECT_CLASS (pragha_preferences_dialog_parent_class)->finalize) (object);
 }
 
-PreferencesDialog *
-pragha_preferences_dialog_new (GtkWidget *parent)
+static void
+pragha_preferences_dialog_class_init (PraghaPreferencesDialogClass *klass)
 {
-	PreferencesDialog *dialog;
+	GObjectClass *gobject_class;
+
+	gobject_class = G_OBJECT_CLASS(klass);
+	gobject_class->dispose = pragha_preferences_dialog_dispose;
+	gobject_class->finalize = pragha_preferences_dialog_finalize;
+}
+
+static void
+pragha_preferences_dialog_init (PraghaPreferencesDialog *dialog)
+{
 	PraghaHeader *header;
 	GtkWidget *pref_notebook;
 	GtkWidget *audio_vbox, *playback_vbox, *appearance_vbox, *library_vbox, *general_vbox, *desktop_vbox;
@@ -1342,18 +1382,18 @@ pragha_preferences_dialog_new (GtkWidget *parent)
 	GtkWidget *label_plugins;
 	#endif
 
-	dialog = g_slice_new0(PreferencesDialog);
+	/* Preferences instance */
 
 	dialog->preferences = pragha_preferences_get();
 
 	/* The main preferences dialog */
 
-	dialog->widget = gtk_dialog_new_with_buttons (_("Preferences"),
-	                                              GTK_WINDOW(parent),
-	                                              GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-	                                              _("_Cancel"), GTK_RESPONSE_CANCEL,
-	                                              _("_Ok"), GTK_RESPONSE_OK,
-	                                              NULL);
+	gtk_window_set_title (GTK_WINDOW(dialog), _("Preferences"));
+
+	gtk_dialog_add_buttons (GTK_DIALOG(dialog),
+	                        _("_Cancel"), GTK_RESPONSE_CANCEL,
+	                        _("_Ok"), GTK_RESPONSE_OK,
+	                        NULL);
 
 	/* Labels */
 
@@ -1424,25 +1464,45 @@ pragha_preferences_dialog_new (GtkWidget *parent)
 	pragha_header_set_title (header, _("Preferences of Pragha"));
 	pragha_header_set_icon_name (header, "pragha");
 
-	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog->widget))), GTK_WIDGET(header), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog->widget))), pref_notebook, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), GTK_WIDGET(header), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), pref_notebook, TRUE, TRUE, 0);
 	gtk_widget_show_all (GTK_WIDGET(header));
 	gtk_widget_show (pref_notebook);
 
 	/* Setup signal handlers */
 
-	g_signal_connect (G_OBJECT(dialog->widget), "response",
+	g_signal_connect (G_OBJECT(dialog), "response",
 	                  G_CALLBACK(pragha_preferences_dialog_response), dialog);
-	g_signal_connect (G_OBJECT(dialog->widget), "delete_event",
+	g_signal_connect (G_OBJECT(dialog), "delete_event",
 	                  G_CALLBACK(pragha_preferences_dialog_delete), dialog);
 
 	pragha_preferences_dialog_init_settings(dialog);
 
 	toggle_album_art(GTK_TOGGLE_BUTTON(dialog->album_art_w), dialog);
 
-	gtk_dialog_set_default_response(GTK_DIALOG (dialog->widget), GTK_RESPONSE_OK);
+	gtk_dialog_set_default_response(GTK_DIALOG (dialog), GTK_RESPONSE_OK);
 
 	dialog->notebook = pref_notebook;
+}
+
+PraghaPreferencesDialog *
+pragha_preferences_dialog_get (void)
+{
+	static PraghaPreferencesDialog *dialog = NULL;
+
+	if (G_UNLIKELY (dialog == NULL))
+	{
+		CDEBUG(DBG_INFO, "Creating a new PraghaPreferencesDialog instance");
+
+		dialog = g_object_new (PRAGHA_TYPE_PREFERENCES_DIALOG, NULL);
+
+		g_object_add_weak_pointer(G_OBJECT (dialog),
+		                          (gpointer) &dialog);
+	}
+	else {
+		g_object_ref (G_OBJECT (dialog));
+	}
 
 	return dialog;
 }
+

@@ -545,7 +545,7 @@ pragha_songinfo_preferences_dialog_response (GtkDialog            *dialog,
 static void
 pragha_songinfo_plugin_append_setting (PraghaSongInfoPlugin *plugin)
 {
-	PreferencesDialog *dialog;
+	PraghaPreferencesDialog *dialog;
 	PraghaPreferences *preferences = NULL;
 	gchar *plugin_group = NULL, *proxy = NULL;
 	GtkWidget *table, *download_album_art_w, *proxy_label, *proxy_w;
@@ -597,7 +597,7 @@ pragha_songinfo_plugin_append_setting (PraghaSongInfoPlugin *plugin)
 static void
 pragha_songinfo_plugin_remove_setting (PraghaSongInfoPlugin *plugin)
 {
-	PreferencesDialog *dialog;
+	PraghaPreferencesDialog *dialog;
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
 
 	dialog = pragha_application_get_preferences_dialog (priv->pragha);

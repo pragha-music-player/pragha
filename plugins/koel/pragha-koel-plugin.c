@@ -895,7 +895,7 @@ static void
 pragha_koel_plugin_append_setting (PraghaKoelPlugin *plugin)
 {
 	PraghaPreferences *preferences;
-	PreferencesDialog *dialog;
+	PraghaPreferencesDialog *dialog;
 	GtkWidget *table, *label, *koel_server, *koel_uname, *koel_pass;
 	gchar *server = NULL, *user = NULL, *pass = NULL;
 	guint row = 0;
@@ -971,7 +971,7 @@ pragha_koel_plugin_append_setting (PraghaKoelPlugin *plugin)
 static void
 pragha_koel_plugin_remove_setting (PraghaKoelPlugin *plugin)
 {
-	PreferencesDialog *dialog;
+	PraghaPreferencesDialog *dialog;
 	PraghaKoelPluginPrivate *priv = plugin->priv;
 
 	dialog = pragha_application_get_preferences_dialog (priv->pragha);

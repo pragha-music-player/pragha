@@ -371,7 +371,6 @@ pragha_subsonic_plugin_download_done (PraghaBackend        *backend,
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
 {
-	PreferencesDialog *dialog;
 	PraghaBackend *backend;
 	GtkWidget *settings_widget;
 	GMenuItem *item;
@@ -396,9 +395,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	/* Settings */
 
-	dialog = pragha_application_get_preferences_dialog (priv->pragha);
-
-	priv->preferences = pragha_subsonic_preferences_new (dialog);
+	priv->preferences = pragha_subsonic_preferences_new ();
 	g_signal_connect (priv->preferences, "server-changed",
 	                  G_CALLBACK (pragha_subsonic_preferences_server_changed), plugin);
 	g_signal_connect (priv->preferences, "credentials-changed",
@@ -456,7 +453,6 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	PraghaBackgroundTaskBar *taskbar;
 	PraghaDatabaseProvider *provider;
 	PraghaPreferences *preferences;
-	PreferencesDialog *dialog;
 	GtkWidget *settings_widget;
 
 	PraghaSubsonicPlugin *plugin = PRAGHA_SUBSONIC_PLUGIN (activatable);

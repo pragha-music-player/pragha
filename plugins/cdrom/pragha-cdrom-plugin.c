@@ -687,7 +687,7 @@ pragha_cdrom_init_settings (PraghaCdromPlugin *plugin)
 static void
 pragha_cdrom_plugin_append_setting (PraghaCdromPlugin *plugin)
 {
-	PreferencesDialog *dialog;
+	PraghaPreferencesDialog *dialog;
 	GtkWidget *table;
 	GtkWidget *audio_cd_device_label,*audio_cd_device_entry, *use_cddb;
 	guint row = 0;
@@ -746,7 +746,7 @@ pragha_cdrom_plugin_append_setting (PraghaCdromPlugin *plugin)
 static void
 pragha_cdrom_plugin_remove_setting (PraghaCdromPlugin *plugin)
 {
-	PreferencesDialog *dialog;
+	PraghaPreferencesDialog *dialog;
 	PraghaCdromPluginPrivate *priv = plugin->priv;
 
 	dialog = pragha_application_get_preferences_dialog (priv->pragha);

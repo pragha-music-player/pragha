@@ -449,9 +449,10 @@ static void search_playlist_action(GtkAction *action, PraghaApplication *pragha)
 
 static void pref_action(GtkAction *action, PraghaApplication *pragha)
 {
-	PreferencesDialog *dialog;
-	dialog = pragha_application_get_preferences_dialog (pragha);
+	PraghaPreferencesDialog *dialog;
+	dialog = pragha_preferences_dialog_get ();
 	pragha_preferences_dialog_show (dialog);
+	g_object_unref (dialog);
 }
 
 /* Handler for the 'Full screen' item in the Edit menu */
@@ -1079,10 +1080,10 @@ pragha_gmenu_show_preferences (GSimpleAction *action,
                                GVariant      *parameter,
                                gpointer       user_data)
 {
-	PreferencesDialog *dialog;
-	PraghaApplication *pragha = user_data;
-	dialog = pragha_application_get_preferences_dialog (pragha);
+	PraghaPreferencesDialog *dialog;
+	dialog = pragha_preferences_dialog_get ();
 	pragha_preferences_dialog_show (dialog);
+	g_object_unref (dialog);
 }
 
 /* Help Submenu */

@@ -27,6 +27,7 @@
 
 #include "src/pragha-hig.h"
 #include "src/pragha-preferences.h"
+#include "src/pragha-preferences-dialog.h"
 #include "src/pragha-utils.h"
 
 #include "pragha-subsonic-preferences.h"
@@ -39,7 +40,7 @@
 struct _PraghaSubsonicPreferences {
 	GObject           _parent;
 
-	PreferencesDialog *dialog;
+	PraghaPreferencesDialog *dialog;
 
 	GtkWidget         *settings_widget;
 
@@ -395,11 +396,14 @@ pragha_subsonic_preferences_init (PraghaSubsonicPreferences *preferences)
 }
 
 PraghaSubsonicPreferences *
-pragha_subsonic_preferences_new (PreferencesDialog *dialog)
+pragha_subsonic_preferences_new (void)
 {
+	PraghaPreferencesDialog *dialog;
 	PraghaSubsonicPreferences *preferences;
 
 	preferences = PRAGHA_SUBSONIC_PREFERENCES(g_object_new (PRAGHA_TYPE_SUBSONIC_PREFERENCES, NULL));
+
+	dialog = pragha_preferences_dialog_get ();
 
 	pragha_preferences_append_services_setting (dialog,
 	                                            preferences->settings_widget,

@@ -66,7 +66,7 @@ struct _PraghaApplication {
 
 	PraghaScanner     *scanner;
 
-	PreferencesDialog *setting_dialog;
+	PraghaPreferencesDialog *setting_dialog;
 
 	/* Main widgets */
 
@@ -865,7 +865,7 @@ pragha_application_get_library (PraghaApplication *pragha)
 	return pragha->library;
 }
 
-PreferencesDialog *
+PraghaPreferencesDialog *
 pragha_application_get_preferences_dialog (PraghaApplication *pragha)
 {
 	return pragha->setting_dialog;
@@ -1026,7 +1026,7 @@ pragha_application_dispose (GObject *object)
 	}
 #endif
 	if (pragha->setting_dialog) {
-		pragha_preferences_dialog_free (pragha->setting_dialog);
+		g_object_unref (pragha->setting_dialog);
 		pragha->setting_dialog = NULL;
 	}
 	if (pragha->backend) {
@@ -1221,7 +1221,8 @@ pragha_application_startup (GApplication *application)
 		                        pragha->sidebar2, "visible",
 		                        binding_flags);
 
-	pragha->setting_dialog = pragha_preferences_dialog_new (pragha->mainwindow);
+	pragha->setting_dialog = pragha_preferences_dialog_get ();
+	pragha_preferences_dialog_set_parent (pragha->setting_dialog, GTK_WIDGET (pragha->mainwindow));
 
 	#ifdef HAVE_LIBPEAS
 	gboolean sidebar2_visible = // FIXME: Hack to allow hide sidebar when init.

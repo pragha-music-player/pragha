@@ -78,7 +78,8 @@ PraghaScanner     *pragha_application_get_scanner         (PraghaApplication *pr
 GtkWidget         *pragha_application_get_window          (PraghaApplication *pragha);
 PraghaPlaylist    *pragha_application_get_playlist        (PraghaApplication *pragha);
 PraghaLibraryPane *pragha_application_get_library         (PraghaApplication *pragha);
-PreferencesDialog *pragha_application_get_preferences_dialog (PraghaApplication *pragha);
+
+PraghaPreferencesDialog *pragha_application_get_preferences_dialog (PraghaApplication *pragha);
 
 PraghaToolbar     *pragha_application_get_toolbar         (PraghaApplication *pragha);
 GtkWidget         *pragha_application_get_overlay         (PraghaApplication *pragha);

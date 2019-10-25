@@ -21,8 +21,6 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include "src/pragha-preferences-dialog.h"
-
 G_BEGIN_DECLS
 
 #define PRAGHA_TYPE_SUBSONIC_PREFERENCES            (pragha_subsonic_preferences_get_type())
@@ -62,7 +60,7 @@ void
 pragha_subsonic_preferences_forget_settings   (PraghaSubsonicPreferences *preferences);
 
 PraghaSubsonicPreferences *
-pragha_subsonic_preferences_new               (PreferencesDialog *dialog);
+pragha_subsonic_preferences_new               (void);
 
 G_END_DECLS
 
