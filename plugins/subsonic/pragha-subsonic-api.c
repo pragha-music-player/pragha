@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2019 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2019-2020 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -70,6 +70,7 @@ struct _PraghaSubsonicApi {
 	GQueue       *albums_queue;
 	guint         albums_count;
 	guint         albums_offset;
+	guint         albums_progress;
 
 	guint         songs_count;
 	GSList       *songs_list;
@@ -82,6 +83,8 @@ struct _PraghaSubsonicApi {
 enum {
 	SIGNAL_AUTH_DONE,
 	SIGNAL_PING_DONE,
+	SIGNAL_SCAN_PROGRESS,
+	SIGNAL_SCAN_TOTAL,
 	SIGNAL_SCAN_DONE,
 	LAST_SIGNAL
 };
@@ -312,6 +315,8 @@ pragha_subsonic_api_get_albums_done (GObject      *object,
 	else if (albums_count == 0 && subsonic->albums_count > 0) {
 		g_warning ("Remove these warning: Subsonic finish obtaining albums. Now look these songs.");
 
+		g_signal_emit (subsonic, signals[SIGNAL_SCAN_TOTAL], 0, subsonic->albums_count);
+
 		album_id = g_queue_pop_head(subsonic->albums_queue);
 		pragha_subsonic_api_get_album (subsonic, album_id);
 	}
@@ -362,12 +367,11 @@ pragha_subsonic_api_get_album_done (GObject      *object,
 	xmlNodePtr node;
 	guint songs_count = 0;
 	gchar *content = NULL;
-	gchar *album = NULL, *artist = NULL, *genre = NULL;
+	gchar *album = NULL, *artist = NULL, *albumArtist = NULL, *genre = NULL;
 	gchar *url = NULL, *song_id = NULL, *title = NULL, *contentType = NULL;
 	guint year = 0, track_no = 0, duration = 0;
 	gchar *album_id = NULL;
 	SubsonicStatusCode code = S_GENERIC_OK;
-
 
 	PraghaSubsonicApi *subsonic = PRAGHA_SUBSONIC_API (user_data);
 
@@ -398,8 +402,8 @@ pragha_subsonic_api_get_album_done (GObject      *object,
 
 		node = node->xmlChildrenNode;
 
-		album = xmlGetProp(node, "album");
-		artist = xmlGetProp(node, "artist");
+		album = xmlGetProp(node, "name");
+		albumArtist = xmlGetProp(node, "artist");
 		year = xmlHasProp(node, "year") ? atoi(xmlGetProp(node, "year")) : 0;
 		genre = xmlGetProp(node, "genre");
 
@@ -410,9 +414,13 @@ pragha_subsonic_api_get_album_done (GObject      *object,
 			{
 				song_id = xmlGetProp(node, "id");
 				title = xmlGetProp(node, "title");
+				artist = xmlGetProp(node, "artist");
 				contentType = xmlGetProp(node, "contentType");
 				track_no = xmlHasProp(node, "track") ? atoi(xmlGetProp(node, "track")) : 0;
 				duration = xmlHasProp(node, "duration") ? atoi(xmlGetProp(node, "duration")) : 0;
+
+				// If doesn't return the artist of the song, try to use the album artist.
+				artist = artist ? artist : albumArtist;
 
 				url = pragha_subsonic_api_get_friendly_url (subsonic->server, artist, album, title, song_id);
 
@@ -448,8 +456,13 @@ pragha_subsonic_api_get_album_done (GObject      *object,
 		return;
 	}
 
-	subsonic->songs_count += songs_count;
-	g_warning ("Remove these warning: Subsonic response %i songs...", subsonic->songs_count);
+	g_warning ("Remove these warning: Subsonic response %i songs...", songs_count);
+
+	/* Report the progress of the albums */
+
+	g_signal_emit (subsonic, signals[SIGNAL_SCAN_PROGRESS], 0, ++subsonic->albums_progress);
+
+	/* If there are still albums, queue them.*/
 
 	if (album_id = g_queue_pop_head(subsonic->albums_queue)) {
 		g_warning ("Remove these warning: Queue new album to look: %s", album_id);
@@ -625,25 +638,6 @@ pragha_subsonic_api_get_songs_list (PraghaSubsonicApi *subsonic)
 	return subsonic->songs_list;
 }
 
-guint
-pragha_subsonic_api_get_songs_count (PraghaSubsonicApi *subsonic)
-{
-	if (subsonic->scanning == TRUE)
-		return 0;
-
-	return subsonic->songs_count;
-}
-
-guint
-pragha_subsonic_api_get_albums_count (PraghaSubsonicApi *subsonic)
-{
-	if (subsonic->scanning == TRUE)
-		return 0;
-
-	return subsonic->albums_count;
-}
-
-
 /*
  * PraghaSubsonicApi
  */
@@ -694,6 +688,22 @@ pragha_subsonic_api_class_init (PraghaSubsonicApiClass *klass)
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__INT,
 		              G_TYPE_NONE, 1, G_TYPE_INT);
+	signals[SIGNAL_SCAN_PROGRESS] =
+		g_signal_new ("scan-progress",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaSubsonicApiClass, scan_progress),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__INT,
+		              G_TYPE_NONE, 1, G_TYPE_INT);
+	signals[SIGNAL_SCAN_TOTAL] =
+		g_signal_new ("scan-total",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaSubsonicApiClass, scan_total),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__INT,
+		              G_TYPE_NONE, 1, G_TYPE_INT);
 	signals[SIGNAL_SCAN_DONE] =
 		g_signal_new ("scan-finished",
 		              G_TYPE_FROM_CLASS (object_class),
@@ -718,8 +728,8 @@ pragha_subsonic_api_init (PraghaSubsonicApi *subsonic)
 	subsonic->albums_offset = 0;
 	subsonic->albums_queue = g_queue_new ();
 	subsonic->albums_count = 0;
+	subsonic->albums_progress = 0;
 
-	subsonic->songs_count = 0;
 	subsonic->songs_list = NULL;
 
 	subsonic->authenticated = FALSE;

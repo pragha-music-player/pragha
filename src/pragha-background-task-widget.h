@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2016 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2016-2020 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -37,6 +37,10 @@ typedef struct _PraghaBackgroundTaskWidget PraghaBackgroundTaskWidget;
 void
 pragha_background_task_widget_set_description (PraghaBackgroundTaskWidget *taskwidget,
                                                const gchar                *description);
+
+void
+pragha_background_task_widget_set_job_count (PraghaBackgroundTaskWidget *taskwidget,
+                                             gint                        job_count);
 
 void
 pragha_background_task_widget_set_job_progress (PraghaBackgroundTaskWidget *taskwidget,

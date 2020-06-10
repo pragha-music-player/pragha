@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2016-2019 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2016-2020 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -129,6 +129,10 @@ void
 pragha_background_task_bar_prepend_widget (PraghaBackgroundTaskBar *taskbar,
                                            GtkWidget               *widget)
 {
+	/* Add reference to the widget. Owner is responsible for its destruction.*/
+
+	g_object_ref(G_OBJECT(widget));
+
 	/* Append the widget and ref it */
 
 	gtk_list_box_prepend (GTK_LIST_BOX(taskbar->listbox), widget);

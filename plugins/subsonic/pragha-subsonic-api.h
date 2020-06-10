@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2019 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2019-2020 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -54,6 +54,8 @@ struct _PraghaSubsonicApiClass
 
 	void (*authenticated) (PraghaSubsonicApi *subsonic, SubsonicStatusCode code);
 	void (*pong)          (PraghaSubsonicApi *subsonic, SubsonicStatusCode code);
+	void (*scan_progress) (PraghaSubsonicApi *subsonic, gint progress);
+	void (*scan_total)    (PraghaSubsonicApi *subsonic, gint total);
 	void (*scan_finished) (PraghaSubsonicApi *subsonic, SubsonicStatusCode code);
 };
 
@@ -108,13 +110,6 @@ pragha_subsonic_get_cancellable           (PraghaSubsonicApi *subsonic);
 
 GSList *
 pragha_subsonic_api_get_songs_list        (PraghaSubsonicApi *subsonic);
-
-guint
-pragha_subsonic_api_get_songs_count       (PraghaSubsonicApi *subsonic);
-
-guint
-pragha_subsonic_api_get_albums_count      (PraghaSubsonicApi *subsonic);
-
 
 G_END_DECLS
 

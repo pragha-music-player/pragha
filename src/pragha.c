@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2019 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2020 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -1025,10 +1025,14 @@ pragha_application_dispose (GObject *object)
 		pragha->plugins_engine = NULL;
 	}
 #endif
+
 	if (pragha->setting_dialog) {
-		g_object_unref (pragha->setting_dialog);
+		// Explicit destroy dialog.
+		// TODO: Evaluate if needed.
+		gtk_widget_destroy (GTK_WIDGET(pragha->setting_dialog));
 		pragha->setting_dialog = NULL;
 	}
+
 	if (pragha->backend) {
 		g_object_unref (pragha->backend);
 		pragha->backend = NULL;

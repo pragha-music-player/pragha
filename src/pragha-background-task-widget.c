@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2016-2019 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2016-2020 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -100,7 +100,7 @@ pragha_background_task_widget_get_icon_name (PraghaBackgroundTaskWidget *taskwid
 	return taskwidget->icon_name;
 }
 
-static void
+void
 pragha_background_task_widget_set_job_count (PraghaBackgroundTaskWidget *taskwidget,
                                              gint                        job_count)
 {
@@ -130,16 +130,17 @@ void
 pragha_background_task_widget_set_job_progress (PraghaBackgroundTaskWidget *taskwidget,
                                                 gint                        job_progress)
 {
-	if (job_progress > 0) {
-		pragha_background_task_widget_set_job_count (taskwidget, 100);
-		gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR(taskwidget->progress), (gdouble)job_progress/100);
+	taskwidget->job_progress = job_progress;
+
+	if (taskwidget->job_count) {
+		gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR(taskwidget->progress), (gdouble)job_progress/taskwidget->job_count);
 	}
 }
 
 static guint
 pragha_background_task_widget_get_job_progress (PraghaBackgroundTaskWidget *taskwidget)
 {
-	return 48; // FIXME????
+	return taskwidget->job_progress;
 }
 
 static void
@@ -295,8 +296,8 @@ pragha_background_task_widget_class_init (PraghaBackgroundTaskWidgetClass *class
 		g_param_spec_uint("job-count",
 		                  "Job-Count",
 		                  "The job-count to show progress",
-		                  0, 128,
-		                  0,
+		                  0, G_MAXUINT,
+		                  100,
 		                  G_PARAM_READWRITE |
 		                  G_PARAM_STATIC_STRINGS);
 
@@ -308,7 +309,7 @@ pragha_background_task_widget_class_init (PraghaBackgroundTaskWidgetClass *class
 		g_param_spec_uint("job-progress",
 		                  "Job-Progress",
 		                  "The job progress",
-		                  0, 128,
+		                  0, G_MAXUINT,
 		                  0,
 		                  G_PARAM_READWRITE |
 		                  G_PARAM_STATIC_STRINGS);

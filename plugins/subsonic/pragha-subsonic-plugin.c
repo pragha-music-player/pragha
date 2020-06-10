@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2019 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2019-2020 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -78,12 +78,6 @@ PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_SUBSONIC_PLUGIN,
                         PraghaSubsonicPlugin,
                         pragha_subsonic_plugin)
 
-/*
- * Propotypes
- */
-
-static void
-pragha_subsonic_plugin_authenticate (PraghaSubsonicPlugin *plugin);
 
 /*
  * Menu actions
@@ -93,10 +87,17 @@ static void
 pragha_subsonic_plugin_upgrade_database_action (GtkAction            *action,
                                                 PraghaSubsonicPlugin *plugin)
 {
+	PraghaBackgroundTaskBar *taskbar;
+
 	PraghaSubsonicPluginPrivate *priv = plugin->priv;
 
 	if (pragha_subsonic_api_is_scanning(priv->subsonic))
 		return;
+
+	taskbar = pragha_background_task_bar_get ();
+	pragha_background_task_widget_set_description (priv->task_widget, _("Getting albums from the server"));
+	pragha_background_task_bar_prepend_widget (taskbar, GTK_WIDGET(priv->task_widget));
+	g_object_unref(G_OBJECT(taskbar));
 
 	pragha_subsonic_api_scan_server (priv->subsonic);
 }
@@ -106,11 +107,18 @@ pragha_subsonic_plugin_upgrade_database_gmenu_action (GSimpleAction *action,
                                                       GVariant      *parameter,
                                                       gpointer       user_data)
 {
+	PraghaBackgroundTaskBar *taskbar;
+
 	PraghaSubsonicPlugin *plugin = user_data;
 	PraghaSubsonicPluginPrivate *priv = plugin->priv;
 
 	if (pragha_subsonic_api_is_scanning(priv->subsonic))
 		return;
+
+	taskbar = pragha_background_task_bar_get ();
+	pragha_background_task_widget_set_description (priv->task_widget, _("Getting albums from the server"));
+	pragha_background_task_bar_prepend_widget (taskbar, GTK_WIDGET(priv->task_widget));
+	g_object_unref(G_OBJECT(taskbar));
 
 	pragha_subsonic_api_scan_server (priv->subsonic);
 }
@@ -148,22 +156,35 @@ pragha_subsonic_plugin_authenticated (PraghaSubsonicApi    *subsonic,
 
 	if (code != S_GENERIC_OK) {
 		notification = pragha_app_notification_new (string_is_empty(priv->server) ? priv->server : _("Subsonic"),
-			_("There was an error authenticating with the server"));
-		pragha_app_notification_set_timeout (notification, 5);
+		                                            _("There was an error authenticating with the server"));
 		pragha_app_notification_show (notification);
+		return;
 	}
-	else {
-		provider = pragha_database_provider_get ();
-		if (!pragha_provider_exist (provider, priv->server)) {
-			taskbar = pragha_background_task_bar_get ();
-			pragha_background_task_bar_prepend_widget (taskbar, GTK_WIDGET(priv->task_widget));
-			pragha_background_task_widget_set_description (priv->task_widget, _("Getting albums from the server"));
-			g_object_unref(G_OBJECT(taskbar));
 
-			pragha_subsonic_api_scan_server (priv->subsonic);
-		}
-		g_object_unref (provider);
+	/* Add a widget to see progress */
+
+	priv->task_widget = pragha_background_task_widget_new (_("Searching files to analyze"),
+	                                                       "network-server",
+	                                                       0,
+	                                                       pragha_subsonic_get_cancellable(priv->subsonic));
+	g_object_ref(G_OBJECT(priv->task_widget));
+
+	/* If the provider exists, we should not analyze it again. */
+
+	provider = pragha_database_provider_get ();
+	if (pragha_provider_exist (provider, priv->server)) {
+		g_object_unref(provider);
+		return;
 	}
+
+	taskbar = pragha_background_task_bar_get ();
+	pragha_background_task_widget_set_description (priv->task_widget, _("Getting albums from the server"));
+	pragha_background_task_bar_prepend_widget (taskbar, GTK_WIDGET(priv->task_widget));
+	g_object_unref(G_OBJECT(taskbar));
+
+	/* Search songs in the provider. */
+
+	pragha_subsonic_api_scan_server (priv->subsonic);
 }
 
 static void
@@ -182,6 +203,25 @@ pragha_subsonic_plugin_pinged (PraghaSubsonicApi    *subsonic,
 }
 
 static void
+pragha_subsonic_plugin_scan_total_albums (PraghaSubsonicApi    *subsonic,
+                                          guint                 total,
+                                          PraghaSubsonicPlugin *plugin)
+{
+	PraghaSubsonicPluginPrivate *priv = plugin->priv;
+	pragha_background_task_widget_set_description (priv->task_widget, _("Getting the songs from the albums"));
+	pragha_background_task_widget_set_job_count (priv->task_widget, total);
+}
+
+static void
+pragha_subsonic_plugin_scan_progress_albums (PraghaSubsonicApi    *subsonic,
+                                             guint                 progress,
+                                             PraghaSubsonicPlugin *plugin)
+{
+	PraghaSubsonicPluginPrivate *priv = plugin->priv;
+	pragha_background_task_widget_set_job_progress (priv->task_widget, progress);
+}
+
+static void
 pragha_subsonic_plugin_scan_finished (PraghaSubsonicApi    *subsonic,
                                       SubsonicStatusCode    code,
                                       PraghaSubsonicPlugin *plugin)
@@ -194,9 +234,15 @@ pragha_subsonic_plugin_scan_finished (PraghaSubsonicApi    *subsonic,
 
 	PraghaSubsonicPluginPrivate *priv = plugin->priv;
 
+	/* Remove the progress widget */
+
 	taskbar = pragha_background_task_bar_get ();
 	pragha_background_task_bar_remove_widget (taskbar, GTK_WIDGET(priv->task_widget));
 	g_object_unref(G_OBJECT(taskbar));
+
+	g_clear_object(&priv->task_widget);
+
+	/* If finish correctly, we must save the collection. */
 
 	if (code == S_GENERIC_OK) {
 		provider = pragha_temp_provider_new (priv->server,
@@ -214,6 +260,7 @@ pragha_subsonic_plugin_scan_finished (PraghaSubsonicApi    *subsonic,
 		g_object_unref (provider);
 	}
 	else if (code != S_USER_CANCELLED) {
+		/* But if the user did not cancel, there was an error */
 		notification = pragha_app_notification_new (priv->server,
 			_("There was an error searching the collection."));
 		pragha_app_notification_show (notification);
@@ -390,6 +437,10 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                  G_CALLBACK (pragha_subsonic_plugin_authenticated), plugin);
 	g_signal_connect (priv->subsonic, "pong",
 	                  G_CALLBACK (pragha_subsonic_plugin_pinged), plugin);
+	g_signal_connect (priv->subsonic, "scan-total",
+	                  G_CALLBACK (pragha_subsonic_plugin_scan_total_albums), plugin);
+	g_signal_connect (priv->subsonic, "scan-progress",
+	                  G_CALLBACK (pragha_subsonic_plugin_scan_progress_albums), plugin);
 	g_signal_connect (priv->subsonic, "scan-finished",
 	                  G_CALLBACK (pragha_subsonic_plugin_scan_finished), plugin);
 
@@ -433,14 +484,6 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	g_signal_connect (backend, "download-done",
 	                  G_CALLBACK(pragha_subsonic_plugin_download_done), plugin);
 
-	/* Task progress widget */
-
-	priv->task_widget = pragha_background_task_widget_new (_("Searching files to analyze"),
-	                                                       "network-server",
-	                                                       0,
-	                                                       pragha_subsonic_get_cancellable(priv->subsonic));
-	g_object_ref (G_OBJECT(priv->task_widget));
-
 	/* Authenticate */
 
 	pragha_subsonic_plugin_authenticate (plugin);
@@ -464,15 +507,16 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	g_object_unref (priv->subsonic);
 
-	/* Remove background task widget. */
+	if (priv->task_widget) {
+		/* Remove background task widget. */
+		taskbar = pragha_background_task_bar_get ();
+		pragha_background_task_bar_remove_widget (taskbar, GTK_WIDGET(priv->task_widget));
+		g_object_unref(G_OBJECT(taskbar));
 
-	taskbar = pragha_background_task_bar_get ();
-	pragha_background_task_bar_remove_widget (taskbar, GTK_WIDGET(priv->task_widget));
-	g_object_unref(G_OBJECT(taskbar));
+		/* Drop task widget */
+		g_object_unref (G_OBJECT(priv->task_widget));
+	}
 
-	/* Remove settings */
-
-	g_object_unref (priv->preferences);
 
 	/* Remove menu actions */
 
@@ -496,6 +540,10 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 			g_object_unref (provider);
 		}
 	}
+
+	/* Remove settings */
+
+	g_object_unref (priv->preferences);
 
 	/* Clean memory */
 
