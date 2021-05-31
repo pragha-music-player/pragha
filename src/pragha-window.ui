@@ -18,6 +18,72 @@
   <menu id="button-menu">
     <section>
       <item>
+        <attribute name='label' translatable='yes'>Edit track information</attribute>
+        <attribute name='action'>win.edit</attribute>
+        <attribute name='accel'>&lt;Control&gt;E</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>E_qualizer</attribute>
+        <attribute name='action'>win.equalizer</attribute>
+      </item>
+    </section>
+    <section>
+      <section>
+        <section id="pragha-view-placeholder"/>
+      </section>
+      <item>
+        <attribute name='label' translatable='yes'>Show lateral _panel</attribute>
+        <attribute name='action'>win.sidebar1</attribute>
+        <attribute name='accel'>F9</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Show secondary lateral panel</attribute>
+        <attribute name='action'>win.sidebar2</attribute>
+        <attribute name='accel'>&lt;Shift&gt;F9</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>Show menubar</attribute>
+        <attribute name='action'>win.menubar</attribute>
+        <attribute name='accel'>&lt;Control&gt;M</attribute>
+      </item>
+    </section>
+    <section>
+      <section id="pragha-plugins-placeholder"/>
+    </section>
+    <section>
+      <section>
+        <item>
+          <attribute name='label' translatable='yes'>_Rescan library</attribute>
+          <attribute name='action'>win.lib-rescan</attribute>
+        </item>
+        <item>
+          <attribute name='label' translatable='yes'>_Update library</attribute>
+          <attribute name='action'>win.lib-update</attribute>
+        </item>
+      </section>
+    </section>
+    <section>
+      <item>
+        <attribute name='label' translatable='yes'>_Preferences</attribute>
+        <attribute name='action'>win.preferences</attribute>
+        <attribute name='accel'>&lt;Control&gt;P</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>About</attribute>
+        <attribute name='action'>win.about</attribute>
+      </item>
+      <item>
+        <attribute name='label' translatable='yes'>_Quit</attribute>
+        <attribute name='action'>win.quit</attribute>
+        <attribute name='accel'>&lt;Control&gt;Q</attribute>
+      </item>
+    </section>
+  </menu>
+  <menu id="playlist-button-menu">
+    <section>
+      <item>
         <attribute name='label' translatable='yes'>_Add files</attribute>
         <attribute name='action'>win.open</attribute>
         <attribute name='accel'>&lt;Control&gt;O</attribute>
@@ -31,17 +97,6 @@
         <attribute name='action'>win.library</attribute>
       </item>
       <section id="pragha-plugins-append-music"/>
-    </section>
-    <section>
-      <item>
-        <attribute name='label' translatable='yes'>Edit track information</attribute>
-        <attribute name='action'>win.edit</attribute>
-        <attribute name='accel'>&lt;Control&gt;E</attribute>
-      </item>
-      <item>
-        <attribute name='label' translatable='yes'>E_qualizer</attribute>
-        <attribute name='action'>win.equalizer</attribute>
-      </item>
     </section>
     <section>
       <item>
@@ -99,61 +154,6 @@
         <attribute name='label' translatable='yes'>Jump to playing song</attribute>
         <attribute name='action'>win.jump-song</attribute>
         <attribute name='accel'>&lt;Control&gt;J</attribute>
-      </item>
-    </section>
-    <section>
-      <section>
-        <section id="pragha-view-placeholder"/>
-      </section>
-      <item>
-        <attribute name='label' translatable='yes'>Show lateral _panel</attribute>
-        <attribute name='action'>win.sidebar1</attribute>
-        <attribute name='accel'>F9</attribute>
-      </item>
-      <item>
-        <attribute name='label' translatable='yes'>Show secondary lateral panel</attribute>
-        <attribute name='action'>win.sidebar2</attribute>
-        <attribute name='accel'>&lt;Shift&gt;F9</attribute>
-      </item>
-      <item>
-        <attribute name='label' translatable='yes'>Show menubar</attribute>
-        <attribute name='action'>win.menubar</attribute>
-        <attribute name='accel'>&lt;Control&gt;M</attribute>
-      </item>
-      <item>
-        <attribute name='label' translatable='yes'>Show status bar</attribute>
-        <attribute name='action'>win.status-bar</attribute>
-      </item>
-    </section>
-    <section>
-      <section id="pragha-plugins-placeholder"/>
-    </section>
-    <section>
-      <section>
-        <item>
-          <attribute name='label' translatable='yes'>_Rescan library</attribute>
-          <attribute name='action'>win.lib-rescan</attribute>
-        </item>
-        <item>
-          <attribute name='label' translatable='yes'>_Update library</attribute>
-          <attribute name='action'>win.lib-update</attribute>
-        </item>
-      </section>
-    </section>
-    <section>
-      <item>
-        <attribute name='label' translatable='yes'>_Preferences</attribute>
-        <attribute name='action'>win.preferences</attribute>
-        <attribute name='accel'>&lt;Control&gt;P</attribute>
-      </item>
-      <item>
-        <attribute name='label' translatable='yes'>About</attribute>
-        <attribute name='action'>win.about</attribute>
-      </item>
-      <item>
-        <attribute name='label' translatable='yes'>_Quit</attribute>
-        <attribute name='action'>win.quit</attribute>
-        <attribute name='accel'>&lt;Control&gt;Q</attribute>
       </item>
     </section>
   </menu>

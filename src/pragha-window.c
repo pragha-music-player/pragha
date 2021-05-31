@@ -485,7 +485,7 @@ pragha_window_new (PraghaApplication *pragha)
 	PraghaToolbar *toolbar;
 	GtkWidget *menubar, *overlay, *pane1, *pane2, *infobox;
 	GtkWidget *main_stack, *playlist_overlay, *vbox_main;
-	GtkWidget *song_box, *menu_button;
+	GtkWidget *song_box, *playlist_menu_button, *menu_button;
 	GtkBuilder *menu_ui;
 	GtkCssProvider *css_provider;
 	GIcon *icon = NULL;
@@ -502,6 +502,12 @@ pragha_window_new (PraghaApplication *pragha)
 		"emblem-system",
 		"open-menu-symbolic",
 		"emblem-system-symbolic",
+		NULL,
+	};
+
+	const gchar *fallbacks_playlist_icon[] = {
+		"view-list",
+		"view-list-symbolic",
 		NULL,
 	};
 
@@ -645,10 +651,32 @@ pragha_window_new (PraghaApplication *pragha)
 	                        menubar, "visible",
 	                        binding_flags);
 
+	/* Add playlist menu */
+
+	playlist_menu_button =  gtk_menu_button_new ();
+	gtk_button_set_relief(GTK_BUTTON(playlist_menu_button), GTK_RELIEF_NONE);
+
+	icon = g_themed_icon_new_from_names ((gchar **)fallbacks_playlist_icon, -1);
+	gtk_button_set_image (GTK_BUTTON (playlist_menu_button),
+		gtk_image_new_from_gicon(icon, pragha_preferences_get_toolbar_size(preferences)));
+	g_object_unref (icon);
+
+	menu_ui = pragha_application_get_menu_ui(pragha);
+	gtk_menu_button_set_menu_model (GTK_MENU_BUTTON(playlist_menu_button),
+		G_MENU_MODEL (gtk_builder_get_object (menu_ui, "playlist-button-menu")));
+
+	g_object_bind_property (preferences, "show-menubar",
+	                        playlist_menu_button, "visible",
+	                        binding_flags | G_BINDING_INVERT_BOOLEAN);
+
+	g_signal_connect (preferences, "notify::toolbar-size",
+	                  G_CALLBACK (prefrences_change_icon_size), playlist_menu_button);
+
+	pragha_toolbar_add_extra_button (toolbar, playlist_menu_button);
+
 	/* Add menu-button to toolbar */
 
 	menu_button =  gtk_menu_button_new ();
-	g_object_set(menu_button, "use-popover", FALSE, NULL);
 	gtk_button_set_relief(GTK_BUTTON(menu_button), GTK_RELIEF_NONE);
 
 	icon = g_themed_icon_new_from_names ((gchar **)fallbacks_icon_menu, -1);
