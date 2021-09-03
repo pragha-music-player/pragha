@@ -77,7 +77,6 @@ struct _PraghaParticle {
 	gdouble         speed;
 	gdouble         size;
 	gdouble         spin;
-	gdouble         band;
 
 	gdouble         smoothedScale;
 	gdouble         smoothedAlpha;

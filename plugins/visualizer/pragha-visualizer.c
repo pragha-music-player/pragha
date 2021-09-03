@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2018 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2018-2021 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -25,20 +25,11 @@
 #include <gmodule.h>
 #include <math.h>
 
-#define SYNCRONIZED 1
-
-//#define DRAW_DEBUG 1
-
 #include "src/pragha-backend.h"
 
 #include "pragha-visualizer-particle.h"
 #include "pragha-visualizer.h"
 
-#ifdef DRAW_DEBUG
-static gint tick_i = 0;
-static gint draw_i = 0;
-static gint update_i = 0;
-#endif
 
 #define PRAGHA_TYPE_VISUALIZER (pragha_visualizer_get_type())
 #define PRAGHA_VISUALIZER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_VISUALIZER, PraghaVisualizer))
@@ -86,17 +77,11 @@ pragha_visualizer_set_magnitudes (PraghaVisualizer *visualizer, GValue *magnitud
 		else
 			dmag = 0.0;
 
-		pragha_particle_set_energy (particle, dmag/80);
+		pragha_particle_set_energy (particle, dmag/128);
 //		pragha_particle_move (particle, visualizer->width, visualizer->height);
 	}
 
-#ifdef DRAW_DEBUG
-	update_i++;
-#endif
-
-#ifndef SYNCRONIZED
 	gtk_widget_queue_draw (GTK_WIDGET(visualizer->drawing_area));
-#endif
 }
 
 void
@@ -119,11 +104,15 @@ pragha_visualizer_widget_draw (GtkWidget *widget, cairo_t *cr, gpointer user_dat
 
 	PraghaVisualizer *visualizer = PRAGHA_VISUALIZER (user_data);
 
+	cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+
 	cairo_set_tolerance (cr, 1.0);
 	cairo_set_antialias (cr, CAIRO_ANTIALIAS_FAST);
 
 	cairo_rectangle (cr, 0, 0, visualizer->width, visualizer->height);
 	cairo_fill (cr);
+
+	cairo_set_operator(cr, CAIRO_OPERATOR_ADD);
 
 	for (l = visualizer->particles ; l != NULL ; l = l->next)
 	{
@@ -132,28 +121,19 @@ pragha_visualizer_widget_draw (GtkWidget *widget, cairo_t *cr, gpointer user_dat
 		pragha_particle_draw (particle, cr);
 	}
 
-#ifdef DRAW_DEBUG
-	draw_i++;
-	g_critical ("Tick: %i, Draw: %i, Mag: %i", tick_i, draw_i, update_i);
-#endif
-
 	return TRUE;
 }
 
-#ifdef SYNCRONIZED
 static gboolean
 pragha_visualizer_drawing_tick (gpointer user_data)
 {
 	GtkWidget *widget = GTK_WIDGET (user_data);
-#ifdef DRAW_DEBUG
-	tick_i++;
-#endif
+
 	if (gtk_widget_is_visible (widget))
 		gtk_widget_queue_draw(widget);
 
 	return G_SOURCE_CONTINUE;
 }
-#endif
 
 static void
 pragha_visualizer_size_allocate (GtkWidget *widget, GdkRectangle *allocation, gpointer user_data)
@@ -182,12 +162,10 @@ pragha_visualizer_dispose (GObject *object)
 {
 	PraghaVisualizer *visualizer = PRAGHA_VISUALIZER (object);
 
-#ifdef SYNCRONIZED
 	if (visualizer->tick_id) {
 		g_source_remove (visualizer->tick_id);
 		visualizer->tick_id = 0;
 	}
-#endif
 
 	if (visualizer->particles) {
 		g_list_free_full (visualizer->particles, g_object_unref);
@@ -219,13 +197,11 @@ pragha_visualizer_init (PraghaVisualizer *visualizer)
 	g_signal_connect (G_OBJECT (drawing_area), "draw",
 	                  G_CALLBACK (pragha_visualizer_widget_draw), visualizer);
 
-#ifdef SYNCRONIZED
-	visualizer->tick_id = g_timeout_add (75, pragha_visualizer_drawing_tick, drawing_area);
-#endif
+	visualizer->tick_id = g_timeout_add (11, pragha_visualizer_drawing_tick, drawing_area);
 
 	for (i = 0 ; i < 128 ; i++) {
 		particle = pragha_particle_new ();
-		pragha_particle_set_energy (particle, 0.0);
+		pragha_particle_set_energy (particle, g_random_double_range (0, i));
 		visualizer->particles = g_list_append (visualizer->particles, particle);
 	}
 
