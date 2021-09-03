@@ -26,56 +26,14 @@
 G_BEGIN_DECLS
 
 #define GTK_TYPE_CELL_RENDERER_BUBBLE (gtk_cell_renderer_bubble_get_type ())
+G_DECLARE_FINAL_TYPE (GtkCellRendererBubble, gtk_cell_renderer_bubble, GTK, CELL_RENDERER_BUBBLE, GtkCellRendererText)
 
-#define GTK_CELL_RENDERER_BUBBLE(obj)             \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj),             \
-  GTK_TYPE_CELL_RENDERER_BUBBLE,                  \
-  GtkCellRendererBubble))
+GType                  gtk_cell_renderer_bubble_get_type        (void) G_GNUC_CONST;
 
-#define GTK_CELL_RENDERER_BUBBLE_CONST(obj)       \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj),             \
-  GTK_TYPE_CELL_RENDERER_BUBBLE,                  \
-  GtkCellRendererBubble const))
-
-#define GTK_CELL_RENDERER_BUBBLE_CLASS(klass)     \
-  (G_TYPE_CHECK_CLASS_CAST ((klass),              \
-  GTK_TYPE_CELL_RENDERER_BUBBLE,                  \
-  GtkCellRendererBubbleClass))
-
-#define GTK_IS_CELL_RENDERER_BUBBLE(obj)          \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj),             \
-  GTK_TYPE_CELL_RENDERER_BUBBLE))
-
-#define GTK_IS_CELL_RENDERER_BUBBLE_CLASS(klass)  \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass),              \
-  GTK_TYPE_CELL_RENDERER_BUBBLE))
-
-#define GTK_CELL_RENDERER_BUBBLE_GET_CLASS(obj)   \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj),              \
-  GTK_TYPE_CELL_RENDERER_BUBBLE,                  \
-  GtkCellRendererBubbleClass))
-
-typedef struct _GtkCellRendererBubble         GtkCellRendererBubble;
-typedef struct _GtkCellRendererBubbleClass    GtkCellRendererBubbleClass;
-typedef struct _GtkCellRendererBubblePrivate  GtkCellRendererBubblePrivate;
-
-struct _GtkCellRendererBubble
-{
-  GtkCellRendererText parent;
-  
-  GtkCellRendererBubblePrivate *priv;
-};
-
-struct _GtkCellRendererBubbleClass
-{
-  GtkCellRendererTextClass parent_class;
-};
-
-GType            gtk_cell_renderer_bubble_get_type        (void) G_GNUC_CONST;
-GtkCellRenderer* gtk_cell_renderer_bubble_new             (void);
-gboolean         gtk_cell_renderer_bubble_get_show_bubble (GtkCellRendererBubble *cell);
-void             gtk_cell_renderer_bubble_set_show_bubble (GtkCellRendererBubble *cell,
-                                                           gboolean               show_bubble);
+GtkCellRendererBubble* gtk_cell_renderer_bubble_new             (void);
+gboolean               gtk_cell_renderer_bubble_get_show_bubble (GtkCellRendererBubble *cell);
+void                   gtk_cell_renderer_bubble_set_show_bubble (GtkCellRendererBubble *cell,
+                                                                 gboolean               show_bubble);
 
 G_END_DECLS
 

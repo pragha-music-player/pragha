@@ -3664,7 +3664,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 
 	column = gtk_tree_view_column_new ();
 
-	renderer = gtk_cell_renderer_bubble_new ();
+	renderer = GTK_CELL_RENDERER (gtk_cell_renderer_bubble_new ());
 	gtk_cell_renderer_set_fixed_size (renderer, icon_size, -1);
 	gtk_tree_view_column_pack_start (column, renderer, FALSE);
 	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer), 1);

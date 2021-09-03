@@ -19,20 +19,19 @@
 
 #include "gtkcellrendererbubble.h"
 
-struct _GtkCellRendererBubblePrivate
+struct _GtkCellRendererBubble
 {
-  gboolean show_bubble;
+  GtkCellRendererText parent;
+  gboolean            show_bubble;
 };
+
+G_DEFINE_TYPE (GtkCellRendererBubble, gtk_cell_renderer_bubble, GTK_TYPE_CELL_RENDERER_TEXT)
 
 enum
 {
   PROP_0,
   PROP_SHOW_BUBBLE,
 };
-
-G_DEFINE_TYPE_WITH_PRIVATE (GtkCellRendererBubble,
-                            gtk_cell_renderer_bubble,
-                            GTK_TYPE_CELL_RENDERER_TEXT);
 
 static void
 get_background_color (GtkStyleContext *context,
@@ -63,7 +62,7 @@ gboolean
 gtk_cell_renderer_bubble_get_show_bubble (GtkCellRendererBubble *cell)
 {
   g_return_val_if_fail (GTK_IS_CELL_RENDERER_BUBBLE (cell), FALSE);
-  return cell->priv->show_bubble;
+  return cell->show_bubble;
 }
 
 void
@@ -71,7 +70,7 @@ gtk_cell_renderer_bubble_set_show_bubble (GtkCellRendererBubble *cell,
                                           gboolean               show_bubble)
 {
   g_return_if_fail (GTK_IS_CELL_RENDERER_BUBBLE (cell));
-  cell->priv->show_bubble = show_bubble;
+  cell->show_bubble = show_bubble;
 }
 
 static void
@@ -153,7 +152,7 @@ render (GtkCellRenderer      *cell,
         const GdkRectangle   *cell_area,
         GtkCellRendererState  flags)
 {
-  GtkCellRendererBubblePrivate *priv;
+  GtkCellRendererBubble *bubble = NULL;
   cairo_pattern_t *pattern;
   GtkStyleContext *style;
   GdkRGBA selected;
@@ -161,10 +160,9 @@ render (GtkCellRenderer      *cell,
   GdkRGBA *color_dark;
 
   g_return_if_fail (GTK_IS_CELL_RENDERER_BUBBLE (cell));
-  
-  priv = GTK_CELL_RENDERER_BUBBLE (cell)->priv;
-  
-  if (priv->show_bubble)
+  bubble = GTK_CELL_RENDERER_BUBBLE (cell);
+
+  if (bubble->show_bubble)
     {
       cairo_save (cr);
 
@@ -224,9 +222,8 @@ render (GtkCellRenderer      *cell,
 
       cairo_restore (cr);
     }
-  
-  GTK_CELL_RENDERER_CLASS (gtk_cell_renderer_bubble_parent_class)->
-    render (cell, cr, widget, background_area, cell_area, flags);
+
+  GTK_CELL_RENDERER_CLASS (gtk_cell_renderer_bubble_parent_class)->render (cell, cr, widget, background_area, cell_area, flags);
 }
 
 static void
@@ -253,17 +250,14 @@ gtk_cell_renderer_bubble_class_init (GtkCellRendererBubbleClass *klass)
 static void
 gtk_cell_renderer_bubble_init (GtkCellRendererBubble *cell)
 {
-  cell->priv = G_TYPE_INSTANCE_GET_PRIVATE (cell,
-                                            GTK_TYPE_CELL_RENDERER_BUBBLE,
-                                            GtkCellRendererBubblePrivate);
-  cell->priv->show_bubble = TRUE;
+  cell->show_bubble = TRUE;
   
   /* we need extra padding on the side */
   /*g_object_set (cell, "xpad", 3, "ypad", 3, NULL);*/
   g_object_set (cell, "xalign", 0.5, NULL);
 }
 
-GtkCellRenderer*
+GtkCellRendererBubble*
 gtk_cell_renderer_bubble_new ()
 {
   return g_object_new (GTK_TYPE_CELL_RENDERER_BUBBLE, NULL);
