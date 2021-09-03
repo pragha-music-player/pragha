@@ -23,30 +23,9 @@
 
 G_BEGIN_DECLS
 
-#define PRAGHA_TYPE_ALBUM_ART (pragha_album_art_get_type())
-#define PRAGHA_ALBUM_ART(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_ALBUM_ART, PraghaAlbumArt))
-#define PRAGHA_ALBUM_ART_CONST(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_ALBUM_ART, PraghaAlbumArt const))
-#define PRAGHA_ALBUM_ART_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PRAGHA_TYPE_ALBUM_ART, PraghaAlbumArtClass))
-#define PRAGHA_IS_ALBUM_ART(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_ALBUM_ART))
-#define PRAGHA_IS_ALBUM_ART_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_ALBUM_ART))
-#define PRAGHA_ALBUM_ART_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_ALBUM_ART, PraghaAlbumArtClass))
+#define PRAGHA_TYPE_ALBUM_ART (pragha_album_art_get_type ())
+G_DECLARE_FINAL_TYPE (PraghaAlbumArt, pragha_album_art, PRAGHA, ALBUM_ART, GtkImage)
 
-typedef struct _PraghaAlbumArt PraghaAlbumArt;
-typedef struct _PraghaAlbumArtClass PraghaAlbumArtClass;
-typedef struct _PraghaAlbumArtPrivate PraghaAlbumArtPrivate;
-
-struct _PraghaAlbumArt
-{
-   GtkImage parent;
-
-   /*< private >*/
-   PraghaAlbumArtPrivate *priv;
-};
-
-struct _PraghaAlbumArtClass
-{
-   GtkImageClass parent_class;
-};
 
 PraghaAlbumArt *pragha_album_art_new (void);
 

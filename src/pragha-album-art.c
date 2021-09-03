@@ -23,13 +23,14 @@
 #include "win32/win32dep.h"
 #endif
 
-struct _PraghaAlbumArtPrivate
+struct _PraghaAlbumArt
 {
+   GtkImage parent;
    gchar *path;
    guint size;
 };
 
-G_DEFINE_TYPE_WITH_PRIVATE (PraghaAlbumArt, pragha_album_art, GTK_TYPE_IMAGE)
+G_DEFINE_TYPE (PraghaAlbumArt, pragha_album_art, GTK_TYPE_IMAGE)
 
 enum
 {
@@ -55,28 +56,25 @@ pragha_album_art_new (void)
 static void
 pragha_album_art_update_image (PraghaAlbumArt *albumart)
 {
-   PraghaAlbumArtPrivate *priv;
    GdkPixbuf *pixbuf = NULL, *album_art = NULL, *frame;
    gchar *frame_uri = NULL;
    GError *error = NULL;
 
    g_return_if_fail(PRAGHA_IS_ALBUM_ART(albumart));
 
-   priv = albumart->priv;
-
    frame_uri = g_build_filename (PIXMAPDIR, "cover.png", NULL);
    frame = gdk_pixbuf_new_from_file (frame_uri, NULL);
    g_free (frame_uri);
 
-   if (priv->path != NULL) {
+   if (albumart->path != NULL) {
       #ifdef G_OS_WIN32
-      GdkPixbuf *a_pixbuf = gdk_pixbuf_new_from_file (priv->path, &error);
+      GdkPixbuf *a_pixbuf = gdk_pixbuf_new_from_file (albumart->path, &error);
       if (a_pixbuf) {
          album_art = gdk_pixbuf_scale_simple (a_pixbuf, 112, 112, GDK_INTERP_BILINEAR);
          g_object_unref(G_OBJECT(a_pixbuf));
       }
       #else
-      album_art = gdk_pixbuf_new_from_file_at_scale(priv->path,
+      album_art = gdk_pixbuf_new_from_file_at_scale(albumart->path,
                                                     112,
                                                     112,
                                                     FALSE,
@@ -87,14 +85,14 @@ pragha_album_art_update_image (PraghaAlbumArt *albumart)
          g_object_unref(G_OBJECT(album_art));
       }
       else {
-         g_critical("Unable to open image file: %s\n", priv->path);
+         g_critical("Unable to open image file: %s\n", albumart->path);
          g_error_free(error);
       }
    }
 
    pixbuf = gdk_pixbuf_scale_simple (frame,
-                                     priv->size,
-                                     priv->size,
+                                     albumart->size,
+                                     albumart->size,
                                      GDK_INTERP_BILINEAR);
 
    pragha_album_art_set_pixbuf(albumart, pixbuf);
@@ -111,7 +109,7 @@ const gchar *
 pragha_album_art_get_path (PraghaAlbumArt *albumart)
 {
    g_return_val_if_fail(PRAGHA_IS_ALBUM_ART(albumart), NULL);
-   return albumart->priv->path;
+   return albumart->path;
 }
 
 /**
@@ -120,16 +118,12 @@ pragha_album_art_get_path (PraghaAlbumArt *albumart)
  */
 void
 pragha_album_art_set_path (PraghaAlbumArt *albumart,
-                          const gchar *path)
+                           const gchar    *path)
 {
-   PraghaAlbumArtPrivate *priv;
-
    g_return_if_fail(PRAGHA_IS_ALBUM_ART(albumart));
 
-   priv = albumart->priv;
-
-   g_free(priv->path);
-   priv->path = g_strdup(path);
+   g_free(albumart->path);
+   albumart->path = g_strdup(path);
 
    pragha_album_art_update_image(albumart);
 
@@ -144,7 +138,7 @@ guint
 pragha_album_art_get_size (PraghaAlbumArt *albumart)
 {
    g_return_val_if_fail(PRAGHA_IS_ALBUM_ART(albumart), 0);
-   return albumart->priv->size;
+   return albumart->size;
 }
 
 /**
@@ -153,15 +147,11 @@ pragha_album_art_get_size (PraghaAlbumArt *albumart)
  */
 void
 pragha_album_art_set_size (PraghaAlbumArt *albumart,
-                           guint size)
+                           guint           size)
 {
-   PraghaAlbumArtPrivate *priv;
-
    g_return_if_fail(PRAGHA_IS_ALBUM_ART(albumart));
 
-   priv = albumart->priv;
-
-   priv->size = size;
+   albumart->size = size;
 
    pragha_album_art_update_image(albumart);
 
@@ -201,11 +191,9 @@ pragha_album_art_get_pixbuf (PraghaAlbumArt *albumart)
 static void
 pragha_album_art_finalize (GObject *object)
 {
-   PraghaAlbumArtPrivate *priv;
+   PraghaAlbumArt *albumart = PRAGHA_ALBUM_ART(object);
 
-   priv = PRAGHA_ALBUM_ART(object)->priv;
-
-   g_free(priv->path);
+   g_free(albumart->path);
 
    G_OBJECT_CLASS(pragha_album_art_parent_class)->finalize(object);
 }
@@ -291,7 +279,4 @@ pragha_album_art_class_init (PraghaAlbumArtClass *klass)
 static void
 pragha_album_art_init (PraghaAlbumArt *albumart)
 {
-   albumart->priv = G_TYPE_INSTANCE_GET_PRIVATE(albumart,
-                                               PRAGHA_TYPE_ALBUM_ART,
-                                               PraghaAlbumArtPrivate);
 }
