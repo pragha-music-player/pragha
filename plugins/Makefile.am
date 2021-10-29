@@ -14,8 +14,7 @@ SUBDIRS = \
 
 if DBUS_PLUGINS_SUPPORT
 SUBDIRS += \
-	mpris2 \
-	gnome-media-keys
+	mpris2
 endif
 
 if HAVE_LIBGLYR

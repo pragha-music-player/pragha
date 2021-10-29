@@ -387,7 +387,6 @@ AC_CONFIG_FILES([plugins/ampache/Makefile])
 AC_CONFIG_FILES([plugins/cdrom/Makefile])
 AC_CONFIG_FILES([plugins/dlna/Makefile])
 AC_CONFIG_FILES([plugins/dlna-renderer/Makefile])
-AC_CONFIG_FILES([plugins/gnome-media-keys/Makefile])
 AC_CONFIG_FILES([plugins/keybinder/Makefile])
 AC_CONFIG_FILES([plugins/koel/Makefile])
 AC_CONFIG_FILES([plugins/lastfm/Makefile])
@@ -416,9 +415,8 @@ echo ""
 echo "  Plugins enabled.......: $LIBPEAS_FOUND"
 echo "   * Show notification when change songs..........(Need libnotify >= 0.7.5).: $LIBNOTIFY_FOUND"
 echo "   * Controls Pragha using Mpris2 interface.................................: $DBUS_PLUGINS_SUPPORT"
-echo "   * Controls Pragha using gnome-media-keys interface.......................: $DBUS_PLUGINS_SUPPORT"
-echo "   * Play Audio cds...............(Need libcdio, libcdio_paranoia, libcddb).: $CDROM_SUPPORT"
 echo "   * Controls Pragha using multimedia keys....(Need keybinder-3.0 >= 0.2.0).: $LIBKEYBINDER_FOUND"
+echo "   * Play Audio cds...............(Need libcdio, libcdio_paranoia, libcddb).: $CDROM_SUPPORT"
 echo "   * Search lyrics, artists info and albums art.....(Need libglyr >= 1.0.1).: $LIBGLYR_FOUND"
 echo "   * Search metadata on AcoustID.....................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
 echo "   * Search radios on TuneIn.........................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
@@ -428,6 +426,7 @@ echo "   * Append music on Ampache server...............(Need grilo-net >= 0.2.5
 echo "   * Append music on Subsonic server..............(Need grilo-net >= 0.2.5).: $GRILO_NET_FOUND"
 echo "   * Append music on Koel server...............(Need libsoup and json-glib).: $KOEL_SUPPORT"
 echo "   * Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
+echo ""
 echo "   * EXPERIMENTAL management of external devices...........(Need gudev-1.0).: $GUDEV_FOUND"
 echo "     * USB flash drive/Memory cards........................(Need gudev-1.0).: $GUDEV_FOUND"
 echo "     * Optical disc Hot-plug...............................(Need gudev-1.0).: $GUDEV_FOUND"
