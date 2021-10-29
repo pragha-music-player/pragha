@@ -248,42 +248,6 @@ pragha_window_add_widget_to_infobox (PraghaApplication *pragha, GtkWidget *widge
 	gtk_container_add (GTK_CONTAINER(infobox), widget);
 }
 
-gint
-pragha_menubar_append_plugin_action (PraghaApplication *pragha,
-                                     GtkActionGroup *action_group,
-                                     const gchar *menu_xml)
-{
-	GtkUIManager *ui_manager;
-	GError *error = NULL;
-	gint merge_id;
-
-	ui_manager = pragha_application_get_menu_ui_manager (pragha);
-	gtk_ui_manager_insert_action_group (ui_manager, action_group, -1);
-
-	merge_id = gtk_ui_manager_add_ui_from_string (ui_manager,
-	                                              menu_xml,
-	                                              -1,
-	                                              &error);
-
-	if (error) {
-		g_warning ("Adding plugin to menubar: %s", error->message);
-		g_error_free (error);
-	}
-
-	return merge_id;
-}
-
-void
-pragha_menubar_remove_plugin_action (PraghaApplication *pragha,
-                                     GtkActionGroup *action_group,
-                                     gint merge_id)
-{
-	GtkUIManager * ui_manager = pragha_application_get_menu_ui_manager (pragha);
-
-	gtk_ui_manager_remove_ui (ui_manager, merge_id);
-	gtk_ui_manager_remove_action_group (ui_manager, action_group);
-	g_object_unref (action_group);
-}
 
 /*
  * Create and destroy the main window.

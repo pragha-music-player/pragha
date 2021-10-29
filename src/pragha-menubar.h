@@ -59,6 +59,23 @@ pragha_menubar_remove_by_id (PraghaApplication *pragha,
                              const gchar       *placeholder,
                              const gchar       *item_id);
 
+gint
+pragha_menubar_append_plugin_action (PraghaApplication *pragha,
+                                     GtkActionGroup    *action_group,
+                                     const gchar       *menu_xml);
+
+void
+pragha_menubar_remove_plugin_action (PraghaApplication *pragha,
+                                     GtkActionGroup    *action_group,
+                                     gint               merge_id);
+
+GtkActionGroup *
+pragha_menubar_plugin_action_new (const gchar          *name,
+                                  const GtkActionEntry *entries,
+                                  guint                 n_entries,
+                                  gpointer              user_data);
+
+
 GtkUIManager *pragha_menubar_new       (void);
 GtkBuilder   *pragha_gmenu_toolbar_new (PraghaApplication *pragha);
 

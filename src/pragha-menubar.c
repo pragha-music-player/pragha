@@ -1310,6 +1310,58 @@ pragha_menubar_remove_by_id (PraghaApplication *pragha,
 	}
 }
 
+gint
+pragha_menubar_append_plugin_action (PraghaApplication *pragha,
+                                     GtkActionGroup    *action_group,
+                                     const gchar       *menu_xml)
+{
+	GtkUIManager *ui_manager;
+	GError *error = NULL;
+	gint merge_id;
+
+	ui_manager = pragha_application_get_menu_ui_manager (pragha);
+	gtk_ui_manager_insert_action_group (ui_manager, action_group, -1);
+
+	merge_id = gtk_ui_manager_add_ui_from_string (ui_manager,
+	                                              menu_xml,
+	                                              -1,
+	                                              &error);
+
+	if (error) {
+		g_warning ("Adding plugin to menubar: %s", error->message);
+		g_error_free (error);
+	}
+
+	return merge_id;
+}
+
+void
+pragha_menubar_remove_plugin_action (PraghaApplication *pragha,
+                                     GtkActionGroup    *action_group,
+                                     gint               merge_id)
+{
+	GtkUIManager * ui_manager = pragha_application_get_menu_ui_manager (pragha);
+
+	gtk_ui_manager_remove_ui (ui_manager, merge_id);
+	gtk_ui_manager_remove_action_group (ui_manager, action_group);
+	g_object_unref (action_group);
+}
+
+GtkActionGroup *
+pragha_menubar_plugin_action_new (const gchar          *name,
+                                  const GtkActionEntry *entries,
+                                  guint                 n_entries,
+                                  gpointer              user_data)
+{
+	GtkActionGroup *action_group = gtk_action_group_new (name);
+	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
+	gtk_action_group_add_actions (action_group,
+	                              entries,
+	                              n_entries,
+	                              user_data);
+	return action_group;
+}
+
 static void
 pragha_gear_menu_update_playlist_changes (PraghaDatabase *database, PraghaApplication *pragha)
 {
