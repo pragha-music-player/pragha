@@ -97,6 +97,36 @@ G_DEFINE_TYPE(PraghaSubsonicApi, pragha_subsonic_api, G_TYPE_OBJECT)
 /*
  *  Utils
  */
+static gchar *
+pragha_subsonic_api_get_token (const gchar *raw_password, const gchar *salt)
+{
+	gchar *str, *token;
+
+	str = g_strdup_printf ("%s%s", raw_password, salt);
+	token = g_compute_checksum_for_string (G_CHECKSUM_MD5, str, strlen(str));
+	g_free (str);
+
+	return token;
+}
+
+static gchar *
+pragha_subsonic_api_get_random_salt (void)
+{
+	gdouble rand;
+	gchar *salt, *str1, *str2;
+
+	rand = g_random_double ();
+	str1 = g_strdup_printf ("%g", rand);
+	rand = g_random_double ();
+	str2 = g_strdup_printf ("%g", rand);
+
+	salt = pragha_subsonic_api_get_token (str1, str2);
+
+	g_free (str1);
+	g_free (str2);
+
+	return salt;
+}
 
 static void
 pragha_subsonic_api_add_query_item (GString     *url,
@@ -110,12 +140,26 @@ static GString *
 pragha_subsonic_api_build_url (PraghaSubsonicApi *subsonic,
                                const gchar       *method)
 {
+	gchar *salt, *token;
 	GString *url = g_string_new (subsonic->server);
 
 	g_string_append_printf (url, "/rest/%s.view?", method);
-	pragha_subsonic_api_add_query_item(url, "u", subsonic->username);
-	pragha_subsonic_api_add_query_item(url, "p", subsonic->password);
 
+	pragha_subsonic_api_add_query_item(url, "u", subsonic->username);
+
+	if (TRUE) {
+		salt = pragha_subsonic_api_get_random_salt ();
+		token = pragha_subsonic_api_get_token (salt, subsonic->password);
+
+		pragha_subsonic_api_add_query_item(url, "t", token);
+		pragha_subsonic_api_add_query_item(url, "s", salt);
+
+		g_free (salt);
+		g_free (token);
+	}
+	else {
+		pragha_subsonic_api_add_query_item(url, "p", subsonic->password);
+	}
 	return url;
 }
 
