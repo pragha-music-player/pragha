@@ -633,12 +633,13 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->cache_info = pragha_info_cache_get();
 
 	/* Attach Playlist popup menu*/
-	priv->action_group_playlist = gtk_action_group_new ("PraghaGlyrPlaylistActions");
-	gtk_action_group_set_translation_domain (priv->action_group_playlist, GETTEXT_PACKAGE);
-	gtk_action_group_add_actions (priv->action_group_playlist,
-	                              playlist_actions,
-	                              G_N_ELEMENTS (playlist_actions),
-	                              plugin);
+
+	priv->action_group_playlist = pragha_menubar_plugin_action_new ("PraghaGlyrPlaylistActions",
+	                                                                playlist_actions,
+	                                                                G_N_ELEMENTS (playlist_actions),
+	                                                                NULL,
+	                                                                0,
+	                                                                plugin);
 
 	playlist = pragha_application_get_playlist (priv->pragha);
 	priv->merge_id_playlist = pragha_playlist_append_plugin_action (playlist,

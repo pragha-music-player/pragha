@@ -457,6 +457,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->action_group_main_menu = pragha_menubar_plugin_action_new ("PraghaSubsonicPlugin",
 	                                                                 main_menu_actions,
 	                                                                 G_N_ELEMENTS (main_menu_actions),
+	                                                                 NULL,
+	                                                                 0,
 	                                                                 plugin);
 
 	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (priv->pragha,

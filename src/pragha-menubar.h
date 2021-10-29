@@ -70,10 +70,12 @@ pragha_menubar_remove_plugin_action (PraghaApplication *pragha,
                                      gint               merge_id);
 
 GtkActionGroup *
-pragha_menubar_plugin_action_new (const gchar          *name,
-                                  const GtkActionEntry *entries,
-                                  guint                 n_entries,
-                                  gpointer              user_data);
+pragha_menubar_plugin_action_new (const gchar                *name,
+                                  const GtkActionEntry       *action_entries,
+                                  guint                       n_action_entries,
+                                  const GtkToggleActionEntry *toggle_entries,
+                                  guint                       n_toggle_entries,
+                                  gpointer                    user_data);
 
 
 GtkUIManager *pragha_menubar_new       (void);

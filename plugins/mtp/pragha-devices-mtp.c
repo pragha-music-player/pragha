@@ -847,13 +847,12 @@ pragha_mtp_plugin_append_menu_action (PraghaMtpPlugin *plugin)
 
 	/* Menubar tools. */
 
-	action_group = gtk_action_group_new ("PraghaMenubarMtpActions");
-	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
-
-	gtk_action_group_add_actions (action_group,
-	                              mtp_menu_actions,
-	                              G_N_ELEMENTS (mtp_menu_actions),
-	                              plugin);
+	action_group = pragha_menubar_plugin_action_new ("PraghaMenubarMtpActions",
+	                                                 mtp_menu_actions,
+	                                                 G_N_ELEMENTS (mtp_menu_actions),
+	                                                 NULL,
+	                                                 0,
+	                                                 plugin);
 
 	action = gtk_action_group_get_action (action_group, "MtpDevice");
 	gtk_action_set_label(GTK_ACTION(action), priv->friend_name);
@@ -878,13 +877,12 @@ pragha_mtp_plugin_append_menu_action (PraghaMtpPlugin *plugin)
 
 	/* Playlist sendto */
 
-	action_group = gtk_action_group_new ("PraghaPlaylistMtpActions");
-	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
-
-	gtk_action_group_add_actions (action_group,
-	                              mtp_sendto_actions,
-	                              G_N_ELEMENTS (mtp_sendto_actions),
-	                              plugin);
+	action_group = pragha_menubar_plugin_action_new ("PraghaPlaylistMtpActions",
+	                                                 mtp_sendto_actions,
+	                                                 G_N_ELEMENTS (mtp_sendto_actions),
+	                                                 NULL,
+	                                                 0,
+	                                                 plugin);
 
 	action = gtk_action_group_get_action (action_group, "Send to MTP");
 	gtk_action_set_label(GTK_ACTION(action), priv->friend_name);

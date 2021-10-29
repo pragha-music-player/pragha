@@ -1420,12 +1420,12 @@ pragha_menubar_append_lastfm (PraghaLastfmPlugin *plugin)
 	/*
 	 * Menubar
 	 */
-	priv->action_group_main_menu = gtk_action_group_new ("PraghaLastfmMainMenuActions");
-	gtk_action_group_set_translation_domain (priv->action_group_main_menu, GETTEXT_PACKAGE);
-	gtk_action_group_add_actions (priv->action_group_main_menu,
-	                              main_menu_actions,
-	                              G_N_ELEMENTS (main_menu_actions),
-	                              plugin);
+	priv->action_group_main_menu = pragha_menubar_plugin_action_new ("PraghaLastfmMainMenuActions",
+	                                                                 main_menu_actions,
+	                                                                 G_N_ELEMENTS (main_menu_actions),
+	                                                                 NULL,
+	                                                                 0,
+	                                                                 plugin);
 
 	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (priv->pragha,
 	                                                                priv->action_group_main_menu,
@@ -1437,12 +1437,12 @@ pragha_menubar_append_lastfm (PraghaLastfmPlugin *plugin)
 	/*
 	 * Playlist
 	 */
-	priv->action_group_playlist = gtk_action_group_new ("PraghaLastfmPlaylistActions");
-	gtk_action_group_set_translation_domain (priv->action_group_playlist, GETTEXT_PACKAGE);
-	gtk_action_group_add_actions (priv->action_group_playlist,
-	                              playlist_actions,
-	                              G_N_ELEMENTS (playlist_actions),
-	                              plugin);
+	priv->action_group_playlist = pragha_menubar_plugin_action_new ("PraghaLastfmPlaylistActions",
+	                                                                playlist_actions,
+	                                                                G_N_ELEMENTS (playlist_actions),
+	                                                                NULL,
+	                                                                0,
+	                                                                plugin);
 
 	playlist = pragha_application_get_playlist (priv->pragha);
 	priv->merge_id_playlist = pragha_playlist_append_plugin_action (playlist,

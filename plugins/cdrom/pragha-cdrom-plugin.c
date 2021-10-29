@@ -782,12 +782,12 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	/* Attach main menu */
 
-	priv->action_group_main_menu = gtk_action_group_new ("PraghaCdromPlugin");
-	gtk_action_group_set_translation_domain (priv->action_group_main_menu, GETTEXT_PACKAGE);
-	gtk_action_group_add_actions (priv->action_group_main_menu,
-	                              main_menu_actions,
-	                              G_N_ELEMENTS (main_menu_actions),
-	                              plugin);
+	priv->action_group_main_menu = pragha_menubar_plugin_action_new ("PraghaCdromPlugin",
+	                                                                 main_menu_actions,
+	                                                                 G_N_ELEMENTS (main_menu_actions),
+	                                                                 NULL,
+	                                                                 0,
+	                                                                 plugin);
 
 	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (priv->pragha,
 	                                                                priv->action_group_main_menu,

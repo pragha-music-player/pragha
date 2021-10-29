@@ -133,12 +133,12 @@ pragha_visualizer_plugin_append_menues (PraghaVisualizerPlugin *plugin)
 	/*
 	 * Menubar
 	 */
-	priv->action_group_main_menu = gtk_action_group_new ("PraghaVisualizerMainMenuActions");
-	gtk_action_group_set_translation_domain (priv->action_group_main_menu, GETTEXT_PACKAGE);
-	gtk_action_group_add_toggle_actions (priv->action_group_main_menu,
-	                                     main_menu_actions,
-	                                     G_N_ELEMENTS (main_menu_actions),
-	                                     plugin);
+	priv->action_group_main_menu = pragha_menubar_plugin_action_new ("PraghaVisualizerMainMenuActions",
+	                                                                 NULL,
+	                                                                 0,
+	                                                                 main_menu_actions,
+	                                                                 G_N_ELEMENTS (main_menu_actions),
+	                                                                 plugin);
 
 	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (priv->pragha,
 	                                                                priv->action_group_main_menu,

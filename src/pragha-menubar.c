@@ -1348,17 +1348,30 @@ pragha_menubar_remove_plugin_action (PraghaApplication *pragha,
 }
 
 GtkActionGroup *
-pragha_menubar_plugin_action_new (const gchar          *name,
-                                  const GtkActionEntry *entries,
-                                  guint                 n_entries,
-                                  gpointer              user_data)
+pragha_menubar_plugin_action_new (const gchar                *name,
+                                  const GtkActionEntry       *action_entries,
+                                  guint                       n_action_entries,
+                                  const GtkToggleActionEntry *toggle_entries,
+                                  guint                       n_toggle_entries,
+                                  gpointer                    user_data)
 {
 	GtkActionGroup *action_group = gtk_action_group_new (name);
 	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
-	gtk_action_group_add_actions (action_group,
-	                              entries,
-	                              n_entries,
-	                              user_data);
+
+	if (action_entries) {
+		gtk_action_group_add_actions (action_group,
+		                              action_entries,
+		                              n_action_entries,
+		                              user_data);
+	}
+
+	if (toggle_entries) {
+		gtk_action_group_add_toggle_actions (action_group,
+		                                     toggle_entries,
+		                                     n_toggle_entries,
+		                                     user_data);
+	}
+
 	return action_group;
 }
 
