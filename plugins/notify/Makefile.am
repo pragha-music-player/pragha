@@ -5,18 +5,18 @@ AM_CPPFLAGS = \
 	$(LIBPEAS_CFLAGS)		\
 	$(LIBPEAS_GTK_CFLAGS)
 
-plugin_LTLIBRARIES = libnotify.la
+plugin_LTLIBRARIES = libpnotify.la
 
-libnotify_la_SOURCES =						\
+libpnotify_la_SOURCES =						\
 	pragha-notify-plugin.c
 
-libnotify_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
+libpnotify_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 
-libnotify_la_CFLAGS = \
+libpnotify_la_CFLAGS = \
 	$(PRAGHA_CFLAGS) \
 	$(LIBNOTIFY_CFLAGS)
 
-libnotify_la_LIBADD = \
+libpnotify_la_LIBADD = \
 	$(PRAGHA_LIBS) \
 	$(LIBNOTIFY_LIBS) \
 	$(top_builddir)/src/libpragha.la

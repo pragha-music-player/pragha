@@ -1,5 +1,5 @@
 [Plugin]
-Module=notify
+Module=pnotify
 Name=Notification Plugin
 Description=Show notification when change songs
 Authors=Matias De lellis <mati86dl@gmail.com>
