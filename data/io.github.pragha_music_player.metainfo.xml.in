@@ -53,6 +53,7 @@
       <image>http://pragha-music-player.github.io/images/Pragha-W7.jpg</image>
     </screenshot>
   </screenshots>
+  <content_rating type="oars-1.1" />
   <translation type="gettext">pragha</translation>
   <update_contact>mati86dl_at_gmail.com</update_contact>
   <developer_name>Matias De lellis</developer_name>
