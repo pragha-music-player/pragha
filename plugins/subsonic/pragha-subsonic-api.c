@@ -149,7 +149,7 @@ pragha_subsonic_api_build_url (PraghaSubsonicApi *subsonic,
 
 	if (TRUE) {
 		salt = pragha_subsonic_api_get_random_salt ();
-		token = pragha_subsonic_api_get_token (salt, subsonic->password);
+		token = pragha_subsonic_api_get_token (subsonic->password, salt);
 
 		pragha_subsonic_api_add_query_item(url, "t", token);
 		pragha_subsonic_api_add_query_item(url, "s", salt);
@@ -166,7 +166,7 @@ pragha_subsonic_api_build_url (PraghaSubsonicApi *subsonic,
 static gchar *
 pragha_subsonic_api_close_url (GString *url)
 {
-	g_string_append_printf (url, "%s=%s&", "v", "1.11.0");
+	g_string_append_printf (url, "%s=%s&", "v", "1.13.0");
 	g_string_append_printf (url, "%s=%s", "c", "Pragha");
 
 	return g_string_free (url, FALSE);
