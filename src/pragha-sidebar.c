@@ -187,11 +187,7 @@ pragha_sidebar_close_button_new(PraghaSidebar *sidebar)
 
 	button = gtk_button_new ();
 	gtk_button_set_relief (GTK_BUTTON (button), GTK_RELIEF_NONE);
-#if GTK_CHECK_VERSION (3, 20, 0)
 	gtk_widget_set_focus_on_click (button, FALSE);
-#else
-	gtk_button_set_focus_on_click (GTK_BUTTON (button), FALSE);
-#endif
 	pragha_hig_set_tiny_button (button);
 	gtk_widget_set_margin_start (button, 4);
 	gtk_widget_set_margin_end (button, 4);

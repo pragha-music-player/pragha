@@ -39,9 +39,6 @@ void
 pragha_header_set_subtitle (PraghaHeader *header,
                             const gchar  *subtitle);
 
-#if !GTK_CHECK_VERSION (3, 22, 0)
-PraghaContainer     *pragha_container_new      (void);
-#endif
 
 void pragha_toolbar_button_set_icon_name (PraghaToolbarButton *button, const gchar *icon_name);
 void pragha_toolbar_button_set_icon_size (PraghaToolbarButton *button, GtkIconSize  icon_size);
