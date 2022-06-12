@@ -31,7 +31,9 @@ new_musicobject_from_file(const gchar *file, const gchar *provider)
 {
 	PraghaMusicobject *mobj = NULL;
 	gchar *mime_type = NULL;
-	gboolean ret = FALSE;
+
+	if (pragha_file_get_media_type(file) != MEDIA_TYPE_AUDIO)
+		return NULL;
 
 	CDEBUG(DBG_MOBJ, "Creating new musicobject from file: %s", file);
 
@@ -46,16 +48,9 @@ new_musicobject_from_file(const gchar *file, const gchar *provider)
 
 	g_free (mime_type);
 
-	ret = pragha_musicobject_set_tags_from_file (mobj, file);
+	pragha_musicobject_set_tags_from_file (mobj, file);
 
-	if (G_LIKELY(ret))
-		return mobj;
-	else {
-		g_critical("Fail to create musicobject from file");
-		g_object_unref(mobj);
-	}
-
-	return NULL;
+	return mobj;
 }
 
 PraghaMusicobject *

@@ -164,7 +164,7 @@ pragha_application_open_files (PraghaApplication *pragha)
 	GtkWidget *window, *hbox, *vbox, *chooser, *bbox, *toggle, *close_button, *add_button;
 	gpointer storage;
 	gint i = 0;
-	GtkFileFilter *media_filter, *playlist_filter, *all_filter;
+	GtkFileFilter *unsupported_filter, *media_filter, *playlist_filter, *all_filter;
 	const gchar *last_folder = NULL;
 
 	/* Create a file chooser dialog */
@@ -217,6 +217,11 @@ pragha_application_open_files (PraghaApplication *pragha)
 	gtk_box_pack_end(GTK_BOX(vbox), chooser, TRUE, TRUE, 0);
 
 	/* Create file filters  */
+
+	unsupported_filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name(GTK_FILE_FILTER(unsupported_filter), _("Supported & partially supported media"));
+	gtk_file_filter_add_mime_type(GTK_FILE_FILTER(unsupported_filter), "audio/*");
+	gtk_file_filter_add_mime_type(GTK_FILE_FILTER(unsupported_filter), "video/*");
 
 	media_filter = gtk_file_filter_new();
 	gtk_file_filter_set_name(GTK_FILE_FILTER(media_filter), _("Supported media"));
@@ -308,6 +313,8 @@ pragha_application_open_files (PraghaApplication *pragha)
 	gtk_file_filter_set_name (GTK_FILE_FILTER(all_filter), _("All files"));
 	gtk_file_filter_add_pattern (GTK_FILE_FILTER(all_filter), "*");
 
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER(chooser),
+	                             GTK_FILE_FILTER(unsupported_filter));
 	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER(chooser),
 	                             GTK_FILE_FILTER(media_filter));
 	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER(chooser),
