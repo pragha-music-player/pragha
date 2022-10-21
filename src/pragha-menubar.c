@@ -673,7 +673,7 @@ static void wiki_action(GtkAction *action, PraghaApplication *pragha)
 
 static void translate_action(GtkAction *action, PraghaApplication *pragha)
 {
-	const gchar *uri = "http://www.transifex.com/projects/p/Pragha/";
+	const gchar *uri = "https://explore.transifex.com/matias/Pragha/";
 	open_url(uri, pragha_application_get_window(pragha));
 }
 
